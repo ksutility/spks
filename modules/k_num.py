@@ -8,9 +8,26 @@
 						#n2: end / big number in serial numbers
 						#- : const character for show serial numbers 
 class SMART_NUM_LIST():
-    #snl=smart_num_list
-    #make a new smart_num_list by add new_num to in_smart_num_list
-    snl=[]
+    '''
+    goal:
+        make a new smart_num_list by add new_num to in_smart_num_list
+    test unit:
+        Usage examples:
+        >>>x=SMART_NUM_LIST("1-5,6-10,12-14")
+        >>>str(x)
+        1-10,12-14
+        >>>str(x.add('11'))
+        '1-14'
+        >>>str(x.add('16'))
+        '1-14,16'
+        >>>str(SMART_NUM_LIST("1-5,6-10,12-14").add("11"))
+        '1-14'
+        >>>str(SMART_NUM_LIST("1-5,6-10001,12-14").add("15"))
+        '1-10001'
+        >>>str(SMART_NUM_LIST("1-5,8,1-12").add("20"))
+        '1-12,20'
+'''	
+    snl=[] #smart_num_list
     def __init__(self,snl_txt=''): 
         '''
         inputs:
@@ -61,19 +78,6 @@ def limit_x (x_father,x,x_min,x_max):
 	if x < x_min :
 		x_father=x_father-1
 		x=x+x_max
-'''
-test unit:
-    Usage examples:
-    >>>x=SMART_NUM_LIST("1-5,6-10,12-14")
-    >>>str(x)
-    1-10,12-14
-    >>>x.add('11')
 
-    x.add('11')
-    x.add('16').str()='1-16'
-	SMART_NUM_LIST("1-5,6-10,12-14").add("11").str())='1-14'
-	SMART_NUM_LIST("1-5,6-10001,12-14").add("15").str()='1-10001'
-	SMART_NUM_LIST("1-5,8,1-12").add("20").str()='1-12,20'
-'''	
 x=SMART_NUM_LIST("1-5,6-10,12-14")
 print(str(x))#.str__())
