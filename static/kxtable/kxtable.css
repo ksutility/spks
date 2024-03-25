@@ -1,0 +1,54 @@
+﻿/*  v2.0 - last update 940615 */
+/* set table  */
+table.kxtable {
+	table-layout: fixed;
+	border-collapse: collapse;
+	}	
+table.kxtable td{	
+	overflow: hidden;
+	white-space: nowrap;
+	text-align:center;
+	border: 1px solid;
+	}
+table.kxtable  th{	
+	overflow: hidden;
+	white-space: nowrap;
+	border: 1px solid;
+	}
+table.kxtable_body{
+	text-align:center;
+}	
+table.kxtable tr:nth-child(odd) {background: #c6c6c6}	
+/*
+.kxtable_resizable {
+	height:40px;padding: 0.5em; text-overflow: ellipsis;overflow: hidden;background-color:#11aaff;width:20;
+			}
+*/			
+#kxtable_div1,#kxtable_div2 {	
+	width:100%;
+	overflow: scroll;
+	background-color:#f6f6f6;
+	}
+#kxtable_div2 {
+	overflow-x: hidden;	
+	height:90%;}	
+.context-menu-one{
+	background-color:#55aaff;
+	}	
+/* ******************************************************************************************************************************
+ jquery dropable drop 
+ ******************************************************************************************************************************** */
+.highlight {
+    border: 1px solid yellow;
+    background-color:yellow;
+}
+.highlight.div {
+    border: 1px solid yellow;
+    background-color:yellow;
+}
+.kxt_sort_sng {
+	padding-top: 2px;
+	float:right;
+
+}
+textarea.kxtable {width:100%}

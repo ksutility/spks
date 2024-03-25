@@ -1,0 +1,451 @@
+﻿/* :root {
+	--color-ib1: #ffDDAA;
+	--color-ib2: #ccaa77; 
+} */
+.float_div
+{
+	background-color:#88dddd;	
+	float: right;
+	padding:0px 10px 0px 10px;
+	margin:0px 10px 0px 10px;
+}
+.table_fix_cell td{
+	line-height: 20px;	
+	overflow: hidden; 
+	height: 20px;
+	table-layout: fixed;
+	white-space: nowrap;
+	}	
+/* ------------------------------------------------------------------------	
+	<SPAN>
+	on mouse show for th in table */		
+.table_y {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table_y td, .table_y th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.table_y tr:nth-child(even){background-color: #f2f2f2;}
+
+.table_y tr:hover {background-color: #ddd;}
+
+.table_y th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+
+	table {
+		 border-collapse: separate; border-spacing: 1px;
+		 /* border-color: #ffffff; */
+	}
+	table td, th {
+		padding: 0px; 
+		text-align: center;
+	}	
+	#table_1 td{  direction: rtl;	}
+	
+	.td_p1{background-color:#7AD8FF;}	
+ 	#table_1 td.td_p1{background-color:#7AD8FF;} 
+	#table_1 td.td_p2{background-color:#88e0ff;}
+	#table_1 td.td_p3{background-color:#FEDCBB;}		
+/* 	 #table_1 td:focus { 
+		 background-color: #88dddd; 
+	 } 
+	
+
+
+	/* #table_1 { */
+	  /* overflow: hidden; */
+	/* } */
+
+	/* #table_1 tr:hover { */
+	  /* background-color: #ffa; */
+	/* } */
+
+	/* #table_1 td, th { */
+	  /* position: relative; */
+	/* } */
+	/* #table_1 td:hover::after, */
+	/* #table_1 th:hover::after { */
+	  /* content: ""; */
+	  /* position: absolute; */
+	  /* background-color: #ffa; */
+	  /* left: 0; */
+	  /* top: -5000px; */
+	  /* height: 10000px; */
+	  /* width: 100%; */
+	  /* z-index: -1; */
+	/* } */
+	
+	/* /* ------------------ */ */
+	
+	/* #table_1 td:focus::after, */
+	/* #table_1 th:focus::after {  */
+	  /* content: '';   */
+	  /* background-color: #77ffff;; */
+	  /* position: absolute;   */
+	  /* left: 0; */
+	  /* height: 10000px; */
+	  /* top: -5000px; */
+	  /* width: 100%; */
+	  /* z-index: -1; */
+	/* } */
+
+	/* #table_1 td:focus::before { */
+	  /* background-color: #77ffff;; */
+	  /* content: '';   */
+	  /* height: 100%; */
+	  /* top: 0; */
+	  /* left: -5000px; */
+	  /* position: absolute;   */
+	  /* width: 10000px; */
+	  /* z-index: -1; */
+	/* } */
+	
+	
+	
+	
+	
+/* ---------------------------	 */
+	
+	
+	#table_1  td, th:hover {text-decoration:none;} 
+	#table_1  th span {
+				z-index:10;display:none; padding:14px 20px;
+				margin-top:0px; left:40%;width:20%;
+				line-height:16px;
+		}
+	#table_1  th:hover span{
+			display:block; position:absolute; 
+			border:2px solid #FFF;  color:#EEE;
+			background:#333 
+		}
+		
+	#table_1  div.popup{
+	 float:right;
+	 background:#333333;
+	 color:#ffffff;
+	}	
+	#table_1  div.popup span {
+		display:none;
+		}	
+	#table_1  div.popup:hover span{
+			display:inline; position:fixed; 
+			left:80%;top:140px;
+			border:2px solid #FFF;  color:#EEE;
+			background:#333; 
+		}	
+	#table_1.callout {z-index:20;position:absolute;border:0;top:-14px;left:120px;}
+/* ------------------ */
+	#table_2  th span {
+				z-index:10;display:none; padding:14px 20px;
+				margin-top:0px; left:40%;width:20%;
+				line-height:16px;
+		}
+	#table_2  th:hover span{
+			display:block; position:absolute; 
+			border:2px solid #FFF;  color:#EEE;
+			background:#333 
+		}
+		
+	#table_2  div.popup{
+	 float:right;
+	 background:#333333;
+	 color:#ffffff;
+	}	
+	#table_2  div.popup span {
+		display:none;
+		}	
+	#table_2  div.popup:hover span{
+			display:inline; position:fixed; 
+			left:80%;top:140px;
+			border:2px solid #FFF;  color:#EEE;
+			background:#333; 
+		}	
+	#table_2.callout {z-index:20;position:absolute;border:0;top:-14px;left:120px;}	
+	
+/* </SPAN> ###################################################################*/
+	.table6 {
+	}
+	.table6	td {
+		border: 1px solid black;
+		border-collapse: collapse;		
+		padding: 0,15px,0,15px;
+		text-align: center;
+	} 
+/* -----------------------------------------------------------------------------	
+	<jdownload >	
+	for 2 div in each page */	
+    .black_overlay{
+        display: none;
+        position: fixed;
+        top: 0%;
+        left: 0%;
+        width: 100%;
+        height: 100%;
+        background-color: #555555;
+        z-index:1001;
+        -moz-opacity: 0.8;
+        opacity:.80;
+        filter: alpha(opacity=80);
+    }
+    .white_content {
+        display: none;
+        position: fixed;
+        top: 25%;
+        left: 25%;
+        width: 50%;
+        height: 50%;
+        padding: 16px;
+        border: 16px solid orange;
+        background-color: white;
+        z-index:1002;
+        overflow: auto;
+    }
+/* </jdownload > ###################################################################*/	
+
+/* -----------------------------------------------------------------------------	
+	<formshow fileds>	
+	                           */
+.input_auto
+	{
+	background-color:#111111;
+	color:#aaaaaa;
+	border:0px;
+	text-align: center;
+	}
+.input_file
+	{
+	background-color:#ffaaaa;
+	color:ffffff;
+	border:0px;
+	text-align: center;
+	}
+.input_optional	
+	{
+	background-color:#aaaaaa;
+	border:0px;
+	}
+textarea {width:100%}
+input[type="checkbox"]
+{
+	width: 30px;
+	height: 22px;
+}	
+.div_show_taiid{
+	width: 100%;
+	height:100%;
+	text-align:center;
+}
+/* </formshow fileds>	 ###################################################################*/	
+
+
+/* -----------------------------------------------------------------------------	
+	<Formshow Sections>	
+	                           */	
+.div_inactive_ib{
+	background-color:#ddffff;
+	margin-top:4px
+	}
+	.div_inactive_ib .form_des{	background-color:#ddffff;}	
+.div_inactive_ia{
+	background-color:#99bbbb;
+	margin-top:4px
+	}	
+	.div_inactive_ia * {color: #888888;}	
+	.div_inactive_ia .form_des{	background-color:#99aaaa;}	
+.div_active
+	{
+	background-color:#ffdddd;
+	margin-top:4px
+	}
+	.div_inactive_a .form_des{background-color:#ffdddd;color: #ff2200;}	
+.table_formshow_sec {
+	border-style: none;
+}
+	.table_formshow_sec tr{height:25px;}
+	.table_formshow_sec tr:first-child{height:0;}
+	#table_formshow_sec_ib tr:nth-child(2n){
+		background-color:  #ffDDAA;
+	}
+	#table_formshow_sec_ib tr:nth-child(2n+1){
+		background-color: #ccaa77;
+	}
+
+	#table_formshow_sec_ia tr:nth-child(2n){
+		background-color: #ffDDAA;
+	}
+	#table_formshow_sec_ia tr:nth-child(2n+1){
+		background-color: #ccaa77;
+	}
+
+	#table_formshow_sec_A tr:nth-child(2n){
+		background-color: #aaccff;
+	}
+	#table_formshow_sec_A tr:nth-child(2n+1){
+		background-color: #7799cc;
+	}
+	#table_formshow_sec_A  tr:last-child{background-color: #5577aa;}
+	#table_formshow_sec_ia  tr:last-child{background-color: #aaaaaa;}
+	#table_formshow_sec_ib tr:last-child{background-color: #aaaaaa;}
+	.table_formshow_sec  tr:last-child{
+	height:50px;
+	}
+/* </Formshow Sections>	 ###################################################################*/		
+
+
+div.scroll {
+    
+    width: 100%;
+	height: 100%;
+    overflow: auto;
+}
+/* for break 4 */
+div.div_brick {
+    float:left;
+	border: 1px solid #999999;
+   	height: 17px;
+   	overflow: hidden;
+   	padding: 3px 1.8%; 
+  	width: 20%;
+	background-color: #ffffff;
+}
+
+
+
+/* ******************************************************************************************************************************
+ un noun
+ ******************************************************************************************************************************** */
+.code2
+	{
+	text-align: center;
+	direction: ltr;
+	margin: 0px 0px 0px 0px;
+	width: 100%;
+	padding: 0px 0px;
+	font-family: Courier New, tahoma;
+	font-size: 9pt;
+	overflow: auto;
+	border-left:0px solid #333333;
+	border-top: 0px solid #333333;
+	border-right: 0px solid #b6b5b5;	
+	border-bottom: 0px solid #b6b5b5;
+	background-color: #909090;
+	}
+div .div_brick{
+	display: table-cell;   	
+	background-color: #909090;
+}
+div .tbl001 {
+   	display: block; 
+  	width: 100%;
+	clear: both;
+	}	
+	/*
+tr  ,td	{ height: 15px;}
+url(cssttp/css-tooltip-gradient-bg.png)  repeat-x 0 0;
+td	{ width: 15px;}
+ 
+ width:300px;margin-left:-160px;
+	/*CSS3 extras*/
+	/*
+td  span	{
+		border-radius:2px;        
+		box-shadow: 0px 0px 8px 4px #666;
+		
+	}
+	*/
+	/*opacity: 0.8;*/
+/* ------------------------------------------------------------------------	
+	<SPAN head>
+	on mouse show for th in table	
+	img:hover {text-decoration:none;} 
+	img div span {
+				z-index:10;display:none; padding:14px 20px;
+				margin-top:0px; left:40%;width:20%;
+				line-height:16px;
+		}
+	img:hover  div span{
+			display:block; position:absolute; 
+			border:2px solid #FFF;  color:#EEE;
+			background:#333 
+		}
+	img  div.popup{
+	 float:right;
+	 background:#333333;
+	 color:#ffffff;
+	}	
+	img  div.popup span {
+		display:none;
+		}	
+	img  div.popup:hover span{
+			display:inline; position:fixed; 
+			left:80%;top:140px;
+			border:2px solid #FFF;  color:#EEE;
+			background:#333; 
+		}	
+	img.callout {z-index:20;position:absolute;border:0;top:-14px;left:120px;}	 */	
+/* </SPAN> ###################################################################*/	
+
+/* tr 
+2015
+*/
+#tr00 {
+	background-color:#3b3a30;
+	color:#ffffff;
+	height:30px;
+}
+#tr01 {
+	background-color:#c0ded9;
+}
+#tr02 {
+	background-color:#c0ded9;
+}
+/* tr 
+rustic
+
+#tr00 {
+	background-color:#034f84;
+	color:#ffffff;
+	height:30px;
+}
+#tr01 {
+	background-color:#b1cbbb;
+}
+*/
+/* ---------------------------------------------- */
+.div_table {
+	height:100%;
+	overflow: auto;
+}
+    .fixed-table-container {
+      overflow-x: hidden;
+      height: 90%;
+      position: relative; /* could be absolute or relative */
+      padding-top: 30px; /* height of header */
+    }
+	
+    .fixed-table-container-inner {
+      overflow-x: auto;
+      overflow-y: auto;
+      height: 100%;
+    }
+	
+    .fixed-table thead {
+     } 
+	/* fixed-table th div */
+    .th-inner {
+      position: absolute;
+      top: 0;
+   }
+
+*/
+

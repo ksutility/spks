@@ -1,0 +1,323 @@
+/* ---------------------------------------------------------------------------------------------------------------- */
+table th {
+	background-color: #04AA6D;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+}
+.div_table{
+   overflow-y: auto;
+   height:550px;
+   width: 100%;
+}
+/*
+table th,table td {
+	width: auto ;
+	table-layout: auto ;
+} width = fit  */
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table0{
+	width: 100%;   
+}
+.table0 td,.table0 th {
+    border: 1px solid #ddd;
+    padding: 0px; }
+.table0 tr:nth-child(even){background-color: #f2f2f2;}	
+
+.table0 td,.table0 th {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: clip;
+    padding:0px 5px 0px 5px;
+    margin:0px;
+    }
+.table0 tr:hover {
+    background-color: #fffcaa;
+    }
+.table0 th {
+	height:15px;
+}
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+.table1 {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;    }
+.table1 td, #customers th {
+      border: 1px solid #ddd;
+      padding: 8px; }
+.table1 tr:nth-child(even){background-color: #f2f2f2;}
+.table1 tr:hover {background-color: #ffccaa;}
+.table1 th {
+      padding: 8px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      background-color: #04AA6D;
+      border: 1px solid #ddd;
+      position: sticky;
+      top: 0; /* Don't forget this, required for the stickiness */
+      color: white; }
+/* ---------------------------------------------------------------------------------------------------------------- 
+*/
+.table2 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      border-collapse: collapse;
+      text-align: center;
+      background-color: #ffffff;
+      width: 100%;    }
+.table2 td,.table2 th {
+    border: 1px solid #ddd;
+    padding: 0px; }
+
+.table2 tr:nth-child(even){background-color: #f2f2f2;}
+.table2 tr:hover {background-color: #ffccaa}
+.table2 th {
+    padding: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #04AA6D;
+    border: 1px solid #ddd;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+    color: white; }
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table3 {
+    table-layout: fixed;
+}
+.table3 td,.table3 th {
+    font-size: 12px;
+    height: 30px; 
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: clip;
+    padding:0px;
+    margin:0px;
+    }
+.table3 td:hover{  
+    word-wrap: break-word;
+    display: block;
+    background-color: #ffccaa;
+    overflow-y: auto;
+    text-overflow:ellipsis;
+    white-space: normal;
+    }
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table4 {
+    table-layout: fixed;
+}
+.table4 tr{
+    height: 15px; 
+}
+.table4 td,.table4 th {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: clip;
+    padding:0px;
+    margin:0px;
+    }
+.table4 tr:hover td{
+    background-color: #ffccaa;
+    }
+.table4 th {
+    height:15px;
+}
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table5 {
+    table-layout: fixed;
+	width: 100%;   
+}
+.table5 td,.table5 th {
+    border: 1px solid #ddd;
+    padding: 0px; }
+.table5 tr:nth-child(even){background-color: #f2f2f2;}	
+.table5 tr{
+    height: 15px; 
+}
+.table5 td,.table5 th {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: clip;
+    padding:0px;
+    margin:0px;
+    }
+.table5 tr:hover{  
+    height:150px;
+}
+.table5 tr:hover td{
+    background-color: #fffcaa;
+    overflow: normal;
+    text-overflow:ellipsis;
+    white-space: normal;
+    }
+.table5 th {
+    height:15px;
+}
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table6 {
+    table-layout: fixed;
+	width: 100%;   
+}
+.table6 td,.table6 th {
+    border: 1px solid #ddd;
+    padding: 0px; }
+.table6 tr:nth-child(even){background-color: #f2f2f2;}	
+.table6 tr{
+    height: 15px; 
+}
+.table6 td,.table6 th {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: clip;
+    padding:0px 2px 0px 2px;
+    margin:0px;
+    }
+.table6 tr:hover td{
+    background-color: #fffcaa;
+    }
+.table6 th {
+    height:15px;
+}
+/* ---------------------------------------------------------------------------------------------------------------- 
+
+.a1:link, .a1:visited {
+    background-color: #2222aa;
+    color: white;
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+.a1:hover, .a1:active {
+    background-color: #ff33ff;
+}*/
+
+/* ---------------------------------------------------------------------------------------------------------------- */
+#wrap_x_frame {
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid black;
+    background-color:#cccccc;
+}
+#x_frame {
+    background-color:#eeeeee;
+    }
+.resizable {
+    background-color: #e6e6ca;
+    border: 1px solid black;
+    overflow: scroll;
+    }
+.resizable1 {
+    background-color: #e6e6ca;
+    border: 1px solid black;
+    overflow: scroll;
+    }	
+
+/* ----------page layout ------------------------------------------------------------------------------------------------------ */
+.layout_l {
+  float: left;
+  padding: 0px;
+  width: 35%;
+  height:750px;
+  background-color: #f5ffff;
+}
+.layout_r {
+  float: left;
+  padding: 0px;
+  width: 65%;
+  height:750px;
+  background-color: #f1f1f1;
+}
+/* ----height: 100%;------page layout ------------------------------------------------------------------------------------------------------ */
+.scroll {
+    border: 1px solid black;
+    overflow: scroll;
+    
+    }
+/* ----------page layout ------------------------------------------------------------------------------------------------------ */
+.file_folder {
+	background-color:#344;
+	color:#ffffff}
+.file_pdf {	
+	background-color:#ffe}
+.file_pic {
+	background-color:#fefae0}
+.file_zip {
+	background-color:#f4f3a3}
+.file_txt {
+	background-color:#e9ede9}
+.file_ml {
+	background-color:#fdd;
+	color:#000}	
+.file_general {
+	}
+/* ---------------------------------------------------------------------------------------------------------------- */
+.table_file {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	border-collapse: collapse;
+	text-align: center;
+	background-color: #ffffff;
+	width: 100%;    }
+.table_file td, #customers th {
+    border: 1px solid #000;
+    padding: 4px; }
+.table_file tr:hover {border: 2px solid #a20;}
+.table_file td:hover {border: 2px solid #a20;text-decoration: overline underline}
+.table_file th {
+    padding: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #04AA6D;
+    border: 1px solid #ddd;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+	font-size: 18px;
+    color: white; }
+.table_file a:hover, a:active {
+	background-color: #808;
+	color:#fff}
+.file_folder a:link,.file_folder a:visited {
+	color:#0ff}
+/* --------highlight cur item clicked in 1 list ------------------------------------------------------------	*/
+.a-active {
+	background-color: #f2ccff;
+}
+/* --------highlight cur item clicked in 1 list ------------------------------------------------------------	*/
+.form_step_befor{
+	background-color: #f5fff5
+}
+.form_step_cur{
+	background-color: #81dbe3;
+}
+.form_step_after{
+	background-color: #566;
+}
+.form_step_cur_unactive{
+	background-color: #dbb69c;
+}
+/* ---------------------------------------------------------------------------------------------------------------- 
+
+input[type=button], input[type=submit], input[type=reset] {
+    width:100%;
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;}
+input:hover {
+    background-color: #ff33ff;
+}
+input[type="checkbox"]:disabled
+{
+     color:#cc0;
+}
+div{
+    background-color: #ffffff;
+}
+*/
