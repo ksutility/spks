@@ -538,16 +538,19 @@ def xtable():
         rows,titles,rows_num=db1.select(table=tb_name,where=where,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
         #if rows:rows.reverse()
         select_cols, all_cols,htm_table_filter=get_table_filter(tasks,x_data_s)
-        select_cols='form-1'#full'#1'
+        select_cols='form_v_cols_1'#form_v_cols_full  
+        ''' form_v_cols_1=form view columns ALT 1 
+            form_v_cols_full= form view columns FULL
+        '''
         #thead=THEAD(TR(TH('n',_width='30px'),TH('id',_width='30px'),*[TH(A(tasks[x]['title'],_title=f'{i} : {x}')) for i,x in enumerate(select_cols)]))
         app_dic1={'un':'کاربر','ap':'نتیجه','dt':'زمان'}
         #--table head
         tds=[TH('n',_width='30px'),TH('id',_width='30px')]
         for st_n,step in x_data_s['steps'].items():
             tds+=[TH(A(tasks[x]['title'],_title=x)) for x in step['tasks'].split(',') if x not in x_data_s['labels']]
-            if select_cols=='form-full':
+            if select_cols=='form_v_cols_full':
                 tds+=[TH(A("^"+str(step['i']+1)+"-"+y,_title=" مرحله "+f"step_{step['i']}_{x}")) for x,y in app_dic1.items()]
-            elif select_cols=='form-1':
+            elif select_cols=='form_v_cols_1':
                 tds+=[TH(A("^"+str(step['i']+1),_title=" مرحله "+",".join([f"step_{step['i']}_{x}" for x in app_dic1])))]
         tds+=[TH("S",_title='f_nxt_s',_width='30px'),TH("U",_title='f_nxt_u',_width='30px')]
         thead=THEAD(TR(*tds))
@@ -566,9 +569,9 @@ def xtable():
             for st_n,step in x_data_s['steps'].items():
                 #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
                 tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
-                if select_cols=='form-full':
+                if select_cols=='form_v_cols_full':
                     tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]
-                elif select_cols=='form-1':  
+                elif select_cols=='form_v_cols_1':  
                     tds+=[TD("-",_title=",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1]),_class='bg-info')]
             tds+=[TD(x_dic[f"f_nxt_s"]),TD(x_dic[f"f_nxt_u"])]
             ''' '''
