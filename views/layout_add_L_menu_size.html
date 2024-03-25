@@ -1,0 +1,105 @@
+<!--
+left menu for resize 2 farme 
+layout_add_L_menu_size : strat
+-->
+<style>
+body {
+  font-family: "Lato", sans-serif;
+}
+.sidenav_icon {
+  position: fixed;
+  top: 0px;
+  left:0px
+}
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  color:#fff;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidenav a {javascript:void(0)
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+.div_nav1{
+color:#000;
+font-size: 36px;
+}
+.sidenav p{
+	color:#fff;
+	display: inline;
+}
+.sidenav a.a1{
+	display: inline;
+	padding: 2px 2px 2px 2px;
+	font-size: 14px;
+}
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+<div class="sidenav_icon"><span style="font-size:30px;cursor:pointer" onclick="openNav()"> &#9776; </span></div>
+
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div class="div_nav1">Horizontal </div>	
+	<a class="a1" href="javascript:void(0)" onclick="widthset(20)">20-80</a> |
+	<a class="a1" href="javascript:void(0)" onclick="widthset(40)">40-60</a> |
+	<a class="a1" href="javascript:void(0)" onclick="widthset(50)">50-50</a> |
+	<a class="a1" href="javascript:void(0)" onclick="widthset(60)">60-40</a> |
+	<a class="a1" href="javascript:void(0)" onclick="widthset(80)">80-20</a> 
+  <div class="div_nav1">Vertical </div>
+  <a  href="javascript:void(0)" onclick="vertical()">vertical</a>
+</div>
+
+
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+function widthset(x) {
+  horizontal()	
+  document.getElementById("layout_l").style.width = x.toString()+"%";
+  document.getElementById("layout_r").style.width = (100-x).toString()+"%";
+}
+function horizontal() {
+  document.getElementById("layout_l").style.height = "900px";
+  document.getElementById("layout_r").style.height = "900px";
+}
+function vertical() {
+  document.getElementById("layout_l").style.width = "100%";
+  document.getElementById("layout_l").style.height = "50vh";
+  document.getElementById("layout_r").style.width = "100%";
+  document.getElementById("layout_r").style.height = "100vh";
+}
+</script>
+<!-- layout_add_L_menu_size : end -->

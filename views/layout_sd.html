@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- sd=sade -->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{=T.accepted_language or 'en'}}"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+    <!-- Always force latest IE rendering engine
+         (even in intranet) & Chrome Frame
+         Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge{{=not request.is_local and ',chrome=1' or ''}}">
+    <!--  Mobile Viewport Fix
+          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
+          device-width: Occupy full width of the screen in its current orientation
+          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
+          user-scalable = yes allows the user to zoom in -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{=response.title or request.application+"-"+request.controller+"-"+request.function+" | ".join(request.args).upper()}}</title>
+    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
+    <meta name="application-name" content="{{=request.application}}">
+    <!-- Speaking of Google, don't forget to set your site up:
+         http://google.com/webmasters -->
+    <meta name="google-site-verification" content="">
+    <!-- include stylesheets 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+	-->
+    <link rel="stylesheet" href="{{=URL('static','css/bootstrap.min.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static','css/web2py-bootstrap4.css')}}"/>
+    
+    <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
+		
+    <!-- All JavaScript at the bottom, except for Modernizr which enables
+         HTML5 elements & feature detects -->
+    <script src="{{=URL('static','js/modernizr-2.8.3.min.js')}}"></script>
+    <!-- Favicons -->
+    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+	<!-- ks -->	
+		<link rel="stylesheet" href="{{=URL('static','css/ks.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','js/ks-form.js')}}"></script>
+	<!-- ks-input-placeholder -->	
+		<link rel="stylesheet" href="{{=URL('static','css/ks-input-placeholder.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','js/ks-input-placeholder.js')}}"></script>	
+	<!-- date piker fa -->
+			<link type="text/css" href="{{=URL('static','js/datepicker/jquery-ui-1.8.14.css')}}"/>
+			<link rel="stylesheet" href="{{=URL('static','js/datepicker/jquery-ui.css')}}/">
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery-1.8.2.min.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery-ui.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.core.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/calendar.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc-ar.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc-fa.js')}}"></script>
+	<!-- /date piker fa -->
+		<script type="text/javascript" src="{{=URL('static','js/jquery.tablesorter.js')}}"></script>
+	<!-- select2 -->
+			<link href="{{=URL('static','select2/select2-410-rc.min.css')}}" rel="stylesheet" />
+			<script type="text/javascript" src="{{=URL('static','select2/select2-410-rc.min.js')}}"></script>
+	<!-- /select2 -->
+	<script type="text/javascript" >
+			$(document).ready(function() {
+				$('#xDATE1').datepicker({
+					dateFormat: 'ymmdd',
+					changeMonth: true,
+					changeYear: true,
+					maxDate: "+5y" ,
+					onSelect: function(dateText, inst) {
+						$('#xDATE2').datepicker('option', 'minDate', new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']));
+					}
+				});
+				$('#xDATE2').datepicker({
+					dateFormat: 'ymmdd',
+					changeMonth: true,
+					changeYear: true,
+					maxDate: "+5y" ,								
+				});
+				$('.fDATE').datepicker({
+					dateFormat: 'yy/mm/dd',
+					changeMonth: true,
+					changeYear: true,
+				});
+				$('select').select2();
+				$('table').tablesorter();
+                
+
+                $( ".resizable" ).resizable();
+                $( ".sortable" ).sortable();
+				//$("textarea").on( 'keydown ', function( e ) {
+				//	alert('tab');
+				//	if( e.which == 9 ) {
+				//		console.log( e.target.href );
+				//	}
+				//});
+				//$('textarea').on('keydown', function(keyEvent) {
+				//	alert('tab');
+				//	//TabManager.enableTab(this, keyEvent);
+				//});
+
+ 			}); 
+	</script>
+    <style>
+    
+    </style>
+<!-- 
+#
+/ks 
+-->	
+	
+	
+	
+	
+    {{block head}}{{end}}
+  </head>
+  
+  <body style="height:700px">
+    <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
+    <!-- Masthead ===================================== 
+    <div class="sortable">
+         </div>  
+    -->
+    {{block header}}
+    {{end}}
+    
+    <div class="container-fluid main-container">
+    
+    
+ 
+    
+    <!-- Main ========================================= -->
+    
+    <!-- Begin page content -->
+  
+      {{include}}
+      {{=response.toolbar() if response.show_toolbar else ''}}
+
+     </div>
+    {{block footer}} <!-- this is default footer -->
+	
+	<!-- footer
+    <footer class="footer container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="copyright pull-left">{{=request.now.year}}</div>
+          <div id="poweredBy" class="pull-right">
+            <a title='KSW=Kind Smart Web tools - Programmer: Kurosh Saadati - your ip={{=str(request.client)}}'>Powered by : KS  </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+	-->
+    {{end}}
+    <!-- The javascript =============================== -->
+    <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
+    {{block page_js}}{{end page_js}}
+    {{if response.google_analytics_id:}}
+    <!-- Analytics ==================================== -->
+    <script src="{{=URL('static','js/analytics.min.js')}}"></script>
+    <script type="text/javascript">
+      analytics.initialize({
+      'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'}
+      });
+    </script>
+    {{pass}}
+	
+	{{include 'layout_add_j_box.html'}}
+
+  </body>
+</html>
+

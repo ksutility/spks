@@ -1,0 +1,29 @@
+{{extend 'layout.html'}}
+
+<table><tr>
+    <td>
+
+        <div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:30px;word-wrap:break-word;">
+          <div class="container center">
+            <h1 class="display-5">/{{=request.application}}/{{=request.controller}}/{{=request.function}}</h1>
+          </div>
+        </div>
+
+    </td>
+    <td>
+        <div class="jumbotron jumbotron-fluid" style="padding:30px;word-wrap:break-word;">
+          <div class="container center">
+            <a class="btn btn-primary" href="{{=URL('ksw','data','index')}}">{{=T("data")}}</a>
+            <a class="btn btn-secondary" href="{{=URL('examples','default','index')}}">{{=T("Online examples")}}</a>
+            <a class="btn btn-primary" href="http://web2py.com">web2py.com</a>
+            <a class="btn btn-secondary" href="http://web2py.com/book">{{=T('Documentation')}}</a>
+            <a class="btn btn-secondary" href="{{=URL('default','api_get_user_email')}}">{{=T('API Example')}}</a>
+            <a class="btn btn-secondary" href="{{=URL('default','grid/auth_user')}}">{{=T('Grid Example')}}</a>
+            <a class="btn btn-secondary" href="{{=URL('default','wiki')}}">{{=T('Wiki Example')}}</a>
+          </div>
+        </div>
+    </td></tr>
+</table>
+{{include}}
+
+

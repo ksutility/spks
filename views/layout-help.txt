@@ -1,0 +1,17 @@
+layout:
+--------------------
+    {{=vars()._vars()}}
+    {{=XML('<br>'.join(['{}:{}'.format(x,y) for x,y in vars().items()]))}}
+    in request.vars
+    {{if 1==1:}}
+    {{pass}}
+-------------------- 
+    {{=locals()}}
+--------------------
+    {{if 'x_frame' in globals():}}
+        <p>ok</p>
+    {{else:}}
+        <p>no</p>
+    {{pass}}
+--------------------
+{{=BEAUTIFY(response._vars)}}

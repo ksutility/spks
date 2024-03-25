@@ -1,0 +1,39 @@
+       <div id="frame_holder" name="frame_holder" >
+            <button id="x_frame_but1">-</button>
+            <button id="x_frame_but2">+</button>
+            <button id="x_frame_but3">*</button>
+            <button id="x_frame_but4">..</button>
+            <div id="wrap_x_frame" class="resizable" width="100%" height="25px">
+                <iframe id="x_frame" name="x_frame" src="" title="x_frame" width="100%" height="100%"></iframe>
+            </div>
+            
+        </div>
+        <script>
+        $("#wrap_x_frame").height(300)
+        $("#x_frame_but4").click(function() {
+            if ($("#wrap_x_frame").height() > 100) {
+                $("#wrap_x_frame").animate({
+                    height: 100
+                    }, 200);
+            } else {
+                $("#wrap_x_frame").animate({
+                    height: 700
+                    }, 200);
+            }
+        });
+        $("#x_frame_but1").click(function() {
+            $("#wrap_x_frame").animate({
+                    height: 300
+                    }, 200);
+        });  
+        $("#x_frame_but2").click(function() {
+            $("#wrap_x_frame").animate({
+                    height: 700
+                    }, 200);
+        });      
+        $("#x_frame_but3").click(function() {
+            $("#wrap_x_frame").animate({
+                    height: 1000
+                    }, 200);
+        });                 
+        </script>

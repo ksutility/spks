@@ -1,0 +1,17 @@
+{{extend 'layout_sd.html'}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{include 'layout_add_L_menu_size.html'}}
+<style>
+	{{=style}}
+</style>
+<div class="resizable1" style="height:150px">{{=json_str}}</div>
+<div>
+	<div id="layout_l" class="layout_l resizable1" height="900px">
+		<pre>{{=json_dump}}</pre>
+	</div>
+	<div id="layout_r" class="layout_r resizable1" height="900px">
+		<pre>{{=k_json}}</pre>
+    </div>
+</div>	
+
+

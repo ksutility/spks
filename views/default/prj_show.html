@@ -1,0 +1,8 @@
+{{extend 'layout.html'}}
+<h1>{{=prj.title}}</h1>
+[ {{=A('اصلاح', _href=URL('prj_edit', args=request.args))}} ]
+[ {{=A('لیست پروژه ها', _href=URL('prj'))}}]
+<nr />
+<ul>{{for x in ['id','des','created_by','created_on']:}}
+     {{=LI("{} => {}".format(x,prj[x]))}}
+{{pass}}</ul>

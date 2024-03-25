@@ -1,0 +1,99 @@
+{{extend 'layout_sd.html'}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+        [data-tab-info] {display: none;}
+        .active[data-tab-info] { display: block;}
+ 
+
+ 
+
+ 
+
+</style>
+{{=scr}}
+<form action="#" enctype="multipart/form-data" method="post">
+
+
+<!-- Tabs Detail -->
+<div  class="row tabs">
+	<div class="col-5">
+		{{=mnu}}
+	</div>
+	<div class="col-4">
+		{{=btn}}
+	</div>
+	<div class="col-1">
+			<a class="btn btn-primary text-light" data-tab-value="#tab_1">ادیتور</a>	
+	</div>
+	<div class="col-1">
+			<a class="btn btn-info text-light" data-tab-value="#tab_2">تغییرات</a>
+	</div>
+	<div class="col-1">
+			<a class="btn btn-dark text-light" data-tab-value="#tab_3">متن</a>
+	</div>
+</div>
+ 
+<!-- Tab content -->
+<div class="tab-content" style="height:700px;" >
+	<div class="tabs__tab active"  style="height:700px;" id="tab_1"  data-tab-info>
+		{{=bdy}}
+
+	</div>
+	<div class="tabs__tab" id="tab_2" data-tab-info>
+		{{=cmp}}
+	</div>
+	<div class="tabs__tab" id="tab_3" data-tab-info>
+		{{=txt}}
+	</div>
+</div>
+
+</form>
+<script type="text/javascript">
+   
+	// function to get each tab_page details
+	const tabs = document.querySelectorAll('[data-tab-value]')
+	const tabInfos = document.querySelectorAll('[data-tab-info]')
+
+	tabs.forEach(tab => {
+		tab.addEventListener('click', () => {
+			const target = document
+				.querySelector(tab.dataset.tabValue);
+			tabInfos.forEach(tabInfo => {
+				tabInfo.classList.remove('active')
+			})
+			target.classList.add('active');
+		})
+	})
+</script>
+	
+
+<script>
+	// 021215 - ks - tabmanger
+	// function to manage tab key press action on textarea 
+	//		print "/t" instead of goto next element 
+	let textarea = document.getElementById("file_txt");
+	textarea.addEventListener("keydown", (e) => {
+		if (e.key == 'Tab') {
+			event.preventDefault(); // stops its action
+			var start = textarea.selectionStart;
+			var end = textarea.selectionEnd;
+			// set textarea value to: text before caret + tab + text after caret
+			textarea.value = textarea.value.substring(0, start) +
+			"\t" + textarea.value.substring(end);
+			// put caret at right position again
+			textarea.selectionStart =
+			  textarea.selectionEnd = start + 1;
+		}
+	});
+</script>
+
+
+
+
+
+
+
+
+
+                

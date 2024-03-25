@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+{{=x}}
+   <script>
+   $(document).ready(function(){
+      if(!$.web2py.web2py_websocket('ws://127.0.0.1:8888/realtime/mygroup', function(e){alert(e.data)}))
+
+         alert("html5 websocket not supported by your browser, try Google Chrome");
+   });
+   </script>

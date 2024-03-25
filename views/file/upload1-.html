@@ -1,0 +1,117 @@
+
+<script>
+	document.getElementById("but1").style.display = "none";
+	
+	const output = document.getElementById('output');
+	const filepicker = document.getElementById('filepicker');
+	filepicker.addEventListener('change', (event) => {
+	  const files = event.target.files;
+	  output.textContent = '';
+
+	  for (const file of files) {
+		//function add_li(File_ext(file.name))
+		if
+	  }
+	});
+	function add_li(xx){
+		const li = document.createElement('li');
+		li.textContent = File_ext(file.name);
+		output.appendChild(li);
+	}
+	function sh1(){
+		r=checkFile()
+		if (r) {
+			document.getElementById("but1").style.display = "block";
+		} else {
+			document.getElementById("but1").style.display = "none";
+		}
+	}
+	function File_ext(filename) {
+		if (filename.lastIndexOf(".") > 0) {
+            fileExtension = filename.substring(filename.lastIndexOf(".") + 1, filename.length);
+			return fileExtension;
+			}
+			return ''
+			
+    }
+
+
+	input.style.opacity = 0;
+	input.addEventListener('change', updateImageDisplay);
+	
+	function updateImageDisplay() {
+	  while(preview.firstChild) {
+		preview.removeChild(preview.firstChild);
+	  }
+
+	  const curFiles = input.files;
+	  if (curFiles.length === 0) {
+		const para = document.createElement('p');
+		para.textContent = 'No files currently selected for upload';
+		preview.appendChild(para);
+	  } else {
+		const list = document.createElement('ol');
+		preview.appendChild(list);
+
+		for (const file of curFiles) {
+		  const listItem = document.createElement('li');
+		  const para = document.createElement('p');
+		  alert(file.type)
+		  if (validFileType(file)) {
+			para.textContent = `File name ${file.name}, file size ${returnFileSize(file.size)}.`;
+			const image = document.createElement('img');
+			image.src = URL.createObjectURL(file);
+			image.style.width = '100px';
+			image.style.height = 'auto';
+			
+			listItem.appendChild(image);
+			listItem.appendChild(para);
+		  } else {
+			para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+			listItem.appendChild(para);
+		  }
+
+		  list.appendChild(listItem);
+		}
+	  }
+	}
+	
+	const fileTypes1 = [
+	  "image/apng",
+	  "image/bmp",
+	  "image/gif",
+	  "image/jpeg",
+	  "image/pjpeg",
+	  "image/png",
+	  "image/svg+xml",
+	  "image/tiff",
+	  "image/webp",
+	  "image/x-icon"
+	];
+	const fileTypes = [
+	  ".docx",
+	  ".gif",
+	  "image/jpeg"
+	];
+
+	function validFileType(file) {
+	  return fileTypes.includes(file.type);
+	}
+	
+	function returnFileSize(number) {
+	  if (number < 1024) {
+		return `${number} bytes`;
+	  } else if (number >= 1024 && number < 1048576) {
+		return `${(number / 1024).toFixed(1)} KB`;
+	  } else if (number >= 1048576) {
+		return `${(number / 1048576).toFixed(1)} MB`;
+	  }
+	}
+</script>
+   
+
+
+
+
+
+

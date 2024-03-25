@@ -1,0 +1,31 @@
+{{extend 'layout_sd.html'}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{include 'layout_add_L_menu_size.html'}}
+<table><tr>
+	<td width="10%">
+		
+	</td>
+	<td><div> {{=a}} </div><div> : </div></rd>
+</td></tr></table>
+
+<div>
+	<div id="layout_l" class="layout_l resizable" height="900px">
+		
+		<div >{{=m_dir}} | {{=upload}}{{=path}}</div>
+		<div  class="scroll" height="900px" float="none">
+			{{=files}}
+		</div>
+	</div>
+	{{include 'x_frame_H.html'}}
+	<!--
+	<div  class="resizable" height="30vh">{{=folders}}</div>
+	-->
+</div>
+{{include 'layout_add_j_box.html'}}
+   
+
+
+
+
+
+

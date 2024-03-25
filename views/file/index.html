@@ -1,0 +1,23 @@
+{{extend 'layout.html'}}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{include 'layout_add_L_menu_size.html'}}
+
+<div>
+	<div id="layout_l" class="layout_l resizable" height="900px">
+		
+		<div dir='rtl' style='text-align:center;  background-color:#ffffff ;padding: 0px;margin:0px; '>
+			<h6>{{=x_title}}</h6>
+			<div>{{=upload1}}</div>
+		</div>
+		<div  class="scroll" height="700px" float="none">
+			{{=files}}
+		</div>
+	</div>
+	{{include 'x_frame_H.html'}}
+	<!--
+	<div  class="resizable" height="30vh">{=folders}</div>
+	-->
+</div>
+{{include 'layout_add_j_box.html'}}
+
+

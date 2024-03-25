@@ -1,0 +1,143 @@
+<!--  
+input = 
+	link
+	file_ext_dot
+onchange="sh1();"
+--> 
+<style>
+.input_x {
+  font-family: "Lato", sans-serif;
+  height: 50px;
+  width: 100%;
+  color:#fff;
+  background-color: #11f;
+}
+
+.button-33 {
+  background-color: #c2fbd7;
+  border-radius: 100px;
+  box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
+  color: green;
+  cursor: pointer;
+  display: inline-block;
+  font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+  padding: 7px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 0;
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 100%;
+}
+.button-33:hover {
+  box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
+  transform: scale(1.01);
+}
+
+
+table {
+	width:100%;
+	}
+table, th, td {
+  border: 1px solid white;
+  border-collapse: collapse;
+  background-color: #96D4D4;
+  padding:10px;
+}
+tr {
+	height: 50px;
+}	
+p	{
+	direction: rtl;
+	}
+.cen	{
+	margin: 0 auto;
+	text-align: center;
+	width:90%;}
+</style>
+<form method="post" enctype="multipart/form-data" action="{{=link}}">
+	<div class="cen"><h1>فرم ارسال فایل</h1></div>
+	<table><tr>
+		<td><div name="ext_inf" id="ext_inf">{{=file_ext_tit}}</div></td>
+		<td><p>مشخصات فایل</p></td>
+		<td><p>1</p></td>
+	</tr><tr>
+		<td><input class="button-33" name="filepicker" id="filepicker" type="file" size="60" maxlength="10000000"  accept="{{=file_ext_dot}}"></td>
+		<td><p>انتخاب فایل جهت ارسال</p></td>
+		<td><p>2</p></td>
+	</tr><tr>
+		<td><input id="but1" class="button-33" type="Submit" value="Upload"></td>
+		<td><p>تایید جهت ارسال فایل</p></td>
+		<td><p>3</p></td>
+	</tr></table>
+	<br>
+	<a title="{{=args}}"> --- </a>
+	<ul id="output"></ul>
+</form> 
+<script>
+	document.getElementById("but1").style.display = "none";
+	
+	const output = document.getElementById('output');
+	const filepicker = document.getElementById('filepicker');
+	filepicker.addEventListener('change', (event) => {
+	  const files = event.target.files;
+	  output.textContent = '';
+
+	  for (const file of files) {
+		//function add_li(File_ext(file.name))
+		out_x('li', File_ext(file.name)+ " - " + FileSize_st(file.size)+ " - " + file.name);
+		if (validFileType(file.name)) {	
+			document.getElementById("but1").style.display = "block";
+			out_x('p','')
+		} else {
+			document.getElementById("but1").style.display = "none";
+			out_x('h2','فایل (های) انتخاب شده مناسب نیست -  لطفا دوباره انتخاب کنید')
+		}
+		
+	  }
+	});
+	function out_x(obj_n,txt){
+		const li = document.createElement(obj_n);
+		li.textContent =txt ;
+		output.appendChild(li);
+	}
+	function sh1(){
+		r=checkFile()
+		if (r) {
+			document.getElementById("but1").style.display = "block";
+		} else {
+			document.getElementById("but1").style.display = "none";
+		}
+	}
+	function File_ext(filename) {
+		if (filename.lastIndexOf(".") > 0) {
+            fileExtension = filename.substring(filename.lastIndexOf(".")+1, filename.length);
+			return fileExtension;
+			}
+			return ''
+    }
+//--------------------
+	const fileTypes = [ {{=file_ext_list}} ]; // exam [ "docx","gif"]
+	function validFileType(filename) {
+	  return (((fileTypes.length == 1) && fileTypes.includes(''))  || (fileTypes.includes(File_ext(filename))));
+	}
+	function FileSize_st(number) {
+	  if (number < 1024) {
+		return `${number} bytes`;
+	  } else if (number >= 1024 && number < 1048576) {
+		return `${(number / 1024).toFixed(1)} KB`;
+	  } else if (number >= 1048576) {
+		return `${(number / 1048576).toFixed(1)} MB`;
+	  }
+	}
+</script>
+   
+
+
+
+
+
+

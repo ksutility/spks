@@ -1,0 +1,100 @@
+<style>
+<!--
+/* -----------------------------------------------------------------------------	
+	<j_box>	
+	for 2 div in each page */
+-->		
+    .j_box_black_overlay{
+        display: none;
+        position: fixed;
+        top: 0%;
+        left: 0%;
+        width: 100%;
+        height: 100%;
+        background-color: #555555;
+        z-index:1001;
+        -moz-opacity: 0.8;
+        opacity:.80;
+        filter: alpha(opacity=80);
+    }
+    .j_box_white_content {
+        display: none;
+        position: fixed;
+        top: 25%;
+        left: 25%;
+        width: 50%;
+        height: 50%;
+        padding: 16px;
+        border: 16px solid orange;
+        background-color: white;
+        z-index:1002;
+        overflow: auto;
+	.j_box_white_content_1 {
+        display: none;
+        position: fixed;
+        top: 15%;
+        left: 15%;
+        width: 70%;
+        height: 70%;
+        padding: 15px;
+        border: 15px solid orange;
+        background-color: white;
+        z-index:1002;
+        overflow: auto;	
+    }
+<!--	
+/* </j_box > ###################################################################*/	
+/* -----------------------------------------------------------------------------
+-->
+</style>
+<!--j_box -->	
+	<div id="j_box_light" class="j_box_white_content resizable"> 
+		<a href = "javascript:void(0)" onclick = "j_box_hide()">Close</a>
+		<a href = "javascript:void(0)" onclick = "j_box_hide()">X</a>
+		<div id="j_box_subwin1_body" style="height:100%;">
+		<!-- subwin1_body --> 
+			<iframe id="j_box_iframe_win" src="" width="100%" height="100%">	<p>Your browser does not support iframes.</p></iframe> 
+		</div>
+	</div>
+	<div id="j_box_fade" class="j_box_black_overlay"></div>
+<!--/j_box -->
+<script>
+	let x_reload
+	function j_box_show1(path) {
+		document.getElementById('j_box_light').style.display='block';
+		document.getElementById('j_box_fade').style.display='block'; 
+		$('#j_box_subwin1_body').load( path ); 
+		//alert ( path );
+		//------ goto the url In cur page 
+		//window.location.href = path
+		//------ open new page
+		//window.open ( path );
+		//
+	}
+	function j_box_show_test(path) {
+		document.getElementById('j_box_light').style.display='block';
+		document.getElementById('j_box_fade').style.display='block'; 
+		//$('#j_box_subwin1_body').load( path ); 
+		//alert ( path );
+		//------ goto the url In cur page 
+		//window.location.href = path
+		//------ open new page
+		window.open ( path );
+		//
+	}
+	function j_box_hide() {
+		document.getElementById('j_box_light').style.display='none';
+		document.getElementById('j_box_fade').style.display='none';
+		if (x_reload) {location.reload();}
+	}
+	//iframe
+	function j_box_show(path,reload=false) {
+		x_reload=reload  //reload page when hide jbox
+		document.getElementById('j_box_light').style.display='block';
+		document.getElementById('j_box_fade').style.display='block'; 
+		var $iframe = $('#j_box_iframe_win');
+		if ( $iframe.length ) {
+			$iframe.attr('src',path);
+		}
+	}	
+</script>

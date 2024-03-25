@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+<h1>زیر پروژه های تعریف شده</h1>
+[ {{=A('search', _href=URL('search'))}} ]<br />
+<ul>{{for prj in sub_prjs:}}
+     {{=LI(A("{}-{}".format(prj.title,prj.prj_id.title), _href=URL('sub_prj_show', args=prj.id)))}}
+{{pass}}</ul>
+[ {{=A('create sub_prject', _href=URL('sub_prj_create'))}} ]
+[ {{=A('list of project', _href=URL('prj'))}} ]
+<hr>
+{{=grid}}
