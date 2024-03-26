@@ -308,6 +308,8 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
             msg3:str =long  message = detail of var and ....
         (additional msg's that shout be write to file_output no to screen_output 
     '''
+    vals=vals.copy()#km: for unchange input data
+    vals2=vals2.copy()#km: for unchange input data
     if reset:xxprint_reset_html()
     def xxd(n):
         return(f'''</div><div class="bg-primary w-100 text-light border" onclick="$('#{n}').toggle();">{n}</div><div id="{n}" class"contents">''')
