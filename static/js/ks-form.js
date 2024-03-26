@@ -469,9 +469,9 @@ function jdownload_only_show_file_inf(file,Pfolder,patern) {
 	}
  }
  */
-function ajax_chek_uniq(db,tb,field_name,target,target_hlp=""){
+function ajax_chek_uniq(db,tb,field_name,target,uniq_where="",target_hlp=""){
 	/*
-		code:
+		uniq_value:
 			input text
 		goal:
 			check that dom.input(target).value  is uniq in file(db).table(tb).filed(field_name)
@@ -481,18 +481,19 @@ function ajax_chek_uniq(db,tb,field_name,target,target_hlp=""){
 			if not uniq: (dom.input(target).value is in  file(db).table(tb).filed(field_name))
 				delete dom.input(target).value
 	*/
-	var code = $(target).val();
-	url = "/spks/km/uniq_inf.json/"+db+"/"+tb+"/"+field_name+"/"+code;
+	var uniq_value = $(target).val();
+	url = "/spks/km/uniq_inf.json/"+db+"/"+tb+"/"+field_name // +"/"+uniq_value;
 	alert("بررسی یکتا بودن کد وارد شده "+"\n"+url);
 	$.ajax({
 		url :url,
 		method : 'POST',
-		data : {code:code},
+		data : {uniq_value:uniq_value,uniq_where:uniq_where},
 		success : function(echo){
 			$(target).val(echo.uniq);
 			if (target_hlp!="") { $(target_hlp).text(echo.like_list);}
-			var msg="like: \n" + echo.like_list
-			alert(msg)
+			if (echo?.err) {alert(echo.err);}
+			var msg="like: \n" + echo.like_list+ "\n -------------\n " + echo.msg;
+			alert(msg);
 			$(target).attr('title', msg);
 		}
 	});

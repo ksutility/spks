@@ -74,7 +74,7 @@ def test_user():
 def test_parser():
     import k_form
     return k_form.template_parser("{a}+{{=b+','.join([x for x in 'abc'])}}",x_dic={'a':'1','b':'2'})
-def test_uniq_old():
+def test_uniq_old2():
     #sample=   spks/form/test_uniq/paper/a/lno
     args=request.args
     x_val=request.vars['x_val'] or ''
@@ -84,7 +84,7 @@ def test_uniq_old():
         db1=DB1(db_path+db_name+'.db')
 
         x_field=args[2]
-        is_uniq,like_list=db1.chek_uniq(tb_name,x_field,x_val)
+        is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where='',uniq_value=x_val)
         xhtm+=[DIV(x_val)]+[DIV('--')]
         xhtm+=[DIV(str(is_uniq))]+[DIV('--')]
         xhtm+=[DIV(x) for x in like_list]+[DIV('--')]
@@ -93,7 +93,7 @@ def test_uniq_old():
         ,DIV(xhtm)
         ))      
 #---------------------------------------------------------------------------------------------------------- =================      
-def test_uniq_old():      
+def test_uniq_old1():      
     scr1='''
     <script>
         function ajax_chek_uniq(){
@@ -161,18 +161,32 @@ def chek_uniq():
 #--------------------        
 def uniq_inf():
     '''
-        use uniq_inf.json for ajax
+    goal:
+        use uniq_inf.json for ajax from ks-form.js>ajax_chek_uniq()
+    test:
+        /spks/km/uniq_inf.json/test/a/txt
     '''
-    args=request.args
-    if len(args)>3:
-        x_data_s,db_name,tb_name,msg=get_init_data()
-        x_field=args[2]
-        x_val=args[3]
-        db1=DB1(db_path+db_name+'.db')
-        is_uniq,like_list=db1.chek_uniq(tb_name,x_field,x_val)
- 
-        return {'uniq':x_val if is_uniq else '','is_uniq':str(is_uniq),'like_list':like_list}
-    return dict(x={'uniq':'err','is_uniq':'','like_list':'error in form.py/def(uniq_inf)-args='+str(args)})      
+    args=''
+    x_dic=''
+    n='1'
+    try:
+        args=request.args
+        x_dic=request.vars
+        if len(args)>2:
+            x_data_s,db_name,tb_name,msg=get_init_data()
+            x_field=args[2]
+            uniq_value=x_dic['uniq_value'] #args[3]
+            uniq_where=x_dic['uniq_where']
+            db1=DB1(db_path+db_name+'.db')
+            n='2'
+            is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where=uniq_where,uniq_value=uniq_value)
+            n='3'
+            return {'uniq':uniq_value if is_uniq else '','is_uniq':str(is_uniq),'like_list':like_list,'msg':str(x_dic)}
+        msg='shoud len(args)>2'
+    except Exception as err:
+        msg='err='+n+"|"+str(err)
+    #return dict(x={'uniq':'err','is_uniq':'','like_list':'','msg':f"error in form.py/def(uniq_inf){msg}\n-args="+str(args)+"\n,vars="+str(request.vars)})  
+    return {'uniq':'error','is_uniq':'','like_list':'','msg':str(x_dic),'err':f" - error in form.py/def(uniq_inf)\n - {msg}\n - args="+str(args)+"\n - vars="+str(x_dic)}
 #---------------------------------------------------------------------------------------------------------- =================     
 def test_ajax():
     scr1='''

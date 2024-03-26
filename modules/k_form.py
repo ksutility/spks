@@ -799,8 +799,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             if "optional" in obj['prop']: 
                 x_class= " class='input_optional' " 
                 if _value=="" : _value="-"
-            if "uniq" in obj['prop']: onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}');"'''
-
+            if "uniq" in obj: 
+                uniq_where=obj["uniq"]["where"]
+                onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''
             t_val= f' value="{_value}"' #'' if 'placeholder' in obj else
             if _len<60 :
                 obj['input']=XML(f'''
