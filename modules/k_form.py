@@ -742,7 +742,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     #xreport_var([i_obj,x_dic,obj,''],True)
     cm.tik('obj template_parser end')
     
-    if debug:xxxprint(msg=['obj',obj['name'],''],vals=x_dic)
+    #if debug:
+    xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)
     def form_update_set(form_update_set_param):
         xmode,xname=form_update_set_param.lower().split(";")
         if xmode== "form": #updae form
@@ -800,7 +801,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 x_class= " class='input_optional' " 
                 if _value=="" : _value="-"
             if "uniq" in obj: 
-                uniq_where=obj["uniq"]["where"]
+                uniq_where=obj["uniq"]
                 onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''
             t_val= f' value="{_value}"' #'' if 'placeholder' in obj else
             if _len<60 :

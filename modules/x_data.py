@@ -135,7 +135,7 @@ x_data={
         'a':{
             'base':{'mode':'form','title':'کد پروژه'},
             'tasks':{
-                'code':{'type':'text','title':'کد پروژه','len':'4','uniq':{'where':''}},
+                'code':{'type':'text','title':'کد پروژه','len':'4','uniq':''},
                 'name':{'type':'text','title':'نام پروژه','lang':'fa'},
                 'per':{'type':'reference','width':'5','title':' نماینده پروژه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
                 'cnt_name':{'type':'text','title':'نام قراردادی پروژه','title_e':'contracte name'},
@@ -182,7 +182,7 @@ x_data={
             'base':{'mode':'form','title':'زیر پروژه'},
             'tasks':{
                 'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':[]},
-                'code':{'type':'text','title':'کد زیر پروژه','len':'3','uniq':{'where':''}},
+                'code':{'type':'text','title':'کد زیر پروژه','len':'3','uniq':"prj=`{{=__objs__['prj']['value']}}`"},#"prj=`{{=__objs__['prj']['value']}}`"
                 'name':{'type':'text','title':'نام زیر پروژه'},
                 'code2':{'type':'auto','len':'8','auto':'{{=prj[:4].upper()}}-{code}','title':'کد کامل زیر پروژه'},
                 'name2':{'type':'auto','len':'256','auto':"{{=__objs__['prj']['select'][prj][5:].strip()}}-{name}",'title':'نام کامل زیر پروژه'},
@@ -227,7 +227,7 @@ x_data={
         'a':{
             'base':{'mode':'form','title':'کد دیسیپلین'},
             'tasks':{
-                'code':{'type':'text','title':'کد','len':'2','uniq':{'where':''}},
+                'code':{'type':'text','title':'کد','len':'2','uniq':''},
                 'name_e':{'type':'text','title':'DECIPLINE NAME'},
                 'name':{'type':'text','title':'نام دیسیپلین'},
                 'n':{'type':'text','title':'ترتیب'},
@@ -392,7 +392,7 @@ x_data={
             'base':{'mode':'form','title':'لیست همکاران'
                 },
             'tasks':{
-                'un':{'type':'text','title':'نام کاربری','len':'3','uniq':{'where':''}},
+                'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
                 'ps':{'type':'text','title':'پسورد','prop':['hide'],'len':'20'},
                 'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
                 'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
@@ -449,7 +449,7 @@ x_data={
                 'dspln':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'doc_t':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'doc_p_code':{'type':'auto','len':'24','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
-                'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':{'where':''}},
+                'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':''},
                 'file_pdf':{'type':'file','len':'24','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'{prj},{sub_p},{step},{dspln},{doc_t}','x':'{txt}-{n}-{sel}-{ch}-{ref}','title':'فایل نهایی'},
             },
             'steps':{
@@ -472,7 +472,7 @@ x_data={
             'base':{'mode':'form','title':'فرم بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
                 },
             'tasks':{
-                'txt':{'type':'text','len':50,'lang':'fa','title':'متن','uniq':{'where':'sel=`x`'}},
+                'txt':{'type':'text','len':50,'lang':'fa','title':'متن','uniq':''},#'sel=`x`'
                 'n':{'type':'num','min':5,'max':15,'title':'عدد','prop':[]},
                 'sel':{'type':'select','select':{'a':'طراحی','x':'نظارت'},'title':'واحد','prop':[]},
                 'ref':{'type':'reference','width':'5','title':' مسئول اقدام','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
