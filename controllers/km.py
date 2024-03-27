@@ -158,7 +158,7 @@ def chek_uniq():
         INPUT(_value="",_id='x_val',_name='x_val',_onchange=f"ajax_chek_uniq('{args[0]}','{args[1]}','{args[2]}','#x_val');"),#,'#x_val_div'
         DIV("",_id='x_val_div'),
         ))   
-#--------------------        
+#--------------------
 def uniq_inf():
     '''
     goal:
@@ -181,7 +181,7 @@ def uniq_inf():
             n='2'
             is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where=uniq_where,uniq_value=uniq_value)
             n='3'
-            return {'uniq':uniq_value if is_uniq else '','is_uniq':str(is_uniq),'like_list':like_list,'msg':str(x_dic)}
+            return {'uniq':uniq_value if is_uniq else '','is_uniq':'Y' if is_uniq else '','like_list':like_list,'msg':str(x_dic)}
         msg='shoud len(args)>2'
     except Exception as err:
         msg='err='+n+"|"+str(err)

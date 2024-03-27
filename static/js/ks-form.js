@@ -348,7 +348,7 @@ function is_validateForm() {
 		if (elem.hasAttribute('required')  )  {
 			tt1='ok';
 			vv=elem.value//innerText//elem.getAttribute("value");
-			if (vv=='None' || vv==''){
+			if (vv=='None' || vv=='' || vv==' '){
 				is_valid=false
 				tt1+='-in';
 				elem.parentElement.style.backgroundColor="#f90";
@@ -483,20 +483,39 @@ function ajax_chek_uniq(db,tb,field_name,target,uniq_where="",target_hlp=""){
 	*/
 	var uniq_value = $(target).val();
 	url = "/spks/km/uniq_inf.json/"+db+"/"+tb+"/"+field_name // +"/"+uniq_value;
-	alert("بررسی یکتا بودن کد وارد شده "+"\n"+url);
+	data = {uniq_value:uniq_value,uniq_where:uniq_where};
+	alert("بررسی یکتا بودن کد وارد شده "+"\n"+url+"\n"+ JSON.stringify(data));
 	$.ajax({
 		url :url,
 		method : 'POST',
-		data : {uniq_value:uniq_value,uniq_where:uniq_where},
+		data : data,
 		success : function(echo){
-			$(target).val(echo.uniq);
+			uniq_value=echo.uniq;
+			$(target).val(uniq_value);
+			/*
+			alert(echo.uniq.length);
+			let inputF = document.getElementById(target.slice(1));
+			uniq_value=echo.uniq;
+			alert(echo.uniq);
+			inputF.value = echo.uniq;
+			alert(target.slice(1));
+			alert(inputF.value);
+			alert("$(target).val()"+$(target).val());
+			*/
 			if (target_hlp!="") { $(target_hlp).text(echo.like_list);}
 			if (echo?.err) {alert(echo.err);}
-			var msg="like: \n" + echo.like_list+ "\n -------------\n " + echo.msg;
+			var msg="";
+			if (echo.is_uniq="Y"){msg=("این کد تکراری می باشد و حذف می شود"+"\n")} 
+			msg+="like: \n" + echo.like_list+ "\n -------------\n " + echo.msg;
 			alert(msg);
 			$(target).attr('title', msg);
 		}
-	});
+		/*,complete: function (data) {
+			alert("uniq_value = "+uniq_value);
+			$(target).val(uniq_value)
+		}
+		*/
+    });
 }
 	/*
 	help :
