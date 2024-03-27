@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-debug=[False,True][1]#True
+debug=[False,True][0]#True
 import tk_ui as ui
 #driver = webdriver.Firefox()
 import time

@@ -802,7 +802,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 if _value=="" : _value="-"
             if "uniq" in obj: 
                 uniq_where=obj["uniq"]
-                onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''
+                onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''#;event.preventDefault()
             t_val= f' value="{_value}"' #'' if 'placeholder' in obj else
             if _len<60 :
                 obj['input']=XML(f'''

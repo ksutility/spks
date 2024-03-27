@@ -9,7 +9,7 @@ from k_ui import var_report
 import datetime
 import jdatetime #khayyam
 from k_err import xxxprint,xxprint,xprint
-debug=1 #False # True#
+debug=0 #False # True#
 today=jdatetime.date.today().strftime('%y-%m-%d') #khayyam.JalaliDate.today().strftime('%y-%m-%d')
 def f_now():
     x=str(datetime.datetime.now())#trftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
