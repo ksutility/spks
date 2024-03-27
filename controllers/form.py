@@ -375,7 +375,15 @@ def save():#save 1 row
             #breakpoint()
             #vv={t:request.vars[t] for t in rv if t in step_flds }
             #xxxprint(msg=['++',f_nxt_s,step],args=step_flds,vals=request.vars)
-            vv={t:(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])  for t in step_flds} # multiple select refine output # 021203
+            vv={}
+            for t in step_flds:#t=field name
+                t_req=request.vars[t]
+                if 'uniq' in x_data_s['tasks'][t]:
+                    url = f"""/spks/km/uniq_inf.json/{x_data_s['base']['db_name']}/{x_data_s['base']['tb_name']}/{t}"""
+                    data = {'uniq_value':t_req,'uniq_where':x_data_s['tasks'][t]['uniq']};
+                    #xxx->return f"""url={url}<br>data={str(data)}"""
+                vv[t]=(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])
+            #vv={t:(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])  for t in step_flds} # multiple select refine output # 021203
             vv.update({ f'step_{f_nxt_s}_un':session['username'],
                         f'step_{f_nxt_s}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
                         f'step_{f_nxt_s}_ap':request.vars['text_app'],
@@ -394,6 +402,7 @@ def save():#save 1 row
             elif text_app=='y':
                 f_nxt_s_new = str(f_nxt_s+1)
             vv=get_vv(f_nxt_s,f_nxt_s_new)    
+            #xxx->return "vv=<br>"+str(vv),"update not done"
             xu = db1.update_data(tb_name,vv,{'id':xid})
             
             p1=A("#",_onclick="$(this).next().toggle()",_class='toggle')
@@ -438,8 +447,10 @@ def save():#save 1 row
         try:
             if r_dic['exe']['done']:
                 htm_form+=[DIV("ذخیره تغییرات با موفقیت انجام شد",_class="container bg-info text-light h3 text-center")]
+            else:
+                htm_form+=[DIV(r_dic,_class="container bg-info text-light h3 text-center")]
         except:
-            pass
+            htm_form+=[DIV(r_dic,_class="container bg-info text-light h3 text-center")]
     else:
         tt=''
     #xreport_var([text_app,htm_form,tt,xid])
