@@ -490,8 +490,6 @@ function ajax_chek_uniq(db,tb,field_name,target,uniq_where="",target_hlp=""){
 		method : 'POST',
 		data : data,
 		success : function(echo){
-			uniq_value=echo.uniq;
-			$(target).val(uniq_value);
 			/*
 			alert(echo.uniq.length);
 			let inputF = document.getElementById(target.slice(1));
@@ -505,7 +503,11 @@ function ajax_chek_uniq(db,tb,field_name,target,uniq_where="",target_hlp=""){
 			if (target_hlp!="") { $(target_hlp).text(echo.like_list);}
 			if (echo?.err) {alert(echo.err);}
 			var msg="";
-			if (echo.is_uniq="Y"){msg=("این کد تکراری می باشد و حذف می شود"+"\n")} 
+			if (echo.uniq!=uniq_value){
+				uniq_value=echo.uniq;
+				$(target).val(uniq_value);
+				msg=("این کد تکراری می باشد و حذف می شود"+"\n")
+				} 
 			msg+="like: \n" + echo.like_list+ "\n -------------\n " + echo.msg;
 			alert(msg);
 			$(target).attr('title', msg);
