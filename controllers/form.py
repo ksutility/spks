@@ -302,7 +302,7 @@ def xform():#view 1 row
                         DIV(' ثبت شماره ' + xid ,_class='col-2 bg-info text-center text-light h6 '),
                         DIV('حالت نمایش',_class='col-1'),
                         DIV(k_htm.select(_options=form_case_dic,_name='form_case',_value=request.vars['form_case'] or '2',_onchange="submit();"),
-                            BUTTON('',_type='submit',_style="display:hidden"),
+                            #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  '))] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
         
