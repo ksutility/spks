@@ -378,6 +378,8 @@ def save():#save 1 row
             vv={}
             for t in step_flds:#t=field name
                 t_req=request.vars[t]
+                if t in x_data_s['labels']:
+                    continue
                 if 'uniq' in x_data_s['tasks'][t]:
                     url = f"""/spks/km/uniq_inf.json/{x_data_s['base']['db_name']}/{x_data_s['base']['tb_name']}/{t}"""
                     data = {'uniq_value':t_req,'uniq_where':x_data_s['tasks'][t]['uniq']};
