@@ -532,7 +532,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
         
         def save(titles):
             def update(titles):
-                vv={t:(lambda x:','.join(x) if type(x)==list else x.strip())(request.vars[t])  for t in titles} # multiple select refine output
+                vv={t:(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])  for t in titles} # multiple select refine output
                 if x_data_s['base']['mode']=='table+':
                     import k_date
                     vv.update({'app_un':session['username'],'app_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),'app_ip':request.client})
@@ -543,7 +543,8 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
                 return rr
             def insert(titles):
                 #return "INSERT",BR(),"titles="+str(titles),BR(),"vv="+str(vv)
-                vv=[request.vars[t].strip() for t in titles ]
+                vv=[(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])  for t in titles]
+                #vv=[request.vars[t].strip() for t in titles ]
                 tt=[t for t in titles]#request.vars]
                 r1=db1.insert_data(tb_name,tt,vv)
                 rr=f"{db1.get_path()}<br> INSERT:result="+str(r1["done"])+" => "+str(r1["sql"])+" | "+str(r1["id"]) #+"<hr>"+str(vv)
