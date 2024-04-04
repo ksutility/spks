@@ -293,7 +293,7 @@ function app_key(t) {
 	if (t=="R") {
 		if (true==true) { re=confirm("Form RETURN  - ARE You Sure ? \n \n" + "فرم بازگشت داده شود ؟") }
 	}	
-	if (t=="X") {
+	else if (t=="X") {
 		var msg =	"آیا مطمئن هستید که می خواهید این فرم را  حذف / عدم تایید   نمایید؟ "
 		msg	+= "\n" + "ARE You Sure ? \n \n"
 		msg += "\n" + "توجه :با این کار کلیه فایلهای الحاق شده به این فرم  پاک می شود"
