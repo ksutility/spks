@@ -167,13 +167,13 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
     #import k_py_list
     #x_dic=k_py_list.list2dict(titles,row)
     x_dic=dict(zip(titles,row))
-    x_dic['__objs__']={}
+    
     for fn in select_cols:#fn=field name
         if 'hide' in tasks[fn]['prop']:
             tds.append('*')
             continue
         x_obj,time_recs=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
-        x_dic['__objs__'][x_obj['name']]=x_obj
+        
         #cm.tik(fn+'-1'+str(recs))    
         tds.append(x_obj['output'])
         #cm.tik(fn+'-2')
@@ -199,7 +199,7 @@ def xform():#view 1 row
             if 'hide' in fd['prop']:
                 return [htm_1,'*','']
             x_obj,time_recs=k_form.obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
-            form_sabt_data['__objs__'][x_obj['name']]=x_obj
+            
             return [htm_1,x_obj[mode],x_obj['help']]
             #------------------------------------------------- 
         def chidman(hx,x_data_s,step):
@@ -295,7 +295,7 @@ def xform():#view 1 row
             steps=x_data_s['steps']
             return form_sabt_data,f_nxt_s,steps
         form_sabt_data,f_nxt_s,steps=inf_g() #form_sabt_data=all field data that is in form of sabt 
-        form_sabt_data['__objs__']={}
+        
         form_case_dic={'1':'عمودی','2':'افقی'}
         htm_form=[ FORM(DIV(
                         DIV(x_data_s['base']['title'],_class='col-8 bg-info text-center text-light h3 border-left'),

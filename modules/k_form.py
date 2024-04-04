@@ -742,8 +742,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     #xreport_var([i_obj,x_dic,obj,''],True)
     cm.tik('obj template_parser end')
     
-    #if debug:
-    xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)
+    if debug:
+        xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)
     def form_update_set(form_update_set_param):
         xmode,xname=form_update_set_param.lower().split(";")
         if xmode== "form": #updae form
@@ -1093,6 +1093,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     ## trs.append(TR(obj['title'],obj['value']))
     cm.tik('end')
     #cm.report()
+    
+    if '__objs__' not in x_dic:x_dic['__objs__']={}
+    x_dic['__objs__'][obj['name']]=obj
+    
     return obj,cm.records()
 
     
