@@ -136,7 +136,7 @@ x_data={
             'base':{'mode':'form','title':'کد پروژه'},
             'tasks':{
                 'code':{'type':'text','title':'کد پروژه','len':'4','uniq':''},
-                'name':{'type':'text','title':'نام پروژه','lang':'fa'},
+                'name':{'type':'text','title':'نام پروژه','len':'40','lang':'fa'},
                 'per':{'type':'reference','width':'5','title':' نماینده پروژه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
                 'cnt_name':{'type':'text','title':'نام قراردادی پروژه','title_e':'contracte name'},
                 'cmn_name':{'type':'text','title':'نام رایج','title_e':'common name'},
@@ -176,17 +176,17 @@ x_data={
                 'lno like "%xxxx%"':'جستجوی نامه'},
         }
     },
-    #--------------------------------------------------------------------
+    #--------------------------------------------------------------------lable_1,name,
     'a_sub_p':{
         'a':{
             'base':{'mode':'form','title':'زیر پروژه'},
             'tasks':{
-                'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':[]},
+                'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'code':{'type':'text','title':'کد زیر پروژه','len':'3','uniq':"prj=`{{=__objs__['prj']['value']}}`"},#"prj=`{{=__objs__['prj']['value']}}`"
-                'name':{'type':'text','title':'نام زیر پروژه'},
+                'name':{'type':'text','len':'140','title':'نام زیر پروژه'},
                 'code2':{'type':'auto','len':'8','auto':'{{=prj[:4].upper()}}-{code}','title':'کد کامل زیر پروژه'},
                 'name2':{'type':'auto','len':'256','auto':"{{=__objs__['prj']['select'][prj][5:].strip()}}-{name}",'title':'نام کامل زیر پروژه'},
-                'des':{'type':'text','title':'توضیح زیر پروژه'},
+                'des':{'type':'text','len':'40','title':'توضیح زیر پروژه'},
                 'date':{'type':'fdate','title':'تاریخ ثبت'},
                 'auth_users':{'type':'reference','width':'20','title':' افراد دارای حق دسترسی','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':['multiple']},
             },
@@ -399,7 +399,7 @@ x_data={
                 'name':{'type':'text','title':'نام','len':'15'},
                 'family':{'type':'text','title':'فامیل','len':'35'},
                 'a_name':{'type':'text','title':'نام در اتوماسیون','len':'50'},
-                'eng':{'type':'reference','title':'رسته / دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{name_f}'}},
+                'eng':{'type':'reference','title':'رسته / دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{name}'}},
                 #'tel_mob':{'type':'text','title':'موبایل','len':'13','placeholder':"0...-...-....",'data-slots':"."},#,'data-accept':"\d"
                 #'tel_mob':{'type':'text','title':'موبایل','len':'13','placeholder':"0...-...-....",'pattern':"0[0-9]{{3}}-[0-9]{{3}}-[0-9]{{4}}"},
                 'tel_mob':{'type':'text','title':'موبایل','len':'13'},
@@ -427,10 +427,16 @@ x_data={
     #--------------------------------------------------------------------
     'job':{
         'a':{ 
+            'base':{'mode':'form','title':'فرم سمتها','help':'document_record'
+            },
             'tasks':{
                 'code':{'type':'text','title':'کد سمت'},
                 'title':{'type':'text','title':'عنوان سمت','lang':'fa'},
                 'users':{'type':'reference','title':'لیست همکاران مرتبط','ref':{'db':'user','tb':'user','key':'{un}','val':'{name}-{family}'},'prop':['multiple']},
+            },
+            'steps':{
+                's0':{'tasks':'code,title','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'users','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{},
             'cols_filter':{'':'همه',},
@@ -461,6 +467,38 @@ x_data={
                 'input':['prj','sub_p','step','dspln','doc_t'],
                 'view1':['doc_p_code'],
                 'view2':['doc_p_code'],
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
+    'suggestion':{
+        'a':{
+            'base':{'mode':'form','title':'فرم پیشنهاد'
+            },
+            'tasks':{
+                'idea':{'type':'text','title':'شرح ایده / پیشنهاد'},
+                'idea_bnft':{'type':'text','title':'فایده ایده / پیشنهاد'},
+                'idea_dscr':{'type':'text','title':'توضیحات لازم'},
+                'vrfy_rslt':{'type':'text','title':'نتیجه بررسی'},
+                'vrfy_meta':{'type':'text','title':'اقدامات انجام شده جهت بررسی'},
+                'clnt_stf':{'type':'num','min':'1','max':'100', 'title':'میزان رضایت پیشنهاد دهنده از اقدامات انجام شده بر حسب درصد'},
+                'clnt_stf_dscr':{'type':'text','title':'توضیحات در خصوص میزان رضایت'},
+            },
+            'steps':{
+                's0':{'tasks':'lable_1,idea,idea_bnft,idea_dscr','jobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'lable_1,vrfy_rslt,vrfy_meta','jobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'clnt_stf,clnt_stf_dscr','jobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
+            },
+            'views':{
+                'input':['vrfy_rslt','vrfy_meta'],
+                'view1':['idea','idea_bnft','idea_dscr'],
+                'view2':['clnt_stf','clnt_stf_dscr'],
+            },
+            'labels':{
+                'lable_1':'از اینکه با ارائه پیشنهادات مفید مارا در بهبود شرکت یاری می فرمایید بسیار سپاسگذاریم ',
+                'lable_2':'باید تاریخ ، نام فرد و نظر فرد برای هر کدام از افراد موثر در بررسی ثبت شود',
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
