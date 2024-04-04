@@ -321,7 +321,7 @@ class DB1():
         else:
             xxxprint(msg=["error","x_where type not in ['str,'dict']",''],launch=True)
         find1=self.find_row(table_name,x_where)
-        xxxprint(msg=["find1",'',''],vals=find1 )
+        if debug:xxxprint(msg=["find1",'',''],vals=find1 )
         s_set=self._dic_2_set(set_dic)
         
         xr['sql']='UPDATE {} SET {} WHERE {}'.format(table_name,s_set,s_where)
@@ -335,7 +335,7 @@ class DB1():
             report_db_change(self.path,r1, [])
             return xr
         find2=self.find_row(table_name,x_where)
-        xxxprint(msg=["find2",'',''],vals=find2 )
+        if debug:xxxprint(msg=["find2",'',''],vals=find2 )
         xr['dif']={} #different s
         if not find2:   
             rows2,titles2,row_num2=self.select(table_name,limit=0)
