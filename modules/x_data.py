@@ -456,7 +456,7 @@ x_data={
                 'doc_t':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'doc_p_code':{'type':'auto','len':'24','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
                 'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':''},
-                'file_pdf':{'type':'file','len':'24','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'{prj},{sub_p},{step},{dspln},{doc_t}','x':'{txt}-{n}-{sel}-{ch}-{ref}','title':'فایل نهایی'},
+                'file_pdf':{'type':'file','len':'24','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی'},
             },
             'steps':{
                 'pre':{'tasks':'prj,sub_p,step,dspln,doc_t','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -517,7 +517,7 @@ x_data={
                 'ch':{'type':'check','title':'با این موضع موافقم','prop':[]},
                 'dt':{'type':'fdate','width':'10','title':'تاریخ انجام کار','prop':[]},
                 'at':{'type':'auto','len':'24','auto':'{n}-{sel}-{ch}-{ref}-{dt:}','title':'کد اتوماتیک'},
-                'fl':{'type':'file','len':'24','file_name':'abc-{{=int("0"+n)+25}}-{sel}-{{=dt[:4] if dt else ""}}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'test,a,c','x':'{txt}-{n}-{sel}-{ch}-{ref}','title':'فایل نهایی'},
+                'fl':{'type':'file','len':'24','file_name':'abc-{{=int("0"+n)+25}}-{sel}-{{=dt[:4] if dt else ""}}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'test,a,c,{txt}-{n}','title':'فایل نهایی'},#,'x':'{txt}-{n}-{sel}-{ch}-{ref}'
                 'tt':{'type':'time','title':'زمان شروع'},
             },
             'steps':{
