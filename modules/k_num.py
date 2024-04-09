@@ -27,23 +27,29 @@ class SMART_NUM_LIST():
         >>>str(SMART_NUM_LIST("1-5,8,1-12").add("20"))
         '1-12,20'
 '''	
-    snl=[] #smart_num_list
-    def __init__(self,snl_txt=''): 
+    num_list=[] #smart_num_list
+    def __init__(self,smart_num_list=''): 
         '''
         inputs:
         ------
-            snl_txt:str
+            smart_num_list:str
                 smart num list in text
         '''
-        if snl_txt:self.add(snl_txt)
-    def add(self,new_snl_txt):
+        if smart_num_list:self.add(smart_num_list)
+    def add(self,new_smart_num_list):
+        '''
+        inputs:
+        ------
+            smart_num_list:str
+                new smart num list in text
+        '''
         def combine(l1,l2):
             if l2[0]>l1[1]+1:
                 return l1,l2	
             else:
                 return [l1[0],max(l1[-1],l2[-1])],None
         #------------------------------------------------		 
-        sn=self.snl+[[int(y) for y in x.split("-")] for x in new_snl_txt.split(",")]
+        sn=self.num_list+[[int(y) for y in x.split("-")] for x in new_smart_num_list.split(",")]
         #sort
         sn.sort(key=lambda x: x[0])
         #compine
@@ -59,16 +65,21 @@ class SMART_NUM_LIST():
                 continue
             else:
                 print (f"error i={i}\n sn[i]={sn[i]},sn[i+1]={sn[i+1]} \n c1={c1},c2={c2}")
-        self.snl=sn
+        self.num_list=sn
         return self
     def __str__(self):
         #list=>smart_num_list_txt
         r1=""
-        for x in self.snl:
+        for x in self.num_list:
             r1+= f",{x[0]}"
             if len(x)>1 : 
                 r1+= f"-{x[1]}"
         return r1[1:]
+    def max(self):
+        return max(self.num_list)
+    def len(self):
+        return len(self.num_list)
+        
 #-------------------------------------------------
 #====================================================== not used ===========================================================================
 def limit_x (x_father,x,x_min,x_max):
