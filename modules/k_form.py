@@ -943,26 +943,20 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 jcode1="alert('" + msg + "');re=false;"
                 obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
     elif sc=="index":
-        def index_select_do(ref,obj_name):
-            for x in['db','tb','where']:
-                ref[x]=template_parser(ref[x],x_dic)
-            x_query=ref['where'] + " and f_nexu <> 'x' and id <> " + session("form_index")
-            dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db'] +".db"
-            tt = sql_sum(dbn,ref['tb'],x_query,obj_name,"max,count,smartnum")
-            new_n=tt(0)+ sgn(tt(1))
-            return [str(new_n), tt(2)] 
-        index=index_select_do(obj['ref'],obj['name'])
-            #index_ar(1)=smart_num_list
+        x_dt=reference_select(obj['ref'],form_data=x_dic)
+        x_list=[x_dt[x] for x in x_dt if x_dt[x]]
+        from k_num import SMART_NUM_LIST
+        smart_num_list=SMART_NUM_LIST(x_list)
+            
         #if def_val=="" : 
-        new_index= index_ar[0] #else new_index=def_val
-        new_index=new_index.zfill(_len)
+        index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val
+        index_hlp=str(smart_num_list)
         
-        #if len(new_index)>60 : obj['len']=60 else obj['len']=len(new_index)
+        #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
         #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
-        x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_ar(1)}","{new_index}",true);' {onact_txt}>'''
-        obj['input']=f'''<input {_n} value='{new_index}' size='{obj['len']} {x_end}'''
-        obj['help']=" <b id='label" + _name + "'>" + index_ar(1) + "</b> "
-        obj['help']=" <a href = 'javascript:void(0)' title='" + index_ar(1) + "' >لیست اعداد استفاده شده</a>"
+        x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
+        obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
+        obj['help']=XML(f"""<a href = 'javascript:void(0)' title='{index_hlp}' >لیست اعداد استفاده شده</a>""")
         msg=""  
 
     elif sc=="file":

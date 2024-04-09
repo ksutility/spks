@@ -517,11 +517,12 @@ x_data={
                 'ch':{'type':'check','title':'با این موضع موافقم','prop':[]},
                 'dt':{'type':'fdate','width':'10','title':'تاریخ انجام کار','prop':[]},
                 'at':{'type':'auto','len':'24','auto':'{n}-{sel}-{ch}-{ref}-{dt:}','title':'کد اتوماتیک'},
+                'indx1':{'type':'index','len':'4','ref':{'db':'test','tb':'b','key':'{id}','val':'{indx1}','where':''},'title':'شماره'},
                 'fl':{'type':'file','len':'24','file_name':'abc-{{=int("0"+n)+25}}-{sel}-{{=dt[:4] if dt else ""}}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'test,a,c,{txt}-{n}','title':'فایل نهایی'},#,'x':'{txt}-{n}-{sel}-{ch}-{ref}'
                 'tt':{'type':'time','title':'زمان شروع'},
             },
             'steps':{
-                'pre':{'tasks':'txt,n,sel','jobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'txt,n,sel,indx1','jobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'ref,ch,tt,dt','jobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'at,fl,tt','jobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's4':{'tasks':'dt,at,fl,tt','jobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
