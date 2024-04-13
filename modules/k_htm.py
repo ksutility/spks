@@ -36,8 +36,17 @@ def val_report(xv):
     elif type(xv)==list:
         #return DIV(p,TABLE(THEAD(TR(TH('key'))),TBODY(*[TR(val_report(x)) for x in xv]),_class="table"))  
         return DIV(p,TABLE(TBODY(*[TR(val_report(x)) for x in xv]),_class="table"))
-    else: 
-        return xv
+    elif type(xv)==bool:
+        if xv==True:
+            return DIV(str(xv),_class="bg-success")
+        elif xv==False:
+            return DIV(str(xv),_class="bg-danger")
+    elif type(xv)==str:
+        if xv.lower().strip()=='true':
+            return DIV(xv,_class="bg-success")
+        elif xv.lower().strip()=='false':
+            return DIV(xv,_class="bg-danger")
+    return xv
 def dict_2_table(i_dict,_class='table'):
     return TABLE(THEAD(TR(TH('key'),TH('val'))),TBODY(*[TR(x,y) for x,y in i_dict.items()]),_class=_class)
 #---------------------- not use
@@ -89,7 +98,7 @@ def table_4_diclist_glon(i_diclist,base_cols,id_col):
         d1.append(BR())
     return DIV(tt,d1)
  #---------------------------------------
-def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False):
+def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True):
     '''
         make 1 select html object
         update 01/08/09 ks
@@ -101,6 +110,8 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     if _value:
         vs=_value if type(_value)==list else _value.split(",")
     opts=[]
+    if add_empty_first:
+        opts+=[OPTION("-",_value="-")]
     for v in _dict:
         value=_dict[v]
         if type(value)==dict:value=value['value'] 
