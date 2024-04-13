@@ -892,7 +892,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         if 'input' in need:
             import k_htm
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
-                ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple )
+                ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple,add_empty_first=True )
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
         obj['help']=''
@@ -930,7 +930,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             au_txt=x_dt['__0__'] if x_dt else ''
         _len=60 if len(au_txt)>60 else len(au_txt)+2
         obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
-        obj['output_text']=obj['output']=au_txt
+        obj["value"]=obj['output_text']=obj['output']=au_txt
         obj['help']=""
         msg=""
         jcode1=""
@@ -970,8 +970,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #if _value==None:_value==''
         #_value=obj['file_name']#_value or 
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
-        show_link=XML(URL('file','download',args=['prj']+obj['path'].split(',')+[_value]))
-        upload_link=XML(URL('file','upload',args=['prj']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
+        show_link=XML(URL('file','download',args=['prj_auto']+obj['path'].split(',')+[_value]))
+        upload_link=XML(URL('file','upload',args=['prj_auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         obj['input']=XML(f'''
