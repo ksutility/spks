@@ -974,14 +974,16 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         upload_link=XML(URL('file','upload',args=['prj_auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
+        opt=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
         obj['input']=XML(f'''
             <div >
-            <a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a> - 
+            {opt} - 
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
         obj['output']=XML(f'''
             <div >
-            <a  href = 'javascript:void(0)' title='{show_link}' onclick='j_box_show("{show_link}");'>{_value}</a> </div> ''')    
+                {opt} 
+            </div> ''')    
         """    
         def path_x(pre_folder,file_name,pattern):
             path1=k_file.folderpath_maker_by_filename(file_name,pattern)
