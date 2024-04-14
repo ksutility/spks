@@ -194,13 +194,13 @@ x_data={
                 'name':{'type':'text','len':'140','title':'نام زیر پروژه'},
                 'code2':{'type':'auto','len':'8','auto':'{{=prj[:4].upper()}}-{code}','title':'کد کامل زیر پروژه'},
                 'name2':{'type':'auto','len':'256','auto':"{{=__objs__['prj']['select'][prj][5:].strip()}}-{name}",'title':'نام کامل زیر پروژه'},
-                'des':{'type':'text','len':'40','title':'توضیح زیر پروژه'},
+                'des':{'type':'text','len':'250','title':'توضیح زیر پروژه'},
                 'date':{'type':'fdate','title':'تاریخ ثبت'},
                 'auth_users':{'type':'reference','width':'20','title':' افراد دارای حق دسترسی','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':['multiple']},
             },
             'steps':{
-                'pre':{'tasks':'prj,code,name','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'code2,name2,des,date','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'prj,code,name','jobs':'dcc_prj','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                'inf':{'tasks':'code2,name2,des,date','jobs':'dcc_prj','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
                 'auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''},
             },  
             'views':{
