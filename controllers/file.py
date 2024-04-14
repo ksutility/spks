@@ -99,6 +99,7 @@ def upload_file():
     filename=filename1.format(**xdata) or xdata['user_filename']
     filename+=ff['ext']
     file_b=file.file.read() #file contents in byte format
+    #input_file_name= file.filename
     #ou=str(file.file.read())
     
     #ou+=str(file.filename)
