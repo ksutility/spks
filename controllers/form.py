@@ -380,6 +380,8 @@ def save():#save 1 row
                 t_req=request.vars[t]
                 if t in x_data_s['labels']:
                     continue
+                if x_data_s['tasks'][t]['type']=='file':
+                    continue
                 if 'uniq' in x_data_s['tasks'][t]:
                     url = f"""/spks/km/uniq_inf.json/{x_data_s['base']['db_name']}/{x_data_s['base']['tb_name']}/{t}"""
                     data = {'uniq_value':t_req,'uniq_where':x_data_s['tasks'][t]['uniq']};
@@ -577,7 +579,8 @@ def xtable():
             #xxxprint(msg=['xdic','',''],vals=x_dic,launch=True)
             ''' '''
             n=str(i+1)
-            nx=A(n,_title='edit',_href=URL('xform',args=(args[0],args[1],row[0]))) if session["admin"] else n
+            jobs=next(iter(x_data_s['steps'].items()))[1]['jobs']
+            nx=A(n,_title='edit',_href=URL('xform',args=(args[0],args[1],row[0]))) if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
             tds=[TD(nx),TD(x_dic['id'])]
             for st_n,step in x_data_s['steps'].items():
                 #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
