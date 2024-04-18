@@ -17,6 +17,7 @@ import k_form
 from k_err import xxprint,xprint,xalert,xxxprint
 from k_time import Cornometer
 from x_data import x_data ,x_data_verify_task
+import k_tools
 
 debug=False # True: for check error
 row_view=[{'lno':'r','sbj':'r'}]
@@ -237,6 +238,7 @@ def get_table_filter(tasks,x_data_s):
                             +'<td><input type="submit"></td></tr></table></form></div>')
     return select_cols, all_cols,htm_table_filter
 #-----------------------------------------------------------------------------
+@k_tools.x_cornometer
 def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref_i):
     #use in:2(show_xtable,show_kxtable)
     #cm=Cornometer(i)
@@ -248,6 +250,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
             
     '''
     tds=['{:03d}'.format(xid)]
+    #langs=['en']#langs /dir of text for html.obj.propery(dir) 'LTR' / 'RTL'
     x_dic=dict(zip(titles,row))
     for fn in select_cols:#fn=field name
         if 'hide' in tasks[fn]['prop']:
@@ -434,6 +437,7 @@ def show_table():
             return DIV(XML(style1),t1,table) 
     return 'error: argumwnt is needed'
 #----------------------------------------------------------------------  
+@k_tools.x_cornometer
 def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     '''
     goal:
@@ -770,10 +774,9 @@ def set_tables():
 
 def table():
     return dict(table=show_table())
+
 def xtable():
-    #f = open('applications\prj\databases\example2.json','w')
-    #import json
-    #json.dump(tasks,f)
+
     return dict(table=show_xtable(x_data))#,'paper',tasks['paper']))
 def sptable():
     return dict(table=show_sptable(x_data,'prj'))
