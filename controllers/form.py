@@ -13,6 +13,8 @@ import k_form
 from k_err import xxprint,xprint,xalert,xreport_var,xxxprint
 from x_data import x_data ,x_data_verify_task
 import k_date
+import k_tools
+from k_time import Cornometer
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
@@ -152,6 +154,7 @@ def get_table_filter(tasks,x_data_s):
                             +'<td><input type="submit"></td></tr></table></form>')
     return select_cols, all_cols,htm_table_filter
 #-----------------------------------------------
+@k_tools.x_cornometer
 def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref_i):
     #use in:2(show_xtable,show_kxtable)
     #cm=Cornometer(i)
@@ -181,6 +184,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
     return tds  
 #===================================================================================================================
 def xform():#view 1 row
+    
     if request.vars['text_app']:
         return save()
     session.view_page='xform'
@@ -511,22 +515,26 @@ def save_app_review():
         return DIV(htm_form) #,x=response.toolbar())
 #------------------------------------------------------------------------------------------------------------
 def list_0():
-    titels=['نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"-"]
+    titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"-"]
     trs=[]
+    n=0
     for db_name,db_obj in x_data.items():
         for tb_name,tb_obj in db_obj.items():
             if tb_obj['base']['mode']=='form':
+                n+=1
                 db1=DB1(db_path+db_name+'.db')
                 for_me_n,total_n=db1.count(tb_name)['count'],db1.count(tb_name)['count']
                 crt_link=A("MAKE",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) if session["admin"] else '-'
-                tx=[A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
+                tx=[n,A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
                     A(tb_obj['base']['title'],_href=URL('data','xtable',args=[db_name,tb_name])),
                     for_me_n,total_n,crt_link]
                 trs+=[tx]
     from k_table import K_TABLE
     tt= K_TABLE.creat_htm ( trs,titels,table_class="1")                     
     return dict(htm=DIV(tt,_dir='rtl'))
+@k_tools.x_cornometer
 def xtable():
+    cornometer=Cornometer("xtable")
     def xtable_show(tb_name,tasks,where,x_data_s):
         ''' func desc
         goal:
@@ -575,6 +583,7 @@ def xtable():
         ref_i={}
         #xxxprint(msg=['xdic','',''],reset=True)
         for i,row in enumerate(rows):
+            cornometer.print('a')
             x_dic=dict(zip(titles,row))
             #xxxprint(msg=['xdic','',''],vals=x_dic,launch=True)
             ''' '''
@@ -582,13 +591,18 @@ def xtable():
             jobs=next(iter(x_data_s['steps'].items()))[1]['jobs']
             nx=A(n,_title='edit',_href=URL('xform',args=(args[0],args[1],row[0]))) if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
             tds=[TD(nx),TD(x_dic['id'])]
+            cornometer.print('b')
             for st_n,step in x_data_s['steps'].items():
+                cornometer2=Cornometer("c2","+ - ")
                 #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
                 tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
+                cornometer2.print('a---b')
                 if select_cols=='form_v_cols_full':
                     tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]
                 elif select_cols=='form_v_cols_1':  
                     tds+=[TD("-",_title=",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1]),_class='bg-info')]
+                cornometer2.print('a---c')
+            cornometer.print('c')
             tds+=[TD(x_dic[f"f_nxt_s"]),TD(x_dic[f"f_nxt_u"])]
             ''' '''
             #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
@@ -618,6 +632,10 @@ def xtable():
     if not x_data_s:
         return dict(htm=msg)
     else:
+        # check access /auth
+        if 'auth' in x_data_s['base']:
+            if not (session["admin"] or k_user.user_in_jobs(session["username"],x_data_s['base']['auth'],{})):
+                return dict(htm=H1("شما اجازه دسترسی به این فرم را ندارید"))
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']
         table,nr,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
