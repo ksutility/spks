@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # ver 1.00 1401/09/24 
 # -------------------------------------------------------------------------
+#f = open('applications\prj\databases\example2.json','w')
+#import json
+#json.dump(tasks,f)
 """
 help  
 x_data={
@@ -136,7 +139,9 @@ steps.jobs= list of name of jobs
         -- repare " error by replace " by ` in x_data.py>uniq_where_text and rereplace in k_sql.py>chek_uniq()
     
 """
-
+x_data_cat:{
+    '1':{'titel':'ex','db':'a_prj,a_sub_p,a_step'}
+}
 x_data={
     
     'a_prj':{
@@ -307,7 +312,7 @@ x_data={
     #-----------------------------------------------------------------------
     'paper':{
         'a':{
-            'base':{'mode':'form','title':'نامه ها'
+            'base':{'mode':'form','title':'نامه ها','auth':'dccm'
             },
             'tasks':{
                 'prj':{'type':'reference','width':'30','ref':{'db':'prj','tb':'a','key':'{id}','val':'{id:03d}-{name}'},'title':'پروژه'},
@@ -497,8 +502,8 @@ x_data={
                 'doc_a_code':{'type':'auto','len':'24','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
                 'rev':{'type':'index','len':'2','ref':{'db':'doc_rec','tb':'a','key':'{id}','val':'{rev}','where':'doc_p_code = {doc_p_code}'},'title':'شماره','prop':['update']},
                 'date':{'type':'fdate','width':'10','title':'تاریخ مدرک','prop':['update']},
-                'file_edt':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"doc,docx,xls,xlsx,ppt,pptx,dwg,zip,rar",'path':'{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت تغییر پذیر'},
-                'file_fix':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت ثابت'},
+                'file_edt':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"doc,docx,xls,xlsx,ppt,pptx,dwg,zip,rar",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت تغییر پذیر'},
+                'file_fix':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت ثابت'},
             },
             'steps':{
                 'pre':{'tasks':'prj,sub_p,step,dspln,doc_t','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -510,6 +515,66 @@ x_data={
                 'input':['prj','sub_p','step','dspln','doc_t'],
                 'view1':['doc_p_code'],
                 'view2':['doc_p_code'],
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
+    'person_get':{
+        'a':{
+            'base':{'mode':'form','title':'فرم مشخصات افراد شناسایی شده برای جذب نیرو','help':''
+            },
+            'tasks':{
+                'name_f':{'type':'text','len':'20','title':'نام'},
+                'family_f':{'type':'text','len':'20','title':'نام خانوادگی'},
+                'name_e':{'type':'text','len':'20','title':'name'},
+                'family_e':{'type':'text','len':'20','title':'family'},
+                'code_meli':{'type':'text','len':'10','title':'کدملی'},
+                'tel_mob':{'type':'text','len':'10','title':'شماره موبایل'},
+                'date':{'type':'fdate','width':'10','title':'تاریخ مراجعه'},
+                'eng':{'type':'reference','title':'رسته / دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{name}'}},
+                'eng_des':{'type':'text','len':'40','title':'توضیحات تخصص'},
+                'office':{'type':'select','select':['طراحی','نظارت','پشتیبانی','مدیریت'],'title':'بخش'},
+                'f_resume':{'type':'file','len':'40','title':'فایل رزومه','file_name':'cv-{{=str(id).zfill(3)}}-{{=date[:4] if date else ""}}-rsum-{family_e}-{name_e}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,person_get'},
+                'f_form':{'type':'file','len':'40','title':'فایل فرم','file_name':'cv-{{=str(id).zfill(3)}}-{{=date[:4] if date else ""}}-form-{family_e}-{name_e}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,person_get'}
+            },
+            'steps':{
+                'pre':{'tasks':'name_f,family_f,name_e,family_e','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'code_meli,tel_mob,date,eng,eng_des,office','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'f_resume,f_form','jobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
+            },
+            'views':{
+                'input':['name_f','family_f','name_e','family_e','tel_mob'],
+                'view1':['code_meli','date','eng','eng_des','office'],
+                'view2':['f_resume','f_form'],
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
+    'a_contract':{
+        'a':{
+            'base':{'mode':'form','title':'فرم ثبت قراردادهای شرکت','help':''
+            },
+            'tasks':{
+                'subject':{'type':'text','title':'موضوع قرارداد','len':'250'},
+                'client':{'type':'text','title':'کارفرما'},
+                'date':{'type':'fdate','title':'تاریخ ابلاغ قرارداد'},
+                'prj_dur':{'type':'num','min':1,'max':1200,'len':'4','title':'مدت قرارداد - ماه'},
+                'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','-':'نا مشخص'},'prop':['multiple']},
+                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,contract'}
+            },
+            'steps':{
+                'pre':{'tasks':'subject,client,date,prj_dur,serv_type','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_cnt','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                
+            },
+            'views':{
+                'input':['name_f','family_f','name_e','family_e','tel_mob'],
+                'view1':['code_meli','date','eng','eng_des','office'],
+                'view2':['f_resume','f_form'],
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
