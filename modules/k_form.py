@@ -1,4 +1,9 @@
-﻿#010929
+﻿#from gluon.cache import Cache
+#cache=Cache()
+k_cache={}
+import k_tools
+#from functools import lru_cache #,cache
+#010929
 # breakpoint()
 """ 
     note:
@@ -646,8 +651,18 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
     trs.append(TR(TD(A('Cancel- goto list',_href=URL(args=(args[0],args[1]))),_style='width:40%'),TD(INPUT(_type='submit',_style='width:100%,background-color:#ff00ff'),_style='width:60%')))
     return TABLE(*trs,_style='width:100%')
 #----------------------------------------------------------------------------------------------------------------------------------------------------
+#@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
+@k_tools.x_cornometer
 def reference_select (ref_0,form_nexu=False,form_data={}):
+    #ceck cach
+    idx="-".join([ref_0[x] for x in ref_0])
+    
+    if idx in k_cache:
+        if k_cache[idx]['time']-time.time()<5000:
+            #print (f'k-cache = ok {time.time()}|'+idx)
+            return k_cache[idx]['val']
 
+    #print (f'k-cache = -- {time.time()}|'+idx)
     '''
     use in kswt:ok 020905
     
@@ -691,10 +706,12 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
     if rows :
         output_data={ref['key'].format(**dict(zip(tits,row))):ref['val'].format(**dict(zip(tits,row))) for row in rows}
         #xxxprint(msg=['output_data','',''],vals=output_data) 
+        k_cache[idx]={'val':output_data,'time':time.time()}
         return output_data
     return {}#'msg':ref['where']}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
+@k_tools.x_cornometer
 def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''): 
     import k_htm
     form_update_set_param="form;form"
@@ -859,7 +876,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             if 'select' not in obj:
                 tt_dif=time.time()
                 #_select=cache_ram(str(obj['ref']),reference_select(obj['ref']))#,time_expire=60)
-                ref_t=str(obj['ref'])
+                ref_t1=str(obj['ref'])
+                
                 #if ref_t not in cache_ram:
                 #    cache_ram[ref_t]=reference_select(obj['ref'],form_data=x_dic)
                 #_select= cache_ram[ref_t]   
@@ -924,9 +942,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             au_txt=obj['auto']
         elif 'ref' in obj:
             x_dt=reference_select(obj['ref'],form_data=x_dic)
-            xxxprint(vals=obj['ref'])
-            xxxprint(vals=x_dic)
-            xxxprint(msg=['x_dt','',''],vals=x_dt)
+            #xxxprint(vals=obj['ref'])
+            #xxxprint(vals=x_dic)
+            #xxxprint(msg=['x_dt','',''],vals=x_dt)
             au_txt=x_dt['__0__'] if x_dt else ''
         _len=60 if len(au_txt)>60 else len(au_txt)+2
         obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
@@ -970,8 +988,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #if _value==None:_value==''
         #_value=obj['file_name']#_value or 
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
-        show_link=XML(URL('file','download',args=['prj_auto']+obj['path'].split(',')+[_value]))
-        upload_link=XML(URL('file','upload',args=['prj_auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
+        show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
+        upload_link=XML(URL('file','upload',args=['auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         opt=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
