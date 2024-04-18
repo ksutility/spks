@@ -1,11 +1,13 @@
+debug=False
 import time,k_err
 class Cornometer():
-    def __init__(self,name,tik_print=False):
+    def __init__(self,name,pre_text='',tik_print=False,):
         self.start=time.time()
         self.name=name
         self.tik_print=tik_print
         self.rec=[]
         self.last=self.start
+        self.pre_text=pre_text
     def tik(self,msg):
         ct=time.time()
         x={'time':(ct-self.last),'msg':msg,'name':self.name}
@@ -18,3 +20,9 @@ class Cornometer():
         return [{'name':self.name,'start':self.start,'total':total}]+self.rec
     def report(self):
         k_err.xprint('k_time.report='+str(self.records()))
+    def print(self,msg):
+        if debug:
+            en=time.time()
+            st=self.last
+            self.last=en
+            print ('{} {:.4f} : {:.4f} - {:.4f} , {} , msg = {}'.format(self.pre_text,en-st,st % 1000,en % 1000,self.name,msg))
