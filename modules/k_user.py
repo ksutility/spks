@@ -96,3 +96,16 @@ def jobs_masul(jobs,x_data_s):
                 tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
                 continue
     return tt
+def auth(auth_jobs):
+    '''
+        آیا کاربر جاری حق دسترسی به این بخش را دارد 
+    inputs:
+    ------
+        auth_jobs:str   jobs str_list separate by ,
+            jobs that can access (read) data of cur section of program
+    '''
+    from gluon import current
+    session=current.session
+    res=(session["admin"] or user_in_jobs(session["username"],auth_jobs,{}))
+    print (f'session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
+    return res

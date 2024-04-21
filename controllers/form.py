@@ -155,7 +155,7 @@ def get_table_filter(tasks,x_data_s):
     return select_cols, all_cols,htm_table_filter
 #-----------------------------------------------
 @k_tools.x_cornometer
-def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref_i):
+def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False):#,all_cols,ref_i):
     #use in:2(show_xtable,show_kxtable)
     #cm=Cornometer(i)
     '''
@@ -165,8 +165,9 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
             id of 
             
     '''
-    
-    tds=['{:03d}'.format(xid)]
+    tds=[]
+    if id_cols:
+        tds+=['{:03d}'.format(xid)]
     #import k_py_list
     #x_dic=k_py_list.list2dict(titles,row)
     x_dic=dict(zip(titles,row))
@@ -175,6 +176,9 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'hide' in tasks[fn]['prop']:
             tds.append('*')
             continue
+        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
+            tds.append('*')
+            continue    
         x_obj,time_recs=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
         
         #cm.tik(fn+'-1'+str(recs))    
@@ -594,8 +598,10 @@ def xtable():
             cornometer.print('b')
             for st_n,step in x_data_s['steps'].items():
                 cornometer2=Cornometer("c2","+ - ")
-                #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
-                tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
+                x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
+                tds_i=get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s)#, all_cols,ref_i)
+                tds+=[TD(x) for x in tds_i]
+                #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
                 cornometer2.print('a---b')
                 if select_cols=='form_v_cols_full':
                     tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]

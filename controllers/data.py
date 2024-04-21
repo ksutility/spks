@@ -17,7 +17,7 @@ import k_form
 from k_err import xxprint,xprint,xalert,xxxprint
 from k_time import Cornometer
 from x_data import x_data ,x_data_verify_task
-import k_tools
+import k_tools,k_user
 
 debug=False # True: for check error
 row_view=[{'lno':'r','sbj':'r'}]
@@ -253,7 +253,10 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
     #langs=['en']#langs /dir of text for html.obj.propery(dir) 'LTR' / 'RTL'
     x_dic=dict(zip(titles,row))
     for fn in select_cols:#fn=field name
-        if 'hide' in tasks[fn]['prop']:
+        if 'hide' in tasks[fn]['prop']:#auth
+            tds.append('*')
+            continue
+        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
             tds.append('*')
             continue
         x_obj,time_recs=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])

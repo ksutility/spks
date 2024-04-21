@@ -537,12 +537,12 @@ x_data={
                 'eng_des':{'type':'text','len':'40','title':'توضیحات تخصص'},
                 'office':{'type':'select','select':['طراحی','نظارت','پشتیبانی','مدیریت'],'title':'بخش'},
                 'f_resume':{'type':'file','len':'40','title':'فایل رزومه','file_name':'cv-{{=str(id).zfill(3)}}-{{=date[:4] if date else ""}}-rsum-{family_e}-{name_e}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,person_get'},
-                'f_form':{'type':'file','len':'40','title':'فایل فرم','file_name':'cv-{{=str(id).zfill(3)}}-{{=date[:4] if date else ""}}-form-{family_e}-{name_e}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,person_get'}
+                'f_form':{'type':'file','len':'40','title':'فایل فرم','file_name':'cv-{{=str(id).zfill(3)}}-{{=date[:4] if date else ""}}-form-{family_e}-{name_e}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,person_get','auth':'dcc_prj'}
             },
             'steps':{
-                'pre':{'tasks':'name_f,family_f,name_e,family_e','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'code_meli,tel_mob,date,eng,eng_des,office','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'f_resume,f_form','jobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
+                'pre':{'tasks':'name_f,family_f,name_e,family_e','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'code_meli,tel_mob,date,eng,eng_des,office','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'f_resume,f_form','jobs':'dcc_prj','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'input':['name_f','family_f','name_e','family_e','tel_mob'],
