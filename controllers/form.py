@@ -145,7 +145,7 @@ def get_table_filter(tasks,x_data_s):
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)[0]['input'])
             tt+=f'''><input {_meta} name='{name}' id='{name}' value='{val}' style='width:{width};background-color:#88aaff'>'''
         return (f'''<td><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
-    htm_table_filter=XML('<form><table><tr style="height:10px;padding:0px;margin:0px">'
+    htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
                             +set_htm_var(caption='data_filter',obj=data_filter1,_help=hlp['data_filter'])
                             +set_htm_var(caption='cols_filter',obj=cols_filter1,_help=hlp['cols_filter'])
                             +set_htm_var(caption='table_class',obj='table_class',width='50px',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')

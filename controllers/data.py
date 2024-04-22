@@ -229,7 +229,7 @@ def get_table_filter(tasks,x_data_s):
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'])[0]['input'])
             tt+=f'''><input {_meta} name='{name}' id='{name}' value='{val}' style='width:{width};background-color:#88aaff'>'''
         return (f'''<td><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
-    htm_table_filter=XML('<div><form><table class="table table-bordered table-sm"><tr >'#style="height:10px;padding:0px;margin:0px"
+    htm_table_filter=XML('<div><form><table  id="table_filter" class="table table-bordered table-sm"><tr >'#style="height:10px;padding:0px;margin:0px"
                             +set_htm_var(caption='data_filter',obj=data_filter1,_help=hlp['data_filter'])
                             +set_htm_var(caption='cols_filter',obj=cols_filter1,_help=hlp['cols_filter'])
                             +set_htm_var(caption='table_class',obj='table_class',width='50px',_val=6,_meta="type='number' min=-1 max=6",_help='-1 to 6')
@@ -841,16 +841,16 @@ def select_i(x_data):
                     base_str=base_str.replace(x,'')
                 return base_str
             #----
-            result1='"{}"{}'.format(request.vars["sel1"],request.vars["abc"])
+            result1='"{}"{}'.format(request.vars["sel1"],request.vars["sign"])
             t1=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','Grup','number']])),
                         TBODY(*[TR(A(i+1,_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
                                    ,val_dic[v]['title'],val_dic[v]['num']) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
                         #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
         ##-----
-        #010921# i1=XML('<input name="abc" id="abc" value="=" onchange="submit();">')
-        i1=k_htm.select(_options=["=","!=",">","<","like"],_name='abc',_value=request.vars['abc'],_onchange="submit();")
+        #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
+        i1=k_htm.select(_options=["=","!=",">","<","like"],_name='sign',_value=request.vars['sign'],_onchange="submit();")
         v=request.vars
-        result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["abc"],request.vars["sel2"])
+        result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
         result_htm=XML(f'<div name="result" id="result">{result}</div>')
         return XML(f'''<form id="form5"><label>data_filter(dict)</label>
                     {TABLE(TR(s1,i1,s2,result_htm))}
@@ -869,7 +869,7 @@ def select_i(x_data):
                     
         '''
                     function set_val(){{
-                        document.getElementById("result").innerHTML='"'+document.getElementById("sel1").value+'"'+document.getElementById("abc").value+'"'+ document.getElementById("sel2").value+'"';
+                        document.getElementById("result").innerHTML='"'+document.getElementById("sel1").value+'"'+document.getElementById("sign").value+'"'+ document.getElementById("sel2").value+'"';
                         
                     }}  
                     set_val();
@@ -879,11 +879,12 @@ def select_i(x_data):
 def select():
     return dict(x=DIV(XML(style2),select_i(x_data)))
 #                    <a href='../xtable/paper?data_filter="prj=\\'36\\'"'>---</a>
-'''
+
+def rc():#run 1 command
+    '''
         final goal=update multi filed by sql
         هدف= تغییر و به روز رسانی چندین فیلد به صورت همزمان
-'''
-def rc():#run 1 command
+    '''
     if not session["admin"]:
         return 'you are not admin'
     #return 'ok'
@@ -961,7 +962,7 @@ def rc():#run 1 command
             rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn} LIKE '{x}'")#{fldn:x})
             rep1+=[k_htm.val_report(rep)]
         return DIV(rep1)
-    elif cmd=='update_auto_filed':  
+    elif cmd=='update_auto_filed': 
         '''
             update select_cols of a table automaticaly
         '''

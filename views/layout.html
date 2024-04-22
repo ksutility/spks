@@ -110,8 +110,8 @@
   
   <body >
     <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
-	<div style='text-align:center;height:50px'>
-        <table width="100%" style="background-color:#f0f0ff"><tr>
+	<div style='text-align:center;'>
+        <table id="table_header" width="100%" style="background-color:#f0f0ff"><tr>
             <td width="10%">
                 <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                       <li class="nav-item dropdown">
@@ -291,7 +291,7 @@
     -->
     {{block header}}
     {{end}}
-    <div class="container-fluid main-container">
+    <div> <!--class="container-fluid main-container"> -->
     
     <!-- Main ========================================= -->
     
