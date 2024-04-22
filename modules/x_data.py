@@ -466,7 +466,7 @@ x_data={
                 'sub_p':{'type':'reference','width':'5','title':'زیر پروژه','ref':{'db':'a_sub_p','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
                 'step':{'type':'reference','width':'5','title':'مرحله','ref':{'db':'a_step','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}"'''},'prop':['update']},
                 'dspln':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
-                'doc_t':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'doc_t':{'type':'reference','width':'5','title':'نوع مدرک','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':''},
                 'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},               
             },
@@ -556,7 +556,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_contract':{
         'a':{
-            'base':{'mode':'form','title':'فرم ثبت قراردادهای شرکت','help':''
+            'base':{'mode':'form','title':'فرم ثبت قراردادهای شرکت','help':'','auth':'dcc_prj'
             },
             'tasks':{
                 'subject':{'type':'text','title':'موضوع قرارداد','len':'250'},
@@ -564,11 +564,13 @@ x_data={
                 'date':{'type':'fdate','title':'تاریخ ابلاغ قرارداد'},
                 'prj_dur':{'type':'num','min':1,'max':1200,'len':'4','title':'مدت قرارداد - ماه'},
                 'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','-':'نا مشخص'},'prop':['multiple']},
-                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,contract'}
+                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,contract'},
+                'verify_note':{'type':'text','len':'40','title':'توضیحات بررسی کننده'},
             },
             'steps':{
-                'pre':{'tasks':'subject,client,date,prj_dur,serv_type','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'f_cnt','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                'pre':{'tasks':'subject,client,date,prj_dur,serv_type','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_cnt','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'verify_note','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
                 
             },
             'views':{
