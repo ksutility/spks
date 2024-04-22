@@ -948,7 +948,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             au_txt=x_dt['__0__'] if x_dt else ''
         _len=60 if len(au_txt)>60 else len(au_txt)+2
         obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
-        obj["value"]=obj['output_text']=obj['output']=au_txt
+        obj["value"]=obj['output_text']=obj['output']=_value #au_txt
         obj['help']=""
         msg=""
         jcode1=""
@@ -990,17 +990,27 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
         show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
         upload_link=XML(URL('file','upload',args=['auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
+        def file_rename_manage(old_file_full_name,new_file_name):
+            '''
+                بررسی و تشخیص تغییر سیستم نام گذاری فایل بعد از دریافت و ذخیره سازی فایل با روش نام گذاری قبلی
+                و اعلام یک آلارم در کنار لینک نمایش فایل در جدول و در فرم
+            '''
+            if old_file_full_name and new_file_name:
+                old_file_name=old_file_full_name.rpartition(".")[0]
+                if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}" class="bg-danger">error<h3>""" 
+            return ''
+        msg1=file_rename_manage(_value,obj['file_name'])
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         opt=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
         obj['input']=XML(f'''
             <div >
-            {opt} - 
+            {opt}{msg1}
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
         obj['output']=XML(f'''
             <div >
-                {opt} 
+                {opt}{msg1}
             </div> ''')    
         """    
         def path_x(pre_folder,file_name,pattern):
