@@ -1,6 +1,8 @@
+body {
+  font-family: BNazanin;
+}
 /* ---------------------------------------------------------------------------------------------------------------- */
 table th {
-	background-color: #04AA6D;
     position: sticky;
     top: 0; /* Don't forget this, required for the stickiness */
 }
@@ -17,21 +19,41 @@ table th,table td {
 /* ---------------------------------------------------------------------------------------------------------------- */
 #table_header {
 	width:100%;
+	background-color: #CAF0F8;
 }
 #table_header td{
 	border: 1px solid #ddd;
 	padding:0px;
 	border-spacing: 0px;
 }
+
 /* ---------------------------------------------------------------------------------------------------------------- */
 #table_filter{
 	width:100%;
+	background-color: #17a2b8;
 }
 #table_filter td{
-	border: 1px solid #ddd;
+	border: 1px solid #fff;
 	padding:0px;
 	border-spacing: 0px;
+	color: #fff;
 }
+#table_filter tr:hover {
+    background-color:  #17a2b8;
+    }
+#table_filter td:hover {
+    background-color: #ffccaa;
+    }
+table th{
+	background-color: #0077B6;
+	color: #fff;
+	font-family: BBadr;
+}	
+table th a{
+	background-color: #0077B6;
+	color: #fff;
+	font-family: BBadr;
+}	
 /* ---------------------------------------------------------------------------------------------------------------- */
 .table0{
 	width: 100%;   
@@ -71,7 +93,7 @@ table th,table td {
       padding: 8px;
       padding-top: 12px;
       padding-bottom: 12px;
-      background-color: #04AA6D;
+
       border: 1px solid #ddd;
       position: sticky;
       top: 0; /* Don't forget this, required for the stickiness */
@@ -95,7 +117,7 @@ table th,table td {
     padding: 8px;
     padding-top: 12px;
     padding-bottom: 12px;
-    background-color: #04AA6D;
+
     border: 1px solid #ddd;
     position: sticky;
     top: 0; /* Don't forget this, required for the stickiness */

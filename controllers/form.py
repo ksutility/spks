@@ -43,7 +43,6 @@ style1='''
               padding: 8px;
               padding-top: 12px;
               padding-bottom: 12px;
-              background-color: #04AA6D;
               border: 1px solid #ddd;
               
               color: white; }
@@ -84,8 +83,8 @@ def get_table_filter(tasks,x_data_s):
         use in:2(show_xtable,show_kxtable)
     goal:
     ------
-        -show input form for customizing filter data
-        نمایش فرم تنظیم فیلتر ها
+        -show input filter form for customizing filter data
+        نمایش فرم فیلتر جهت تنظیم اطلاعات فیلتر ها
         -set new_value of filter data in goal variabl
         
     
@@ -133,7 +132,7 @@ def get_table_filter(tasks,x_data_s):
             name=obj
             val=request.vars.get(name,_val)
             xw=f"width={width}" if width else ""
-            tt=f'''><input {_meta} name='{name}' id='{name}' value='{val}' style='width:{width};background-color:#88aaff''>'''
+            tt=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' style='width:{width};''>'''
         else:
             name=obj['name']
             name2=name+'-x'
@@ -143,7 +142,7 @@ def get_table_filter(tasks,x_data_s):
             val=request.vars.get(name,_val)
             if width:obj['width']=width
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)[0]['input'])
-            tt+=f'''><input {_meta} name='{name}' id='{name}' value='{val}' style='width:{width};background-color:#88aaff'>'''
+            tt+=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' style='width:{width};'>'''
         return (f'''<td><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
     htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
                             +set_htm_var(caption='data_filter',obj=data_filter1,_help=hlp['data_filter'])
@@ -592,9 +591,11 @@ def xtable():
             #xxxprint(msg=['xdic','',''],vals=x_dic,launch=True)
             ''' '''
             n=str(i+1)
+            idx=f"{x_dic['id']}"
             jobs=next(iter(x_data_s['steps'].items()))[1]['jobs']
-            nx=A(n,_title='edit',_href=URL('xform',args=(args[0],args[1],row[0]))) if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
-            tds=[TD(nx),TD(x_dic['id'])]
+            form_url=URL('xform',args=(args[0],args[1],idx))
+            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
+            tds=[TD(n),TD(id_l)]
             cornometer.print('b')
             for st_n,step in x_data_s['steps'].items():
                 cornometer2=Cornometer("c2","+ - ")

@@ -77,7 +77,7 @@ table th {
   padding-top: 12px;
   padding-bottom: 12px;
   
-  background-color: #04AA6D;
+
   color: white;
 }
 table td {text-align: center;}

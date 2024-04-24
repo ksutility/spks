@@ -34,6 +34,7 @@
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
 	<!-- ks -->	
+		<link rel="stylesheet" href="{{=URL('static','css/fonts_b.css')}}"/>
 		<link rel="stylesheet" href="{{=URL('static','css/ks.css')}}"/>
 		<script type="text/javascript" src="{{=URL('static','js/ks-form.js')}}"></script>
 	<!-- ks-input-placeholder -->	
@@ -111,7 +112,7 @@
   <body >
     <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
 	<div style='text-align:center;'>
-        <table id="table_header" width="100%" style="background-color:#f0f0ff"><tr>
+        <table id="table_header" width="100%"><tr>
             <td width="10%">
                 <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                       <li class="nav-item dropdown">
