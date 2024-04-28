@@ -23,19 +23,26 @@ def load_job_inf():
     jobs={}
     for row in rows:
         j_inf=dict(zip(titles,row))
-        jobs[j_inf['code']]={x:j_inf[x] for x in ['title','users']} 
+        jobs[j_inf['code']]={x:j_inf[x] for x in ['title','users','base_user']} 
     return jobs
 a_jobs=load_job_inf()
 def user_in_jobs(un,jobs,row_data):
     '''
-        inputs:
-        -------
-            jobs=list of job_code separate by ,
+        according form_inf(row_data) retun that un is in jobs ?  
+        مشخص می کند که آیا کاربر مشخص شده در شغلهای مشخص شده می باشد یا خیر 
+        از اطلاعات _ ردیف برای اطلاعات تکمیلی برای کاربر های خاص بر اساس مرحله و یا فیلد استفاده می کند
+    inputs:
+    -------
+        un:str
+            username
+        jobs=list of job_code separate by ,
+        row_data:dict
+            data of recored form for user(#task#<task_name>,#step#<n> )
     '''
     for job in jobs.split(','):
         if job =='*':return True
         if job[0] != "#":
-            if un in a_jobs[job]['users'].split(','):
+            if (un in a_jobs[job]['users'].split(',')) or (un == a_jobs[job]['base_user']):
                 return True
         if job[0] == "#" and  len(job) > 6:
             jx=job.split('#')
@@ -50,6 +57,45 @@ def user_in_jobs(un,jobs,row_data):
                 #print('x_un=',x_un)
                 if un==x_un:return True
     return False
+def jobs_masul(x_data_s,step_index,form_sabt_data ):
+    '''
+        according form_inf(form_sabt_data) return masul of jobs  
+        مسئول یک شغل را مشخص می کند - کسی که باید جواب یک مرحله یک فرم را بدهد
+        از اطلاعات _ ردیف برای اطلاعات تکمیلی برای کاربر های خاص بر اساس مرحله و یا فیلد استفاده می کند
+    inputs:
+    -------
+
+        x_data_s:dict
+            dic data of selected form
+        step_index:int
+            
+            
+        form_sabt_data:dict
+            data of recored form for user(#task#<task_name>,#step#<n> )
+    outputs:
+    -------
+        un:str
+            username
+    '''
+    import k_tools
+    xxx=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_res='y')
+    if xxx in ['y','x']: # y=form is fill ok ,x=form is remove / kill
+            return xxx
+    job=xxx['jobs']
+  
+    if 1>0: #try:
+        if job[0] != "#":
+            return a_jobs[job]['base_user']
+        if job[0] == "#" and  len(job) > 6:
+            jx=job.split('#')
+            if jx[1]=="task":
+                x_un=form_sabt_data[jx[2]]
+                return x_un
+            elif jx[1]=="step":          
+                x_un=form_sabt_data[f'step_{jx[2]}_un']
+                return x_un
+    #except:
+    #    return ''
 def jobs_title(jobs,x_data_s):
     '''
     عنوان هر سمت
@@ -75,7 +121,22 @@ def jobs_title(jobs,x_data_s):
                 
                 continue
     return tt
-def jobs_masul(jobs,x_data_s):
+def auth(auth_jobs):
+    '''
+        آیا کاربر جاری حق دسترسی به این بخش را دارد 
+    inputs:
+    ------
+        auth_jobs:str   jobs str_list separate by ,
+            jobs that can access (read) data of cur section of program
+    '''
+    from gluon import current
+    session=current.session
+    res=(session["admin"] or user_in_jobs(session["username"],auth_jobs,{}))
+    print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
+    return res
+#--------------------------------------------------------------- not used
+
+def jobs_masul_old(jobs,x_data_s):
     '''
         مسئول اصلی انجام یک سمت
     '''
@@ -96,16 +157,3 @@ def jobs_masul(jobs,x_data_s):
                 tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
                 continue
     return tt
-def auth(auth_jobs):
-    '''
-        آیا کاربر جاری حق دسترسی به این بخش را دارد 
-    inputs:
-    ------
-        auth_jobs:str   jobs str_list separate by ,
-            jobs that can access (read) data of cur section of program
-    '''
-    from gluon import current
-    session=current.session
-    res=(session["admin"] or user_in_jobs(session["username"],auth_jobs,{}))
-    print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
-    return res
