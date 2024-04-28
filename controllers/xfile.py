@@ -5,6 +5,7 @@ htm_head=XML(f"""
 <head>
 <script type="text/javascript" src="{URL('static','js/datepicker/jquery-1.8.2.min.js')}"></script>
 <script type="text/javascript" src="{URL('static','js/jquery.tablesorter.js')}"></script>
+<link rel="stylesheet" href="{URL('static','css/fonts_b.css')}"/>
 """+
 """
 <style>
@@ -12,6 +13,8 @@ body {
 	counter-reset: c_h1;
     background-color: #ffe;
     direction:rtl;
+    font-family: BBadr;
+    font-size: 20px;
     
 }
 h1:before {
@@ -22,7 +25,7 @@ h1 {
 	counter-reset: c_h2;
     background-color: #fbb;
     margin:4px;
-    font-family: Tahoma, sans-serif;
+    font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 24px;
 }
 h2:before {
@@ -34,7 +37,7 @@ h2 {
     background-color: #eef;
     counter-reset: c_h3;
     margin:2px;
-    font-family: Tahoma, sans-serif;
+    font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 22px;
 }
 h3:before {
@@ -45,14 +48,14 @@ h3 {
     text-indent: 50px;
     background-color: #eed;
     margin:2px;
-    font-family: Tahoma, sans-serif;
+    font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 20px;
 }
 h4 {
     text-indent: 60px;
     background-color: #ccc;
     margin:2px;
-    font-family: Tahoma, sans-serif;
+    font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 18px;
 }
 /* ---------------------------------------------------------- */
@@ -81,14 +84,15 @@ table th {
   color: white;
 }
 table td {text-align: center;}
-/* ---------------------------------------------------------- */
+/* ----------------------------------------------------------blockquote =>  */
 blockquote {
-   background-color:rgba(250, 200, 130, 0.2);
    
-   font-family: Tahoma, sans-serif;
-   font-size: 12px;
-   width: 80%;
-   margin: 20 auto;
+   background-color:rgba(250, 200, 130, 0.5);
+   font-family: BYekan,Tahoma, sans-serif;
+   text-indent: 20px;
+   font-size: 18px;
+   width: 90%;
+   margin: 5 auto;
 }
 blockquote h1 {
    font-size: 4rem;
@@ -102,15 +106,15 @@ blockquote p::before,
 blockquote p::after {
    content: "“";
    font-family: Georgia;
-   font-size: 2rem;
-   margin: 0 -2rem 0 0 ;
+   font-size: 1rem;
+   margin: 0 -1rem 0 0 ;
    position: absolute;
    opacity: 0.5;
 }
 
 blockquote p::after {
    content: "”";
-   margin: +0rem +2rem 0 0;
+   margin: +0rem +1rem 0 0;
 }
 
 blockquote cite {
@@ -126,8 +130,9 @@ textarea {
 /* ---------------------------------------------------------- */
 ul,li{
     direction:rtl;
-    font-family: arial, sans-serif;
-    font-size: 17px;
+    font-family:BNazanin,BYekan,BRoya,BTitrBold,BMehrBold,arial, sans-serif;
+    font-size: 18px;
+    margin:2px;
 }   
 pre {direction:ltr;}
 code {
