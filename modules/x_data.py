@@ -149,7 +149,7 @@ x_data={
             'base':{'mode':'form','title':'کد پروژه'},
             'tasks':{
                 'code':{'type':'text','title':'کد پروژه','len':'4','uniq':''},
-                'name':{'type':'text','title':'نام پروژه','len':'40','lang':'fa'},
+                'name':{'type':'text','title':'نام پروژه','len':'140','lang':'fa'},
                 'per':{'type':'reference','width':'5','title':' نماینده پروژه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
                 'cnt_name':{'type':'text','title':'نام قراردادی پروژه','title_e':'contracte name'},
                 'cmn_name':{'type':'text','title':'نام رایج','title_e':'common name'},
@@ -163,8 +163,8 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'lable_1,name,per,date,code,code_hlp','jobs':'dcc_prj','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'cnt_name,cmn_name,client,client_mn,client_pr,prj_dur,date,serv_type','jobs':'dcc_prj','title':'اطلاعات کلی','app_keys':'','app_titls':'','oncomplete_act':''},
-                'sbt':{'tasks':'code,code_hlp,name,serv_type,date','jobs':'dccm','title':'ثبت نهایی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                'inf':{'tasks':'client,client_mn,serv_type','jobs':'dcc_prj','title':'اطلاعات کلی','app_keys':'','app_titls':'','oncomplete_act':''},
+                'sbt':{'tasks':'code','jobs':'dccm','title':'ثبت نهایی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
             },
             'views':{
             },
@@ -446,10 +446,11 @@ x_data={
                 'code':{'type':'text','title':'کد سمت'},
                 'title':{'type':'text','title':'عنوان سمت','lang':'fa'},
                 'users':{'type':'reference','title':'لیست همکاران مرتبط','ref':{'db':'user','tb':'user','key':'{un}','val':'{name}-{family}'},'prop':['multiple']},
+                'base_user':{'type':'reference','title':'مسئول','ref':{'db':'user','tb':'user','key':'{un}','val':'{name}-{family}'}},
             },
             'steps':{
                 's0':{'tasks':'code,title','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'users','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'users,base_user','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{},
             'cols_filter':{'':'همه',},
