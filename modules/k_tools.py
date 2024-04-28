@@ -43,7 +43,7 @@ def x_cornometer(func):
         if debug:
             t2=time.time()
             try:
-                tt1=nth_item_of_dict(nth_item_of_dict(kwargs,1),1)
+                tt1=nth_item_of_dict(nth_item_of_dict(kwargs,0),0)
             except:
                 tt1='*err* => nth_item_of_dict'
             try:
@@ -61,5 +61,13 @@ def x_cornometer(func):
             print('--------{} , {} : {} - {} , func = {} , {} , args = {}'.format(dtm1,dtm2,tm1,tm3,func.__name__,tt1,tt2))
         return xxx
     return wrapper
-def nth_item_of_dict(xdic,n):
-    return next(iter(xdic.items()))[n]
+def nth_item_of_dict(xdic,n,up_res=''):
+    '''
+    inputs:
+    -------
+        up_res:value for return if n > xdic.len
+            >= is used becuse index is start from 0
+    '''
+    if n>=len(xdic):return up_res
+    x=list(xdic)[n]
+    return xdic[x]
