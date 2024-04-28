@@ -104,7 +104,10 @@ def get_table_filter(tasks,x_data_s):
                "des" like "%L%"
                "prj"="29" AND "des" like "%L-%"
                date_e > "1401/09/01"
-            '''
+            ''',
+        'prj':'''
+            
+        '''
         }
 
     cols_filter=x_data_s['cols_filter']
@@ -127,6 +130,14 @@ def get_table_filter(tasks,x_data_s):
     else:
         select_cols= all_cols
     def set_htm_var(caption,obj,width='15vw',_help='',_val='',_meta=''):
+        '''
+        inputs:
+        ------
+            obj:str / dict
+                str : object name
+                dict: object props
+        '''
+        
         import x_data
         if type(obj)==str:
             name=obj
@@ -142,14 +153,15 @@ def get_table_filter(tasks,x_data_s):
             val=request.vars.get(name,_val)
             if width:obj['width']=width
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)[0]['input'])
-            tt+=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' style='width:{width};'>'''
-        return (f'''<td><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
+            tt+=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
+        return (f'''<td style='width:{width};'><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
     htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
-                            +set_htm_var(caption='data_filter',obj=data_filter1,_help=hlp['data_filter'])
-                            +set_htm_var(caption='cols_filter',obj=cols_filter1,_help=hlp['cols_filter'])
-                            +set_htm_var(caption='table_class',obj='table_class',width='50px',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
-                            +set_htm_var(caption='page',obj='data_page_n',width='80px',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
-                            +set_htm_var(caption='rows',obj='data_page_len',width='80px',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
+                            +set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
+                            +set_htm_var(caption='data_filter',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
+                            +set_htm_var(caption='cols_filter',width='20vw',obj=cols_filter1,_help=hlp['cols_filter'])
+                            +set_htm_var(caption='table_class',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
+                            +set_htm_var(caption='page',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
+                            +set_htm_var(caption='rows',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
                             +'<td><input type="submit"></td></tr></table></form>')
     return select_cols, all_cols,htm_table_filter
 #-----------------------------------------------
@@ -368,13 +380,21 @@ def _save_out(htm_form,tt,args):
     </script>
     """)]
     #return htm_form
-def save():#save 1 row
+def save():
+    '''
+    GOAL:
+        save 1 row
+    '''
+    
     #چک کردن عدم ذخیره مجدد اطلاعات به دلیل ریلود شدن صفحه 
     if session.view_page!='xform' :
         return 'refer to this page is uncorrect'
     session.view_page='save'
     def save1(text_app,xid):
         def get_vv(f_nxt_s,f_nxt_s_new):
+            '''
+                تهیه یک دیکشنری از اطلاعاتی که قرار است در دیتا بیس به روز رسانی شوند
+            '''
             steps=x_data_s['steps']
             step=steps[list(steps.keys())[f_nxt_s]]
             step_flds=step['tasks'].split(',')
@@ -399,7 +419,8 @@ def save():#save 1 row
                         f'step_{f_nxt_s}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
                         f'step_{f_nxt_s}_ap':request.vars['text_app'],
                         'f_nxt_s':str(f_nxt_s_new),
-                        'f_nxt_u':''
+                        'f_nxt_u':k_user.jobs_masul(x_data_s,int(f_nxt_s_new),form_sabt_data )
+ 
                         })
             return vv
         def update(text_app,xid):
@@ -442,6 +463,7 @@ def save():#save 1 row
     xid=request.args[2] or 1
     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
     #xreport_var([rows,titles])
+    #form_sabt_data= data of 1 sabt /record of 1 form
     if xid=='-1':
         form_sabt_data={x:'' for x in titles}
         f_nxt_s=0
@@ -474,6 +496,9 @@ def save():#save 1 row
     except Exception as err:
         return DIV(htm_form)
 def save_app_review():
+    '''
+        تغییرات لازم در زمان زدن دکمه بازبینی مرحله آخر
+    '''
     if session.view_page!='xform' :
         return 'refer to this page is uncorrect'
     args=request.args
