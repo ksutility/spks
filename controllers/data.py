@@ -826,26 +826,29 @@ def select_i(x_data):
         val_dic={x:tasks[x]['title'] for x in tasks}
         s1=k_htm.select(_options=val_dic,_name='sel1',_value=request.vars['sel1'],_onchange="submit();")#$('#res1').text($(this).val())")
         ##-----
-        s2,t1='',''
+        #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
+        ssw_select,t1='',''
         if request.vars['sel1']:
             sel1=request.vars['sel1']
-            traslate_dict =k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
-            val_dic=db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
+            traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
+            val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
             #print(str(val_dic))
-            #s2=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="set_val();")
-            s2=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="submit();")
-            #------
+            #ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="set_val();")
+            ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="submit();")
+            #----------------------------------------------------------------------------------------------------------
+            #ssl_table=sql select linked table : a table split category of a field and liked to each
             def remove(base_str,chars):
                 #remove chars from base_str
                 for x in chars:
                     base_str=base_str.replace(x,'')
                 return base_str
-            #----
+            #---- 
             result1='"{}"{}'.format(request.vars["sel1"],request.vars["sign"])
-            t1=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','Grup','number']])),
+            ssl_table=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','Grup','number']])),
                         TBODY(*[TR(A(i+1,_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
                                    ,val_dic[v]['title'],val_dic[v]['num']) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
                         #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
+            #----
         ##-----
         #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
         i1=k_htm.select(_options=["=","!=",">","<","like"],_name='sign',_value=request.vars['sign'],_onchange="submit();")
@@ -853,11 +856,11 @@ def select_i(x_data):
         result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
         result_htm=XML(f'<div name="result" id="result">{result}</div>')
         return XML(f'''<form id="form5"><label>data_filter(dict)</label>
-                    {TABLE(TR(s1,i1,s2,result_htm))}
+                    {TABLE(TR(s1,i1,ssw_select,result_htm))}
                     <input type="submit">
                     {A('Open Selected List-باز کردن لیست انتخاب شده',_href=URL('xtable',args=args,vars={'data_filter':result}))}
                     </form>
-                    {t1}
+                    {ssl_table}
                     <script>
                     var filter1=0
                     function submit() {{
