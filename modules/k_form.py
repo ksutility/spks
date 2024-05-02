@@ -654,14 +654,13 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
 @k_tools.x_cornometer
 def reference_select (ref_0,form_nexu=False,form_data={}):
+    debug=False
     #ceck cach
-    idx="-".join([ref_0[x] for x in ref_0])
-    
+    idx="-".join([ref_0[x] for x in ref_0])+"|"+str(form_data)
     if idx in k_cache:
-        if k_cache[idx]['time']-time.time()<5000:
+        if k_cache[idx]['time']-time.time()<5:
             #print (f'k-cache = ok {time.time()}|'+idx)
             return k_cache[idx]['val']
-
     #print (f'k-cache = -- {time.time()}|'+idx)
     '''
     use in kswt:ok 020905
@@ -690,22 +689,23 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
             {'key_1':'val/tit_1','key_2':'val/tit_2',...}
     '''
     ref=ref_0.copy()
-    #xxxprint(msg=['ref1','',''],vals=ref) 
+    if debug :xxxprint(msg=['ref1',idx,''],vals=ref) 
     for x in ['db','tb','key','val']:
         if not x in ref:
             do_report('err',x + " is not in Ref /n ref shoud have ['db','tb','key','val']" +  ref)
     
     for x in ['db','tb','where']:
         ref[x]=template_parser(ref.get(x,''),x_dic=form_data) #.format(task=task_inf,step=form['steps'],session=session)
-    #xxxprint(msg=['ref2','',''],vals=ref)    
+    if debug :xxxprint(msg=['ref2',idx,''],vals=form_data)    
     #dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db']+".db"#db_path+ref['db']
     dbn=db_path+ ref['db']+".db"
     if form_nexu:
         ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nexu <> 'x' "
     rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0)
+    if debug :xxxprint(msg=['where',idx,ref['where']],args=rows)
     if rows :
         output_data={ref['key'].format(**dict(zip(tits,row))):ref['val'].format(**dict(zip(tits,row))) for row in rows}
-        #xxxprint(msg=['output_data','',''],vals=output_data) 
+        if debug :xxxprint(msg=['output_data',idx,''],vals=output_data) 
         k_cache[idx]={'val':output_data,'time':time.time()}
         return output_data
     return {}#'msg':ref['where']}
@@ -753,14 +753,24 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             htm_select
             template_parser
     '''
+    sc=i_obj['type']
+    def obj_pars(i_obj,obj_type,force=False):
+        if force or 'input' in need or obj_type in ['file']:
+            cm.tik('obj template_parser start')
+            obj={x:template_parser(i_obj[x],x_dic) for x in i_obj}#['file_name','ext','path','pre_folder']}
+            #xreport_var([i_obj,x_dic,obj,''],True)
+            cm.tik('obj template_parser end')
+        else:
+            obj=i_obj.copy()
+        if debug:
+            xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)    
+        return obj
     db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
-    cm.tik('obj template_parser start')
-    obj={x:template_parser(i_obj[x],x_dic) for x in i_obj}#['file_name','ext','path','pre_folder']}
-    #xreport_var([i_obj,x_dic,obj,''],True)
-    cm.tik('obj template_parser end')
     
-    if debug:
-        xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)
+    obj=obj_pars(i_obj,obj_type=sc)
+    
+    
+    
     def form_update_set(form_update_set_param):
         xmode,xname=form_update_set_param.lower().split(";")
         if xmode== "form": #updae form
@@ -779,7 +789,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                     link_go+=f' + "{o_name};" + document.getelementbyid("{o_name}").value + ";"'
             return "document.location.assign(" + link_go + ");" #link_go 
     ##---------------------------------------------------------------------------------################################
-    sc=obj['type']
+    
     _name=obj['name']
     onact_txt,x_class='',''
     _n=f"name='{_name}' id='{_name}'" 
@@ -787,6 +797,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     _value=request.vars[_name] if request else ''
     _value=_value or str(obj.get('value',obj['def_value'])) or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '')
     obj['value']=_value
+    obj['help']=''
     obj['output']=_value 
     obj['output_text']=_value # output in simple text
     obj['input']=_value  # if read im prop
@@ -893,12 +904,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         _select={x:x for x in _select} if type(_select)==list else _select
         ##----------
         if debug:
-            xprint( 'select='+ str(_select))
-            xprint( 'value='+ str(_value))
-            xprint( 'tt_dif='+ str(tt_dif))
+            xprint('select='+ str(_select))
+            xprint('value='+ str(_value))
+            xprint('tt_dif='+ str(tt_dif))
         
         try:
             def select_1_or_multi(_value,_multiple):
+                if not _value:return''
                 if _multiple:
                      return ','.join([_select[x] for x in _value.split(',')])
                 else:
@@ -906,7 +918,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             obj['output']=XML(f'''<a  title="{select_1_or_multi(_value,_multiple)}">{_value}</a>''')
         except Exception as err:
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
-            
+            xxxprint(msg=["err",'',''],err=err,vals=_select) 
+        obj["value"]=_value
+        obj['output_text']=_select[_value] if (type(_value)==str and _value in _select) else ""
         if 'input' in need:
             import k_htm
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
@@ -938,43 +952,48 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
             this field info is show in ["auto"] item or in ["ref"] item
         '''
-        if 'auto' in obj:
-            au_txt=obj['auto']
-        elif 'ref' in obj:
-            x_dt=reference_select(obj['ref'],form_data=x_dic)
-            #xxxprint(vals=obj['ref'])
-            #xxxprint(vals=x_dic)
-            #xxxprint(msg=['x_dt','',''],vals=x_dt)
-            au_txt=x_dt['__0__'] if x_dt else ''
-        _len=60 if len(au_txt)>60 else len(au_txt)+2
-        obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
         obj["value"]=obj['output_text']=obj['output']=_value #au_txt
         obj['help']=""
-        msg=""
-        jcode1=""
-        form=share.form
-        if "uniq" in obj : #"singel" 
-            xquery1=f"[{form['tb']}].[{_name}]='{au_txt}' and [{form['tb']}].[id]<> {session('form_index')}"
-            n= x_sql.sql_count(share.form['db'],share.form['tb'], xquery1)
-            if n>0 : 
-                msg="خطا : اطلاعات این فیلد تکراری می باشد و قبلا در فرم دیگری ثبت شده است. لطفا از اطلاعات غیر تکراری در گذشته برای این فیلد استفاده نمایید." 
-                jcode1="alert('" + msg + "');re=false;"
-                obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
-    elif sc=="index":
-        x_dt=reference_select(obj['ref'],form_data=x_dic)
-        x_list=[x_dt[x] for x in x_dt if x_dt[x]]
-        from k_num import SMART_NUM_LIST
-        smart_num_list=SMART_NUM_LIST(x_list)
+        if 'input' in need :
+            if 'auto' in obj:
+                au_txt=obj['auto']
+            elif 'ref' in obj:
+                x_dt=reference_select(obj['ref'],form_data=x_dic)
+                #xxxprint(vals=obj['ref'])
+                #xxxprint(vals=x_dic)
+                #xxxprint(msg=['x_dt','',''],vals=x_dt)
+                au_txt=x_dt['__0__'] if x_dt else ''
+            _len=60 if len(au_txt)>60 else len(au_txt)+2
+            obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
             
-        #if def_val=="" : 
-        index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val
-        index_hlp=str(smart_num_list)
-        
-        #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
-        #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
-        x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
-        obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
-        obj['help']=XML(f"""<a href = 'javascript:void(0)' title='{index_hlp}' >لیست اعداد استفاده شده</a>""")
+            msg=""
+            jcode1=""
+            form=share.form
+            if "uniq" in obj : #"singel" 
+                xquery1=f"[{form['tb']}].[{_name}]='{au_txt}' and [{form['tb']}].[id]<> {session('form_index')}"
+                n= x_sql.sql_count(share.form['db'],share.form['tb'], xquery1)
+                if n>0 : 
+                    msg="خطا : اطلاعات این فیلد تکراری می باشد و قبلا در فرم دیگری ثبت شده است. لطفا از اطلاعات غیر تکراری در گذشته برای این فیلد استفاده نمایید." 
+                    jcode1="alert('" + msg + "');re=false;"
+                    obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
+            if not _value:
+                obj["value"]=obj['output_text']=obj['output']=au_txt
+    elif sc=="index":
+        if 'input' in need:
+            x_dt=reference_select(obj['ref'],form_data=x_dic)
+            x_list=[x_dt[x] for x in x_dt if x_dt[x]]
+            from k_num import SMART_NUM_LIST
+            smart_num_list=SMART_NUM_LIST(x_list)
+                
+            #if def_val=="" : 
+            index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val
+            index_hlp=str(smart_num_list)
+            
+            #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
+            #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
+            x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
+            obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
+            obj['help']=XML(f"""<a href = 'javascript:void(0)' title='{index_hlp}' >لیست اعداد استفاده شده</a>""")
         msg=""  
 
     elif sc=="file":
