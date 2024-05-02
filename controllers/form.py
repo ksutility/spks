@@ -357,6 +357,7 @@ def xform():#view 1 row
     return dict(htm=show_form(x_data_s,db1,tb_name,xid))
 # ------------------------------------------------------------------------------------------ 
 def _save_out(htm_form,tt,args):
+    sec=2500 if debug and session["admin"] else 1
     htm_form+=[DIV(DIV(DIV(A('بازگشت به فرم',_href=URL('xform',args=args),_class="btn h4 btn-primary text-light"),_class="col-7"),
                     DIV("ثانیه تا برگشت اتوماتیک به فرم",_class="col-4 h6 text-right"),
                     DIV("timer",_id="x_time_counter",_class="col-1 bg-info text-light h3 text-center"),
@@ -368,7 +369,7 @@ def _save_out(htm_form,tt,args):
         $( document ).ready(function() {
             $("a.toggle").click();
         });
-        var sec=2500;
+        var sec=""" + str(sec) + """;
         var redirect_timer = setTimeout(function() {
             window.location='""" + URL('xform',args=args) + """'
         }, sec * 1000);
