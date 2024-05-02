@@ -827,7 +827,7 @@ def select_i(x_data):
         s1=k_htm.select(_options=val_dic,_name='sel1',_value=request.vars['sel1'],_onchange="submit();")#$('#res1').text($(this).val())")
         ##-----
         #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
-        ssw_select,t1='',''
+        ssw_select,ssl_table='',''
         if request.vars['sel1']:
             sel1=request.vars['sel1']
             traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
@@ -895,9 +895,11 @@ def rc():#run 1 command
     if not args:
         pass
     #- print(str(args))
+    
     cmd=args[0]
-    db_name,tb_name=args[1:3]
-    db1=DB1(db_path+db_name+'.db')
+    if len(args)>2:
+        db_name,tb_name=args[1:3]
+        db1=DB1(db_path+db_name+'.db')
     if cmd=='columns_add':
         #sample /spks/data/rlc/columns_add/user/user?col_add_list=app_u,app_d
         rep= db1.add_columns(tb_name,request.vars['col_add_list'])
@@ -954,9 +956,9 @@ def rc():#run 1 command
         rep['table-1-add']=db1.columns_add(tb_name,cols1,"TEXT")
         rep['table-2']=db1.define_table(tb_name+"_backup",fields_txt='id INTEGER PRIMARY KEY AUTOINCREMENT,', fields_order={"TEXT":['xid']+cols1}) 
         rep['table-2-add']=db1.columns_add(tb_name+"_backup",cols1,"TEXT")    
-    elif cmd=='update_fields':  
-        #sample /spks/data/rc/update_fields/eng/a/code
-        #sample /spks/data/rc/update_fields/user/user/eng
+    elif cmd=='update_data':  
+        #sample /spks/data/rc/update_data/eng/a/code
+        #sample /spks/data/rc/update_data/user/user/eng
         #replace_inf={"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"}
         replace_inf={"%OT":"GE"}
         fldn=args[3]#field name
@@ -968,6 +970,8 @@ def rc():#run 1 command
     elif cmd=='update_auto_filed': 
         '''
             update select_cols of a table automaticaly
+            فعلا برنامه در حال تکامل بوده و فقط موارد زیر را انجام می دهد
+            برنامه بررسی می کند که فیلد های داده شده بر اساس اخرین متن تعریف فرم مقدار جدیددشان چقدر می شود  و این مقدار جدید با مقدار ذخیره شده چه تفاوتی دارد
         '''
         #sample /spks/data/rc/update_auto_filed/paper/a?select_cols=prj,man_crt
         select_cols=request.vars['select_cols']
@@ -988,17 +992,77 @@ def rc():#run 1 command
             for fn in select_cols:
                 i_obj=x_data_s['tasks'][fn]
                 x_obj,time_recs=k_form.obj_set(i_obj=i_obj,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
-                x_save=x_dic[fn]
+                x_saved=x_dic[fn]
                 import k_tools
-                tds+=[k_tools.var_compare(x_save,x_obj['output_text'])['msg']]#output_text
-                #if x_save:x_save.strip()
-                #if x_save!=x_obj['output']:
-                #    tds+=[f" != ,{len(x_save)},{len(x_obj['output_text'])},{x_save},{x_obj['output_text']}"]
+                tds+=[k_tools.var_compare(x_saved,x_obj['output_text'])['msg']]#output_text
+                #if x_saved:x_saved.strip()
+                #if x_saved!=x_obj['output']:
+                #    tds+=[f" != ,{len(x_saved)},{len(x_obj['output_text'])},{x_saved},{x_obj['output_text']}"]
                 #else:
-                #   tds+=[f" == {x_save}"]
+                #   tds+=[f" == {x_saved}"]
             trs+=[tds]
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['id']+select_cols,table_class='1')
+        return dict(x=DIV(rep))
+    elif cmd=='copy_table_inf': 
+        '''
+        goal:
+            copy (append) inf of tb1 to tb2
+                
+            dont delete exist inf in 2nd table
+        inputs:
+        -------
+            internal:dt
+                tb1:str
+                    1th table name in db1
+                db1:str
+                    1th db name
+                tb2:str 
+                    2nd table name in db2
+                db2:str
+                    a db name (1th db or other)
+                cols:str list (separate by ,)
+                    list of fields that shoud copy from tb1 to tb2
+                uniq_field:str
+                    name of a uniq field 
+                    can be :
+                        empty = ''
+                            pro result : All data (every where exist or not exist) add to tb2
+                        1 field_name
+                            pro result : only new data (1 row of tb1 that tb1.row.uniq_field is not in tb1.uniq_field) add to tb2
+                            فقط اطلاعات جدید کپی می شود
+                            روش تشخیص جدید بودن بر اساس وجود یا عدم وجود فیلد یکتا می باشد
+                exec_sql:bool
+                    False: sql creat and show but not exec sql
+                    True: sql creat and show and exec sql
+        '''
+        #sample /spks/data/rc/copy_table_inf
+        #dt=data
+        dt={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':'','exec_sql':False}#True
+   
+        db1=DB1(db_path+dt['db1']+'.db')
+        db2=DB1(db_path+dt['db2']+'.db')
+        
+        if dt['cols']=='*':
+            dt['cols']=db1.columns_list(dt['tb1'])
+            dt['cols'].remove('id')
+            
+        rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
+        trs=[] 
+        i=0
+        if dt['uniq_field']:#only new data add to tb2
+            pass
+        else: #All data add to tb2
+            for row in rows:
+                i+=1
+                xxd=dict(zip(titles,row))
+                update_dic={x:xxd[x] for x in dt['cols']}
+                rep=''
+                if dt['exec_sql']:
+                    rep=db2.insert_data(dt['tb2'],update_dic)
+                trs+=[[str(i),str(update_dic),str(rep)]]
+        from k_table import K_TABLE
+        rep=K_TABLE.creat_htm(trs,['i','update dict','report'],table_class='1')
         return dict(x=DIV(rep))
     #return dict(table=TABLE(THEAD([rep[0]],_class="thead-light"),TBODY(rep[1:]),_class="table table-bordered table-hover"))  
     return dict(x=k_htm.val_report(rep))
