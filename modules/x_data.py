@@ -323,8 +323,8 @@ x_data={
             'base':{'mode':'form','title':'نامه ها','auth':'dccm'
             },
             'tasks':{
-                'prj_id':{'type':'reference','width':'30','ref':{'db':'prj','tb':'a','key':'{id}','val':'{id:03d}-{name}'},'title':'پروژه'},
-                'prj1':{'type':'auto','ref':{'db':'prj','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj']['value']}}"'''},'title':'کد کامل زیر پروژه'},
+                'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{name}'},'title':'پروژه'},
+                'prj1':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj']['value']}}"'''},'title':'کد کامل زیر پروژه'},
                 'man_crt':{'type':'reference','width':'5','title':'تهیه کننده','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{family}'},'prop':['read']},#,'prop':['read']
                 'man_ar_mng':{'type':'reference','width':'5','title':'مسئول طرح معماری','ref':{'db':'user','tb':'user','key':'{id}','val':'{un}-{family}'}},#,'prop':['read']
                 'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[]},#'hide']},
