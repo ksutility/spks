@@ -1,0 +1,28 @@
+file for data.py & file.py
+--------------------------
+k_err.py
+k_file.py
+k_ui.py
+ksql.py
+kytable.py
+--------------------------
+--------------------------
+need:
+	beautifulsoup4:	beautifulsoup4
+			soupsieve>1.2
+	---------------------------
+	jdatetime:	jdatetime
+	---------------------------
+	selenium	selenium
+			urllib3
+	---------------------------
+	openpyxl:	openpyxl
+			et-xmlfile
+				contextlib
+				xml.etree.ElementTree (lib)
+	---------------------------
+	tkinter:	?
+	
+	
+		
+		
