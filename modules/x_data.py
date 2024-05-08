@@ -323,8 +323,9 @@ x_data={
             'base':{'mode':'form','title':'نامه ها','auth':'dccm'
             },
             'tasks':{
-                'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{name}'},'title':'پروژه'},
-                'prj1':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj']['value']}}"'''},'title':'کد کامل زیر پروژه'},
+                'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
+                'prj1':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
+                'prj2':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{code2}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد کامل زیر پروژه'},
                 'man_crt':{'type':'reference','width':'5','title':'تهیه کننده','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{family}'},'prop':['read']},#,'prop':['read']
                 'man_ar_mng':{'type':'reference','width':'5','title':'مسئول طرح معماری','ref':{'db':'user','tb':'user','key':'{id}','val':'{un}-{family}'}},#,'prop':['read']
                 'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[]},#'hide']},
@@ -349,8 +350,9 @@ x_data={
                  #,'get_inf':{'type':'xlink','width':'20','title':'دانلود','link':{'pro':['ksw','aqc','import_paper_inf'],'args':['{lno}']},'prop':['hide']}                
             },
             'steps':{
-                'pre':{'tasks':'prj_id,sbj','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                'd1':{'tasks':'prj1','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                'pre':{'tasks':'prj_id,prj1,prj2','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'date_s,date_e','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'lno,sbj','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'input':['prj_id','man_crt','x_num','x_des','x_act_todo','x_act_rec','x_act_pey','act_todo'],
@@ -394,7 +396,7 @@ x_data={
                 'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
                 'name':{'type':'text','title':'نام','len':'15'},
                 'family':{'type':'text','title':'فامیل','len':'35'},
-                'a_name':{'type':'text','title':'نام در اتوماسیون','len':'50'},
+                'a_name':{'type':'text','title':'نام در اتوماسیون','len':'70'},
                 'eng':{'type':'reference','title':'رسته / دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{name}'}},
                 #'tel_mob':{'type':'text','title':'موبایل','len':'13','placeholder':"0...-...-....",'data-slots':"."},#,'data-accept':"\d"
                 #'tel_mob':{'type':'text','title':'موبایل','len':'13','placeholder':"0...-...-....",'pattern':"0[0-9]{{3}}-[0-9]{{3}}-[0-9]{{4}}"},
@@ -404,11 +406,12 @@ x_data={
                 'loc':{'type':'reference','title':'موقعیت','ref':{'db':'a_loc','tb':'a','key':'{code}','val':'{name}'}},
                 'office':{'type':'select','select':['طراحی','نظارت','پشتیبانی','مدیریت'],'title':'بخش'},
                 #'discipline':{'type':'text','title':'رسته'}
+                'date':{'type':'fdate','title':'تاریخ تولد'},
                 'job':{'type':'text','title':'سمت','len':'50'}#,'ref':{'db':'user','tb':'job','key':'id','val':'{id}{name}'}
                 },
             'steps':{
-                'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'tel_mob,tel_wrk','jobs':'#task#un','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                'inf':{'tasks':'tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},#'jobs':'#task#un,dccm,as1',
                 'st2':{'tasks':'job','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
@@ -549,20 +552,25 @@ x_data={
                 'client':{'type':'text','title':'کارفرما'},
                 'date':{'type':'fdate','title':'تاریخ ابلاغ قرارداد'},
                 'prj_dur':{'type':'num','min':1,'max':1200,'len':'4','title':'مدت قرارداد - ماه'},
-                'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','-':'نا مشخص'},'prop':['multiple']},
+                'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','M':'MC-مدیریت طرح','-':'نا مشخص'},'prop':['multiple']},
                 'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,contract'},
                 'verify_note':{'type':'text','len':'40','title':'توضیحات بررسی کننده'},
+                'des':{'type':'text','len':'250','title':'توضیح'},
+                'n_contr':{'type':'text','len':'40','title':'شماره قرارداد'},
+                'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
+                'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
+                'price':{'type':'num','min':1,'max':9000000,'len':'7','title':'مبلغ قرارداد بر حسب میلیون تومان'},
             },
             'steps':{
-                'pre':{'tasks':'subject,client,date,prj_dur,serv_type','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'f_cnt','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'verify_note','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                'pre':{'tasks':'subject,client,date,prj_dur,serv_type,des,n_contr','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_cnt,chlng,solution','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'verify_note,price','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
                 
             },
             'views':{
-                'input':['name_f','family_f','name_e','family_e','tel_mob'],
-                'view1':['code_meli','date','eng','eng_des','office'],
-                'view2':['f_resume','f_form'],
+                'input':['subject','client','date','prj_dur','serv_type','price'],
+                'view1':['date','n_contr','des'],
+                'view2':['des'],
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
