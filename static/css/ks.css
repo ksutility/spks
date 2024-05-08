@@ -337,6 +337,7 @@ table th a{
 }
 .form_step_after{
 	background-color: #566;
+	color:#fff;
 }
 .form_step_cur_unactive{
 	background-color: #dbb69c;
