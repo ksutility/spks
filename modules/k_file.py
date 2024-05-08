@@ -229,24 +229,35 @@ def file_delete(file_path,path=''):
     log_to_file('File Delete = ' + file_path)
     
 @check_err   
-def file_delete_rcl(file_path,path='',delete_empty_folder=False):
+def file_delete_rcl(file_path,path='',delete_empty_folder=False,recycle_sub_folder=''):
     #move to recycle :share.base_path_recycle_delete
     #1400/10/02 ok
+    '''
+        recycle_sub_folder:STR
+            1 folder name in recycle folder 
+            for split each sum files in 1 folder
+    '''
     from k_set import K_set
     rc=K_set.recycle
+    if recycle_sub_folder: rc=os.path.join(rc,recycle_sub_folder)
     if path !='':
         file_path=os.path.join(path,file_path)
+    rep=f'{file_path} '    
     if not os.path.exists(file_path):
-        return xxprint('err',f'{file_path} not found')
+        rep+=': not exist'
+        xxxprint(msg=['err',rep,''])
+        return rep
     #try:
-    rep=f'delete {file_path}'
+    
     import k_date
     dd=k_date.ir_date("yymmdd-hhggss-")#("","yymmddhhggss",0,"","")
     ff=file_name_split(file_path)
-    file_move(file_path,(rc,dd + ff['filename']))
+    new_fname=dd + ff['filename']
+    file_move(file_path,(rc,new_fname))
+    rep+=f" => {rc} \ {new_fname} "
     if delete_empty_folder:
         folder_delete_if_empty(ff['path'])
-    return xxprint(True,rep)
+    return rep #xxxprint(True,rep)
 #---------------------------------------------------------------------------------################################     
 @check_err                      
 def get_downloded_file(new_path):
