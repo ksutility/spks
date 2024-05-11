@@ -13,7 +13,8 @@ import k_form
 from k_err import xxprint,xprint,xalert,xreport_var,xxxprint
 from x_data import x_data ,x_data_verify_task
 import k_date
-import k_tools
+import k_tools,k_user
+k_user.how_is_connect('form')
 from k_time import Cornometer
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
@@ -21,7 +22,7 @@ now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 
 debug=False # True: for check error
 db_path='applications\\spks\\databases\\'
-import k_user
+
 
 style1='''
         <style>
@@ -164,39 +165,7 @@ def get_table_filter(tasks,x_data_s):
                             +set_htm_var(caption='rows',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
                             +'<td><input type="submit"></td></tr></table></form>')
     return select_cols, all_cols,htm_table_filter
-#-----------------------------------------------
-@k_tools.x_cornometer
-def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False):#,all_cols,ref_i):
-    #use in:2(show_xtable,show_kxtable)
-    #cm=Cornometer(i)
-    '''
-    INPUTS:
-    ------
-        xid:int
-            id of 
-            
-    '''
-    tds=[]
-    if id_cols:
-        tds+=['{:03d}'.format(xid)]
-    #import k_py_list
-    #x_dic=k_py_list.list2dict(titles,row)
-    x_dic=dict(zip(titles,row))
-    
-    for fn in select_cols:#fn=field name
-        if 'hide' in tasks[fn]['prop']:
-            tds.append('*')
-            continue
-        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
-            tds.append('*')
-            continue    
-        x_obj,time_recs=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
-        
-        #cm.tik(fn+'-1'+str(recs))    
-        tds.append(x_obj['output'])
-        #cm.tik(fn+'-2')
-    #cm.report()    
-    return tds  
+
 #===================================================================================================================
 def xform():#view 1 row
     
@@ -626,7 +595,7 @@ def xtable():
             for st_n,step in x_data_s['steps'].items():
                 cornometer2=Cornometer("c2","+ - ")
                 x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
-                tds_i=get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s)#, all_cols,ref_i)
+                tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)#, all_cols,ref_i)
                 tds+=[TD(x) for x in tds_i]
                 #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
                 cornometer2.print('a---b')
@@ -638,7 +607,7 @@ def xtable():
             cornometer.print('c')
             tds+=[TD(x_dic[f"f_nxt_s"]),TD(x_dic[f"f_nxt_u"])]
             ''' '''
-            #tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
+            #tds=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
             
             trs.append(TR(*tds))
         cc='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
