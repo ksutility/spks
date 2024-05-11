@@ -15,7 +15,8 @@ import k_file
 from k_file_meta import K_FILE_META 
 k_file_meta=K_FILE_META ()
 import k_finglish
-import k_err
+import k_err,k_user
+k_user.how_is_connect('file')
 
 import k_set #share_value as share
 xpath=k_set.xpath()
@@ -96,46 +97,79 @@ def upload_file():
     xdata={    
         'user_filename':k_file.name_correct(ff['name']),
         'un':session["username"]}
-    filename=filename1.format(**xdata) or xdata['user_filename']
-    filename+=ff['ext']
-    file_b=file.file.read() #file contents in byte format
+    filefullname=filename1.format(**xdata) or xdata['user_filename']
+    filefullname+=ff['ext']
+    
     #input_file_name= file.filename
     #ou=str(file.file.read())
     
     #ou+=str(file.filename)
     #ou+='<br>'+ str(file_b)
     
-    if filename:
-        session['uploaded_name']=filename
-        path1=xpath+'\\'.join(request.args) #join((*request.args,filename))
-        path=path1+'\\'+filename
+    if filefullname:
+        session['uploaded_name']=filefullname
+        path1=xpath+'\\'.join(request.args) #join((*request.args,filefullname))
+        path=path1+'\\'+filefullname
         session['uploaded_path']=path
         session['uploaded_time']=time.time() #now
         response.flash=T("File Upload started!")
         if not os.path.exists(path1):k_file.dir_make(path1)
+        msgs=[k_file.file_delete_rcl(path,recycle_sub_folder=request.args[0])]  
+        file_b=file.file.read() #file contents in byte format
         with open(path, 'wb') as f:f.write(file_b)
-        msgs=['File Upload Succesfully',f'filename={path}',f'args={request.args}']
+        msgs+=['File Upload Succesfully',f'filename={path}',f'args={request.args}','uploaded_time = '+ str(time.time()-session['uploaded_time']),'-'*25]
         #- print("/n".join(msgs))
         if request.vars.todo :
-            sq=request.vars.todo.split(';') 
-            msgs+=['todo ='+ str(sq)]
-            if sq[0]=='sql':
-                #- print('xxx')
+            msgs+=_update_todo(request.vars.todo,filefullname)
+            '''
+            import json
+            todo1=request.vars.todo
+            todo2=todo1.replace("$filefullname$",filefullname)
+            todo= json.loads(todo2)
+            
+            print('todo=' + str(todo))            
+            print('db=' + str(todo['db']))
+            if todo['do']=='sql':                 #- print('xxx')
                 from k_sql import DB1
                 db_path='applications\\spks\\databases\\'
-                db_p=db_path+sq[1]+'.db'
+                db_p=db_path+todo['db']+'.db'
                 if os.path.isfile(db_p):
                     msgs+=['todo file is found =>'+ db_p]   
                     db1=DB1(db_p)
-                    xu=db1.update_data(table_name=sq[2],set_dic={sq[4]:filename},x_where={'id':sq[3]}) #tb_name=sq[1]
+                    xu=db1.update_data(table_name=todo['tb'],set_dic=todo['set_dic'],x_where=todo['where']) #tb_name=sq[1]
                     msgs+=['update db is done =>'+ str(xu)]
+
                 else:
                     msgs+=['error path:'+ str(db_p)]
-
+            '''        
         return "<br><h2>فایل با موفقیت آپلود شد</h2><hr>"+'<br>'.join(msgs)
     else:
         return f'File Not Found <br> filename={path}'
-    
+def _update_todo(todo,filefullname):
+    '''
+        todo=request.vars.todo
+        filefullname:str    
+            input file full name (name +ext)
+    '''
+    import json
+    msgs=[]
+    todo=todo.replace("$filefullname$",filefullname)
+    todo= json.loads(todo)
+    print('todo=' + str(todo))            
+    print('db=' + str(todo['db']))
+    if todo['do']=='sql':                 #- print('xxx')
+        from k_sql import DB1
+        db_path='applications\\spks\\databases\\'
+        db_p=db_path+todo['db']+'.db'
+        if os.path.isfile(db_p):
+            msgs+=['todo file is found =>'+ db_p]   
+            db1=DB1(db_p)
+            xu=db1.update_data(table_name=todo['tb'],set_dic=todo['set_dic'],x_where=todo['where']) #tb_name=sq[1]
+            msgs+=['update db is done =>'+ str(xu)]
+
+        else:
+            msgs+=['error path:'+ str(db_p)]
+    return msgs
 def mdir():
     args=request.args
     if args:
@@ -219,11 +253,14 @@ def delete():
 
     args=request.args
     if args:
-        xp=os.path.join(xpath,*args)
-        k_file.file_delete_rcl(xp)
         from k_set import K_set
-        return (f"""<br><h2>فایل /  فلدر با موفقیت پاک شد</h2><hr>
-                    <br> Delete  Done Successfully <br> move to recycle:<br>===>   {K_set.recycle})<br>fome:<br><=== {xp}<br> <hr>""")
+        xp=os.path.join(xpath,*args)
+        k_file.file_delete_rcl(xp,recycle_sub_folder=request.args[0])
+        msgs=['Delete  Done Successfully','move to recycle:',f'===>   {K_set.recycle})','fome:',f'<=== {xp}']
+        
+        if request.vars.todo :
+            msgs+=_update_todo(request.vars.todo,'')
+        return "<br><h2>فایل /  فلدر با موفقیت پاک شد</h2><hr>"+'<br>'.join(msgs)
     return 'error : args is empty'
 def move():
     '''
