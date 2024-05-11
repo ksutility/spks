@@ -18,6 +18,7 @@ from k_err import xxprint,xprint,xalert,xxxprint
 from k_time import Cornometer
 from x_data import x_data ,x_data_verify_task
 import k_tools,k_user
+k_user.how_is_connect('data')
 
 debug=False # True: for check error
 row_view=[{'lno':'r','sbj':'r'}]
@@ -486,13 +487,21 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             new_titles[tasks[x]['title']]={'title':f'{i} : {x}'}
         #thead=THEAD(TR(TH('n',_width='30px'),TH('id',_width='30px'),*[TH(A(tasks[x]['title'],_title=f'{i} : {x}')) for i,x in enumerate(select_cols)]))#,_style="top:0;position: sticky;")
         trs=[]
-
+        
         for i,row in enumerate(rows):
-            tds=get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
             n=str(i+1)
-            n=A(n,_title='edit',_href=URL(args=(args[0],args[1],'edit',row[0]))) if session["admin"] else n
-            x_edit={'title-name':'id','args':[args[0],args[1],'edit']}
-            trs.append([n,*tds])
+            idx=f"{row[0]}"#x_dic['id']
+            form_url=URL(args=(args[0],args[1],'edit',row[0])) if session["admin"] else ""
+            #URL('xform',args=(args[0],args[1],idx))
+            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
+            tds=[TD(n),TD(id_l)]
+            
+            tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s,request=request)#, all_cols,ref_i)
+            tds+=[TD(x) for x in tds_i]
+            #n=str(i+1)
+            #n=A(n,_title='edit',_href=URL(args=(args[0],args[1],'edit',row[0]))) if session["admin"] else n
+            # ؟ x_edit={'title-name':'id','args':[args[0],args[1],'edit']}
+            trs.append(TR(*tds))
         from k_table import K_TABLE
         table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
         return K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type=""),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
@@ -758,6 +767,7 @@ def index():
               )
         t2="<hr>"      
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])    
+        t2+=f"<br><a href={URL('user_inf')}>همکاران وارد شده به سیستم</a> "
     else:
         #redirect(URL('spks','file','index'))
         trs+=[TR(*[TH(f_l+x) for x in ['x','select']])]
@@ -766,7 +776,15 @@ def index():
         t1=DIV('-')
         t2=''
     return dict(x=DIV(TABLE(*trs,_class="table"),t1,XML(t2)))
-    
+def inf():
+    import k_user
+    msg,user_inf=k_user.how_is_connect('test')
+    user_log=k_user.USER_LOG()
+    return msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+str(BEAUTIFY(user_log.report()))# str(BEAUTIFY(request))
+def user_inf():
+    import k_user
+    user_log=k_user.USER_LOG()
+    return dict(report=XML("<h3>logged Users inf:</h3><hr>"+ str(BEAUTIFY(user_log.report()))))
 def _xxprint_reset_html():
     import k_err
     return k_err.xxprint_reset_html()
