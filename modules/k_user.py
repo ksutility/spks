@@ -7,6 +7,18 @@ from x_data import x_data ,x_data_verify_task
 import k_date
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 db_path='applications\\spks\\databases\\'
+class USER_LOG():
+    inf={}
+    def __init__(self,ip='',un='',xtime=''):
+        if ip:
+            if not ip in self.inf:
+                self.inf[ip]={'un':un,'start':xtime}
+            else:
+                if un and (not self.inf[ip]['un'] or un not in self.inf[ip]['un']):
+                    self.inf[ip]['un']+= ',' + un
+                    self.inf[ip]['start']+= ',' + xtime
+    def report(self):
+        return (self.inf)
 def load_user_inf():
     db1=DB1(db_path+'user.db')
     rows,titles,rows_num=db1.select('user',where={},limit=0)
@@ -157,3 +169,16 @@ def jobs_masul_old(jobs,x_data_s):
                 tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
                 continue
     return tt
+def how_is_connect(subject):
+    import k_date,os
+    from gluon import current
+    
+    xdate=k_date.ir_date('yymmdd')
+    xtime=k_date.ir_date('hh:gg:ss')
+    file_n=os.path.join("c:\\","temp",'user_log',f'{xdate}-{subject}-user_log.txt')
+    u_log=USER_LOG(ip=current.request.client,un=current.session["username"],xtime=xtime)
+    log=f'{xtime} , {current.request.client} , {current.session["username"]} , {current.request.url}'
+    with open(file_n,"a",encoding='utf8') as f:
+        f.writelines('\n'+log)
+    return file_n + " | " +log , u_log.report()
+#how_is_connect()
