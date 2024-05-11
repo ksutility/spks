@@ -650,6 +650,39 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
             trs.append(TR(f['title'],f['value']))
     trs.append(TR(TD(A('Cancel- goto list',_href=URL(args=(args[0],args[1]))),_style='width:40%'),TD(INPUT(_type='submit',_style='width:100%,background-color:#ff00ff'),_style='width:60%')))
     return TABLE(*trs,_style='width:100%')
+#-----------------------------------------------
+#@k_tools.x_cornometer
+def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,request={}):#,all_cols,ref_i):
+    #use in:2(show_xtable,show_kxtable)
+    #cm=Cornometer(i)
+    '''
+    INPUTS:
+    ------
+        xid:int
+            id of 
+            
+    '''
+    tds=[]
+    if id_cols:
+        tds+=['{:03d}'.format(xid)]
+    #import k_py_list
+    #x_dic=k_py_list.list2dict(titles,row)
+    x_dic=dict(zip(titles,row))
+    
+    for fn in select_cols:#fn=field name
+        if 'hide' in tasks[fn]['prop']:
+            tds.append('*')
+            continue
+        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
+            tds.append('*')
+            continue    
+        x_obj,time_recs=obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
+        
+        #cm.tik(fn+'-1'+str(recs))    
+        tds.append(x_obj['output'])
+        #cm.tik(fn+'-2')
+    #cm.report()    
+    return tds  
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
 @k_tools.x_cornometer
@@ -1008,7 +1041,16 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #_value=obj['file_name']#_value or 
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
         show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
-        upload_link=XML(URL('file','upload',args=['auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':f'sql;{db_name};{tb_name};{xid};{obj["name"]}','from':'form'}))#'{un}-{user_filename}'
+        import json
+        todo=json.dumps({'do':'sql','db':db_name,'tb':tb_name,'set_dic':{obj['name']:"$filefullname$"},'where':{'id':xid}})
+        
+        upload_link=XML(URL('file','upload',args=['auto']+obj['path'].split(','),
+            vars={'filename':obj['file_name'],'file_ext':obj['file_ext']
+                ,'todo':todo
+                ,'from':'form'}
+            ))#'{un}-{user_filename}'
+        #upload_link=XML(URL('file','upload',args=['auto']+obj['path'].split(','),vars={'filename':obj['file_name'],'file_ext':obj['file_ext'],'todo':{'do':'sql','db':db_name,'tb':tb_name,'set_dic':{obj["name"]:filename},'x_where':{'id':xid}}
+        del_link=XML(URL('file','delete',args=['auto']+obj['path'].split(',')+[_value], vars={'todo':todo}))
         def file_rename_manage(old_file_full_name,new_file_name):
             '''
                 بررسی و تشخیص تغییر سیستم نام گذاری فایل بعد از دریافت و ذخیره سازی فایل با روش نام گذاری قبلی
@@ -1016,20 +1058,22 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             '''
             if old_file_full_name and new_file_name:
                 old_file_name=old_file_full_name.rpartition(".")[0]
-                if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}" class="bg-danger">error<h3>""" 
+                if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}\n old name = {old_file_name}" class="bg-danger">error<h3>""" 
             return ''
-        msg1=file_rename_manage(_value,obj['file_name'])
+        msg1=file_rename_manage(_value,obj['file_name'])#check fine is renamed ?
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
-        opt=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
+        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
+        bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
+        
         obj['input']=XML(f'''
             <div >
-            {opt}{msg1}
+            {bt_view}{msg1}{bt_del}
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
         obj['output']=XML(f'''
             <div >
-                {opt}{msg1}
+                {bt_view}{msg1}
             </div> ''')    
         """    
         def path_x(pre_folder,file_name,pattern):
