@@ -239,7 +239,7 @@ def get_table_filter(tasks,x_data_s):
                             +'<td><input type="submit"></td></tr></table></form></div>')
     return select_cols, all_cols,htm_table_filter
 #-----------------------------------------------------------------------------
-@k_tools.x_cornometer
+#@k_tools.x_cornometer
 def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref_i):
     #use in:2(show_xtable,show_kxtable)
     #cm=Cornometer(i)
@@ -441,7 +441,7 @@ def show_table():
             return DIV(XML(style1),t1,table) 
     return 'error: argumwnt is needed'
 #----------------------------------------------------------------------  
-@k_tools.x_cornometer
+#@k_tools.x_cornometer
 def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     '''
     goal:
@@ -734,7 +734,7 @@ def show_sptable(x_data,ref_col):
 # ==== level 0 (use by user)=========================================================================================================
 def index():
     f_l='لیست - '
-    ff={'prj':'پروژه ها','paper':'نامه ها','a_dspln':'رسته های مهندسی','user':'لیست همکاران','job':'سمتها'}
+    ff={'a_sub_p':'پروژه ها','paper':'نامه ها','a_dspln':'رسته های مهندسی','user':'لیست همکاران','job':'سمتها'}
     ff1={'xtable':'{}','select':'-'}
     trs=[]
     lnk="""/spks/""" 
@@ -760,27 +760,28 @@ def index():
     }
     if session["admin"]:
         trs+=[TR(*[TH(f_l+x) for x in ['0','x','kx','sp','select']])]#[TR(TH(f_l+'0'),TH(f_l+'X'),TH(f_l+'KX'),TH(f_l+'SP'),TH('update'))]
-        for arg in [['prj','a'],['paper','a'],['a_dspln','a'],['user','user'],['job','a']]:#,'a'),('eng','a'),('user','user')]:
+        for arg in [['a_sub_p','a'],['paper','a'],['a_dspln','a'],['user','user'],['job','a']]:#,'a'),('eng','a'),('user','user')]:
             trs+=[TR(*[A(ff[arg[0]],_href=URL(xtbl,args=(arg)))   for xtbl in ['table','xtable','kxtable','sptable','select']])]
         t1=DIV(DIV(A('admin',_href=URL('spks','default','admin'))),
               DIV(A('xxprint_reset_html',_href=URL('spks','data','_xxprint_reset_html'),_target="x_frame"))
               )
         t2="<hr>"      
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])    
-        t2+=f"<br><a href={URL('user_inf')}>همکاران وارد شده به سیستم</a> "
+        
     else:
         #redirect(URL('spks','file','index'))
         trs+=[TR(*[TH(f_l+x) for x in ['x','select']])]
-        for arg in [['prj','a'],['paper','a'],['a_dspln','a'],['user','user']]:
+        for arg in [['a_sub_p','a'],['paper','a'],['a_dspln','a'],['user','user']]:
             trs+=[TR(*[A(ff1[xtbl].format(ff[arg[0]]),_href=URL(xtbl,args=(arg)))   for xtbl in ['xtable','select']])]
         t1=DIV('-')
         t2=''
+    t2+=f"<br><a href={URL('user_inf')}>همکاران وارد شده به سیستم</a> "
     return dict(x=DIV(TABLE(*trs,_class="table"),t1,XML(t2)))
 def inf():
     import k_user
     msg,user_inf=k_user.how_is_connect('test')
-    user_log=k_user.USER_LOG()
-    return msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+str(BEAUTIFY(user_log.report()))# str(BEAUTIFY(request))
+    
+    return msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+ str(BEAUTIFY(request))
 def user_inf():
     import k_user
     user_log=k_user.USER_LOG()
