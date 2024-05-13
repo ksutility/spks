@@ -450,16 +450,21 @@ x_data={
             },
             'tasks':{
                 'prj':{'type':'reference','width':'5','title':'پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'prj_name':{'type':'auto','len':'50','auto':"{{=__objs__['prj']['output_text'][5:]}}",'title':'نام پروژه'},
                 'sub_p':{'type':'reference','width':'5','title':'زیر پروژه','ref':{'db':'a_sub_p','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
+                'sub_p_name':{'type':'auto','len':'50','auto':"{{=__objs__['sub_p']['output_text'][4:]}}",'title':'نام زیر پروژه'},
                 'step':{'type':'reference','width':'5','title':'مرحله','ref':{'db':'a_step','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}"'''},'prop':['update']},
+                'step_name':{'type':'auto','len':'50','auto':"{{=__objs__['step']['output_text'][3:]}}",'title':'نام مرحله'},
                 'dspln':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'dspln_name':{'type':'auto','len':'50','auto':"{{=__objs__['dspln']['output_text'][3:]}}",'title':'نام دیسیپلین'},
                 'doc_t':{'type':'reference','width':'5','title':'نوع مدرک','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'doc_t_name':{'type':'auto','len':'50','auto':"{{=__objs__['doc_t']['output_text'][3:]}}",'title':'نام نوع مدرک'},
                 'doc_p_code':{'type':'auto','len':'24','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
                 'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':''},
                 'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},               
             },
             'steps':{
-                'pre':{'tasks':'prj,sub_p,step,dspln,doc_t','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'prj,prj_name,sub_p,sub_p_name,step,step_name,dspln,dspln_name,doc_t,doc_t_name','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'doc_p_code,doc_srl_code','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'doc_srl_name','jobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
@@ -476,23 +481,28 @@ x_data={
     #{{=__objs__['doc_srl_code']['select'][__objs__['doc_srl_code']['value']][5:].strip()}}
     'doc_rec':{
         'a':{
-            'base':{'mode':'form','title':'دریافت مدارک','help':'document_record'
+            'base':{'mode':'form','title':'مرکز کنترل مدارک - DCC','help':'document_record'
             },
             'tasks':{
-                'prj':{'type':'reference','width':'5','title':'پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
-                'sub_p':{'type':'reference','width':'5','title':'زیر پروژه','ref':{'db':'a_sub_p','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
-                'step':{'type':'reference','width':'5','title':'مرحله','ref':{'db':'a_step','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}"'''},'prop':['update']},
-                'dspln':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
-                'doc_t':{'type':'reference','width':'5','title':'دسته مدرک','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
-                'doc_p_code':{'type':'auto','len':'24','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
+                'prj':{'type':'reference','width':'5','title':'پروژه','ref':{'db':'doc_num','tb':'a','key':'{prj}','val':'{prj}-{prj_name}'},'prop':['update']},
+                'sub_p':{'type':'reference','width':'5','title':'زیر پروژه','ref':{'db':'doc_num','tb':'a','key':'{sub_p}','val':'{sub_p}-{sub_p_name}'
+                    ,'where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
+                'step':{'type':'reference','width':'5','title':'مرحله','ref':{'db':'doc_num','tb':'a','key':'{step}','val':'{step}-{step_name}'
+                    ,'where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}"'''},'prop':['update']},
+                'dspln':{'type':'reference','width':'5','title':'دیسیپلین','ref':{'db':'doc_num','tb':'a','key':'{dspln}','val':'{dspln}-{dspln_name}'
+                    ,'where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}" AND step =  "{{=__objs__['step']['value']}}"'''},'prop':['update']},
+                'doc_t':{'type':'reference','width':'5','title':'دسته مدرک','ref':{'db':'doc_num','tb':'a','key':'{doc_t}','val':'{doc_t}-{doc_t_name}'
+                    ,'where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}" AND step =  "{{=__objs__['step']['value']}}" AND dspln =  "{{=__objs__['dspln']['value']}}"'''},'prop':['update']},
+                'doc_p_code':{'type':'auto','len':'40','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
                 #'test1':{'type':'auto','title':'پیش کد مدرک','auto':"{{=__objs__['doc_p_code']['value']}}"},
                 'doc_srl_code':{'type':'reference','len':'4','lang':'en','title':'کد سریال مدرک','ref':{'db':'doc_num','tb':'a','key':'{doc_srl_code}','val':'{doc_srl_code}-{doc_srl_name}','where':'''doc_p_code = "{{=__objs__['doc_p_code']['value']}}"'''},'prop':['update']},#
                 'doc_srl_name':{'type':'auto','len':'250','title':'نام مدرک','auto':"{{=__objs__['doc_srl_code']['output_text'][5:].strip()}}"}, #"{{=__objs__['doc_srl_code']['select'][doc_srl_code]}}"
-                'doc_a_code':{'type':'auto','len':'24','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
+                'doc_a_code':{'type':'auto','len':'50','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
                 'rev':{'type':'index','len':'2','ref':{'db':'doc_rec','tb':'a','key':'{id}','val':'{rev}','where':'doc_p_code = {doc_p_code}'},'title':'بازبینی','prop':['update']},
                 'date':{'type':'fdate','width':'10','title':'تاریخ مدرک','prop':['update']},
                 'file_edt':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"doc,docx,xls,xlsx,ppt,pptx,dwg,zip,rar",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت تغییر پذیر'},
                 'file_fix':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت ثابت'},
+                'snd_ppr':{'type':'text','len':'240','title':'شماره نامه های ارسال فایل'},
             },
             'steps':{
                 'pre':{'tasks':'prj,sub_p,step,dspln,doc_t','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -592,7 +602,7 @@ x_data={
             },
             'steps':{
                 's0':{'tasks':'lable_1,idea,idea_bnft,idea_dscr','jobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'lable_1,vrfy_rslt,vrfy_meta','jobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'lable_2,vrfy_rslt,vrfy_meta','jobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'clnt_stf,clnt_stf_dscr','jobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
@@ -601,7 +611,7 @@ x_data={
                 'view2':['clnt_stf','clnt_stf_dscr'],
             },
             'labels':{
-                'lable_1':'از اینکه با ارائه پیشنهادات مفید مارا در بهبود شرکت یاری می فرمایید بسیار سپاسگذاریم ',
+                'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
                 'lable_2':'باید تاریخ ، نام فرد و نظر فرد برای هر کدام از افراد موثر در بررسی ثبت شود',
             },
             'cols_filter':{'':'همه',},
