@@ -20,7 +20,7 @@ now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
 
-debug=False # True: for check error
+debug= True #False # True: for check error
 db_path='applications\\spks\\databases\\'
 
 
@@ -219,7 +219,7 @@ def xform():#view 1 row
             htm_1=[]
             for field_name in step['tasks'].split(','):
                 if field_name in x_data_s['labels']:
-                    hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center"),_class='row border-top')]
+                    hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
                 else:
                     hh=show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode='output')
                     hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
@@ -250,7 +250,7 @@ def xform():#view 1 row
             hx={'data':[],'stp':'','app':[]}
             for field_name in x_data_s['steps'][step_n]['tasks'].split(','):
                 if field_name in x_data_s['labels']:
-                    hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center"),_class='row border-top')]
+                    hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
                 else:
                     hh=show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode='input')
                     hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
@@ -274,6 +274,7 @@ def xform():#view 1 row
         #-- def show_form:start ----------------------------------------------
         def inf_g():
             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+            xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'---xid==-1 : '+str(xid=='-1')])
             if xid=='-1':
                 form_sabt_data={x:'' for x in titles}
                 f_nxt_s=0
@@ -315,9 +316,13 @@ def xform():#view 1 row
             htm_form+=[app_review()]
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
+        x_arg=request.args[:2]
+        xid=int(xid)
         htm_form+=[
-                   A('لیست فرم',_href=URL('xtable',args=request.args),_class='btn btn-primary'),'-',
-                   A('تغییرات',_title='تغییرات این ثبت از فرم',_href='javascript:void(0)',_onclick=f'j_box_show("{xlink}")',_class='btn btn-primary'),]    
+                A('لیست فرم',_href=URL('xtable',args=request.args),_class='btn btn-primary'),'-',
+                A('تغییرات',_title='تغییرات این ثبت از فرم',_href='javascript:void(0)',_onclick=f'j_box_show("{xlink}")',_class='btn btn-primary'),'-',
+                A('+',_title='فرم بعدی',_href=URL('xform',args=x_arg+[str(xid+1)]),_class='btn btn-primary'),'-',  
+                A('-',_title='tvl rfgd',_href=URL('xform',args=x_arg+[str(xid-1)]),_class='btn btn-primary'),]                
         return DIV(htm_form,_dir="rtl")
     #-- def xform:start ------------------------------------------------------------
     x_data_s,db_name,tb_name,msg=_get_init_data()
@@ -325,8 +330,8 @@ def xform():#view 1 row
     xid=request.args[2] or 1
     return dict(htm=show_form(x_data_s,db1,tb_name,xid))
 # ------------------------------------------------------------------------------------------ 
-def _save_out(htm_form,tt,args):
-    sec=2500 if debug and session["admin"] else 1
+def _save_out(htm_form,tt,args,err_show=False):
+    sec=2500 if err_show or (debug and session["admin"]) else 1
     htm_form+=[DIV(DIV(DIV(A('بازگشت به فرم',_href=URL('xform',args=args),_class="btn h4 btn-primary text-light"),_class="col-7"),
                     DIV("ثانیه تا برگشت اتوماتیک به فرم",_class="col-4 h6 text-right"),
                     DIV("timer",_id="x_time_counter",_class="col-1 bg-info text-light h3 text-center"),
@@ -430,7 +435,9 @@ def save():
     x_data_s,db_name,tb_name,msg=_get_init_data()
     #xxxprint(msg=[db_name,tb_name,msg],vals=x_data_s)
     db1=DB1(db_path+db_name+'.db')
+    htm_form=[]
     xid=request.args[2] or 1
+    htm_form=[DIV('request.args= '+str(request.args[2]),_class="row")]
     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
     #xreport_var([rows,titles])
     #form_sabt_data= data of 1 sabt /record of 1 form
@@ -441,25 +448,31 @@ def save():
         form_sabt_data=dict(zip(titles,rows[0]))
         f_nxt_s=int(form_sabt_data['f_nxt_s'] or '0')
     steps=x_data_s['steps']
-    htm_form=[]
+    
     #xreport_var([form_sabt_data,f_nxt_s])
     if request.vars['text_app']:# if form is filled and send for save
         text_app=request.vars['text_app'].lower()
-        htm_form=[DIV(request.vars['text_app'],_class="row")]
+        htm_form=[DIV('text_app= '+request.vars['text_app'],_class="row")]
         tt,xid,r_dic=save1(text_app,xid)
+
+        err_show=True
         try:
-            if r_dic['exe']['done']:
+            if r_dic['exe']['done'] and xid !=0:
                 htm_form+=[DIV("ذخیره تغییرات با موفقیت انجام شد",_class="container bg-info text-light h3 text-center")]
+                err_show=False
             else:
-                htm_form+=[DIV(r_dic,_class="container bg-info text-light h3 text-center")]
-        except:
-            htm_form+=[DIV(r_dic,_class="container bg-info text-light h3 text-center")]
+                htm_form+=[DIV("ذخیره سازی با مشکل مواجه شد به مسئول سیستم اطلاع دهید",_class="container bg-danger text-light h3 text-center")]
+                htm_form+=[DIV("xid =" +str(xid) + " | r_dic['exe']= " + str(r_dic['exe']),_class="container bg-warning text-light h3 text-center")]
+                htm_form+=[DIV(r_dic)]
+        except Exception as err:
+            htm_form+=[DIV("err = " +str(err),_class="container bg-danger text-light h3 text-center")]
+            htm_form+=[DIV(r_dic)]
     else:
         tt=''
     #xreport_var([text_app,htm_form,tt,xid])
     args=request.args
     args[2]=xid
-    _save_out(htm_form,tt,args)
+    _save_out(htm_form,tt,args,err_show)
     try:
         #
         return dict(htm=DIV(htm_form)) #,x=response.toolbar())
@@ -530,7 +543,7 @@ def list_0():
     from k_table import K_TABLE
     tt= K_TABLE.creat_htm ( trs,titels,table_class="1")                     
     return dict(htm=DIV(tt,_dir='rtl'))
-@k_tools.x_cornometer
+#@k_tools.x_cornometer
 def xtable():
     cornometer=Cornometer("xtable")
     def xtable_show(tb_name,tasks,where,x_data_s):
