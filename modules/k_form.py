@@ -685,7 +685,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
     return tds  
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
-@k_tools.x_cornometer
+#@k_tools.x_cornometer
 def reference_select (ref_0,form_nexu=False,form_data={}):
     debug=False
     #ceck cach
@@ -744,7 +744,7 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
     return {}#'msg':ref['where']}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
-@k_tools.x_cornometer
+#@k_tools.x_cornometer
 def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''): 
     import k_htm
     form_update_set_param="form;form"
@@ -985,8 +985,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
             this field info is show in ["auto"] item or in ["ref"] item
         '''
-        obj["value"]=obj['output_text']=obj['output']=_value #au_txt
-        obj['help']=""
+        obj["value"]=obj['output_text']=_value #au_txt
+        obj['output']=DIV(_value,_class="input_auto")
+        obj['help']="خود کار"
         if 'input' in need :
             if 'auto' in obj:
                 au_txt=obj['auto']
