@@ -9,7 +9,7 @@ from k_ui import var_report
 import datetime
 import jdatetime #khayyam
 from k_err import xxxprint,xxprint,xprint
-debug=0 #False # True#
+debug=1 #False # True#
 today=jdatetime.date.today().strftime('%y-%m-%d') #khayyam.JalaliDate.today().strftime('%y-%m-%d')
 def f_now():
     x=str(datetime.datetime.now())#trftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
@@ -295,7 +295,7 @@ class DB1():
             return rep
         #----------
         x_v="?,"*(len(val_list))
-        sql_t='INSERT OR IGNORE INTO {} ({}) VALUES ({})'.format(table_name,",".join(name_list),x_v[:-1])
+        sql_t='INSERT INTO {} ({}) VALUES ({})'.format(table_name,",".join(name_list),x_v[:-1])#NSERT OR IGNORE INTO
         #ui.msg(sql_t+"/n"+str(val_list))
         rep=self._exec(sql_t, val_list)
         xid=self.cur.lastrowid
