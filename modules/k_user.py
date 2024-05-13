@@ -11,12 +11,15 @@ class USER_LOG():
     inf={}
     def __init__(self,ip='',un='',xtime=''):
         if ip:
+            if not un:un=''
             if not ip in self.inf:
-                self.inf[ip]={'un':un,'start':xtime}
+                self.inf[ip]={'un':[un],'start':[xtime],'log_count':0,'last':xtime}
             else:
                 if un and (not self.inf[ip]['un'] or un not in self.inf[ip]['un']):
-                    self.inf[ip]['un']+= ',' + un
-                    self.inf[ip]['start']+= ',' + xtime
+                    self.inf[ip]['un']+= [un]
+                    self.inf[ip]['start']+= [xtime]
+            self.inf[ip]['log_count']+=1     
+            self.inf[ip]['last']=xtime   
     def report(self):
         return (self.inf)
 def load_user_inf():
