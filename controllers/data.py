@@ -646,6 +646,9 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     if not x_data_s:
         return msg
     else:
+        if 'auth' in x_data_s['base']:
+            if not (session["admin"] or k_user.user_in_jobs(session["username"],x_data_s['base']['auth'],{})):
+                return DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
         tasks=x_data_s['tasks']
@@ -660,8 +663,11 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             return DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s))
         else:
             table,nr,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
-            htm_head=DIV(TABLE(TR(  TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
-                                ,TD(A(str(nr),_title="rows:"),_width='40px')
+            htm_head=DIV(TABLE(TR(  
+                                TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
+                                ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='40px')
+                                ,TD(A("F",_title="Table",_class="btn btn-primary",_href=URL('form','xtable',args=args,vars=request.vars)),_width='40px')
+                                ,TD(A(str(nr),_title="تعداد نمایش داده شده"),_width='40px')
                                 ,TD(DIV('...',_id='viewcell',_name='viewcell'))),_class="table0"))#,_style='position:sticky;top:0px')
             #return DIV(XML(style1_x),XML(script1),htm_table_filter,htm_head,table,)
             return DIV(XML(script1),htm_table_filter,htm_head,table,)
@@ -766,8 +772,9 @@ def index():
               DIV(A('xxprint_reset_html',_href=URL('spks','data','_xxprint_reset_html'),_target="x_frame"))
               )
         t2="<hr>"      
-        t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])    
-        
+        t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
+        t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
+     
     else:
         #redirect(URL('spks','file','index'))
         trs+=[TR(*[TH(f_l+x) for x in ['x','select']])]
@@ -842,40 +849,47 @@ def select_i(x_data):
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']#tasks[args[0]]
         ##-----
-        val_dic={x:tasks[x]['title'] for x in tasks}
+        val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
         s1=k_htm.select(_options=val_dic,_name='sel1',_value=request.vars['sel1'],_onchange="submit();")#$('#res1').text($(this).val())")
         ##-----
         #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
         ssw_select,ssl_table='',''
-        if request.vars['sel1']:
-            sel1=request.vars['sel1']
-            traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
-            val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
-            #print(str(val_dic))
-            #ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="set_val();")
-            ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="submit();")
-            #----------------------------------------------------------------------------------------------------------
-            #ssl_table=sql select linked table : a table split category of a field and liked to each
-            def remove(base_str,chars):
-                #remove chars from base_str
-                for x in chars:
-                    base_str=base_str.replace(x,'')
-                return base_str
-            #---- 
-            result1='"{}"{}'.format(request.vars["sel1"],request.vars["sign"])
-            ssl_table=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','Grup','number']])),
-                        TBODY(*[TR(A(i+1,_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
-                                   ,val_dic[v]['title'],val_dic[v]['num']) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
-                        #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
-            #----
-        ##-----
+        #--------------------------------------------------------------------------------------------------------------------------------------
+        #if request.vars['sel1']:
+        sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[1] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
+        #if sel1 in ["None",None]:sel1='prj'
+        traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
+        val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
+        #print(str(val_dic))
+        #ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="set_val();")
+        ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="submit();")
+        #---------------------------------------------------------------------------
+        #ssl_table=sql select linked table : a table split category of a field and liked to each
+        def remove(base_str,chars):
+            #remove chars from base_str
+            for x in chars:
+                base_str=base_str.replace(x,'')
+            return base_str
+        #---- 
+        result1='"{}"{}'.format(sel1,(request.vars["sign"]) ) if (request.vars["sign"] and request.vars["sign"]!="-") else sel1 + " = "
+        ssl_table=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','T','F','Grup','number']])),
+                    TBODY(*[TR(
+                                str(i+1)
+                                ,A('T',_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
+                                ,A('F',_href=URL('form','xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
+                                ,val_dic[v]['title']
+                                ,val_dic[v]['num']
+                            ) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
+                    #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
+        #----
+        ##------------------------------------------------------------------------------------------------------------------------------------------
         #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
-        i1=k_htm.select(_options=["=","!=",">","<","like"],_name='sign',_value=request.vars['sign'],_onchange="submit();")
+        i1=k_htm.select(_options=[" = "," != "," > "," < "," like "],_name='sign',_value=request.vars['sign'],_onchange="submit();")
         v=request.vars
         result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
         result_htm=XML(f'<div name="result" id="result">{result}</div>')
         return XML(f'''<form id="form5"><label>data_filter(dict)</label>
-                    {TABLE(TR(s1,i1,ssw_select,result_htm))}
+                    {DIV(DIV(s1,_class="col-4"),DIV(i1,_class="col-2"),DIV(ssw_select,_class="col-4"),DIV(result_htm,_class="col-2"),_class="row")}
                     <input type="submit">
                     {A('Open Selected List-باز کردن لیست انتخاب شده',_href=URL('xtable',args=args,vars={'data_filter':result}))}
                     </form>
@@ -1027,7 +1041,7 @@ def rc():#run 1 command
         '''
         goal:
             copy (append) inf of tb1 to tb2
-                
+            اطلاعات یک جدول را به یک جدول دیگر اضافه می کند
             dont delete exist inf in 2nd table
         inputs:
         -------
@@ -1082,6 +1096,44 @@ def rc():#run 1 command
                 trs+=[[str(i),str(update_dic),str(rep)]]
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['i','update dict','report'],table_class='1')
+        return dict(x=DIV(rep))
+    elif cmd=='find_linked_target_fields': 
+        '''
+        goal:
+            find list of linked_target_field in all form for 1 linked_base_field
+            
+            بررسی اینکه چه فیلدهایی در چه جداولی (مقصد لینک) به اطلاعات یک فیلد در یک جدول (مبدا لینک) لینک هستند
+            لینک هستند یعنی اگر فیلد مبدا تغییر کند فیلدهای مقصد متناضر با آن نیز باید تغییر کنند
+        sample:
+            /spks/data/rc/find_linked_target_fields    
+        inputs:
+        -------
+            internal:dt
+                tb1:str
+                    base table name in db1
+                db1:str
+                    base db name
+                field1:str 
+                    base field name
+                
+        '''
+        dt={'db1':'a_sub_p','tb1':'a','field1':'*'}
+        trs=[]
+        i=0
+        for db,db_data in x_data.items():
+            for tb,tb_data in db_data.items():
+                for fld,fld_data in tb_data['tasks'].items():
+                    db_tb=db+","+tb
+                    if 'ref' in fld_data:
+                        i+=1
+                        ref=fld_data['ref']
+                        db_tb2=ref['db']+","+ref['tb']
+                        trs+=[[str(i),'ref',db_tb,fld,fld_data['type'],db_tb2,str(fld_data['ref'])]]
+                    if 'auto' in fld_data:
+                        i+=1
+                        trs+=[[str(i),'auto',db_tb,fld,fld_data['type'],'',str(fld_data['auto'])]]
+        from k_table import K_TABLE
+        rep=K_TABLE.creat_htm(trs,['i','r-a','db_tb1','fld','type','db_tb2','data'],table_class='1')
         return dict(x=DIV(rep))
     #return dict(table=TABLE(THEAD([rep[0]],_class="thead-light"),TBODY(rep[1:]),_class="table table-bordered table-hover"))  
     return dict(x=k_htm.val_report(rep))
