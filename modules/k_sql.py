@@ -176,10 +176,11 @@ class DB1():
         return " AND ".join(["`{}`='{}'".format(n,where_dic[n]) for n in where_dic])
     def make_select_role(self,table_name,name_list):
         return "SELECT * FROM {} WHERE ".format(table_name) + self.make_where_role(name_list)
-    def count(self,table_name):
+    def count(self,table_name,where=''):
         result={}
         try:
-            sql="SELECT COUNT(*) FROM {} ".format(table_name)
+            sql="SELECT COUNT(*) FROM {} ".format(table_name) 
+            if where:sql+="WHERE {} ".format(where) 
             result=self._exec(sql,fetch=True)
             result['count']=result['data'][0][0]
         except Exception as err:
@@ -215,7 +216,7 @@ class DB1():
                 x_offset=(x_page-1)* x_page_len 
                 return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
         #-------------------------------------------------------------------------------------
-        row_num=0
+        row_num=self.count(table_name=table_name,where=where)['count']
         if where:
             if type(where)==dict:
                 find1=self.find_row(table_name,where)
