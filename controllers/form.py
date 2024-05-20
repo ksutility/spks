@@ -20,7 +20,7 @@ now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
 
-debug= True #False # True: for check error
+debug= False #True #False # True: for check error
 db_path='applications\\spks\\databases\\'
 
 
@@ -455,7 +455,7 @@ def save():
         htm_form=[DIV('text_app= '+request.vars['text_app'],_class="row")]
         tt,xid,r_dic=save1(text_app,xid)
 
-        err_show=True
+        err_show=False#:True
         try:
             if r_dic['exe']['done'] and xid !=0:
                 htm_form+=[DIV("ذخیره تغییرات با موفقیت انجام شد",_class="container bg-info text-light h3 text-center")]
@@ -624,7 +624,7 @@ def xtable():
             
             trs.append(TR(*tds))
         cc='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
-        return TABLE(thead,TBODY(*trs),_class=cc),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
+        return TABLE(thead,TBODY(*trs),_class=cc),len(rows),rows_num,htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
     #----------------------------------------------------------------------------------------
     #tasks,f_views
     script1='''<script>
@@ -653,7 +653,7 @@ def xtable():
                 return dict(htm=H1("شما اجازه دسترسی به این فرم را ندارید"))
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']
-        table,nr,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
+        table,nr,rows_num,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
         jobs=next(iter(x_data_s['steps'].items()))[1]['jobs']
         #print(f'job={job}')
         if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}):
@@ -661,7 +661,10 @@ def xtable():
         else:
             new_record_link='-'
         htm_head=DIV(TABLE(TR(  TD(new_record_link,_width='20px')
-                            ,TD(A(str(nr),_title="rows:"),_width='40px')
+                            ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='30px')
+                            ,TD(A("T",_title="Table",_class="btn btn-primary",_href=URL('data','xtable',args=args,vars=request.vars)),_width='30px')
+                            ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
+                            ,TD(A(f"{rows_num}",_title="تعداد کل بر اساس فیلتر جاری"),_width='30px')
                             ,TD(DIV('...',_id='viewcell',_name='viewcell')))),_style='position:sticky;top:0px')
         return dict(htm=DIV(XML(style1),XML(script1),htm_table_filter,htm_head,table,))
 #--------------------------------------
