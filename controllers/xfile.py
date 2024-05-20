@@ -17,6 +17,9 @@ body {
     font-size: 20px;
     
 }
+@media print {
+  h1 {page-break-before: always;}
+}
 h1:before {
 	content: counter(c_h1)") ";
 	counter-increment: c_h1;
@@ -353,6 +356,12 @@ def _read_markup(mm_case):
             pdf=markmin2pdf(data)  # requires pdflatex 
             """
             return markmin2html(data)#[2:-2]
+        elif ext=='md1':
+            """
+                module\mistune3\
+            """
+            import mistune3
+            return mistune3.html(data)
         elif ext=='md':
             """
                 module\mistune.py
@@ -387,7 +396,12 @@ def _read_markup(mm_case):
         #return str(lines)   
         if "---" in lines_rs:
             n=lines_rs.index('---')
-            xdic=eval(''.join(lines_rs[:n]))
+            try:
+                xdic=eval(''.join(lines_rs[:n]))
+            except Exception as err:
+                import traceback
+                tb = traceback.format_exc()
+                return f'ERROR<br>خطا در محتوای داخل فایل <br> در قسمت دیکشنری تعریف متغرها در بالای فایل قبل از 3 دش<hr>file={f_name}<hr>{tb}'
             #return (str(xdic))
             xlines=lines[n+1:]
             xlines=[template.render(content=x,context=xdic) for x in xlines]
