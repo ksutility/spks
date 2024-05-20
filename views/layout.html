@@ -126,8 +126,14 @@
 								<a class="dropdown-item" href="{{=URL('form','list_0')}}">مدیریت فرمها</a>
 								<!-- 
 								<a class="dropdown-item" href="{{=URL('file','index',args=('paper','pre'))}}">پیش نویس نامه </a>
+								<a class="dropdown-item" href="{{=URL('xfile','read',
+									args=('AQC0-SPX-A0-KM-RP-1001-1-021224-FORM-INTRO-media.mm'),
+									vars={'xpath':'D:/ks/web2py/Applications/spks/help'}
+									)}}">راهنما</a>
 								-->
                                 <a class="dropdown-item" href="{{=URL('data','index')}}">جداول اطلاعات</a>
+								
+								<a class="dropdown-item" href="http://192.168.80.133/spks/xfile/read/AQC0-SPX-A0-KM-RP-0000-masterlist.ksm?xpath=D:/ks/I/web2py/Applications/spks/help">راهنما</a>
 								<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								  ویرایشگر فارسی 
 								</a> 
@@ -139,10 +145,16 @@
                       </li>
                 </ul>
             </td>
-			
-            {{import k_date}}
-            <td width="15%">{{=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}</td>
-            <td width="70%">
+ 
+			<td width="10%">
+				<a class="btn btn-primary" href="{{=URL('file','index')}}" title="اشتراک فایل">S</a>
+				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'))}}" title="کتابخانه">L</a>
+				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">F</a>
+				<a class="btn btn-primary" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
+			</td>
+			{{import k_date}}
+			<td width="10%">{{=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}</td>
+            <td width="60%">
 				
 					<a title='
 					مجموعه سیستم های هوشمند و یکپارچه  مدیریت اسناد
