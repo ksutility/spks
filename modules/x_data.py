@@ -211,7 +211,7 @@ x_data={
             'steps':{
                 'pre':{'tasks':'prj,name,code','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 'inf':{'tasks':'code2,name2,des,date','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
-                'auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''}
+                'set_auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'input':['prj','code','name','des','cat_1','cat_2'],
@@ -346,18 +346,24 @@ x_data={
                 'act_todo':{'type':'text','width':'150','title':'ارجاع نامه','prop':[]},
                 'x_act_todo':{'type':'text','width':'150','title':'اقدامات لازم','prop':[]},
                 'x_act_rec':{'type':'text','width':'150','title':'اقدامات انجام شده','prop':[]},
-                'x_act_pey':{'type':'text','width':'150','title':'پیگیری','prop':[]},                 
+                'x_act_pey':{'type':'text','width':'150','title':'پیگیری','prop':[]},      
+                'x_act_type':{'type':'select','title':'نوع اقدام','select':{'I':'INFO-اطلاع','D':'DO-اقدام','F':'FOLLOW UP-پیگیری','DF':'DO & FOLLOW UP-اقدام و پیگیری','OK':'ALL ACT DONE-اقدامات انجام شده'}},
                  #,'get_inf':{'type':'xlink','width':'20','title':'دانلود','link':{'pro':['ksw','aqc','import_paper_inf'],'args':['{lno}']},'prop':['hide']}                
             },
             'steps':{
                 'pre':{'tasks':'prj_id,prj1,prj2','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'date_s,date_e','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'lno,sbj','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                's1':{'tasks':'lable_1,x_act_type,man_crt,x_num,x_des,x_act_rec,act_todo,x_act_pey,x_act_todo','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'lable_2,x_act_type','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'date_s,date_e,lno,sbj','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'input':['prj_id','man_crt','x_num','x_des','x_act_todo','x_act_rec','x_act_pey','act_todo'],
                 'view1':['lno','lno_t','sbj'],
                 'view2':['comment','date_s','date_e','cdate','io_t','outbox','man_ar_mng','paper_num','attach','folder'],
+            },
+            'labels':{
+                'lable_1':'فیلد ارجاع نامه توسط نرم افزار اسکرپ اتوماسیون پر می شود در زمان بررسی هر نامه باید آنرا خالی کرد تا نشانه تکمیل اقدامات لازم باشد',
+                'lable_2':' اگر فیلد ارجاع نامه  پر باشد  حتمی باید اقدام جدید را بررسی کرد - حتی اگر فیلد نوع اقدام نیاز به اقدامی را نشان ندهد ',
             },
             'cols_filter':
                 {'':'همه',
@@ -371,11 +377,11 @@ x_data={
                 #cols_filter={'':'همه','lno,sbj':'2',}
             'data_filter':
                 {'':'همه نامه ها',
-                'prj is Null':'نیاز به تعیین پروژه',
-                'prj = "36"':'پروژه پیوندراه',
-                'prj = "29"':'پروژه گیتها',
-                'prj = "29" AND x_des like "%L-%"':'-Lپروژه گیتها',
-                'prj = "48"':'پروژه استاندارد سازی',
+                'prj_id is Null':'نیاز به تعیین پروژه',
+                'prj_id = "36"':'پروژه پیوندراه',
+                'prj_id = "29"':'پروژه گیتها',
+                'prj_id = "29" AND x_des like "%L-%"':'-Lپروژه گیتها',
+                'prj_id = "48"':'پروژه استاندارد سازی',
                 'act_todo != ""':'دارای ارجاع',
                 'x_act_todo != ""':'نیاز به اقدام',
                 'act_pey != ""':'پی گیری',
@@ -391,7 +397,7 @@ x_data={
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
-                'ps':{'type':'text','title':'پسورد','prop':['hide'],'len':'20'},
+                'ps':{'type':'text','title':'پسورد','prop':['hide'],'len':'20','auth':'dcc_prj'},
                 'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
                 'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
                 'name':{'type':'text','title':'نام','len':'15'},
@@ -429,13 +435,13 @@ x_data={
             'base':{'mode':'form','title':'سمتها','help':'document_record'
             },
             'tasks':{
-                'code':{'type':'text','title':'کد سمت'},
+                'code':{'type':'text','title':'کد سمت','len':'10','uniq':''},
                 'title':{'type':'text','title':'عنوان سمت','lang':'fa'},
                 'users':{'type':'reference','title':'لیست همکاران مرتبط','ref':{'db':'user','tb':'user','key':'{un}','val':'{name}-{family}'},'prop':['multiple']},
                 'base_user':{'type':'reference','title':'مسئول','ref':{'db':'user','tb':'user','key':'{un}','val':'{name}-{family}'}},
             },
             'steps':{
-                's0':{'tasks':'code,title','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'title,code','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'users,base_user','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{},
@@ -619,6 +625,37 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
+    'eblag':{
+        'a':{
+            'base':{'mode':'form','title':'ابلاغیه های شرکت'
+            },
+            'tasks':{
+                'name':{'type':'text','title':'عنوان ابلاغیه'},
+                'date':{'type':'fdate','width':'10','title':'تاریخ ابلاغ'},
+                'ppr_num':{'type':'text','title':'شماره نامه'},
+                'f_eblag':{'type':'file','len':'40','title':'فایل ابلاغیه','file_name':'eblag-{{=str(id).zfill(4)}}-{{=date[:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,eblag'},
+                'des':{'type':'text','title':'توضیح'},
+                
+            },
+            'steps':{
+                's0':{'tasks':'name,date,ppr_num','jobs':'rcm_dcc','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_eblag','jobs':'rcm_dcc','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'des','jobs':'dccm','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
+            },
+            'views':{
+                'input':['name','date'],
+                'view1':['ppr_num','f_eblag'],
+                'view2':['des'],
+            },
+            'labels':{
+                'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
+                'lable_2':'باید تاریخ ، نام فرد و نظر فرد برای هر کدام از افراد موثر در بررسی ثبت شود',
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
     'test':{
         'b':{
             'base':{'mode':'form','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
@@ -717,7 +754,7 @@ x_data_verify(x_data)
             'steps':{
                 'pre':{'tasks':'prj,code,name','jobs':'dcc_prj','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 'inf':{'tasks':'code2,name2,des,date','jobs':'dcc_prj','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
-                'auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                'set_auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''},
             },  
             'views':{
             },
