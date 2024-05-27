@@ -32,12 +32,16 @@ def _folder_w_access(args=request.args):
         return {'ok':False,'msg':f'you can not do this action-path={path}'} #False,'error'        
 def _access_denied():
     link=URL('user','login')
+    r0='''
+        <h2> وارد سیستم شوید تا حق دسترسی شما بررسی شود</h2>
+        <BR><a href='javascript:void(0)' onclick="j_box_show('{}',true)"><h3> ورود به سیستم </h3></a>
+    '''.format(link) if not session['username'] else ''
     r1='''
         <div align="center">
-        <h1>شما اجازه دسترسی به این صفحه را ندارید- باید اول وارد سیستم شوید</h1>
-        <BR><a href='javascript:void(0)' onclick="j_box_show('{}',true)"><h3> ورود به سیستم </h3></a>
+        <h1>شما اجازه دسترسی به این صفحه را ندارید</h1>
+        {}
         </div>
-    '''.format(link)
+    '''.format(r0)
     return dict(x=XML(r1))
 def _login_check():
     if not session["username"]: 
@@ -305,8 +309,25 @@ def move():
                             <hr> MOVE ( path1={path1}<br>path2={path2}<br>f_name={f_name})
                             <hr> MOVE  Done - Report = {str(re0)}<hr>{re1}""")
 
-    return f'error in file.move() : <br> path1 ={path1}<br>path2={path2}<br>f_name={f_name}<hr>{str(re0)}<hr>{re1}'
+    #return f'error in file.move() : <br> path1 ={path1}<br>path2={path2}<br>f_name={f_name}<hr>{str(re0)}<hr>{re1}'
     
+    
+    p1=INPUT(_name='path1',_id='path1',_value=path1 ,_style="width:90%")
+    p2=INPUT(_name='path2',_id='path2',_value=request.vars['path2'] ,_style="width:90%")
+    b_s=INPUT(_type='submit')
+    return XML(f'''
+    <form action="" method="post">
+    <div class="container">
+        <div class="row">
+            <div class="col-2">path1=</div>
+            <div class="col-8">{p1}</div>
+        </div>
+        <div class="row">
+            <div class="col-2">path2=</div>
+            <div class="col-8">{p2}</div>
+        </div>
+        <div class="well">{b_s}</div>
+    </div></form>''')
 def name_correct():
     args=request.args
     if args:
@@ -335,6 +356,8 @@ def f_list_set():
     path=request.vars['path']
     return path
 def f_list():#file_browser=file.index
+    if not session['username']:
+        return k_user.shoud_login_msg
     r1=False #_login_check()
     if r1:return dict(address='',m_dir='',upload='',path='',a='',files=XML(r1),folders='',js='')
     '''
@@ -373,8 +396,9 @@ def f_list():#file_browser=file.index
                 
         '''
         def list_match(pt_list,st):
+            st=st.lower()
             for pt in pt_list:
-                if re.findall(pt,st):
+                if re.findall(pt.lower(),st):
                     return True
         #------------------------    
         
@@ -386,11 +410,14 @@ def f_list():#file_browser=file.index
     #print(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
     
     #add_folder_access
-    def m_dir(x_path):
+    def add_my_folder(x_path):
         def afa():
+            '''
+                بررسی اینکه آیا در فلدر جاری می تواند برای شخص جاری فلدر بسازد یا خیر
+            '''
             x_match=r";prj;\w*;\w*;\B"
             if re.findall(x_match,x_path):
-                path=xpath+'\\'.join(args+[session["my_folder"]])
+                path=xpath+'\\'.join(args+[str(session["my_folder"])])
                 if not os.path.exists(path):
                     return True
         #------------------------------------        
@@ -409,9 +436,9 @@ def f_list():#file_browser=file.index
     def x_ext(x_file):
         if x_file['ext']=='.zip':
             return DIV(A('+zip',_title='unzip in this folder',_href=URL(f='unzip',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")
-                ,A('+7z',_title='unzip7 in this folder',_href=URL(f='unzip7',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")) if x_file['ext'] in ['.zip'] and fc_access else ''
-        elif x_file['ext'] in ['.docx']:
-            return DIV(A('+md',_title='doc=>md in this folder',_href=URL(f='doc2md',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")) if x_file['ext'] in ['.docx'] and fc_access else ''
+                ,A('+7z',_title='unzip7 in this folder',_href=URL(f='unzip7',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")) if fc_access else ''
+        elif x_file['ext'] in ['.docx','.doc']:
+            return DIV(A('+md',_title='doc=>md in this folder',_href=URL(f='doc2md',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")) if fc_access else ''
         
         else:
             return x_file['ext']
@@ -424,7 +451,7 @@ def f_list():#file_browser=file.index
     def link_unzip(fname):
         pass
     def link_move(fname):
-        return A('M',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['del'] else '' #_target="x_frame"
+        return A('M',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['move'] else '' #_target="x_frame"
     def link_delete(fname):
         return A('D',_title='Delete',_class='btn btn-danger',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['del'] else '' #_target="x_frame"
     def link_rename(fname):
@@ -568,7 +595,7 @@ def f_list():#file_browser=file.index
                 _class='table table-hover ')
     #k_file_meta.list_unused_json_item(files,folders,meta)
     return dict(js=XML(copyclip_func),
-    m_dir=m_dir(x_path),
+    m_dir=add_my_folder(x_path),
     upload=x_upload(),
     path=(XML(filepath)  if session["admin"] else ''),
     #a=DIV(*[DIV(' \\ ',A(args.get(i),_href=URL(args=args[:(i+1)]),_style='background-color:#ddddff'),_style='float:left') for i in range(-1, len(args))],DIV(' : ')) ,
@@ -668,7 +695,7 @@ def index1():
                     A(x['filename'],_href=URL(f='download',args=args+[x['filename']],vars=request.vars),_target="x_frame",_title=x['fname']),
                     x['size'],x['mtime'],x['m_dif_time']['isi'],link_delete(x['filename'])
                         ) for i,x in enumerate(files)]),
-                _class='table2'),
+                _class='table6'),
     )
   
 def index():
@@ -701,12 +728,15 @@ def index():
     x_farme=1,
     upload1=XML(j_box_txt.format(link1,'+ File','Uload File (بارگزاری فایل)')),
     
-    files=TABLE(THEAD(TR(*[TH(x) for x in ['n','Name','Size','Date','Age','-']])),
+    files=TABLE(THEAD(TR(*[TH(x) for x in ['n','-','Size','Age','Name','Date',]])),
                 TBODY(*[TR((i+1),
+                    link_delete(x['filename']),
+                    x['size'],x['m_dif_time']['isi'],
+                   
                     A(x['filename'],_href=URL(f='download',args=args+[x['filename']],vars=request.vars),_target="x_frame",_title=x['fname']),
-                    x['size'],x['mtime'],x['m_dif_time']['isi'],link_delete(x['filename'])
+                    x['mtime']
                         ) for i,x in enumerate(files)]),
-                _class='table2'),
+                _class='table0'),
     )    
 def file_meta_edit():
     def file_meta_save(f_name,f_title,x_dic={}):
