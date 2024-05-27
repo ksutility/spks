@@ -227,7 +227,7 @@ def get_table_filter(tasks,x_data_s):
             obj['def_value']=request.vars.get(name2,obj['def_value'])
             val=request.vars.get(name,_val)
             if width:obj['width']=width
-            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'])[0]['input'])
+            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'])['input'])
             tt+=f'''><input {_meta} name='{name}' id='{name}' value='{val}' style='width:{width};background-color:#88aaff'>'''
         return (f'''<td><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
     htm_table_filter=XML('<div><form><table  id="table_filter" class="table table-bordered table-sm"><tr >'#style="height:10px;padding:0px;margin:0px"
@@ -260,7 +260,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
             tds.append('*')
             continue
-        x_obj,time_recs=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
+        x_obj=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
    
         #cm.tik(fn+'-1'+str(recs))    
         tds.append(x_obj['output'])
@@ -284,7 +284,7 @@ def get_table_row_edit(xid,row_dic,titles,tasks,f_views,x_data_s,cancel_url):#,a
             o_case=out_case
             f=tasks[fn]
             if prop_read_check and ('read' in f['prop']):o_case='output'
-            x_obj,time_recs=k_form.obj_set(i_obj=f,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=[o_case])
+            x_obj=k_form.obj_set(i_obj=f,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=[o_case])
             '''
             if debug :
                 xprint('x_obj='+str(x_obj))
@@ -774,6 +774,8 @@ def index():
         t2="<hr>"      
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
         t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
+        t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
+        t2+=f"<br><a href={URL('inf')}> مشخصات </a> "
      
     else:
         #redirect(URL('spks','file','index'))
@@ -787,8 +789,8 @@ def index():
 def inf():
     import k_user
     msg,user_inf=k_user.how_is_connect('test')
-    
-    return msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+ str(BEAUTIFY(request))
+    response.show_toolbar=True
+    return dict(tt=XML(msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+ str(BEAUTIFY(request))))
 def user_inf():
     import k_user
     user_log=k_user.USER_LOG()
@@ -1024,7 +1026,7 @@ def rc():#run 1 command
             tds=[xid]
             for fn in select_cols:
                 i_obj=x_data_s['tasks'][fn]
-                x_obj,time_recs=k_form.obj_set(i_obj=i_obj,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
+                x_obj =k_form.obj_set(i_obj=i_obj,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
                 x_saved=x_dic[fn]
                 import k_tools
                 tds+=[k_tools.var_compare(x_saved,x_obj['output_text'])['msg']]#output_text
