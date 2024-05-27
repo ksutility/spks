@@ -676,7 +676,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
         if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
             tds.append('*')
             continue    
-        x_obj,time_recs=obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
+        x_obj=obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
         
         #cm.tik(fn+'-1'+str(recs))    
         tds.append(x_obj['output'])
@@ -748,7 +748,7 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
 def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''): 
     import k_htm
     form_update_set_param="form;form"
-    cm=Cornometer(f"obj-{i_obj['type']}-{i_obj['name']}")
+    #cm=Cornometer(f"obj-{i_obj['type']}-{i_obj['name']}")
     '''
     use in kswt:ok 020905
     old name= obj_set_form_active_parts
@@ -789,16 +789,16 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     sc=i_obj['type']
     def obj_pars(i_obj,obj_type,force=False):
         if force or 'input' in need or obj_type in ['file']:
-            cm.tik('obj template_parser start')
+            #cm.tik('obj template_parser start')
             obj={x:template_parser(i_obj[x],x_dic) for x in i_obj}#['file_name','ext','path','pre_folder']}
             #xreport_var([i_obj,x_dic,obj,''],True)
-            cm.tik('obj template_parser end')
+            #cm.tik('obj template_parser end')
         else:
             obj=i_obj.copy()
         if debug:
             xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)    
         return obj
-    db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
+    if x_data_s:db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
     
     obj=obj_pars(i_obj,obj_type=sc)
     
@@ -835,7 +835,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     obj['output_text']=_value # output in simple text
     obj['input']=_value  # if read im prop
     #xprint('output='+str(obj['output']))
-    cm.tik('step 3')
+    #cm.tik('step 3')
     if sc=='text':
         def htm_correct(x):
             if x:
@@ -1163,7 +1163,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         h_code2,or_v,js_ff_chek="","",""  #msg is define correct in top of select
     """
     ##----------------------------
-    cm.tik('link start')
+    #cm.tik('link start')
     if 'link' in obj:
         r1='input' if 'input' in need else 'output'
         #-----
@@ -1179,13 +1179,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     if "private" in obj['prop']:
         pass
     ## trs.append(TR(obj['title'],obj['value']))
-    cm.tik('end')
+    #cm.tik('end')
     #cm.report()
     
     if '__objs__' not in x_dic:x_dic['__objs__']={}
     x_dic['__objs__'][obj['name']]=obj
     
-    return obj,cm.records()
+    return obj #,cm.records()
 
     
 

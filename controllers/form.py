@@ -153,7 +153,7 @@ def get_table_filter(tasks,x_data_s):
             obj['def_value']=request.vars.get(name2,obj['def_value'])
             val=request.vars.get(name,_val)
             if width:obj['width']=width
-            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)[0]['input'])
+            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)['input'])
             tt+=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
         return (f'''<td style='width:{width};'><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
     htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
@@ -186,7 +186,7 @@ def xform():#view 1 row
             htm_1=A(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
             if 'hide' in fd['prop']:
                 return [htm_1,'*','']
-            x_obj,time_recs=k_form.obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
+            x_obj=k_form.obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
             
             return [htm_1,x_obj[mode],x_obj['help']]
             #------------------------------------------------- 
@@ -610,7 +610,7 @@ def xtable():
                 x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
                 tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)#, all_cols,ref_i)
                 tds+=[TD(x) for x in tds_i]
-                #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)[0]['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
+                #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
                 cornometer2.print('a---b')
                 if select_cols=='form_v_cols_full':
                     tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]
