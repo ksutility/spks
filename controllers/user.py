@@ -236,3 +236,25 @@ def test():
     return dict(x=response.toolbar(),y=str(request.cookies))#,z=request.cookies["username"].value=="abc")
 def test1():
     response.cookies["username"]="abc"
+def reset_password():
+    # sample use : spks/user/reset_password 
+    if request:
+        user_ab=request.vars.user_ab
+        if user_ab:
+            import k_user
+            tt=[user_ab]
+            tt+=[k_user.a_users[user_ab]['fullname']]
+            xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
+            if xr['rowcount']>0:
+               tt+=["رمز با موفقیت ریست شد"]
+            else:
+               tt+=["برنامه با مشکل مواجه شد لطفا به مسئول مربوطه اطلاع دهید"]
+            tt+=["<a href='reset_password' class='btn btn-primary'>new reset</a>"]
+            return dict(tt=XML('<br>'.join(x for x in tt)))
+    import k_form
+    from x_data import x_data_verify_task
+    obj_inf={'type':'reference','width':'5','title':' همکار','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]}
+    x_data_verify_task('user_ab',obj_inf)
+    h_obj=XML(k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])['input'])
+    tt=FORM(h_obj,INPUT(_type='submit'))
+    return dict(tt=tt)
