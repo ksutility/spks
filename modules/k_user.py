@@ -1,4 +1,5 @@
 from gluon.custom_import import track_changes; track_changes(True)
+from gluon import URL
 from k_sql import DB1
 import k_htm
 import k_form
@@ -7,6 +8,10 @@ from x_data import x_data ,x_data_verify_task
 import k_date
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 db_path='applications\\spks\\databases\\'
+shoud_login_msg=f""" <h3>برای دسترسی به این بخش </h3>
+                    <h3>ابتدا باید وارد سیستم شوید</h3>
+                    <a href={URL("data","index")}>ورود</a>
+                """
 class USER_LOG():
     inf={}
     def __init__(self,ip='',un='',xtime=''):
@@ -185,3 +190,18 @@ def how_is_connect(subject):
         f.writelines('\n'+log)
     return file_n + " | " +log , u_log.report()
 #how_is_connect()
+
+import functools
+#decorator
+# not work 
+def user_is_login(func):
+    from gluon import current
+    if not current.session["username"]:
+        return shoud_login_msg
+    @functools.wraps(func)
+    def wrapper_decorator(*args, **kwargs):
+        # Do something before
+        value = func(*args, **kwargs)
+        # Do something after
+        return value
+    return wrapper_decorator
