@@ -49,8 +49,10 @@
 </style>
 <!--j_box -->	
 	<div id="j_box_light" class="j_box_white_content resizable"> 
-		<a href = "javascript:void(0)" onclick = "j_box_hide()">Close</a>
-		<a href = "javascript:void(0)" onclick = "j_box_hide()">X</a>
+		<a href = "javascript:void(0)" title = "Close" class = "btn btn-danger" onclick = "j_box_hide()">X</a> - 
+		<a href = "javascript:void(0)" title = "set win size to 50%" class = "btn btn-primary" onclick = "win_set_size50()">50%</a>
+		<a href = "javascript:void(0)" title = "set win size to 75%" class = "btn btn-primary" onclick = "win_set_size75()">75%</a>
+		<a href = "javascript:void(0)" title = "set win size to 100%" class = "btn btn-primary" onclick = "win_set_size100()">100%</a>
 		<div id="j_box_subwin1_body" style="height:100%;">
 		<!-- subwin1_body --> 
 			<iframe id="j_box_iframe_win" src="" width="100%" height="100%">	<p>Your browser does not support iframes.</p></iframe> 
@@ -96,5 +98,26 @@
 		if ( $iframe.length ) {
 			$iframe.attr('src',path);
 		}
-	}	
+	}
+	function win_set_size100() {
+		xs=document.getElementById('j_box_light').style
+		xs.width='100%';
+		xs.height='100%';
+		xs.left='0%';
+		xs.top='0%';
+	}
+	function win_set_size75() {
+		xs=document.getElementById('j_box_light').style
+		xs.width='75%';
+		xs.height='75%';
+		xs.left='12%';
+		xs.top='12%';
+	}
+	function win_set_size50() {
+		xs=document.getElementById('j_box_light').style
+		xs.width='50%';
+		xs.height='50%';
+		xs.left='25%';
+		xs.top='25%';
+	}
 </script>
