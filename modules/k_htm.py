@@ -98,15 +98,23 @@ def table_4_diclist_glon(i_diclist,base_cols,id_col):
         d1.append(BR())
     return DIV(tt,d1)
  #---------------------------------------
-def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True):
+def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):
     '''
         make 1 select html object
         update 01/08/09 ks
         _options:list or dict
+    INPUTS:
+    -------
+        remember:bool
+            remember last select value
     '''
     #convert _options :list to dict
     _dict={x:x for x in _options} if type(_options)==list else _options
     vs=''
+    if not _value:
+        if remember:
+            from gluon import current
+            _value=current.request.vars[_name]
     if _value:
         vs=_value if type(_value)==list else _value.split(",")
     opts=[]
