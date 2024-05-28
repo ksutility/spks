@@ -20,17 +20,37 @@ k_user.how_is_connect('file')
 
 import k_set #share_value as share
 xpath=k_set.xpath()
-def _folder_w_access(args=request.args):
-    """
-        folder_w_access=folder_write_access
-    """
-    #args=request.args or ['share']
-    path='\\'.join(args)
-    if path in share_inf or session["admin"] or request.vars['from']=='form':
-        return {'ok':True} #x_title 
+def _folder_w_access(args=request.args,x_path=''):
+    '''
+    old name=fca
+    بررسی امکان تغییر یک فلدر توسط یک نفر
+    folder_w_access=folder_write_access
+        بررسی می کند که آیا یک فلدر توس ط کاربر جاری قابل دسترسی نوشتن و موارد مشابه مثل حذف و جابجایی است یا خیر
+    input
+    ------
+        session["file_access"]=> set by user.py on login
+        session["my_folder"]=> set by user.py on login
+            سسشن های فایل_اکسس و مای_فلدر در داخل برنامه یوزر.پای در زمان لاگین کردن فرد تنظیم می شود
+            
+    '''
+    x_path=(x_path or (';'.join(args))) +";"
+    def list_match(pt_list,st):
+        import re
+        st=st.lower()
+        for pt in pt_list:
+            if re.findall(pt.lower(),st):
+                return True
+    #------------------------    
+    
+    fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+[f';{session["my_folder"]};']
+    #print("x_path"+str(x_path))
+    #print("args"+str(args))
+    #print("fc_list"+str(fc_list))
+    if session["admin"] or x_path in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
+        return {'ok':True}  
     else:
-        return {'ok':False,'msg':f'you can not do this action-path={path}'} #False,'error'        
-def _access_denied():
+        return {'ok':False,'msg':f'you can not do this action-path={x_path}'} 
+def _access_denied_msg():
     link=URL('user','login')
     r0='''
         <h2> وارد سیستم شوید تا حق دسترسی شما بررسی شود</h2>
@@ -45,7 +65,7 @@ def _access_denied():
     return dict(x=XML(r1))
 def _login_check():
     if not session["username"]: 
-        return _access_denied()    #redirect(URL('_access_denied'))
+        return _access_denied_msg()    #redirect(URL('_access_denied_msg'))
 def _ftime(x):
     return datetime.utcfromtimestamp(x).strftime("%Y/%m/%d - %H:%M:%S")#%a, %b
 def _dif_time(x):
@@ -385,27 +405,8 @@ def f_list():#file_browser=file.index
     
     x_path=";"+path.lower().replace("\\",";")+";"
     #file_change_access-----------------------------
-    def fca(x_path):
-        '''
-        بررسی امکان تغییر یک فلدر توسط یک نفر
-        input
-        ------
-            session["file_access"]=> set by user.py on login
-            session["my_folder"]=> set by user.py on login
-                سسشن های فایل_اکسس و مای_فلدر در داخل برنامه یوزر.پای در زمان لاگین کردن فرد تنظیم می شود
-                
-        '''
-        def list_match(pt_list,st):
-            st=st.lower()
-            for pt in pt_list:
-                if re.findall(pt.lower(),st):
-                    return True
-        #------------------------    
-        
-        fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+[f';{session["my_folder"]};']
-        #- print(str(fc_list))
-        return True if session["admin"] or (list_match(fc_list,x_path)) else False #file_change_access: user have file_change_access for this folder
-    fc_access=fca(x_path)
+    
+    fc_access=_folder_w_access(x_path=x_path)['ok']
     #- print('curren user file_change_access='+ str(fc_access)+ '  | on floder ='+x_path)
     #print(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
     
@@ -432,7 +433,7 @@ def f_list():#file_browser=file.index
     
     files,folders=_list_files(path)
     meta=k_file_meta.read(path,files,folders)
-    #print(str(f_list))
+    #print(f'path={path} ,fiels len={len(files)}')
     def x_ext(x_file):
         if x_file['ext']=='.zip':
             return DIV(A('+zip',_title='unzip in this folder',_href=URL(f='unzip',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")
@@ -499,15 +500,19 @@ def f_list():#file_browser=file.index
     xp=XML(path.replace('/','\\'))
     #onchange="window.location.replace('{URL('f_list_set')}')"
     list_view_mod=XML(SELECT('1','2',_id='list_view_mod',_name='list_view_mod', value=r_vars['list_view_mod']))
-    filepath=f'''
-    <form>
+    x_setting=f'''
     <div class="row">
-        <div class="col-1">list_view_mod=</div>
-		<div class="col-1">{list_view_mod}</div>
-        <div class="col-1"><button id="copy">Copy</button></div>
-        <div class="col-8"><input id="input_adr" name="input_adr" type="text" value="{xp}" style="width:100%" onchange="this.form.submit()" /></div>
-        <div class="col-1"><input type="submit" style="display:hidden" /></div>
-    </div></form>
+        <div class="col-2"> نحوه نمایش لیست </div>
+		<div class="col-2">{list_view_mod}</div>
+        <div class="col-6">-</div>
+        <div class="col-2"><input type="submit" /></div>
+    </div>
+    '''
+    x_cmd_address=f'''
+    <div class="row">
+        <div class="col-10"><input id="input_adr" name="input_adr" type="text" value="{xp}" style="width:100%" onchange="this.form.submit()" /></div>
+        <div class="col-2"><button id="copy">Copy</button></div>
+    </div>
     <script>
         function copy() {{
             var copyText = document.querySelector("#input_adr");
@@ -597,7 +602,8 @@ def f_list():#file_browser=file.index
     return dict(js=XML(copyclip_func),
     m_dir=add_my_folder(x_path),
     upload=x_upload(),
-    path=(XML(filepath)  if session["admin"] else ''),
+    setting=(XML(x_setting)), #(XML(x_setting)  if fc_access else ''),
+    cmd_address=(XML(x_cmd_address) if session["admin"] else ''),
     #a=DIV(*[DIV(' \\ ',A(args.get(i),_href=URL(args=args[:(i+1)]),_style='background-color:#ddddff'),_style='float:left') for i in range(-1, len(args))],DIV(' : ')) ,
     address=DIV(address('..',[]),*[address(args[i],args[:i+1],k_finglish.fin_to_fa(args[i])) for i in range(len(args))]," : ") ,
     files=files_list(list_view_mod=1 if r_vars['list_view_mod']=='1' else 2),
@@ -704,7 +710,7 @@ def index():
         share folder
     '''
     args=request.args or ['share']
-    fwa=_folder_w_access(args)
+    fwa=_folder_w_access(args=args)
     if not fwa['ok']:return fwa['msg']
     
     path='\\'.join(args)
