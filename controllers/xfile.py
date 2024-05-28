@@ -548,7 +548,7 @@ def edit_r():
     
     '''
     if not session["admin"]:
-        redirect(URL('file','_access_denied'))
+        redirect(URL('file','_access_denied_msg'))
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
     file_txt=request.vars['file_txt']
@@ -562,7 +562,7 @@ def edit_r():
                 encode_n=enc
             break    
         except:
-            print ('file format !='+enc)
+            print ('error: file format !='+enc)
     else:
         return 'error in find encoding of file'
     # save data    
