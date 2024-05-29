@@ -2,17 +2,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 {{include 'layout_add_L_menu_size.html'}}
-<div class="row">
-	<div class="col-9">{{=address}}</div>
+<div class="row" dir="ltr">
+	<div class="col-8">{{=address}}</div>
 	<div class="col-1">{{=m_dir}}</div>
-	<div class="col-1">{{=upload}}</div>
+	<div class="col-2">{{=upload}}</div>
 	<div class="col-1">
 		<a class="btn btn-primary" data-toggle="collapse" href="#collapse_setting" role="button" aria-expanded="false" aria-controls="collapse_setting">
 		...
 		</a>
 	</div>
 </div>
-<div class="collapse" id="collapse_setting">
+<div class="collapse" id="collapse_setting" dir="ltr">
 	<form>
 	{{=setting}}
 	{{=cmd_address}}
@@ -22,7 +22,7 @@
 	</form>
 </div>
 
-<div>
+<div dir="ltr">
 	<div id="layout_l" class="layout_l scroll" height="90%">
 		{{=files}}
 	</div>
