@@ -624,7 +624,7 @@ def xtable():
             
             trs.append(TR(*tds))
         cc='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
-        return TABLE(thead,TBODY(*trs),_class=cc),len(rows),rows_num,htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
+        return TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num,htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
     #----------------------------------------------------------------------------------------
     #tasks,f_views
     script1='''<script>
@@ -657,7 +657,7 @@ def xtable():
         jobs=next(iter(x_data_s['steps'].items()))[1]['jobs']
         #print(f'job={job}')
         if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}):
-            new_record_link=A('+',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
+            new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
         else:
             new_record_link='-'
         htm_head=DIV(TABLE(TR(  TD(new_record_link,_width='20px')
