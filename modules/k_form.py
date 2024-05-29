@@ -668,7 +668,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
     #import k_py_list
     #x_dic=k_py_list.list2dict(titles,row)
     x_dic=dict(zip(titles,row))
-    
+    import k_user
     for fn in select_cols:#fn=field name
         if 'hide' in tasks[fn]['prop']:
             tds.append('*')
