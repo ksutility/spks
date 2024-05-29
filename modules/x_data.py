@@ -625,6 +625,33 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
+    'errors':{
+        'a':{
+            'base':{'mode':'form','title':'مشکلات'
+            },
+            'tasks':{
+                'err_rec':{'type':'text','title':'شرح مشکل'},
+                'err_des':{'type':'text','title':'توضیح'},
+                'act':{'type':'text','title':'اقدام لازم'},
+            },
+            'steps':{
+                's0':{'tasks':'lable_1,err_rec','jobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'err_des','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'act','jobs':'dccm','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
+            },
+            'views':{
+                'input':['err_rec','err_des'],
+                'view1':['act'],
+                'view2':['act'],
+            },
+            'labels':{
+                'lable_1':'از اینکه با ثبت مشکلات مشاهده شده در شرکت ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
     'eblag':{
         'a':{
             'base':{'mode':'form','title':'ابلاغیه های شرکت'
