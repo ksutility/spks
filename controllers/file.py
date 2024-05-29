@@ -8,7 +8,7 @@
     نشان دادن  میزان قدیمی بودن فایل به دقیقه
 '''
 share_inf={ 'share':'اشتراک فایل',
-            'paper\\pre':'محل پیش نویس نامه ها'}
+            'paper;pre':'محل پیش نویس نامه ها'}
 import os,time
 from jdatetime import datetime
 import k_file
@@ -46,7 +46,7 @@ def _folder_w_access(args=request.args,x_path=''):
     #print("x_path"+str(x_path))
     #print("args"+str(args))
     #print("fc_list"+str(fc_list))
-    if session["admin"] or x_path in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
+    if session["admin"] or x_path[:-1] in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
         return {'ok':True}  
     else:
         return {'ok':False,'msg':f'you can not do this action-path={x_path}'} 
@@ -322,13 +322,9 @@ def move():
             #path2={{=root[+1]}}\b&
             #import k_str
             #path2=k_str.template_parser(path2,x_dic={'root':x_root})#path2.format(root=x_root)
-            re0=k_file.file_move((path1,f_name),(path2,f_name))
+            re0=_move_1_file(path1,path2,f_name)
             if re0['ok']:
-                re1=k_file_meta.move(path1,path2,f_name)
-                return (f"""<br><h2>گزارش اقدامات انجام شده</h2>
-                            <hr> MOVE ( path1={path1}<br>path2={path2}<br>f_name={f_name})
-                            <hr> MOVE  Done - Report = {str(re0)}<hr>{re1}""")
-
+                return re0['report']
     #return f'error in file.move() : <br> path1 ={path1}<br>path2={path2}<br>f_name={f_name}<hr>{str(re0)}<hr>{re1}'
     
     
@@ -348,6 +344,105 @@ def move():
         </div>
         <div class="well">{b_s}</div>
     </div></form>''')
+def _move_1_file(path1,path2,f_name):
+    re0=k_file.file_move((path1,f_name),(path2,f_name))
+    if re0['ok']:
+        re1=k_file_meta.move(path1,path2,f_name)
+        re0['report']=(f"""<br><h2>گزارش اقدامات انجام شده</h2>
+                    <br> MOVE:<br>{"-"*5} path1={path1}<br>{"-"*5} path2={path2}<br>{"-"*5}f_name={f_name})
+                    <br> MOVE  Done - Report = {str(re0)}<br>{re1}""")
+    else:
+        re0['report']=(f"""<br><h2>Error in</h2> 
+                    <br> MOVE:<br>{"-"*5} path1={path1}<br>{"-"*5} path2={path2}<br>{"-"*5}f_name={f_name})
+                    """)
+    return re0
+def move_x():
+    '''
+        cut 1 file for move it from past_location
+            + move its metadata form __inf
+    exam:
+        use by pro 
+        external use is not ok
+    INPUTS:
+    ------
+        request.args:
+            [0]='cut' / 'copy'
+            [...] =path
+            [-1]= filename (by .ext)
+    '''
+    re0,re1="",""
+    fwa=_folder_w_access(args=request.args[:-1])
+    if not fwa['ok']:return fwa['msg']
+    if not session['move_files']:
+        session['move_files']=[]
+    if not request.args in session['move_files']:
+        session['move_files']+=[request.args]
+    return (DIV(*[DIV(str(x)) for x in session['move_files']]))
+def move_p(): 
+    '''
+        past 1 file (move it from cut_location)
+            + move its metadata form __inf
+    exam:
+        use by pro 
+        external use is not ok
+    INPUTS:
+    ------
+        request.args:
+            [0]='cut' / 'copy'
+            [...] =path
+            [-1]= filename (by .ext)
+    '''
+    rep=''
+    path2=''
+    if session['move_files']:
+        path2=os.path.join(xpath,*request.args)
+        for x_args in session['move_files']:
+            path1= os.path.join(xpath,*x_args[1:-1])
+            f_name=x_args[-1]
+            if path1!=path2:
+                rep+=_move_1_file(path1,path2,f_name)['report']
+            else:
+                rep+=f"""مبدا و مقصد با هم یکسان هستند : 
+                    {path1},{f_name}"""
+    rep1=DIV("path2="+path2,HR(),DIV(*[DIV(str(x)) for x in session['move_files']],HR(),XML(rep)))
+    session['move_files']=[]
+    return (rep1)
+def file_tools(): 
+    import re
+    args=request.args
+    r_vars=request.vars
+    fname=request.args[-1]
+    # chak adrees is send to form from adress input
+    if 'input_adr' in r_vars:
+        path=r_vars['input_adr']
+        del r_vars['input_adr']
+        args=path.split('\\')
+        #if path:
+        xpath=args[0]
+        r_vars['xpath']=xpath
+        #p1=path.replace(xpath,'')
+        args=args[1:]
+        #return xpath," | ",p1," | ",path
+    else:
+        xpath=k_set.xpath()
+        path=xpath+'\\'.join(args)
+    
+    x_path=";"+path.lower().replace("\\",";")+";"
+    #file_change_access-----------------------------
+    
+    fc_access=_folder_w_access(x_path=x_path)['ok']
+    return DIV(
+        DIV("args="+str(args)),
+        DIV(A("compare",_href=URL('xfile','tools',args=args,vars=r_vars),_title="مقایسه")),
+        DIV(
+            #DIV(A('Move',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""")),
+            DIV(A('Cut',_title='CUT',_class='btn btn-warning',_href=URL(f='move_x',args=['cut']+args,vars=r_vars))),
+            #DIV(A('Copy',_title='COPY',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move_x',args=['copy']+args+[fname],vars=r_vars)}",true)"""))
+            ) if fc_access else '' #_target="x_frame"
+        )
+        
+
+    
 def name_correct():
     args=request.args
     if args:
@@ -451,8 +546,6 @@ def f_list():#file_browser=file.index
         
     def link_unzip(fname):
         pass
-    def link_move(fname):
-        return A('M',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['move'] else '' #_target="x_frame"
     def link_delete(fname):
         return A('D',_title='Delete',_class='btn btn-danger',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['del'] else '' #_target="x_frame"
     def link_rename(fname):
@@ -473,7 +566,8 @@ def f_list():#file_browser=file.index
         return link_download(x_file,link_txt,link_title)    
     def link_tools(x_file,link_txt,link_title='Tools'):        
         if fc_access:
-            return  A(link_txt,_href=URL('xfile','tools',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
+            return  A("tt",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('file_tools',args=args+[x_file['filename']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title)
+            
         return ''
     def link_edit(x_file,link_txt,link_title='Edit'):  
         ext=x_file['ext'][1:]
@@ -547,9 +641,13 @@ def f_list():#file_browser=file.index
         else:
             t='general'
         return 'file_'+ t
-    def x_upload():
+    def add_file():
         link1=XML(URL(f='upload',args=request.args,vars={**r_vars,'filename':'','file_ext':""}))
-        return XML('''<a  href = 'javascript:void(0)' onclick='j_box_show("{}",true);' title='بارگزاری فایل'> +File </a>'''.format(link1) if fc_access else '')
+        link2=XML(URL(f='move_p',args=request.args,vars={**r_vars}))
+        return DIV(
+            A('+File',_href ='javascript:void(0)',_class='btn btn-primary',_onclick=f"""j_box_show("{link1}",true);""",_title='بارگزاری فایل'),"-",
+            A('+past',_href ='javascript:void(0)',_class='btn btn-primary',_onclick=f"""j_box_show("{link2}",true);""",_title='چسباندن فایل'+"\n"+"\n".join(str(x) for x in session['move_files'])) if session['move_files'] else '' ,
+            ) if fc_access else ''
     def files_list(list_view_mod=1):
         if list_view_mod==1:
             return TABLE(THEAD(TR(*[TH(x) for x in ['n','Title','Name','E_1','E_2','Size','Date','-','-','-']])),
@@ -574,7 +672,7 @@ def f_list():#file_browser=file.index
                                     x_file['size'],
                                     x_file['mtime'],
                                     x_ext(x_file),
-                                    link_delete(x_file['filename']),link_move(x_file['filename']),
+                                    link_delete(x_file['filename']),
                                     link_rename(x_file['filename']),
                                     _class=x_class(x_file['ext'])
                                     ) for i,x_file in enumerate(files)],
@@ -601,7 +699,7 @@ def f_list():#file_browser=file.index
     #k_file_meta.list_unused_json_item(files,folders,meta)
     return dict(js=XML(copyclip_func),
     m_dir=add_my_folder(x_path),
-    upload=x_upload(),
+    upload=add_file(),
     setting=(XML(x_setting)), #(XML(x_setting)  if fc_access else ''),
     cmd_address=(XML(x_cmd_address) if session["admin"] else ''),
     #a=DIV(*[DIV(' \\ ',A(args.get(i),_href=URL(args=args[:(i+1)]),_style='background-color:#ddddff'),_style='float:left') for i in range(-1, len(args))],DIV(' : ')) ,
