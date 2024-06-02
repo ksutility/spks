@@ -98,6 +98,13 @@ def file_count(path,full_name=False):
     files=list_files(path,full_name)
     return len(files),files
     #print(files)
+def new_file(file_path): 
+    try:
+        with open(file_path,'w',encoding='utf8') as f:
+            f.write(" ")
+        return "ok creat file :"+file_path
+    except exception as err:
+        return "error in creat file :" + file_path + "<br> err=" + str(err)
 def dir_make(dir_path):
     # make_path #cad make_path1(path)
     '''
