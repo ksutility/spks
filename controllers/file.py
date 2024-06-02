@@ -15,7 +15,7 @@ import k_file
 from k_file_meta import K_FILE_META 
 k_file_meta=K_FILE_META ()
 import k_finglish
-import k_err,k_user
+import k_err,k_user,k_htm
 k_user.how_is_connect('file')
 
 import k_set #share_value as share
@@ -274,17 +274,41 @@ def zip():
 def delete():
     fwa=_folder_w_access(args=request.args[:-1])
     if not fwa['ok']:return fwa['msg']
-
     args=request.args
-    if args:
+    def _delete(args):
         from k_set import K_set
         xp=os.path.join(xpath,*args)
-        k_file.file_delete_rcl(xp,recycle_sub_folder=request.args[0])
+        k_file.file_delete_rcl(xp,recycle_sub_folder=args[0])
         msgs=['Delete  Done Successfully','move to recycle:',f'===>   {K_set.recycle})','fome:',f'<=== {xp}']
-        
         if request.vars.todo :
             msgs+=_update_todo(request.vars.todo,'')
         return "<br><h2>فایل /  فلدر با موفقیت پاک شد</h2><hr>"+'<br>'.join(msgs)
+    if args:
+        if args[0]=='del':
+            args=args[1:]
+            return (_delete(args))
+        else:
+            ok_do=request.vars['ok_do']
+            if ok_do=='yes' :
+                return (_delete(args))
+            else:    
+                xp=os.path.join(xpath,*args)    
+                ok_do_htm=INPUT(_name='ok_do',_id='ok_do',_value=ok_do ,_style="width:90%")
+                b_s=INPUT(_type='submit',_value='حذف فایل')
+                return XML(f'''
+                    <form action="" method="post">
+                    <div class="container" dir="rtl">
+                        <div class="row">
+                            <div class="col-2">شما در حال حذف یک فایل یا فلدر هستید</div>
+                            <div class="col-8">{xp}</div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-2">در صورت اطمینان عبارت yes را تایپ کنید</div>
+                            <div class="col-8">{ok_do_htm}</div>
+                        </div>
+                        <div class="well">{b_s}</div>
+                    </div></form>''')
     return 'error : args is empty'
 def move():
     '''
@@ -407,42 +431,46 @@ def move_p():
     rep1=DIV("path2="+path2,HR(),DIV(*[DIV(str(x)) for x in session['move_files']],HR(),XML(rep)))
     session['move_files']=[]
     return (rep1)
-def file_tools(): 
-    import re
-    args=request.args
-    r_vars=request.vars
-    fname=request.args[-1]
-    # chak adrees is send to form from adress input
-    if 'input_adr' in r_vars:
-        path=r_vars['input_adr']
-        del r_vars['input_adr']
-        args=path.split('\\')
-        #if path:
-        xpath=args[0]
-        r_vars['xpath']=xpath
-        #p1=path.replace(xpath,'')
-        args=args[1:]
-        #return xpath," | ",p1," | ",path
+def new_file(): 
+    if request.vars['file_name'] :
+        f_name=request.vars['file_name']
+        path=os.path.join(xpath,*request.args+[f_name])
+        return k_file.new_file(path)
     else:
-        xpath=k_set.xpath()
-        path=xpath+'\\'.join(args)
-    
-    x_path=";"+path.lower().replace("\\",";")+";"
-    #file_change_access-----------------------------
-    
-    fc_access=_folder_w_access(x_path=x_path)['ok']
+        p1=INPUT(_name='file_name',_id='file_name',_value=request.vars['file_name'] ,_style="width:90%")
+        b_s=INPUT(_type='submit')
+        return XML(f'''
+        <form action="" method="post">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">filename</div>
+                <div class="col-6">{p1}</div>
+            </div>
+            <div class="well">{b_s}</div>
+        </div></form>''')
+def file_tools(): 
+    files_x_tools=FILES_X_TOOLS()
     return DIV(
-        DIV("args="+str(args)),
-        DIV(A("compare",_href=URL('xfile','tools',args=args,vars=r_vars),_title="مقایسه")),
-        DIV(
-            #DIV(A('Move',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""")),
-            DIV(A('Cut',_title='CUT',_class='btn btn-warning',_href=URL(f='move_x',args=['cut']+args,vars=r_vars))),
-            #DIV(A('Copy',_title='COPY',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move_x',args=['copy']+args+[fname],vars=r_vars)}",true)"""))
-            ) if fc_access else '' #_target="x_frame"
+        DIV("args="+str(files_x_tools.args)),
+        DIV(files_x_tools.link_comp()),
+        DIV(files_x_tools.link_move()),
+        HR(),
+        DIV(files_x_tools.link_rename()),
+        HR(),
+        DIV(files_x_tools.link_delete()),
         )
-        
-
-    
+def folder_tools(): 
+    files_x_tools=FILES_X_TOOLS()
+    return DIV(
+        DIV("args="+str(files_x_tools.args)),
+        DIV(files_x_tools.link_move()),
+        HR(),
+        DIV(files_x_tools.link_rename()),
+        HR(),
+        DIV(files_x_tools.link_ren2()),
+        HR(),        
+        DIV(files_x_tools.link_delete()),
+        )        
 def name_correct():
     args=request.args
     if args:
@@ -465,6 +493,47 @@ def manage():
     return dict(a=A('upload new file',_href=URL(f='upload',args=args,vars=request.vars)),
     files=TABLE(*[TR(A(x['name'],_href=URL(f='download',args=args+[x['name']])),x['size'],x['mtime'],x['ctime']) for x in files],_class='table2'),
     folders=TABLE(*[A(x,_href=URL(args=args+[x])) for x in folders],_class='table2'))
+class FILES_X_TOOLS():
+    r_vars=request.vars
+    import re,k_set
+    args=request.args
+    r_vars=request.vars
+    # chak adrees is send to form from adress input
+    if 'input_adr' in r_vars:
+        path=r_vars['input_adr']
+        del r_vars['input_adr']
+        args=path.split('\\')
+        #if path:
+        xpath=args[0]
+        r_vars['xpath']=xpath
+        #p1=path.replace(xpath,'')
+        args=args[1:]
+        #return xpath," | ",p1," | ",path
+    else:
+        xpath=k_set.xpath()
+        path=xpath+'\\'.join(args)
+    x_path=";"+path.lower().replace("\\",";")+";"
+    fc_access=_folder_w_access(x_path=x_path)['ok']
+    def link_delete(self):
+        return A('Delete',_title='حذف فایل',_class='btn btn-danger',_href=URL(f='delete',args=self.args,vars=self.r_vars)) if self.fc_access else '' #_target="x_frame"
+    def link_rename(self):
+        return A('Refine File Name',_title='اصلاح نام فایل',_class='btn btn-warning',_href=URL(f='name_correct',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
+    def link_ren2(self):
+        return A('Refine ALL Files Name in Folder',_title='اصلاح نام کلیه فایلها داخل فلدر',_class='btn btn-warning',_href=URL(f='correct_files_name_in_folder',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
+    def link_rename_title(self,case,f_name,f_title):
+        
+        if not f_title:f_title='-'
+        vars={'f_name':f_name,'f_title':f_title,'case':case}
+        vars.update(dict(self.r_vars))
+        return k_htm.a(f_title,_href=URL(f='file_meta_edit',args=self.args,vars=vars),_target="box",_class='btn') if self.fc_access else f_title 
+        #return A(f_title,_href=URL(f='file_meta_edit',args=self.args,vars={'f_name':f_name,'f_title':f_title,'case':case}.update(dict(self.r_vars))),_target="x_frame") if self.fc_access else f_title 
+    def link_comp(self):
+        return A("compare",_href=URL('xfile','tools',args=self.args,vars=self.r_vars),_title="مقایسه")
+    def link_move(self):
+        #DIV(A('Move',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""")),
+        return A('Cut',_title='CUT',_class='btn btn-warning',_href=URL(f='move_x',args=['cut']+self.args,vars=self.r_vars)
+        #DIV(A('Copy',_title='COPY',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move_x',args=['copy']+args+[fname],vars=r_vars)}",true)"""))
+        ) if self.fc_access else '' #_target="x_frame"
 def f_list_sd():    #sd=sade
     return f_list()
 def f_list_set():
@@ -473,6 +542,7 @@ def f_list_set():
 def f_list():#file_browser=file.index
     if not session['username']:
         return k_user.shoud_login_msg
+    files_x_tools=FILES_X_TOOLS()
     r1=False #_login_check()
     if r1:return dict(address='',m_dir='',upload='',path='',a='',files=XML(r1),folders='',js='')
     '''
@@ -546,29 +616,19 @@ def f_list():#file_browser=file.index
         
     def link_unzip(fname):
         pass
-    def link_delete(fname):
-        return A('D',_title='Delete',_class='btn btn-danger',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=args+[fname],vars=r_vars)}",true)""") if fc_access and r_vars['del'] else '' #_target="x_frame"
-    def link_rename(fname):
-        return A('Ren',_href=URL(f='name_correct',args=args+[fname],vars=r_vars),_target="x_frame") if fc_access and r_vars['ren'] else ''     
-    def link_ren2(fname):
-        return A('Ren-*',_href=URL(f='correct_files_name_in_folder',args=args+[fname],vars=r_vars),_target="x_frame") if fc_access and r_vars['ren'] else ''     
-    def link_rename_title(case,f_name,f_title):
-        if not f_title:f_title='-'
-        vars={'f_name':f_name,'f_title':f_title,'case':case}
-        vars.update(dict(r_vars))
-        return A(f_title,_href=URL(f='file_meta_edit',args=args,vars=vars),_target="x_frame") if fc_access else f_title 
-        return A(f_title,_href=URL(f='file_meta_edit',args=args,vars={'f_name':f_name,'f_title':f_title,'case':case}.update(dict(r_vars))),_target="x_frame") if fc_access else f_title 
+
     def link_view(x_file,link_txt,link_title='View'):
         xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win'}
         ext=x_file['ext'][1:]
         if ext in xd:
             return A(link_txt,_href=URL('xfile',xd[ext],args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
         return link_download(x_file,link_txt,link_title)    
-    def link_tools(x_file,link_txt,link_title='Tools'):        
-        if fc_access:
-            return  A("tt",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('file_tools',args=args+[x_file['filename']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title)
-            
-        return ''
+    def link_file_tools(x_file,link_title='Tools'):        
+        return  A(" * ",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('file_tools',args=args+[x_file['filename']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title
+            ) if fc_access else ''      
+    def link_folder_tools(x_dir,link_txt,link_title='Tools'):        
+        return  A(link_txt,_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('folder_tools',args=args+[x_dir['name']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title
+            ) if fc_access else ''      
     def link_edit(x_file,link_txt,link_title='Edit'):  
         ext=x_file['ext'][1:]
         if ext in ['md','mm','json','csv','txt','ksm']:#files that can edit by edit_r page
@@ -642,38 +702,40 @@ def f_list():#file_browser=file.index
             t='general'
         return 'file_'+ t
     def add_file():
-        link1=XML(URL(f='upload',args=request.args,vars={**r_vars,'filename':'','file_ext':""}))
-        link2=XML(URL(f='move_p',args=request.args,vars={**r_vars}))
         return DIV(
-            A('+File',_href ='javascript:void(0)',_class='btn btn-primary',_onclick=f"""j_box_show("{link1}",true);""",_title='بارگزاری فایل'),"-",
-            A('+past',_href ='javascript:void(0)',_class='btn btn-primary',_onclick=f"""j_box_show("{link2}",true);""",_title='چسباندن فایل'+"\n"+"\n".join(str(x) for x in session['move_files'])) if session['move_files'] else '' ,
+            k_htm.a('+File',_target="box",_href =URL(f='upload',args=request.args,vars={**r_vars,'filename':'','file_ext':""}),_title='بارگزاری فایل'),
+            "-",
+            k_htm.a('+past',_target="box",_href =URL(f='move_p',args=request.args,vars={**r_vars})
+                ,_title='چسباندن فایل'+"\n"+"\n".join(str(x) for x in session['move_files'])) if session['move_files'] else '' ,
+            "-",
+            k_htm.a('new',_target="box",_href =URL(f='new_file',args=request.args,vars={**r_vars}),_title='فایل جدید'),   
             ) if fc_access else ''
     def files_list(list_view_mod=1):
         if list_view_mod==1:
             return TABLE(THEAD(TR(*[TH(x) for x in ['n','Title','Name','E_1','E_2','Size','Date','-','-','-']])),
                         TBODY(  *[TR((i+1),
-                                    link_rename_title('folders',x_dir['name'],x_dir['title']),
+                                    files_x_tools.link_rename_title('folders',x_dir['name'],x_dir['title']),
                                     A(f"<{x_dir['name']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
                                     '<>',
-                                    'folder',
-                                    link_rename(x_dir['name']),
-                                    link_ren2(x_dir['name']),
-                                    link_delete(x_dir['name']),
+                                    link_folder_tools(x_dir,'folder'),
+                                    '',#files_x_tools.link_rename(),#x_dir['name']),
+                                    '',#files_x_tools.link_ren2(),#x_dir['name']),
+                                    '',#files_x_tools.link_delete(),#x_dir['name']),
                                     '',
                                     '',
                                     _class=x_class('folder')
                                     ) for i,x_dir in enumerate(folders)],
                                 *[TR((i+1),
-                                    link_rename_title('files',x_file['filename'],x_file['title']),
+                                    files_x_tools.link_rename_title('files',x_file['filename'],x_file['title']),
                                     link_view(x_file,x_file['name'],link_title=x_file['fname']+'\n'+x_file['ext']),
                                     #A(x_file['name'],_href=URL(f='download',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=x_file['fname']+'\n'+x_file['ext']),
                                     x_file['ext'][1:],
-                                    DIV(link_download(x_file,'d'),"|",link_tools(x_file,'t'),"|",link_edit(x_file,'e')),
+                                    DIV(link_download(x_file,'d'),"|",link_file_tools(x_file,'t'),"|",link_edit(x_file,'e')),
                                     x_file['size'],
                                     x_file['mtime'],
                                     x_ext(x_file),
-                                    link_delete(x_file['filename']),
-                                    link_rename(x_file['filename']),
+                                    '',#files_x_tools.link_delete(x_file['filename']),
+                                    '',#files_x_tools.link_rename(),#x_file['filename']),
                                     _class=x_class(x_file['ext'])
                                     ) for i,x_file in enumerate(files)],
                              ),
@@ -709,8 +771,8 @@ def f_list():#file_browser=file.index
     folders=TABLE(THEAD(TR(*[TH(x) for x in ['n','Folder Name','-','-']])),
                   TBODY(*[TR((i+1),
                         A(x['name'],_href=URL(args=args+[x['name']],vars=r_vars),_title=x['fname']),
-                        link_rename(x['name']),
-                        link_ren2(x['name'])
+                        files_x_tools.link_rename(),#x['name']),
+                        files_x_tools.link_ren2(),#x['name'])
                         ) for i,x in enumerate(folders)]),
         _class='table_file'),
     frame=XML('<iframe id="f_frame" name="f_frame" src="" height="1000" width="1740" title="file previw"></iframe>')
