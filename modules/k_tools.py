@@ -61,13 +61,13 @@ def x_cornometer(func):
             print('--------{} , {} : {} - {} , func = {} , {} , args = {}'.format(dtm1,dtm2,tm1,tm3,func.__name__,tt1,tt2))
         return xxx
     return wrapper
-def nth_item_of_dict(xdic,n,up_res=''):
+def nth_item_of_dict(xdic,n,up_result=''):
     '''
     inputs:
     -------
-        up_res:value for return if n > xdic.len
-            >= is used becuse index is start from 0
+        up_result:value for return if n > xdic.len
+            > is used becuse index is start from 0
     '''
-    if n>=len(xdic):return up_res
+    if n>=len(xdic):return up_result
     x=list(xdic)[n]
     return xdic[x]
