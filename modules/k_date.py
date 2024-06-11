@@ -14,11 +14,12 @@ def i_date():
         return {'d':d,'m':m,'iso':mt + dt}
 def ir_date(xformat):
     xf=xformat
-    today=jdatetime.date.today().strftime('%y-%m-%d')
-    yy,mm,dd=today.split('-')
+    today=jdatetime.date.today().strftime('%Y-%m-%d')
+    yyyy,mm,dd=today.split('-')
+    yy=yyyy[-2:]
     now=time.strftime("%H:%M:%S", time.localtime())
     hh,gg,ss=now.split(':')
-    ll={'yy':yy,'mm':mm,'dd':dd,
+    ll={'yyyy':yyyy,'yy':yy,'mm':mm,'dd':dd,
         'hh':hh,'gg':gg,'ss':ss}
     for x in ll:
         xf=xf.replace(x,ll[x])
@@ -39,8 +40,8 @@ def date_dif(time2,time1,in_format,out_format="DDD+hh:gg"):
         if t3['yy']:
             t3['yy']-=1
         else:
-            t3['YYYY']-=1
-    t3['DDD']=(t3['yy']+t3['YYYY'])*365+t3['mm']*30+t3['dd']
+            t3['yyyy']-=1
+    t3['DDD']=(t3['yy']+t3['yyyy'])*365+t3['mm']*30+t3['dd']
     #print(str(t3))
     for x in t3:
         t3[x]=f"000{t3[x]}"[-len(x):]
@@ -54,7 +55,7 @@ def split_by_format(in_time,in_format,int_str='int'):
     yyyy=yy=mm=dd=hh=gg=ss=''
     in_format=in_format.lower()
     t={} #get values
-    ll=['YYYY','yy','mm','dd','hh','gg','ss']
+    ll=['yyyy','yy','mm','dd','hh','gg','ss']
     if int_str=='int':
         for x in ll:
             t[x]=int(in_time[in_format.index(x):][:len(x)]) if x in in_format else 0
@@ -68,7 +69,7 @@ def change_format(in_time,in_format,out_format):
     dt=split_by_format(in_time,in_format,'str') #dt=k_datetime obj
     return out_in_format(dt,out_format)
 def out_in_format(dt_obj,out_format):
-    #dt =date_time dict format ['YYYY','yy','mm','dd','hh','gg','ss' + 'DDD']
+    #dt =date_time dict format ['yyyy','yy','mm','dd','hh','gg','ss' + 'DDD']
     #out_format=out_format.lower()
     #print(out_format)   
     for x,y in dt_obj.items():
