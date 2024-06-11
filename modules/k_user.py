@@ -46,7 +46,7 @@ def load_job_inf():
         jobs[j_inf['code']]={x:j_inf[x] for x in ['title','users','base_user']} 
     return jobs
 a_jobs=load_job_inf()
-def user_in_jobs(un,jobs,row_data):
+def user_in_jobs(jobs,row_data={},un=''):
     '''
         according form_inf(row_data) retun that un is in jobs ?  
         مشخص می کند که آیا کاربر مشخص شده در شغلهای مشخص شده می باشد یا خیر 
@@ -59,6 +59,11 @@ def user_in_jobs(un,jobs,row_data):
         row_data:dict
             data of recored form for user(#task#<task_name>,#step#<n> )
     '''
+    if not un:
+        from gluon import current
+        session=current.session
+        un=session["username"]
+    #xxxprint(msg=['user_in_jobs',jobs,un],vals=row_data)
     for job in jobs.split(','):
         if job =='*':return True
         if job[0] != "#":
@@ -76,6 +81,7 @@ def user_in_jobs(un,jobs,row_data):
                 x_un=row_data[f'step_{jx[2]}_un']
                 #print('x_un=',x_un)
                 if un==x_un:return True
+    print("user_in_jobs=>false")
     return False
 def jobs_masul(x_data_s,step_index,form_sabt_data ):
     '''
@@ -98,7 +104,7 @@ def jobs_masul(x_data_s,step_index,form_sabt_data ):
             username
     '''
     import k_tools
-    xxx=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_res='y')
+    xxx=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_result='y')
     if xxx in ['y','x']: # y=form is fill ok ,x=form is remove / kill
             return xxx
     job=xxx['jobs']
@@ -151,7 +157,7 @@ def auth(auth_jobs):
     '''
     from gluon import current
     session=current.session
-    res=(session["admin"] or user_in_jobs(session["username"],auth_jobs,{}))
+    res=(session["admin"] or user_in_jobs(auth_jobs))
     print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
     return res
 #--------------------------------------------------------------- not used
