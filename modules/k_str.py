@@ -49,3 +49,72 @@ def template_parser(x_template,x_dic={}):
             print('error in template_parser')
     else:
         return x_template
+from k_err import xxprint,xprint
+def end_with(txt,ew):
+    n=len(ew)
+    return (txt[-n:]==ew)
+def compare_2_str(str1,str2):
+    '''
+    compare 2 str and make 1 brif report
+    '''
+    if str1!=str2:
+        l1=len(str1)
+        l2=len(str2)
+        cm1=''
+        cm2=''
+        dif_n=0
+        l=l1 if l1<l2 else l2
+        for i in range(l):
+            if str1[i]==str2[i]:
+                cm1+="_"
+                cm2+="_"
+            else:
+                dif_n+=1
+                cm1+=str1[i]
+                cm2+=str2[i]
+        if l1==l2:
+            return (f'(dif={dif_n} : "{cm1}" != "{cm2}")')
+        elif l==l1:
+            return (f'(dif={dif_n}+ : "{cm1}" != "{cm2}" + "{str2[l:]}")')
+        else:
+            return (f'(dif={dif_n}+ :  "{cm1}" + "{str1[l:]}" != "{cm2}" )')
+    else:
+        return True
+def do_compare_2_str():
+    while True:
+        x=ui.input([['str1',''],['str2','']])
+        if not x:break
+        xprint(compare_2_str(x['str1'],x['str2']))
+#----------------------------------------------------------------------------
+def correct_fa(str1):
+    r1='ي'
+    r2='ي'
+    str1=str1.replace(r2,r1)
+    r2='ك'
+    r1='ک'
+    str1=str1.replace(r2,r1)
+    '''
+    if r1 in str1:print ('r1:'+str(list_all_index(str1,r1)))
+    if r2 in str1:print ('r2:'+str(list_all_index(str1,r2)))
+    str1=str1.replace(r2,r1)
+    print('-'*10+' replced ')
+    if r1 in str1:print ('r1:'+str(list_all_index(str1,r1)))
+    if r2 in str1:print ('r2:'+str(list_all_index(str1,r2)))
+    '''
+    return str1
+def do_correct_fa():
+    res=''
+    while True:
+        x=ui.input([['result',res],['new_str','']])
+        if not x:break
+        res=correct_fa(x['new_str'])
+def list_all_index(str_base,chr_search):
+    return [i for i,t in enumerate(str_base) if t==chr_search]
+if __name__ == "__main__":
+    import tk_ui as ui
+    while True:
+        x=ui.input([['pro',['correct_fa','compare_2_str'],'c']])
+        if not x:break
+        xx='do_'+x['pro']+'()'
+        print(xx)
+        exec(xx)
