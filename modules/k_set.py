@@ -31,13 +31,13 @@ from k_set import x_class
     b=x_class.a1    
 '''
 #----
-def xpath():
+def xpath(file_name=''):
     xpath='d:\\ks\\0-file\\' #or xpath=os.getcwd()+"\\file"
     #xpath=os.getcwd()+"\\"+path if not ':' in path else path
     from gluon import current
     session=current.session
     request=current.request
-    if session["admin"]:
+    if session["admin"] or 'share_for_all' in file_name:
         if request.vars['drive']:
             xpath= request.vars['drive'] + ':\\'
         elif request.vars['xpath']:
