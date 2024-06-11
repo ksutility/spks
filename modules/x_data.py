@@ -353,7 +353,7 @@ x_data={
             'steps':{
                 'pre':{'tasks':'prj_id,prj1,prj2','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'lable_1,x_act_type,man_crt,x_num,x_des,x_act_rec,act_todo,x_act_pey,x_act_todo','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'lable_2,x_act_type','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'lable_2,x_act_type,folder','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'date_s,date_e,lno,sbj','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
@@ -677,6 +677,45 @@ x_data={
             'labels':{
                 'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
                 'lable_2':'باید تاریخ ، نام فرد و نظر فرد برای هر کدام از افراد موثر در بررسی ثبت شود',
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
+    'off_mor_mam_sat':{
+        'a':{
+            'base':{'mode':'form','title':'مرخصی و ماموریت ساعتی'
+            },
+            'tasks':{
+                'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
+                'mor_mam':{'type':'select','select':{'مرخصی':'مرخصی','ماموریت':'ماموریت'},'title':'مرخصی / ماموریت','prop':[]},
+                'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
+                'time_st':{'type':'time','title':'از ساعت'},
+                'time_en':{'type':'time','title':'تا ساعت'},
+                'frd_jnshin':{'type':'reference','width':'5','title':'جانشین','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
+                'frd_modir':{'type':'reference','width':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':[]},
+                'des_0':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
+                'des_jnshin':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
+                'des_modir':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
+                'des_2':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
+                'time_st2':{'type':'time','title':'از ساعت','def_value':'{time_st}'},
+                'time_en2':{'type':'time','title':'تا ساعت','value':'{time_en}'},
+
+            },
+            'steps':{
+                's0':{'tasks':'frd_1,mor_mam,date,time_st,time_en,frd_jnshin,frd_modir,des_0','jobs':'rcm_dcc','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des_jnshin','jobs':'#task#frd_jnshin','title':'تایید جانشین','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's2':{'tasks':'des_modir','jobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's3':{'tasks':'lable_1,time_st2,time_en2,des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''}
+            },
+            'views':{
+                'input':['mor_mam','time_st','time_en','frd_jnshin','frd_modir','des_0'],
+                'view1':['des_jnshin'],
+                'view2':['des_modir'],
+            },
+            'labels':{
+                'lable_1':'این بخش پس از انجام ماموریت  و یا مرخصی و مشخص شدن زمان نهایی آن باید پر شود',
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
