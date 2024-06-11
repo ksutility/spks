@@ -493,7 +493,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             idx=f"{row[0]}"#x_dic['id']
             form_url=URL(args=(args[0],args[1],'edit',row[0])) if session["admin"] else ""
             #URL('xform',args=(args[0],args[1],idx))
-            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(session["username"],jobs,{}) else n
+            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
             tds=[TD(n),TD(id_l)]
             
             tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s,request=request)#, all_cols,ref_i)
@@ -647,7 +647,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
         return msg
     else:
         if 'auth' in x_data_s['base']:
-            if not (session["admin"] or k_user.user_in_jobs(session["username"],x_data_s['base']['auth'],{})):
+            if not (session["admin"] or k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
