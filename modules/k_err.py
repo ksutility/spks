@@ -333,7 +333,7 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
     #-----------------
     def htm_dict(vals):
         tt=''
-        if vals:
+        if vals and type(vals)==dict:
             for x in vals:
                 y=vals[x] 
                 if type(y)==dict:
@@ -342,7 +342,11 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
                     y=htm_list(y)
                 else:
                     y=str(y)
-                if 'file' in x:y=htm_file(y)
+                try:
+                    if 'file' in x:
+                        y=htm_file(y)
+                except:
+                    pass
                 tt+='<div class="row border"><div class="col-2 bg-info">{}:</div><div  class="col-10">{}</div></div>'.format(x,_er_chk(y))
         return tt
     #-----------------
