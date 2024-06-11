@@ -3,13 +3,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 debug=[False,True][0]#True
 import tk_ui as ui
-#driver = webdriver.Firefox()
+#driver = webdriver.Firefox() =browser
 import time
 import json
 import k_err
 from k_err import xxprint,xprint,xxxprint
 chrome_options = webdriver.ChromeOptions()
-if 1==1:#chorome
+if 1==0:#chorome
     settings = {
             "recentDestinations": [{
                 "id": "Save as PDF",
@@ -28,7 +28,8 @@ if 1==1:#chorome
         "savefile.default_directory":"C:\\Users\\k.saadati\\Downloads\\"} 
       
     chrome_options.add_experimental_option('prefs', prefs)
-    for tt in ["--kiosk-printing" , "--window-size=800,850", "--window-position=810,0","--disable-infobars"]:# ,--headless-for-tests"]:# ,--kiosk
+    #   "--kiosk-printing",
+    for tt in [  "--window-size=800,850", "--window-position=810,0","--disable-infobars"]:# ,--headless-for-tests"]:# ,--kiosk
         chrome_options.add_argument(tt)
     chrome_options.add_experimental_option('prefs', {
     #"download.default_directory": "C:/Users/XXXX/Desktop", #Change default directory for downloads
@@ -36,8 +37,8 @@ if 1==1:#chorome
        "download.directory_upgrade": True,
        "plugins.always_open_pdf_externally": True #It will not show PDF directly in chrome
      })
-    #driver = webdriver.Chrome(executable_path=r"C:\webdriver\chromedriver.exe",options=chrome_options)
-    #chrome_options.binary_location =r'C:\webdriver\chromedriver.exe'
+    #driver = webdriver.Chrome(executable_path="C:\\pro\\webdriver\\chromedriver.exe",options=chrome_options)
+    #chrome_options.binary_location =r'C:\pro\webdriver\chromedriver.exe'
     driver = webdriver.Chrome(options=chrome_options)
 else:
     from selenium.webdriver.firefox.options import Options
@@ -45,10 +46,13 @@ else:
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
     #options.add_argument("download.default_directory=C:\\temp")
     driver = webdriver.Firefox(options=options)#,executable_path="C:\\temp\\geckodriver.exe")
+driver.set_window_position(810, 0)   
+driver.set_window_size(800,850)
 actions = ActionChains(driver)
 class Kselenium():
     xx="xx"
     #driver.get("http://93.115.149.30/RAVAN/UI/index.php") # automation 
+    success=''
     def __init__(self,url):
         driver.get(url)
     def find_element_trace(self,_xpath):
@@ -178,6 +182,7 @@ class Kselenium():
                             try:
                                 xprint('-123-'+xp)
                                 el=driver.find_element(By.XPATH,xp)
+                                xprint('-124-'+xp)
                                 if el:
                                     
                                     xxxprint(msg=['element','find_element_by_xpath:',xp],vals=self.report_element(el))
@@ -221,6 +226,9 @@ class Kselenium():
                     else:
                         return False,_id,_xpath
                     #element = self.find_element(_id,_xpath)
+                if t>20:
+                    xxxprint(msg=['err','in wait_for-20 x try but no success '])
+                    break
         return True,_id,_xpath
     
     def send_keys(self,keys_text_list):
@@ -243,11 +251,11 @@ class Kselenium():
         try:
             return driver.title
         except Exception as err:
-            if debug : breakpoint()
+            #if debug : breakpoint()
             return ''
-    def cur_win():
+    def cur_win(self):
         '''
-            detect Current Window ID in selenium browser
+            detect Current Window ID in selenium browser (driver)
             output:
                 [cur_win_id,cur_win_title]
                 cur_win_id : Current Window ID
@@ -260,21 +268,21 @@ class Kselenium():
             except Exception as err:
                 tx1='err on cuurent window access:'
                 tx2="""
-                    ÔäÇÓÇíí äÌÑå ÝÚÇá ÈÇ ãÔ˜á ãæÇÌå ÔÏå ÇÓÊ
+                    Ø´Ù†Ø§Ø³Ø§ÙŠÙŠ Ù¾Ù†Ø¬Ø±Ù‡ ÙØ¹Ø§Ù„ Ø¨Ø§ Ù…Ø´Ú©Ù„ Ù…ÙˆØ§Ø¬Ù‡ Ø´Ø¯Ù‡ Ø§Ø³Øª
                     --
-                    áØÝÇ Ó ÇÒ ÔäÇÓÇíí æ Íá ãÔ˜á Ï˜ãå ok ÑÇ ÈÒäíÏ 
+                    Ù„Ø·ÙØ§ Ù¾Ø³ Ø§Ø² Ø´Ù†Ø§Ø³Ø§ÙŠÙŠ Ùˆ Ø­Ù„ Ù…Ø´Ú©Ù„ Ø¯Ú©Ù…Ù‡ ok Ø±Ø§ Ø¨Ø²Ù†ÙŠØ¯ 
                     """
                 xxxprint(msg=['err',tx1,tx2],err=err)
                 xc=ui.ask(tx1+'\n',tx2,['cancel & next','breakpoint','play - go'])
                 if xc=='breakpoint':breakpoint()
                 elif xc=='cancel & next':return ''
-                if debug : breakpoint()
+                #if debug : breakpoint()
         '''              
         titles=self.titles()
         if cur_win_id not in titles: # cur_win_id in ids of titels
             ui.msg("
-                äÌÑå ãæÌæÏ ÏÑ áíÓÊ äÌÑå åÇí ÔäÇÓÇíí ÔÏå äãí ÈÇÔÏ
-                ÈÑÇí ÈÑÑÓí ÈíÔÊÑ ÈÑäÇãå ÏÑ ÍÇáÊ breakpoint ÇÏÇãå ãí íÇÈÏ
+                Ù¾Ù†Ø¬Ø±Ù‡ Ù…ÙˆØ¬ÙˆØ¯ Ø¯Ø± Ù„ÙŠØ³Øª Ù¾Ù†Ø¬Ø±Ù‡ Ù‡Ø§ÙŠ Ø´Ù†Ø§Ø³Ø§ÙŠÙŠ Ø´Ø¯Ù‡ Ù†Ù…ÙŠ Ø¨Ø§Ø´Ø¯
+                Ø¨Ø±Ø§ÙŠ Ø¨Ø±Ø±Ø³ÙŠ Ø¨ÙŠØ´ØªØ± Ø¨Ø±Ù†Ø§Ù…Ù‡ Ø¯Ø± Ø­Ø§Ù„Øª breakpoint Ø§Ø¯Ø§Ù…Ù‡ Ù…ÙŠ ÙŠØ§Ø¨Ø¯
             ")
             breakpoint()
             self.cur_win()
@@ -296,9 +304,9 @@ class Kselenium():
             except Exception as err:
                 tx1='err in switch win:'
                 tx2="""
-                    ÏÑ ÔäÇÓÇíí ÊÇíÊá ÊÈ åÇí ÈÇÒ ãÔ˜á æÌæÏ ÏÇÑÏ
-                    ÇÍÊãÇáÇ í˜ ãÔ˜á ãËá í˜ ÑíäÊ ÏÑ ÍÇá ÇäÌÇã æÌæÏ ÏÇÑÏ
-                    áØÝÇ Ó ÇÒ ÔäÇÓÇíí æ Íá ãÔ˜á Ï˜ãå ok ÑÇ ÈÒäíÏ 
+                    Ø¯Ø± Ø´Ù†Ø§Ø³Ø§ÙŠÙŠ ØªØ§ÙŠØªÙ„ ØªØ¨ Ù‡Ø§ÙŠ Ø¨Ø§Ø² Ù…Ø´Ú©Ù„ ÙˆØ¬ÙˆØ¯ Ø¯Ø§Ø±Ø¯
+                    Ø§Ø­ØªÙ…Ø§Ù„Ø§ ÙŠÚ© Ù…Ø´Ú©Ù„ Ù…Ø«Ù„ ÙŠÚ© Ù¾Ø±ÙŠÙ†Øª Ø¯Ø± Ø­Ø§Ù„ Ø§Ù†Ø¬Ø§Ù… ÙˆØ¬ÙˆØ¯ Ø¯Ø§Ø±Ø¯
+                    Ù„Ø·ÙØ§ Ù¾Ø³ Ø§Ø² Ø´Ù†Ø§Ø³Ø§ÙŠÙŠ Ùˆ Ø­Ù„ Ù…Ø´Ú©Ù„ Ø¯Ú©Ù…Ù‡ ok Ø±Ø§ Ø¨Ø²Ù†ÙŠØ¯ 
                     """
                 xxxprint(msg=['err',tx1,tx2],err=err)
                 xc=ui.ask(tx1+'\n'+tx2,['play - go','cancel & next','breakpoint',])
@@ -354,7 +362,7 @@ class Kselenium():
             n,f=k_file.file_count(k_file.downloads_path())
             if n==1:return True
             chwnd = driver.window_handles
-            xxxprint(msg=['n ','switch_to.window'],args=chwnd)
+            xxxprint(msg=[f'n={n} ','switch_to.window'],args=chwnd)
             for w in chwnd:
                 #switch focus to child window
                 if(w!=p):
@@ -376,12 +384,14 @@ class Kselenium():
             try:
                 time.sleep(1)
                 driver.execute_script('window.print();')
+                
                 #driver.execute_script("window.document.execCommand('Save')")
                 time.sleep(1)
             except Exception as err:
-                if debug : breakpoint()
+                #if debug : breakpoint()
                 pass
                 #k_err.show()
+            #ui.msg('print')    
             n,f=k_file.file_count(k_file.downloads_path()) 
             xxxprint(msg=['print_win--',n,k_file.downloads_path()],args=f)
             return True if n>0 else False
@@ -407,10 +417,13 @@ class Kselenium():
                         driver.switch_to.window(w) 
                         driver.close()
                     except Exception as err:
-                        if debug : breakpoint()
+                        #if debug : breakpoint()
                         xprint('==error:1 window can not  switch or close (in kselenium.print_v_close_by_title.colse_win)')
         p = driver.current_window_handle
         xxxprint(msg=['titles','print : start'],vals=self.titles())
+        print_win()
+        #ui.msg('ok')
+        return True
         print_master()
         #                           try:
         #                               time.sleep(1)
@@ -470,14 +483,15 @@ class Kselenium():
                 'att_textContent':el.get_attribute("textContent"),
                 'text':el.text}
         except Exception as err:
-            if debug : breakpoint()
+            #if debug : breakpoint()
             r1={'err':str(err)}
         return r1    
         #r1.update(vals)
         #xxxprint(msg=['result',msg1,msg2],vals=r1)
-    def make_pdf():
-        response = browser.execute_cdp_cmd('Page.printToPDF', self.template)
-        self.log = self.get_log(browser)
+    def make_pdf(self):
+        response = driver.execute_cdp_cmd('Page.printToPDF', self.template)
+        self.log = self.get_log(driver)
+        import base64,os
         if not response:
             return
 
