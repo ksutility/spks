@@ -361,7 +361,23 @@ input[type="checkbox"]:disabled
 div{
     background-color: #ffffff;
 }
+
+	font-family: BBadr;
+
+	font-size: 18px;
 */
 .input_auto {
 	background-color: #ccc;
 }
+.timepicker,.fDATE  {
+	background-color: #ccf;
+	text-align: center;
+}
+.app_x {
+	background-color: #faa;
+}
+.app_y {
+	background-color: #afa;
+}
+
+
