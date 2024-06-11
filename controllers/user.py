@@ -104,7 +104,7 @@ def login():
         rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
         if rs:
             #- print(str(rs))
-            return True, '{m_w} {pre_n} {name} {family}'.format(**rs),rs
+            return True, '{m_w} {name} {family}'.format(**rs),rs
         else:
             return False,False,False
     #--------------------------------------------'
