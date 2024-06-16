@@ -2,6 +2,8 @@
 #cache=Cache()
 k_cache={}
 import k_tools
+from gluon import current
+session=current.session
 #from functools import lru_cache #,cache
 #010929
 # breakpoint()
@@ -570,8 +572,12 @@ def template_parser(x_template,x_dic={}):
         try:
             xx=x_template.strip()
             from gluon import template
-            x1= template.render(content=xx,context=x_dic) 
-            return x1.format(**x_dic)  #remove 020926
+            x_dic1=x_dic.copy()
+            from gluon import current
+            session=current.session
+            x_dic1.update({'session':session})
+            x1= template.render(content=xx,context=x_dic1) 
+            return x1.format(**x_dic1)  #remove 020926
         except Exception as err:
             
             xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)
@@ -828,7 +834,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     _n=f"name='{_name}' id='{_name}'" 
     _len=int(obj['len']) if 'len' in obj else 256
     _value=request.vars[_name] if request else ''
-    _value=_value or str(obj.get('value',obj['def_value'])) or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '')
+    _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value',obj['def_value'])) if 'input' in need else  '')
     obj['value']=_value
     obj['help']=''
     obj['output']=_value 
@@ -885,6 +891,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         obj['help']=x_min + " - "+ x_max #f"{obj['min']} تا {obj['max']}"
         if 'input' in need :
             if "update" in obj['prop']:onact_txt= " onchange='" + form_update_set(form_update_set_param) + "'"
+            if "uniq" in obj: 
+                uniq_where=obj["uniq"]
+                onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''#;event.preventDefault()
             x_min=f"min={obj['min']} " if 'min' in obj else ""
             x_max=f"max={obj['max']}" if 'max' in obj else ""
             obj['input']=XML(f'''
@@ -948,12 +957,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                      return ','.join([_select[x] for x in _value.split(',')])
                 else:
                     return _select[_value]
+            
             obj['output']=XML(f'''<a  title="{select_1_or_multi(_value,_multiple)}">{_value}</a>''')
         except Exception as err:
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
             xxxprint(msg=["err",'',''],err=err,vals=_select) 
         obj["value"]=_value
         obj['output_text']=_select[_value] if (type(_value)==str and _value in _select) else ""
+        if 'show_full' in obj['prop']:obj['output']=obj['output_text']
         if 'input' in need:
             import k_htm
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
@@ -965,7 +976,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         
     elif sc=='fdate':
         import k_date
-        obj['format']='yymmdd' #obj['format']
+        obj['format']='yyyy/mm/dd' #obj['format']
         _value=_value or k_date.ir_date(obj['format'])
         if "update" in obj['prop']:onact_txt=form_update_set(form_update_set_param) 
         #x_end= " readonly >" if "readonly" in obj['prop'] else f''' onchange='date_key("{_name}","{def_val}","{x_format}");' {onact_txt} >'''
@@ -975,9 +986,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             obj['input']=INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True)
         obj['help']=DIV(obj['format'],_dir='ltr')
         msg ,or_v,js_ff_chek="",'',''
-    elif sc=='time':
+    elif sc=='time_c':
         if 'input' in need :
-            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="time",_required=True)
+            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_c",_required=True,_dir="ltr")#_type="time"
+        obj['help']=''
+        msg ,or_v,js_ff_chek="",'',''
+    elif sc=='time_t':
+        if 'input' in need :
+            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_t",_required=True,_dir="ltr",_time_inf=obj['time_inf'],_maxtime=obj['time_inf']['maxTime'])#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     elif sc=="auto":
@@ -1184,6 +1200,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     
     if '__objs__' not in x_dic:x_dic['__objs__']={}
     x_dic['__objs__'][obj['name']]=obj
+    ##obj['js']=
     
     return obj #,cm.records()
 
