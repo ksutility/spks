@@ -1,3 +1,4 @@
+def xxx():
     def save(text_app):
         def get_vv(f_nxt_s,f_nxt_s_new):
             steps=x_data_s['steps']
@@ -38,4 +39,7 @@
         else:
             r1=update(text_app)
         return DIV(XML(r1))
+def wday():
+    import k_date
+    return k_date.ir_weekday(name=True)
             
