@@ -228,6 +228,7 @@ def upload():
 def download():#ownload
     #return response.download(request,db,download_filename=xpath+'per.xlsx')
     args=request.args
+    xpath=k_set.xpath(args[-1]) # check for access to files with "share_for_all"
     if args:
         path=xpath+'\\'.join(args)
         if not os.path.exists(path):return f'file not exist => {path}'
@@ -513,7 +514,10 @@ class FILES_X_TOOLS():
         xpath=k_set.xpath()
         path=xpath+'\\'.join(args)
     x_path=";"+path.lower().replace("\\",";")+";"
+    #file_change_access-----------------------------
     fc_access=_folder_w_access(x_path=x_path)['ok']
+    def set_out_val(self):
+        return self.x_path,self.path,self.fc_access,self.args
     def link_delete(self):
         return A('Delete',_title='حذف فایل',_class='btn btn-danger',_href=URL(f='delete',args=self.args,vars=self.r_vars)) if self.fc_access else '' #_target="x_frame"
     def link_rename(self):
@@ -551,27 +555,10 @@ def f_list():#file_browser=file.index
         url?del=1
     '''
     import re
-    args=request.args
     r_vars=request.vars
-    # chak adrees is send to form from adress input
-    if 'input_adr' in r_vars:
-        path=r_vars['input_adr']
-        del r_vars['input_adr']
-        args=path.split('\\')
-        #if path:
-        xpath=args[0]
-        r_vars['xpath']=xpath
-        #p1=path.replace(xpath,'')
-        args=args[1:]
-        #return xpath," | ",p1," | ",path
-    else:
-        xpath=k_set.xpath()
-        path=xpath+'\\'.join(args)
-    
-    x_path=";"+path.lower().replace("\\",";")+";"
-    #file_change_access-----------------------------
-    
-    fc_access=_folder_w_access(x_path=x_path)['ok']
+ 
+    x_path,path,fc_access,args=files_x_tools.set_out_val()
+
     #- print('curren user file_change_access='+ str(fc_access)+ '  | on floder ='+x_path)
     #print(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
     
@@ -645,13 +632,14 @@ def f_list():#file_browser=file.index
                             });
                           }
                         </script> '''   
-    copyclip_func='''<script>var $temp = $("<input>");
+    copyclip_func=''
+    '''<script>var $temp = $("<input>");
             $("body").append($temp);
             $temp.val($(element).text()).select();
             document.execCommand("copy");
             $temp.remove();
             </script>'''                        
-    xp=XML(path.replace('/','\\'))
+    xp=XML(path.replace(',','\\'))
     #onchange="window.location.replace('{URL('f_list_set')}')"
     list_view_mod=XML(SELECT('1','2',_id='list_view_mod',_name='list_view_mod', value=r_vars['list_view_mod']))
     x_setting=f'''
