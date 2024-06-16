@@ -138,12 +138,12 @@ def jobs_title(jobs,x_data_s):
         elif job[0] == "#" and  len(job) > 6:
             jx=job.split('#')
             if jx[1]=="task":
-                tt+=['تکمیل کننده فیلد '+x_data_s['tasks'][jx[2]]['title']]
+                tt+=[' ' + x_data_s['tasks'][jx[2]]['title']]
                 #xxxprint(vals=x_data_s['tasks'],launch=True)
                 continue
             elif jx[1]=="step":
                 #xxxprint(msg=['',str(jx),''],launch=True)
-                tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
+                tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1) + ' فرم جاری ']
                 
                 continue
     return tt
