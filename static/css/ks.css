@@ -369,8 +369,12 @@ div{
 .input_auto {
 	background-color: #ccc;
 }
-.timepicker,.fDATE  {
+.timepicker_c,.fDATE  {
 	background-color: #ccf;
+	text-align: center;
+}
+.timepicker_t  {
+	background-color: #cff;
 	text-align: center;
 }
 .app_x {
