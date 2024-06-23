@@ -158,7 +158,7 @@ def auth(auth_jobs):
     from gluon import current
     session=current.session
     res=(session["admin"] or user_in_jobs(auth_jobs))
-    print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
+    #print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
     return res
 #--------------------------------------------------------------- not used
 
