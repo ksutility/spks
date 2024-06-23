@@ -260,6 +260,10 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
             tds.append('*')
             continue
+        if 'file'== tasks[fn]['type']:
+            tds.append(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
+            continue   
+        print(tasks[fn]['type'])
         x_obj=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
    
         #cm.tik(fn+'-1'+str(recs))    
@@ -858,7 +862,7 @@ def select_i(x_data):
         ssw_select,ssl_table='',''
         #--------------------------------------------------------------------------------------------------------------------------------------
         #if request.vars['sel1']:
-        sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[1] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
+        sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[0] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
         #if sel1 in ["None",None]:sel1='prj'
         traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
         val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
