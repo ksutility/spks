@@ -12,6 +12,63 @@ import kytable
 now = datetime.now().strftime("%H:%M:%S")
 db_name=r'applications\spks\databases\user.db'
 db1=DB1(db_name)
+def _isok_un_ps (un,ps):
+    #input un:user abb  ps:password
+    #output		if un and ps is ok	=>	true
+    #			else				=>	false
+    # tavjoh natige in barname dakhel 2 session ("username","user_fullname") garar migirad ke khali budan anha neshaney adam vorud kamel mibashad
+    r1,fullname,rs=_user_chek_ps_get_Inf(un,ps)
+    if r1:
+        session["user_fullname"]= fullname
+        session["username"]=un.lower()
+        session["admin"]=True if session["username"]=='ks' else False
+        session["file_access"]=rs["file_access"]
+        session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
+        #Session.Timeout=15
+
+        response.cookies["username"]=un
+        response.cookies["user_fullname"]=fullname
+        #response.Cookies["username"].expires=date+30
+        #response.Cookies["user_fullname"].expires=date+30
+        return True
+    else:
+        session.forget(response) #session.Abandon ()
+        response.cookies["username"]=""
+        response.cookies["user_fullname"]=""
+        return False
+#------------------------------------------------
+def _user_chek_ps_get_Inf (un,ps):#,fullname):
+    #return result , fullname
+    if un=="admin" and ps==";,vasuhnjd" : return True,"admin"
+    ps=f_cod(ps)
+    sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
+    #- print ('sql='+sql)
+    rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
+    if rs:
+        #- print(str(rs))
+        return True, '{m_w} {name} {family}'.format(**rs),rs
+    else:
+        return False,False,False
+#--------------------------------------------'
+def _chek_un_ps(un,ps):
+    goback="<BR><a href='login'><h3> بازگشت </h3></a>"
+    if _isok_un_ps(un,ps):
+        #session["username"]=un
+        ou='''  <div align=center><h2>{}</h2>
+                <h3>شما با موفقیت وارد سیستم شدید</h3><hr>
+                <h4>رمز و پسورد صحیح است</h4>
+                </div>
+        '''.format(session["user_fullname"])
+        ou+='<br>'.join([f'{x}={session[x]}' for x in ['username',"my_folder"]])#session
+        #redirect(URL('index'))#, args=(1,2,3), vars=dict(a='b')))
+    else:
+        ou='''  <div align=center><h3></h3>
+                <h3>نام و يا رمز را اشتباه وارد کرده ايد</h3>
+                {}
+                </div>
+        '''.format(goback,)
+    return ou
+    #------------------------------------------------------------------------------------------
 def f_cod(s1, enc_st='09377953310'):
     return s1
     s2=enc_st*5
@@ -70,65 +127,11 @@ def retrieve_password():
     return dict(ou=XML(ou))
       
 def login():
-    def isok_un_ps (un,ps):
-        #input un:user abb  ps:password
-        #output		if un and ps is ok	=>	true
-        #			else				=>	false
-        # tavjoh natige in barname dakhel 2 session ("username","user_fullname") garar migirad ke khali budan anha neshaney adam vorud kamel mibashad
-        r1,fullname,rs=user_chek_ps_get_Inf(un,ps)
-        if r1:
-            session["user_fullname"]= fullname
-            session["username"]=un.lower()
-            session["admin"]=True if session["username"]=='ks' else False
-            session["file_access"]=rs["file_access"]
-            session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
-            #Session.Timeout=15
-
-            response.cookies["username"]=un
-            response.cookies["user_fullname"]=fullname
-            #response.Cookies["username"].expires=date+30
-            #response.Cookies["user_fullname"].expires=date+30
-            return True
-        else:
-            session.forget(response) #session.Abandon ()
-            response.cookies["username"]=""
-            response.cookies["user_fullname"]=""
-            return False
-    #------------------------------------------------
-    def user_chek_ps_get_Inf (un,ps):#,fullname):
-        #return result , fullname
-        if un=="admin" and ps==";,vasuhnjd" : return True,"admin"
-        ps=f_cod(ps)
-        sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
-        #- print ('sql='+sql)
-        rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
-        if rs:
-            #- print(str(rs))
-            return True, '{m_w} {name} {family}'.format(**rs),rs
-        else:
-            return False,False,False
-    #--------------------------------------------'
+    
     #call page_set("f","ورود","-")
     #---------------------------------------------------------------------------------------------------------------------------
-    goback="<BR><a href='login'><h3> بازگشت </h3></a>"
-    def chek_un_ps(un,ps):
-        if isok_un_ps(un,ps):
-            #session["username"]=un
-            ou='''  <div align=center><h2>{}</h2>
-                    <h3>شما با موفقیت وارد سیستم شدید</h3><hr>
-                    <h4>رمز و پسورد صحیح است</h4>
-                    </div>
-            '''.format(session["user_fullname"])
-            ou+='<br>'.join([f'{x}={session[x]}' for x in ['username',"my_folder"]])#session
-            #redirect(URL('index'))#, args=(1,2,3), vars=dict(a='b')))
-        else:
-            ou='''  <div align=center><h3></h3>
-                    <h3>نام و يا رمز را اشتباه وارد کرده ايد</h3>
-                    {}
-                    </div>
-            '''.format(goback,)
-        return ou
-    #------------------------------------------------------------------------------------------
+    
+    
     """
     if request.vars["mail"]:#!= "":
         ou=goback
@@ -143,13 +146,13 @@ def login():
     if "username" in request.cookies and "password" in request.cookies:
         un=request.cookies["username"].value
         ps=request.cookies["password"].value
-        ou=chek_un_ps(un,ps)
+        ou=_chek_un_ps(un,ps)
         #- print(f'cookies-{un}-{ps}')
         #redirect(URL('index'))
     elif "username" in session and session["username"] and session["password"]:
         un=session["username"]
         ps=session["password"]
-        ou=chek_un_ps(un,ps)
+        ou=_chek_un_ps(un,ps)
         #- print(f'session-{un}-{ps}')
         #redirect(URL('index'))
     elif request.vars["username"]:  #!="":
@@ -158,7 +161,7 @@ def login():
         #session["ir_date"]= iran_time("","",0,x_w,"t")
         #session("ir_weak")=x_w
         #set_inf()
-        ou=chek_un_ps(un,ps)
+        ou=_chek_un_ps(un,ps)
     else:
         ou=f'''<div align=center>
         <h2>لطفا براي ورود نام کاربری و پسورد خود را وارد کنيد</h2>
