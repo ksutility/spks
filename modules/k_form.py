@@ -682,6 +682,10 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
         if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
             tds.append('*')
             continue    
+        if 'file'== tasks[fn]['type']:
+            tds.append(obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
+            continue   
+        #print(tasks[fn]['type'])
         x_obj=obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
         
         #cm.tik(fn+'-1'+str(recs))    
@@ -1080,7 +1084,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         msg1=file_rename_manage(_value,obj['file_name'])#check fine is renamed ?
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
-        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",true);'>{_value}</a>'''
+        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>'''
+        file_icon="F"
+        bt_view_mini=f'''<a class="btn btn-info" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
         bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
         
         obj['input']=XML(f'''
@@ -1091,6 +1097,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         obj['output']=XML(f'''
             <div >
                 {bt_view}{msg1}
+            </div> ''')    
+        obj['output-mini']=XML(f'''
+            <div >
+                {bt_view_mini}{msg1}
             </div> ''')    
         """    
         def path_x(pre_folder,file_name,pattern):
@@ -1189,7 +1199,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         vars={x:template_parser(x_link['vars'][x],x_dic) for x in x_link['vars']}
         #obj[r1]=XML(A(DIV(obj[r1],_href=URL(*p,args=tuple(args),vars=vars))))
         show_link=URL(*p,args=tuple(args),vars=vars)
-        obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}")' ))
+        obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}",false)' ))
 
     ##----------------------
     if "private" in obj['prop']:
