@@ -101,6 +101,18 @@ fildes={'paper':[{'name':'lno','type':'text','title':'شماره نامه','disa
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def index():
+    response.flash = T("سیستم مدیریت محتوا")
+    im_url=URL('spks','static','images/AQC-entrance-web-page-030401.jpg')
+    login_ulr=URL('spks','user','login')
+    x_url=URL('spks','static','images/AQC-')
+    html=f"""
+        <body style="background-image: url('{im_url}');">
+        <div>سیستم مدیریت محتوا</div>
+        </body>
+    """
+    return dict(im_url=im_url,login_ulr=login_ulr,x_url=x_url,m1=T('سیستم مدیریت محتوا'),m2=T('-'),m3=T('Kind Smart Web Tools'),
+        link=A('ورود', _href=URL('spks','data','index')))
+def index1():
     t=[ A('جداول اطلاعات',_href=URL('data','index')),
         A('ویرایشگر اتوکد',_href=URL('acpe','index'))
         ]
