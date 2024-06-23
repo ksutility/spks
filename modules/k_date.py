@@ -12,8 +12,7 @@ def i_date():
         if d<1:d+=30
         dt = '{:0>2}'.format (d)
         return {'d':d,'m':m,'iso':mt + dt}
-def ir_date(xformat):
-    xf=xformat
+def ir_date(xformat=''):
     today=jdatetime.date.today().strftime('%Y-%m-%d')
     yyyy,mm,dd=today.split('-')
     yy=yyyy[-2:]
@@ -21,9 +20,12 @@ def ir_date(xformat):
     hh,gg,ss=now.split(':')
     ll={'yyyy':yyyy,'yy':yy,'mm':mm,'dd':dd,
         'hh':hh,'gg':gg,'ss':ss}
-    for x in ll:
-        xf=xf.replace(x,ll[x])
-    return xf
+    if xformat:  
+        for x in ll:
+            xformat=xformat.replace(x,ll[x])
+        return xformat
+    else:
+        return ll
 def date_dif(time2,time1,in_format,out_format="DDD+hh:gg"):
     t1=split_by_format(time1,in_format,int_str='int')
     t2=split_by_format(time2,in_format,int_str='int')
@@ -77,3 +79,42 @@ def out_in_format(dt_obj,out_format):
     return out_format
 
 #print (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
+def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
+    import datetime
+    if type(in_time)==tuple:
+        in_time=jdatetime.date(in_time)
+    wd_e=in_time.togregorian().weekday()
+    wd_f=(wd_e+2) % 7
+    w_days=[[0,1,2,3,4,5,6],
+            ['ش','1ش','2ش','3ش','4ش','5ش','ج'],
+            ['شنبه','1 شنبه','2 شنبه','3 شنبه','4 شنبه ','5 شنبه ','جمعه']]
+    if w_case==4:
+        return w_days[1][wd_f],w_days[2][wd_f] 
+    elif w_case==3:
+        t1,t2=w_days[1][wd_f],w_days[2][wd_f]  
+        return f"<a title='{t2}' class='btn btn-light'>{t1}</a>"
+    else:
+        return w_days[w_case][wd_f] 
+    
+    #x=datetime.date(2008, 6, 24).weekday()
+    #print(x1,x2)
+    #x=datetime.date(2008, 6, 24).weekday() 0=monday,6=sunday
+def site_time():
+    #=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}-
+    ird=ir_date() #irdate
+    t1,t2=ir_weekday(w_case=4)
+    xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
+    return f"""
+                <a title='{t2}' {xcs}>{t1}</a>
+                <a title='{ird["hh"]}:{ird["gg"]}:{ird["hh"]}' {xcs}>{ird["hh"]}:{ird["gg"]}</a>
+                <a title='{ird["yyyy"]}/{ird["mm"]}/{ird["dd"]}' {xcs}>{ird["dd"]}</a>
+                
+                """
+    return f"""<div dir="rtl" class="row ">
+                <div title='{t2}' class='col  btn btn-light mx-auto p-1'>{t1}</div>
+                <div title='{ird["hh"]}:{ird["gg"]}:{ird["hh"]}' class='col  btn btn-light mx-0 p-1'>{ird["hh"]}:{ird["gg"]}</div>
+                <div title='{ird["yyyy"]}/{ird["mm"]}/{ird["dd"]}' class='col  btn btn-light mx-0 p-1'>{ird["dd"]}</div>
+                
+                
+            </div>"""
+    
