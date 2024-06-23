@@ -150,9 +150,10 @@
   
   <body >
     <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
-	<div style='text-align:center;'>
+	<div style='text-align:center;height: 40px;'>
         <table id="table_header" width="100%"><tr>
-            <td width="10%">
+			<td width="5%"></td>
+            <td width="10%" class="align-text-top">
                 <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                       <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -185,15 +186,16 @@
                 </ul>
             </td>
  
-			<td width="10%">
+			<td width="15%"><div style="max-height:40px" class="overflow-hidden">
 				<a class="btn btn-primary" href="{{=URL('file','index')}}" title="اشتراک فایل">S</a>
 				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'))}}" title="کتابخانه">L</a>
 				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">F</a>
 				<a class="btn btn-primary" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
-			</td>
+			
+			</div></td>
 			{{import k_date}}
-			<td width="10%">{{=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}</td>
-            <td width="60%">
+			<td width="15%" dir='rtl' class="align-text-top" style="max-height:40px"><div class="overflow-hidden" >{{=XML(k_date.site_time())}}</div></td>
+            <td width="45%" dir='rtl' class="align-text-top">
 				
 					<a title='
 					مجموعه سیستم های هوشمند و یکپارچه  مدیریت اسناد
@@ -267,7 +269,7 @@
                   </div>
                 </nav>
                 -->
-            <td width="10%">
+            <td width="10%" class="align-text-top">
                 <!-- ab
                   {{if 'auth' in globals():}}
                     <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
