@@ -416,13 +416,20 @@ x_data={
                 'job':{'type':'text','title':'سمت','len':'50'},#,'ref':{'db':'user','tb':'job','key':'id','val':'{id}{name}'}
                 'p_id':{'type':'num','len':4,'lang':'fa','title':'شماره پرسنلی','uniq':''},
                 'end':{'type':'fdate','title':'تاریخ خاتمه کار'},
+                'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی'},
+                'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'صفحه اول شناسنامه','auth':'dcc_prj'},
+                'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی'},
+                'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dcc_prj'},
                 },
             'steps':{
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,p_id,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},#'jobs':'#task#un,dccm,as1',
+                'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},#'jobs':'#task#un,dccm,as1',
                 'st2':{'tasks':'job','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
+                'input':['file_pic_per','file_shnsnm','file_mdrk_thsl','file_ot'],
+                'view1':['un','name','family'],
+                'view2':['p_id','ps'],
                 },
             'cols_filter':{'':'همه',},
             'data_filter':{
@@ -577,7 +584,11 @@ x_data={
                 'n_contr':{'type':'text','len':'40','title':'شماره قرارداد'},
                 'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
                 'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
-                'price':{'type':'num','min':1,'max':9000000,'len':'7','title':'مبلغ قرارداد بر حسب میلیون تومان'},
+                'price':{'type':'num','min':1,'max':900000000000,'len':'15','title':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه'},
+                'price_se':{'type':'num','min':1,'max':900000000000,'len':'15','title':'مبلغ صورت وضعیت ارسالی'},
+                'date_lse':{'type':'fdate','title':'تاریخ آخرین صورت وضعیت ارسالی'},
+                'frd_peygir':{'type':'reference','width':'5','title':'مسئول پیگیری','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
+                'prj_step1':{'type':'select','title':'وضعیت کلی','select':{'1':'پروپوزال','2':'در حال قرارداد','11':'جاری','21':'گذشته  و ناتمام مالی','31':'خاتمه کامل'}},
             },
             'steps':{
                 'pre':{'tasks':'subject,client,date,prj_dur,serv_type,des,n_contr','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -687,7 +698,7 @@ x_data={
     #--------------------------------------------------------------------
     'off_mor_mam_sat':{
         'a':{
-            'base':{'mode':'form','title':'مرخصی و ماموریت ساعتی'
+            'base':{'mode':'form','title':'-',"x":'مرخصی و ماموریت ساعتی'
             },
             'tasks':{
                 'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
