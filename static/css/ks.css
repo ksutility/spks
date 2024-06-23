@@ -25,6 +25,8 @@ table th,table td {
 	border: 1px solid #ddd;
 	padding:0px;
 	border-spacing: 0px;
+	height:40px;
+	max-height:40px;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
