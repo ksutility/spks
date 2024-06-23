@@ -232,7 +232,7 @@ def xform():#view 1 row
                 v_name=v_name or '' # NONE => ''
                 v_name=v_name.lower()
                 return x_dict.get(v_name,v_name)
-                
+            #print("==>"+str(form_sabt_data[f'step_{step["i"]}_un']))   
             hx['app']=[ 
                         (val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["i"]}_ap'])),
                         (" توسط "+val_in_dic(k_user.a_users,form_sabt_data[f'step_{step["i"]}_un'])['fullname']),
@@ -301,7 +301,7 @@ def xform():#view 1 row
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  '))] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
-        
+        step_befor='' # svae name of before step
         for i,step_n in enumerate(x_data_s['steps']):
             step=x_data_s['steps'][step_n]
             step['i']=i
@@ -312,17 +312,23 @@ def xform():#view 1 row
                 if k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
                     htm_form+=[show_step_cur(x_data_s,xid,form_sabt_data,step)]
                 else :
+                    if step_befor and k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):# show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+                        htm_form+=[app_review()]
                     htm_form+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
                     #htm_form+=[DIV(DIV(_class='col-1'),DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')],_class='col-10'),DIV(_class='col-1'),_class='row')]
                     htm_form+=[DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')])]
                     htm_form+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
             else:
                 htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'a')]
+            step_befor=step_n
         # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+        # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
         if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
             htm_form+=[app_review()]
+        # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
         elif f_nxt_s < 0 and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
             htm_form+=[app_review()]
+            
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=request.args[:2]
