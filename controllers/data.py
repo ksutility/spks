@@ -637,7 +637,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     </script>
     '''      
     #flt=request.vars['filter']
-    filter_data=request.vars.get('data_filter') #eval(flt) if flt else ''
+    filter_data=k_form.template_parser(request.vars.get('data_filter'),x_dic={}) #eval(flt) if flt else ''
     #print ('filter_data='+str(filter_data))
     #print(str(request.vars))
     #exec('xx={"a":"2"}')
