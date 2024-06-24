@@ -27,6 +27,7 @@ class USER_LOG():
             self.inf[ip]['last']=xtime   
     def report(self):
         return (self.inf)
+
 def load_user_inf():
     db1=DB1(db_path+'user.db')
     rows,titles,rows_num=db1.select('user',where={},limit=0)
@@ -36,7 +37,13 @@ def load_user_inf():
         users[u_inf['un']]={'fullname':'{m_w} {pre_n} {name} {family}'.format(**u_inf)}
         #users[u_inf['un']]=u_inf
     return users
+class ALL_USERS():
+    inf={}
+    def __init__(self):
+        self.inf=load_user_inf()
 a_users=load_user_inf()
+all_user=ALL_USERS()
+
 def load_job_inf():
     db1=DB1(db_path+'job.db')
     rows,titles,rows_num=db1.select('a',where={},limit=0)
@@ -83,6 +90,31 @@ def user_in_jobs(jobs,row_data={},un=''):
                 if un==x_un:return True
     print("user_in_jobs=>false")
     return False
+def step_changer(step_index,form_sabt_data):
+    '''
+        مشخص کردن فردی که می تواند یک مرحله پر شده از یک فرم را تغییر دهد
+    '''
+    return form_sabt_data[f'step_{step_index}_un']
+def can_user_edit_step(step,step_index,form_sabt_data,un=''):
+    '''
+       آیا کاربر مشخص شده می تواند مرحله مشخص شده را تغییر دهد
+       اگر کاربری مشخص نشود کاربر جاری در نظر گرفته می شود
+    '''
+    if not un:
+        from gluon import current
+        session=current.session
+        un=session["username"]
+    """
+        first chek that target_step if filled older   
+        ابتدا بررسی می کنیم که آیا بخش مورد نظر از فرم قبلا پر شده است یا خیر
+        قبلا پر شده یعنی فرم برگشت خورده است
+    """
+    x_step_changer=step_changer(step_index,form_sabt_data)
+    if x_step_changer: 
+        return x_step_changer==un # if user is editor of x_step
+        
+    return user_in_jobs(step['jobs'],row_data=form_sabt_data)
+    #return form_sabt_data[f'step_{step_index}_un']    
 def jobs_masul(x_data_s,step_index,form_sabt_data ):
     '''
         according form_inf(form_sabt_data) return masul of jobs  
@@ -103,11 +135,16 @@ def jobs_masul(x_data_s,step_index,form_sabt_data ):
         un:str
             username
     '''
+    x_step_changer=step_changer(step_index,form_sabt_data)
+    if x_step_changer: return x_step_changer
     import k_tools
-    xxx=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_result='y')
-    if xxx in ['y','x']: # y=form is fill ok ,x=form is remove / kill
-            return xxx
-    job=xxx['jobs']
+    if step_index>len(x_data_s['steps']):
+        return 'y' # y=form is fill ok 
+    if form_sabt_data['f_nxt_u'] in ['y','x']:  # y=form is fill ok ,x=form is remove / kill
+        return form_sabt_data['f_nxt_u']
+    x_step=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_result='y')
+    
+    job=x_step['jobs']
   
     if 1>0: #try:
         if job[0] != "#":
