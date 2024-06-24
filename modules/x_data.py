@@ -377,11 +377,14 @@ x_data={
                 #cols_filter={'':'همه','lno,sbj':'2',}
             'data_filter':
                 {'':'همه نامه ها',
+                'prj_id = "112"':'پروژه صحن جامع',
+                'prj_id = "110"':'مدیریت سوابق',
                 'prj_id is Null':'نیاز به تعیین پروژه',
                 'prj_id = "36"':'پروژه پیوندراه',
                 'prj_id = "29"':'پروژه گیتها',
                 'prj_id = "29" AND x_des like "%L-%"':'-Lپروژه گیتها',
                 'prj_id = "48"':'پروژه استاندارد سازی',
+                
                 'act_todo != ""':'دارای ارجاع',
                 'x_act_todo != ""':'نیاز به اقدام',
                 'act_pey != ""':'پی گیری',
@@ -698,7 +701,7 @@ x_data={
     #--------------------------------------------------------------------
     'off_mor_mam_sat':{
         'a':{
-            'base':{'mode':'form','title':'-',"x":'مرخصی و ماموریت ساعتی'
+            'base':{'mode':'form','title':'-',"x":'مرخصی و ماموریت ساعتی'+'حذف شده'
             },
             'tasks':{
                 'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
@@ -749,8 +752,7 @@ x_data={
             'steps':{
                 's0':{'tasks':'frd_1,date,time_st,lable_1,time_len,frd_modir,des_0','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'des_modir','jobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
-                's2':{'tasks':'des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
-                's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['انجام شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+                's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
                 'input':['frd_1','time_st','time_len','frd_modir','des_0'],
@@ -761,10 +763,14 @@ x_data={
                 'lable_1':'حداکثرمیزان مرخصی ساعتی مجاز 3:30 می باشد',
             },
             'cols_filter':{'':'همه',},
-            'data_filter':{'':'همه',}
+            'data_filter': 
+                {'':'همه موارد',
+                'step_0_un = "{_i_}"':'فرم های من',
+                'f_nxt_u = "{{=_i_}}"':'فرمهای منتظر من',
+                },
         }
     },
-    #--------------------------------------------------------------------
+    #-------------------------------------------------------------------- 's2':{'tasks':'des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'off_mamurit_saat':{
         'a':{
             'base':{'mode':'form','title':'ماموریت ساعتی'
@@ -871,7 +877,7 @@ def x_data_verify(x_data):
                     if 'app_titls' not in step or not step['app_titls']:
                         step['app_titls']=[{'x':'حذف فرم','y':'تایید این مرحله','r':'بازگشت به مرحله قبل'}[x] for x in step['app_keys'].split(',')]
                     step['app_keys']=step['app_keys'].split(',')
-                    #'app_kt'=app dict from keys and titels
+                    #'app_kt'=app dict from keys and titels 
                     step['app_kt']=dict(zip(step['app_keys'],step['app_titls']))
                     step['i']=i
                     #{x:step['app_titls'][i] for i,x in enumerate(step['app_keys'].split(',').reverse())} 
