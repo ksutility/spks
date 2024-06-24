@@ -113,7 +113,7 @@ def get_table_filter(tasks,x_data_s):
 
     cols_filter=x_data_s['cols_filter']
     cols_filter1={'name':'cols_filter','type':'select','select':cols_filter}#,$hlp='prop':["can_add"],}
-    data_filter=x_data_s['data_filter']
+    data_filter=x_data_s['data_filter'] 
     data_filter1={'name':'data_filter','type':'select','select':data_filter}
     all_cols=list(tasks.keys())
     #print(f'all_cols={all_cols}')
@@ -232,10 +232,11 @@ def xform():#view 1 row
                 v_name=v_name or '' # NONE => ''
                 v_name=v_name.lower()
                 return x_dict.get(v_name,v_name)
+            print("step[i]="+str(step["i"]))
             #print("==>"+str(form_sabt_data[f'step_{step["i"]}_un']))   
             hx['app']=[ 
                         (val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["i"]}_ap'])),
-                        (" توسط "+val_in_dic(k_user.a_users,form_sabt_data[f'step_{step["i"]}_un'])['fullname']),
+                        (" توسط "+val_in_dic(k_user.a_users,form_sabt_data[f'step_{step["i"]}_un']).get('fullname','')),
                         (" در تاریخ "+(form_sabt_data[f'step_{step["i"]}_dt'] or '')),
                         ]
             # breakpoint()
@@ -275,6 +276,8 @@ def xform():#view 1 row
         def inf_g():
             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
             xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'---xid==-1 : '+str(xid=='-1')])
+            if not rows:
+                return '',0,''
             if xid=='-1':
                 form_sabt_data={x:'' for x in titles}
                 f_nxt_s=0
@@ -301,33 +304,36 @@ def xform():#view 1 row
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  '))] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
-        step_befor='' # svae name of before step
-        for i,step_n in enumerate(x_data_s['steps']):
-            step=x_data_s['steps'][step_n]
-            step['i']=i
-            if i < f_nxt_s:
-                htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'b')]
-            elif i == f_nxt_s:
-                
-                if k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
-                    htm_form+=[show_step_cur(x_data_s,xid,form_sabt_data,step)]
-                else :
-                    if step_befor and k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):# show revize buttom نشان دادن دکمه بازبینی مرحله آخر
-                        htm_form+=[app_review()]
-                    htm_form+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
-                    #htm_form+=[DIV(DIV(_class='col-1'),DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')],_class='col-10'),DIV(_class='col-1'),_class='row')]
-                    htm_form+=[DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')])]
-                    htm_form+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
-            else:
-                htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'a')]
-            step_befor=step_n
-        # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
-        # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
-        if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
-            htm_form+=[app_review()]
-        # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
-        elif f_nxt_s < 0 and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
-            htm_form+=[app_review()]
+        if form_sabt_data:
+            step_befor='' # svae name of before step
+            for i,step_n in enumerate(x_data_s['steps']):
+                step=x_data_s['steps'][step_n]
+                step['i']=i
+                if i < f_nxt_s:
+                    htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'b')]
+                elif i == f_nxt_s:
+                    
+                    if k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
+                        #k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
+                        htm_form+=[show_step_cur(x_data_s,xid,form_sabt_data,step)]
+                    else :
+                        if step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
+                            #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):# show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+                            htm_form+=[app_review()]
+                        htm_form+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
+                        #htm_form+=[DIV(DIV(_class='col-1'),DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')],_class='col-10'),DIV(_class='col-1'),_class='row')]
+                        htm_form+=[DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')])]
+                        htm_form+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
+                else:
+                    htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'a')]
+                step_befor=step_n
+            # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+            # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
+            if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
+                htm_form+=[app_review()]
+            # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
+            elif f_nxt_s < 0 and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
+                htm_form+=[app_review()]
             
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
@@ -346,7 +352,7 @@ def xform():#view 1 row
     return dict(htm=show_form(x_data_s,db1,tb_name,xid))
 # ------------------------------------------------------------------------------------------ 
 def _save_out(htm_form,tt,args,err_show=False):
-    sec=2500 if err_show or (debug and session["admin"]) else 1
+    sec=2500 if err_show or (debug and session["admin"]) else .5
     htm_form+=[DIV(DIV(DIV(A('بازگشت به فرم',_href=URL('xform',args=args),_class="btn h4 btn-primary text-light"),_class="col-7"),
                     DIV("ثانیه تا برگشت اتوماتیک به فرم",_class="col-4 h6 text-right"),
                     DIV("timer",_id="x_time_counter",_class="col-1 bg-info text-light h3 text-center"),
@@ -509,7 +515,14 @@ def save_app_review():
     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
     form_sabt_data=dict(zip(titles,rows[0]))
     f_nxt_s=int(form_sabt_data['f_nxt_s'] )
-    vv={'f_nxt_s':str(f_nxt_s-1)}
+    f_nxt_s_new=f_nxt_s-1
+    vv={
+        f'step_{f_nxt_s_new}_un':'',
+        f'step_{f_nxt_s_new}_dt':'',
+        f'step_{f_nxt_s_new}_ap':'',
+        'f_nxt_s':str(f_nxt_s_new),
+        'f_nxt_u':k_user.jobs_masul(x_data_s,int(f_nxt_s_new),form_sabt_data) if (type(f_nxt_s_new)==int or f_nxt_s_new[0]!="x") else "x"
+        }
     result=db1.row_backup(tb_name,xid)
     xu = db1.update_data(tb_name,vv,{'id':xid})
     htm_form=['UPDATE:'] 
@@ -526,7 +539,7 @@ def save_app_review():
         $( document ).ready(function() {
             $("a.toggle").click();
         });
-        var sec=25;
+        var sec=0.5;
         var redirect_timer = setTimeout(function() {
             window.location='""" + URL('xform',args=args) + """'
         }, sec * 1000);
@@ -644,7 +657,7 @@ def xtable():
                 if select_cols=='form_v_cols_full':
                     tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]
                 elif select_cols=='form_v_cols_1':  
-                    tds+=[TD("-",_title=",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1]),_class='bg-info')]
+                    tds+=[TD(str(x_dic[f"step_{step['i']}_ap"]),_title=",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1]),_class='bg-info')]
                 cornometer2.print('a---c')
             cornometer.print('c')
             tds+=[TD(x_dic[f"f_nxt_s"],_class=cls1),TD(x_dic[f"f_nxt_u"],_class=cls1)]
@@ -668,7 +681,8 @@ def xtable():
     </script>
     '''      
 
-    filter_data=request.vars.get('data_filter') #eval(flt) if flt else ''
+    filter_data=k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
+    print ('filter_data='+str(filter_data))
     args=request.args
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
