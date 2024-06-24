@@ -575,7 +575,7 @@ def template_parser(x_template,x_dic={}):
             x_dic1=x_dic.copy()
             from gluon import current
             session=current.session
-            x_dic1.update({'session':session})
+            x_dic1.update({'session':session,'_i_':session['username']})
             x1= template.render(content=xx,context=x_dic1) 
             return x1.format(**x_dic1)  #remove 020926
         except Exception as err:
