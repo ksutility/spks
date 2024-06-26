@@ -214,9 +214,7 @@ x_data={
                 'set_auth':{'tasks':'auth_users','jobs':'dccm','title':'دسترسی','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['prj','code','name','des','cat_1','cat_2'],
-                'view1':[''],
-                'view2':['des'],
+                'all':{'input':'prj,code,name,des,cat_1,cat_2','view1':'','view2':'des'},
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -260,9 +258,7 @@ x_data={
                 'inf':{'tasks':'n,des,date','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
-                'input':['code','name_e','name'],
-                'view1':[],
-                'view2':[]
+                'all':{'input':'code,name_e,name','view1':'','view2':''}
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -357,9 +353,7 @@ x_data={
                 's3':{'tasks':'date_s,date_e,lno,sbj','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['prj_id','man_crt','x_num','x_des','x_act_todo','x_act_rec','x_act_pey','act_todo'],
-                'view1':['lno','lno_t','sbj'],
-                'view2':['comment','date_s','date_e','cdate','io_t','outbox','man_ar_mng','paper_num','attach','folder'],
+                'all':{'input':'prj_id,man_crt,x_num,x_des,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_t,sbj','view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,attach,folder'}
             },
             'labels':{
                 'lable_1':'فیلد ارجاع نامه توسط نرم افزار اسکرپ اتوماسیون پر می شود در زمان بررسی هر نامه باید آنرا خالی کرد تا نشانه تکمیل اقدامات لازم باشد',
@@ -430,9 +424,7 @@ x_data={
                 'st2':{'tasks':'job','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
-                'input':['file_pic_per','file_shnsnm','file_mdrk_thsl','file_ot'],
-                'view1':['un','name','family'],
-                'view2':['p_id','ps'],
+                'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot','view1':'un,name,family','view2':'p_id,ps'},
                 },
             'cols_filter':{'':'همه',},
             'data_filter':{
@@ -487,9 +479,7 @@ x_data={
                 's2':{'tasks':'doc_srl_name','jobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['prj','sub_p','step','dspln','doc_t','doc_srl_code','doc_srl_name'],
-                'view1':[''],
-                'view2':[''],
+                'all':{'input':'prj,sub_p,step,dspln,doc_t,doc_srl_code,doc_srl_name','view1':'','view2':''},
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -529,9 +519,7 @@ x_data={
                 's3':{'tasks':'file_edt,file_fix','jobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['prj','sub_p','step','dspln','doc_t'],
-                'view1':['doc_p_code'],
-                'view2':['doc_p_code'],
+                'all':{'input':'prj,sub_p,step,dspln,doc_t','view1':'doc_p_code','view2':'doc_p_code'}
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -562,9 +550,7 @@ x_data={
                 's2':{'tasks':'f_resume,f_form','jobs':'dcc_prj','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['name_f','family_f','name_e','family_e','tel_mob'],
-                'view1':['code_meli','date','eng','eng_des','office'],
-                'view2':['f_resume','f_form'],
+                'all':{'input':'name_f,family_f,name_e,family_e,tel_mob','view1':'code_meli,date,eng,eng_des,office','view2':'f_resume,f_form'}
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -581,28 +567,28 @@ x_data={
                 'date':{'type':'fdate','title':'تاریخ ابلاغ قرارداد'},
                 'prj_dur':{'type':'num','min':1,'max':1200,'len':'4','title':'مدت قرارداد - ماه'},
                 'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','M':'MC-مدیریت طرح','-':'نا مشخص'},'prop':['multiple']},
-                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,contract'},
+                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf",'path':'form,contract'},
+                'f_cnt_1p':{'type':'file','len':'40','title':'فایل قرارداد نهایی امضا نشده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-1p','file_ext':"pdf",'path':'form,contract'},
                 'verify_note':{'type':'text','len':'40','title':'توضیحات بررسی کننده'},
                 'des':{'type':'text','len':'250','title':'توضیح'},
                 'n_contr':{'type':'text','len':'40','title':'شماره قرارداد'},
                 'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
                 'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
-                'price':{'type':'num','min':1,'max':900000000000,'len':'15','title':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه'},
-                'price_se':{'type':'num','min':1,'max':900000000000,'len':'15','title':'مبلغ صورت وضعیت ارسالی'},
+                'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ اولیه','title_add':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه بر حسب میلیون تومان'},
+                'price_se':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ نهایی','title_add':'مبلغ صورت وضعیت ارسالی بر حسب میلیون تومان'},
                 'date_lse':{'type':'fdate','title':'تاریخ آخرین صورت وضعیت ارسالی'},
                 'frd_peygir':{'type':'reference','width':'5','title':'مسئول پیگیری','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
                 'prj_step1':{'type':'select','title':'وضعیت کلی','select':{'1':'پروپوزال','2':'در حال قرارداد','11':'جاری','21':'گذشته  و ناتمام مالی','31':'خاتمه کامل'}},
             },
             'steps':{
                 'pre':{'tasks':'subject,client,date,prj_dur,serv_type,des,n_contr','jobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'f_cnt,chlng,solution','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_cnt,f_cnt_1p,chlng,solution','jobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'verify_note,price','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
                 
             },
             'views':{
-                'input':['subject','client','date','prj_dur','serv_type','price'],
-                'view1':['date','n_contr','des'],
-                'view2':['des'],
+                '1':{'input':'subject,client,date,prj_dur,serv_type,price','view1':'date,n_contr,des','view2':'des'},
+                'all':{'input':'f_cnt,f_cnt_1p,price,n_contr','view1':'subject,date','view2':'des'},
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -628,9 +614,7 @@ x_data={
                 's2':{'tasks':'clnt_stf,clnt_stf_dscr','jobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['vrfy_rslt','vrfy_meta'],
-                'view1':['idea','idea_bnft','idea_dscr'],
-                'view2':['clnt_stf','clnt_stf_dscr'],
+                'all':{'input':'vrfy_rslt,vrfy_meta','view1':'idea,idea_bnft,idea_dscr','view2':'clnt_stf,clnt_stf_dscr'}
             },
             'labels':{
                 'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
@@ -656,9 +640,7 @@ x_data={
                 's2':{'tasks':'act','jobs':'dccm','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['err_rec','err_des'],
-                'view1':['act'],
-                'view2':['act'],
+                'all':{'input':'err_rec,err_des','view1':'act','view2':'act'}
             },
             'labels':{
                 'lable_1':'از اینکه با ثبت مشکلات مشاهده شده در شرکت ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
@@ -686,9 +668,7 @@ x_data={
                 's2':{'tasks':'des','jobs':'dccm','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'input':['name','date'],
-                'view1':['ppr_num','f_eblag'],
-                'view2':['des'],
+                'all':{'input':'name,date','view1':'ppr_num,f_eblag','view2':'des'}
             },
             'labels':{
                 'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
@@ -722,9 +702,7 @@ x_data={
                 's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['انجام شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'input':['mor_mam','time_st','time_len','frd_modir','des_0'],
-                'view1':['des_jnshin'],
-                'view2':['des_modir'],
+                'all':{'input':'mor_mam,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
             },
             'labels':{
                 'lable_1':'برای ماموریت  توضیحات مربوطه  شامل محل ماموریت  باید ذکر شود',
@@ -755,9 +733,7 @@ x_data={
                 's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'input':['frd_1','time_st','time_len','frd_modir','des_0'],
-                'view1':['des_jnshin'],
-                'view2':['des_modir'],
+                'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
             },
             'labels':{
                 'lable_1':'حداکثرمیزان مرخصی ساعتی مجاز 3:30 می باشد',
@@ -793,9 +769,7 @@ x_data={
                 's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['انجام شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'input':['frd_1','time_st','time_len','frd_modir','des_0'],
-                'view1':['des_jnshin'],
-                'view2':['des_modir'],
+                'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
             },
             'labels':{
                 'lable_1':'محل و هدف ماموریت را ذکر بفرمایید',
