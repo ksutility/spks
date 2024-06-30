@@ -7,9 +7,11 @@
 """
 from k_ui import var_report
 import datetime
+#from gluon import cache,current
+#cache=cache.Cache(current.request)
 import jdatetime #khayyam
 from k_err import xxxprint,xxprint,xprint
-debug=1 #False # True#
+debug=0 #False # True#
 today=jdatetime.date.today().strftime('%y-%m-%d') #khayyam.JalaliDate.today().strftime('%y-%m-%d')
 def f_now():
     x=str(datetime.datetime.now())#trftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
@@ -36,12 +38,15 @@ class DB1():
     # path=d:\\temp\\example1.db
     con,cur,path,dbn="","","",""
     tables_name={}
+    columns={}
     def __init__(self,path='example2.db'):
         self.con = self.sqlite3.connect(path)
         self.cur = self.con.cursor()
         self.path=path
         self.get_tables_name()#prn=True)
         self.dbn=self.path.partition("//")[2]
+    ##---@cache(time_expire=5, cache_model=cache.ram)
+    #@cache.action(time_expire=300, cache_model=cache.ram, session=True, vars=True, public=True)
     def _exec(self,sql,val_list=[],fetch=False):
         
         result={'def':'_exec','sql':sql,'data':[]}
@@ -52,7 +57,8 @@ class DB1():
                 result['data']=self.cur.fetchall()
             self.con.commit()
             result.update({'done':True})
-            if debug:xxxprint(msg=[self.dbn,str(result['done'])+ " - " + sql,self.path],vals=result)
+            if debug:
+                xxxprint(msg=[self.dbn,str(result['done'])+ " - " + sql,self.path],vals=result)
         except Exception as err:
             result.update({'done':False,'Error':str(err)})  
             xxxprint(msg=['err',sql, self.path],err=err,vals=result)
@@ -108,7 +114,8 @@ class DB1():
     def columns_list(self,table_n):
         result=self._exec('select * from {}'.format(table_n))
         if result['done']:
-            return self._titles()
+            self.columns[table_n]=self._titles()
+            return self.columns[table_n]
         return []
         '''
         try:
@@ -131,10 +138,12 @@ class DB1():
         report=self._exec(sql)
         return report
     def columns_add(self,table_n,col_add_list,col_add_type=''):
+        if not table_n in self.columns:self.columns_list(table_n)
         report=[]
         for col_name in col_add_list:
-            sql="ALTER TABLE {} ADD COLUMN {} {};".format(table_n,col_name,col_add_type)
-            report+=[self._exec(sql)]
+            if not col_name in self.columns[table_n]:
+                sql="ALTER TABLE {} ADD COLUMN {} {};".format(table_n,col_name,col_add_type)
+                report+=[self._exec(sql)]
         return report
     def get_path(self):
         return self.path
@@ -180,12 +189,15 @@ class DB1():
         result={}
         try:
             sql="SELECT COUNT(*) FROM {} ".format(table_name) 
-            if where:sql+="WHERE {} ".format(where) 
+            if where:
+                if type(where)==dict:
+                    where=self.make_where(where)
+                sql+="WHERE {} ".format(where) 
             result=self._exec(sql,fetch=True)
             result['count']=result['data'][0][0]
         except Exception as err:
             result['count']=0
-            result.update({'done':False,'Error':str(err)})  
+            result.update({'done':False,'Error':str(err),'sql':sql})  
             xxxprint(msg=['err','count',table_name],vals=result)
         return result    
     #--------------------------------------------
