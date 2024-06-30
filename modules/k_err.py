@@ -490,12 +490,12 @@ def xreport_var(x_var_list,reset=False):
     ttt=k_date.ir_date('yy/mm/dd-hh:gg:ss')+br
     lunch=True
     
-    for x_var in x_var_list:
-        ttt+="-"*50+br
+    for i,x_var in enumerate(x_var_list):
+        ttt+="="*3+f" {i} "+"-"*50+br
         
         if not x_var:
             ttt+='- emplty value'+br
-            lunch=True
+            ttt+=f"val = {x_var}"+br
         elif type(x_var)== dict:
             ttt+=f'dict:len={len(x_var)}'+br
             ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])
@@ -510,10 +510,11 @@ def xreport_var(x_var_list,reset=False):
     ttt+=hr+"all:<br>"+br.join([x for x in func["all"].split('\n')])
 
     # ('w' if reset else 'a')
-    with open(report_html['htm_report_fullname'],'w' ,encoding='UTF8') as file:
+    fname='var_report-'+k_date.ir_date('yymmdd-hhggss')+'.htm'
+    with open(fname,'w' ,encoding='UTF8') as file:
         file.write(ttt)
     if lunch:
-        k_file.launch_file(report_html['htm_report_fullname'])
+        k_file.launch_file(fname)
     print("------------")
     return True
 #------------------------------------
