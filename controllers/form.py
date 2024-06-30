@@ -224,7 +224,6 @@ def xform():#view 1 row
                     hh=show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode='output')
                     hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
             #breakpoint()
-            #xreport_var([form_sabt_data])
             def val_in_dic(x_dict,v_name):
                 '''
                     goal:extract item_val(=return) from dict(=x_dict) by its item_name(=v_name)
@@ -232,7 +231,7 @@ def xform():#view 1 row
                 v_name=v_name or '' # NONE => ''
                 v_name=v_name.lower()
                 return x_dict.get(v_name,v_name)
-            print("step[i]="+str(step["i"]))
+            #print("step[i]="+str(step["i"]))
             #print("==>"+str(form_sabt_data[f'step_{step["i"]}_un']))   
             hx['app']=[ 
                         (val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["i"]}_ap'])),
@@ -276,17 +275,19 @@ def xform():#view 1 row
         def inf_g():
             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
             xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'---xid==-1 : '+str(xid=='-1')])
-            if not rows:
-                return '',0,''
+            
             if xid=='-1':
                 form_sabt_data={x:'' for x in titles}
                 f_nxt_s=0
+            elif not rows:
+                return '',0,''    
             else:
                 form_sabt_data=dict(zip(titles,rows[0]))
                 f_nxt_s=form_sabt_data['f_nxt_s']
+                f_nxt_u=form_sabt_data['f_nxt_u']
                 if f_nxt_s:
-                    if f_nxt_s[0]=="x":
-                        f_nxt_s=-int(f_nxt_s[2:])
+                    if f_nxt_u=="x":
+                        f_nxt_s=-int(f_nxt_s)
                     else:
                         f_nxt_s=int(f_nxt_s)
                 else:
@@ -304,6 +305,7 @@ def xform():#view 1 row
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  '))] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
+        
         if form_sabt_data:
             step_befor='' # svae name of before step
             for i,step_n in enumerate(x_data_s['steps']):
@@ -339,8 +341,10 @@ def xform():#view 1 row
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=request.args[:2]
         xid=int(xid)
+        args=request.args
         htm_form+=[
-                A('لیست فرم',_href=URL('xtable',args=request.args),_class='btn btn-primary'),'-',
+                A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary'),'-',
+                A('T',_title='نمایش جدول مربوطه',_href=URL('data','xtable',args=args[:2]+['edit']+[args[2]]),_class='btn btn-primary'),'-',
                 A('تغییرات',_title='تغییرات این ثبت از فرم',_href='javascript:void(0)',_onclick=f'j_box_show("{xlink}")',_class='btn btn-primary'),'-',
                 A('+',_title='فرم بعدی',_href=URL('xform',args=x_arg+[str(xid+1)]),_class='btn btn-primary'),'-',  
                 A('-',_title='tvl rfgd',_href=URL('xform',args=x_arg+[str(xid-1)]),_class='btn btn-primary'),]                
@@ -414,12 +418,10 @@ def save():
                     #xxx->return f"""url={url}<br>data={str(data)}"""
                 vv[t]=(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t]) if not reset else ''
             #vv={t:(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(request.vars[t])  for t in step_flds} # multiple select refine output # 021203
-            vv.update({ f'step_{f_nxt_s}_un':session['username'],
-                        f'step_{f_nxt_s}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
-                        f'step_{f_nxt_s}_ap':request.vars['text_app'],
-                        'f_nxt_s':str(f_nxt_s_new),
-                        'f_nxt_u':k_user.jobs_masul(x_data_s,int(f_nxt_s_new),form_sabt_data) if (type(f_nxt_s_new)==int or f_nxt_s_new[0]!="x") else "x"
-                        })
+            c_form=k_form.C_FORM(x_data_s,xid,vv)
+            dict2=c_form.set_step_app(f_nxt_s) 
+            dict2.update(c_form.set_form_app(f_nxt_s_new))
+            vv.update(dict2)
             return vv
         def update(text_app,xid):
             rr=''
@@ -428,7 +430,7 @@ def save():
                 f_nxt_s_new = str(f_nxt_s-1)
                 rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
             elif text_app=='x':
-                f_nxt_s_new = "x-"+str(f_nxt_s)
+                f_nxt_s_new = str(f_nxt_s)#"x-"+
             elif text_app=='y':
                 f_nxt_s_new = str(f_nxt_s+1)
             vv=get_vv(f_nxt_s,f_nxt_s_new,reset=(text_app=='x'))    
@@ -515,16 +517,13 @@ def save_app_review():
     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
     form_sabt_data=dict(zip(titles,rows[0]))
     f_nxt_s=int(form_sabt_data['f_nxt_s'] )
-    f_nxt_s_new=f_nxt_s-1
-    vv={
-        f'step_{f_nxt_s_new}_un':'',
-        f'step_{f_nxt_s_new}_dt':'',
-        f'step_{f_nxt_s_new}_ap':'',
-        'f_nxt_s':str(f_nxt_s_new),
-        'f_nxt_u':k_user.jobs_masul(x_data_s,int(f_nxt_s_new),form_sabt_data) if (type(f_nxt_s_new)==int or f_nxt_s_new[0]!="x") else "x"
-        }
+    f_nxt_s_new=f_nxt_s-1 if form_sabt_data['f_nxt_u']!='x' else f_nxt_s
+
+    c_form=k_form.C_FORM(x_data_s,xid)
+    dict2=c_form.set_step_app(f_nxt_s_new,reset=True) 
+    dict2.update(c_form.set_form_app(f_nxt_s_new))
     result=db1.row_backup(tb_name,xid)
-    xu = db1.update_data(tb_name,vv,{'id':xid})
+    xu = db1.update_data(tb_name,dict2,{'id':xid})
     htm_form=['UPDATE:'] 
     try:
         if xu['exe']['done']:
@@ -560,26 +559,39 @@ def list_0():
     trs=[]
     n=0
     if session["admin"]:
-        titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"-"]
+        titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"ساخت فیلدهاو جدول","بروز رسانی نتیجه فرم"]
         for db_name,db_obj in x_data.items():
             for tb_name,tb_obj in db_obj.items():
                 if tb_obj['base']['mode']=='form':
                     n+=1
                     db1=DB1(db_path+db_name+'.db')
-                    for_me_n,total_n=db1.count(tb_name)['count'],db1.count(tb_name)['count']
-                    crt_link=A("MAKE",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) 
-                    tx=[n,A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
+                    total_n=db1.count(tb_name)['count']
+                    x_where=f'''f_nxt_u = "{session['username']}"'''
+                    for_me_n=db1.count(tb_name,where=x_where)['count']
+                    make_link=A("MAKE",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) 
+                    f_nxt_u_link=A("f_nxt_u",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"]))
+                    tx=[n,
+                        A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
                         A(tb_obj['base']['title'],_href=URL('data','xtable',args=[db_name,tb_name])),
-                        for_me_n,total_n,crt_link]
+                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where})) if for_me_n else '',
+                        total_n,
+                        make_link,
+                        f_nxt_u_link]
                     trs+=[tx]
     else:
-        titels=['n','نام فرم']
+        titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل']
         for db_name,db_obj in x_data.items():
             for tb_name,tb_obj in db_obj.items():
                 if tb_obj['base']['mode']=='form':
                     n+=1
                     db1=DB1(db_path+db_name+'.db')
-                    tx=[n,A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name]))]
+                    total_n=db1.count(tb_name)['count']
+                    x_where=f'''f_nxt_u = "{session['username']}"'''
+                    for_me_n=db1.count(tb_name,where=x_where)['count']
+                    tx=[n,
+                        A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
+                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where})) if for_me_n else '',
+                        total_n]
                     trs+=[tx]
     from k_table import K_TABLE
     tt= K_TABLE.creat_htm ( trs,titels,table_class="1")                     

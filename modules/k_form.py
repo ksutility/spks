@@ -1214,7 +1214,72 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     
     return obj #,cm.records()
 
-    
+class C_FORM():
+    def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
+        self.x_data_s=x_data_s
+        self.db_name=x_data_s['base']['db_name']
+        self.tb_name=x_data_s['base']['tb_name']
+        self.xid=int(xid)
+        if form_sabt_data:
+            self.form_sabt_data=form_sabt_data
+        else:
+            self._set_form_sabt_data()
+        self.all_data=self.form_sabt_data.copy()
+        self.new_data=new_data.copy()
+        self.all_data.update(new_data)
+        self.last_text_app=''
+    def _set_form_sabt_data(self):
+        db1=DB1(db_path+self.db_name +'.db')
+
+        
+        rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
+        if self.xid<1 or (not rows): #-1
+            self.form_sabt_data={x:'' for x in titles}
+        else:
+            self.form_sabt_data=dict(zip(titles,rows[0]))
+    def set_step_app(self,step_i,reset=False):
+        import k_date
+        if reset:
+            x_data= {
+                    f'step_{step_i}_un':'',
+                    f'step_{step_i}_dt':'',
+                    f'step_{step_i}_ap':''
+                }
+        else:
+            text_app=current.request.vars['text_app'].lower()
+            x_data= {
+                    f'step_{step_i}_un':current.session['username'],
+                    f'step_{step_i}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
+                    f'step_{step_i}_ap':text_app
+                }
+            if text_app=="x" :x_data['f_nxt_u']="x"
+        self.new_data.update(x_data)
+        self.all_data.update(x_data)
+        return x_data
+    def set_form_app (self,f_nxt_s_new): 
+        x_data={'f_nxt_s':str(f_nxt_s_new)}
+        #import k_err k_err.xreport_var([f_nxt_s_new,re1,self.all_data,self.x_data_s])  
+        self.new_data.update(x_data)
+        self.all_data.update(x_data)
+        x_data["f_nxt_u"]=self.f_nxt_u()
+        return x_data
+    def f_nxt_u(self):
+        import k_user
+        f_nxt_s=self.all_data['f_nxt_s'] #tas
+        if not f_nxt_s: return '' 
+        step_x_ap=f'step_{f_nxt_s}_ap'
+        last_text_app=self.all_data[step_x_ap] if step_x_ap in self.all_data else ''
+        #import k_err 
+        #k_err.xreport_var([last_text_app,self.all_data,self.form_sabt_data,self.x_data_s]) 
+        _f_nxt_u=k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data) if last_text_app!="x" else "x"
+        x_data={
+                'f_nxt_u':_f_nxt_u
+            }
+        self.new_data.update(x_data)
+        self.all_data.update(x_data)
+        self.last_text_app=last_text_app
+        return _f_nxt_u
+
 
 
     
