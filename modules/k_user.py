@@ -88,7 +88,7 @@ def user_in_jobs(jobs,row_data={},un=''):
                 x_un=row_data[f'step_{jx[2]}_un']
                 #print('x_un=',x_un)
                 if un==x_un:return True
-    print("user_in_jobs=>false")
+    #print("user_in_jobs=>false")
     return False
 def step_changer(step_index,form_sabt_data):
     '''
@@ -135,19 +135,22 @@ def jobs_masul(x_data_s,step_index,form_sabt_data ):
         un:str
             username
     '''
-    x_step_changer=step_changer(step_index,form_sabt_data)
-    if x_step_changer: return x_step_changer
+    
     import k_tools
-    if step_index>len(x_data_s['steps']):
+    if step_index>=len(x_data_s['steps']):
         return 'y' # y=form is fill ok 
+    x_step_changer=step_changer(step_index,form_sabt_data)
+    if x_step_changer: return x_step_changer    
     if form_sabt_data['f_nxt_u'] in ['y','x']:  # y=form is fill ok ,x=form is remove / kill
         return form_sabt_data['f_nxt_u']
     x_step=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_result='y')
     
     job=x_step['jobs']
-  
+    #import k_err
+    #k_err.xreport_var(['!!',x_step,job])
     if 1>0: #try:
         if job[0] != "#":
+            if job[0]=='*':return ''
             return a_jobs[job]['base_user']
         if job[0] == "#" and  len(job) > 6:
             jx=job.split('#')
