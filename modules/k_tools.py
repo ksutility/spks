@@ -71,3 +71,5 @@ def nth_item_of_dict(xdic,n,up_result=''):
     if n>=len(xdic):return up_result
     x=list(xdic)[n]
     return xdic[x]
+#class X_DIC():
+    
