@@ -793,8 +793,8 @@ x_data={
                 'at':{'type':'auto','len':'24','auto':'{n}-{sel}-{ch}-{ref}-{dt:}','title':'کد اتوماتیک'},
                 'indx1':{'type':'index','len':'4','ref':{'db':'test','tb':'b','key':'{id}','val':'{indx1}','where':''},'title':'شماره'},
                 'fl':{'type':'file','len':'24','file_name':'abc-{{=int("0"+n)+25}}-{sel}-{{=dt[:4] if dt else ""}}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar",'path':'test,a,c,{txt}-{n}','title':'فایل نهایی'},#,'x':'{txt}-{n}-{sel}-{ch}-{ref}'
-                'tt':{'type':'time','title':'زمان شروع'},
-                'time_st2':{'type':'time','title':'از ساعت','def_value':'{tt}'},
+                'tt':{'type':'time_c','title':'زمان شروع'},
+                'time_st2':{'type':'time_c','title':'از ساعت','def_value':'{tt}'},
                 'frd_jnshin':{'type':'reference','width':'5','title':'جانشین','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
             },
             'steps':{
