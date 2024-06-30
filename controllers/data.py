@@ -20,7 +20,7 @@ from x_data import x_data ,x_data_verify_task
 import k_tools,k_user
 k_user.how_is_connect('data')
 
-debug=False # True: for check error
+debug=0 #False # True: for check error
 row_view=[{'lno':'r','sbj':'r'}]
 now = datetime.now().strftime("%H:%M:%S")
 db_path='applications\\spks\\databases\\'
@@ -278,23 +278,22 @@ def get_table_row_edit(xid,row_dic,titles,tasks,f_views,x_data_s,cancel_url):#,a
     #cm=Cornometer(i)
     trs=[TR('id',xid)]
     x_dic=row_dic# dict(zip(titles,row))
+    x_dic['id']=xid
     #for fn in select_cols:#fn=field name
-    def tb_rows(tasks,name_list,out_case,prop_read_check=False):
+    def tb_rows(tasks,tasks_name_list,out_case,prop_read_check=False):
         """
             out_case='input'/ 'output'
         """
         trs=[]
-        for fn in name_list:
+        for fn in tasks_name_list.split(','):
             o_case=out_case
             f=tasks[fn]
             if prop_read_check and ('read' in f['prop']):o_case='output'
             x_obj=k_form.obj_set(i_obj=f,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=[o_case])
-            '''
+            
             if debug :
-                xprint('x_obj='+str(x_obj))
-                xprint('i_obj='+str(tasks[fn]))
-                xprint('x_dic='+str(x_dic))
-            '''    
+                xxxprint(msg=['debug','x_obj='+str(x_obj)+',i_obj='+str(tasks[fn]),'x_dic='+str(x_dic)])
+   
             #cm.tik(fn+'-1'+str(recs))    
             #tds.append(x_obj['input'])
             trs.append(TR(A(f['title'],_title=fn),x_obj[o_case]))
@@ -656,7 +655,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
         tasks=x_data_s['tasks']
-        f_views=x_data_s['views']
+        f_views=x_data_s['views']['all']
         
         #db=DB1(db_name)
         if len(args)>3 and args[2]=='view':
@@ -996,13 +995,14 @@ def rc():#run 1 command
         rep['table-2']=db1.define_table(tb_name+"_backup",fields_txt='id INTEGER PRIMARY KEY AUTOINCREMENT,', fields_order={"TEXT":['xid']+cols1}) 
         rep['table-2-add']=db1.columns_add(tb_name+"_backup",cols1,"TEXT")    
     elif cmd=='update_data':  
-        #sample /spks/data/rc/update_data/eng/a/code
-        #sample /spks/data/rc/update_data/user/user/eng
-        #replace_inf={"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"}
-        replace_inf={"%OT":"GE"}
-        fldn=args[3]#field name
+        #sample /spks/data/rc/update_data
+        inf_1={'db_name':'eng','tb_name':'a','field name':'code','replace':{"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"}}
+        inf={'db_name':'user','tb_name':'user','field name':'eng','replace':{"%OT":"GE"}}
+        db1=DB1(db_path+inf['db_name']+'.db')
+        fldn=inf['field name']#args[3]#field name
+        tb_name=inf['tb_name']
         rep1=[]
-        for x,y in  replace_inf.items():
+        for x,y in  inf['replace'].items():
             rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn} LIKE '{x}'")#{fldn:x})
             rep1+=[k_htm.val_report(rep)]
         return DIV(rep1)
@@ -1045,12 +1045,19 @@ def rc():#run 1 command
         return dict(x=DIV(rep))
     elif cmd=='copy_table_inf': 
         '''
+        exam:
+            /spks/data/rc/copy_table_inf
+            /spks/data/rc/copy_table_inf/do
         goal:
             copy (append) inf of tb1 to tb2
             اطلاعات یک جدول را به یک جدول دیگر اضافه می کند
             dont delete exist inf in 2nd table
         inputs:
         -------
+            args:
+                arg[1]:'do'/''
+                    'do': run sql (sql creat and show and exec sql)
+                    '': dont run sql (sql creat and show but not exec sql)
             internal:dt
                 tb1:str
                     1th table name in db1
@@ -1062,22 +1069,20 @@ def rc():#run 1 command
                     a db name (1th db or other)
                 cols:str list (separate by ,)
                     list of fields that shoud copy from tb1 to tb2
+                    * = all but id
                 uniq_field:str
                     name of a uniq field 
                     can be :
                         empty = ''
                             pro result : All data (every where exist or not exist) add to tb2
                         1 field_name
-                            pro result : only new data (1 row of tb1 that tb1.row.uniq_field is not in tb1.uniq_field) add to tb2
+                            pro result : only new data (1 row of tb1 that tb1.row.uniq_field is not in tb1.rows.uniq_field) add to tb2
                             فقط اطلاعات جدید کپی می شود
                             روش تشخیص جدید بودن بر اساس وجود یا عدم وجود فیلد یکتا می باشد
-                exec_sql:bool
-                    False: sql creat and show but not exec sql
-                    True: sql creat and show and exec sql
         '''
         #sample /spks/data/rc/copy_table_inf
         #dt=data
-        dt={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':'','exec_sql':False}#True
+        dt={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':''}#True
    
         db1=DB1(db_path+dt['db1']+'.db')
         db2=DB1(db_path+dt['db2']+'.db')
@@ -1097,7 +1102,7 @@ def rc():#run 1 command
                 xxd=dict(zip(titles,row))
                 update_dic={x:xxd[x] for x in dt['cols']}
                 rep=''
-                if dt['exec_sql']:
+                if len(args)>0 and args[1]=='do':
                     rep=db2.insert_data(dt['tb2'],update_dic)
                 trs+=[[str(i),str(update_dic),str(rep)]]
         from k_table import K_TABLE
@@ -1140,6 +1145,34 @@ def rc():#run 1 command
                         trs+=[[str(i),'auto',db_tb,fld,fld_data['type'],'',str(fld_data['auto'])]]
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['i','r-a','db_tb1','fld','type','db_tb2','data'],table_class='1')
+        return dict(x=DIV(rep))
+    elif cmd=='update_f_nxt_u':   
+        '''
+        exam:
+            /spks/data/rc/update_f_nxt_u/test/b/do
+        goal:
+            به روز رسانی فیلد f_nxt_u
+            به روز رسانی نام نفراتی که مرحله بعدی فرم منتظر آنهاست
+        input:
+            arg[1]:db_name
+            arg[2]:tb_name
+        '''
+        rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
+        x_data_s,msg1=get_x_data_s(db_name,tb_name)
+        trs=[]
+        for i,row in enumerate(rows):
+            rep=''
+            x_dic=dict(zip(titles,row))
+            xid=row[0]
+            c_form=k_form.C_FORM(x_data_s,xid,form_sabt_data=x_dic)
+            #fnu=f_nxt_u
+            f_nxt_u_old=x_dic['f_nxt_u']
+            f_nxt_u_new=c_form.f_nxt_u()
+            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new!=f_nxt_u_old): #run_sql:
+                rep=db1.update_data(tb_name,{'f_nxt_u':f_nxt_u_new},{'id':xid})
+            trs+=[[i,xid,x_dic['f_nxt_s'],f_nxt_u_old,f_nxt_u_new,rep,c_form.last_text_app]]
+        from k_table import K_TABLE
+        rep=K_TABLE.creat_htm(trs,['i','id','f_nxt_s','f_nxt_u old','f_nxt_u new','run_sql={run_sql}'],table_class='1')
         return dict(x=DIV(rep))
     #return dict(table=TABLE(THEAD([rep[0]],_class="thead-light"),TBODY(rep[1:]),_class="table table-bordered table-hover"))  
     return dict(x=k_htm.val_report(rep))
