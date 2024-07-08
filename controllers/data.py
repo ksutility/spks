@@ -263,7 +263,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'file'== tasks[fn]['type']:
             tds.append(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
             continue   
-        print(tasks[fn]['type'])
+        #print(tasks[fn]['type'])
         x_obj=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
    
         #cm.tik(fn+'-1'+str(recs))    
@@ -334,19 +334,13 @@ def get_init_data():
         #print (db_name)
         if len(args)<2:args+=['a']
         tb_name=args[1]# if len(args)>1 else 'a'
-        x_data_s,msg1=get_x_data_s(db_name,tb_name)
+        x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
         if x_data_s:
             return x_data_s,db_name,tb_name,msg1
         else:
             return False,'','',msg1
     return False,'','','error : args not set correctly'
-def get_x_data_s(db_name,tb_name):
-    if not db_name in x_data:return False,'error : "{}" not in ( x_data )'.format(db_name)
-    x_data_s1=x_data[db_name]#x_data_select
-    
-    if not tb_name in x_data_s1:return False,'error : "{}" not in ( x_data["{}"] )'.format(tb_name,db_name)
-    x_data_s=x_data_s1[tb_name]
-    return x_data_s,'ok'
+
     
 
 #-------------------------------------------------------------------------------------------------------------------------------
@@ -778,7 +772,9 @@ def index():
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
         t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
         t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
-        t2+=f"<br><a href={URL('inf')}> مشخصات </a> "
+        t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
+        t2+=f"<br><a href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>"
+        
      
     else:
         #redirect(URL('spks','file','index'))
@@ -948,7 +944,25 @@ def rc():#run 1 command
     elif cmd=='columns_del_x':  
         #sample /spks/data/rc/columns_del_x/user/user
         # note this pro run for correct 1 error 
-        rep=db1.columns_del(tb_name,['app_u','app_d'])     
+        rep=db1.columns_del(tb_name,['app_u','app_d'])  #WIP 030415
+    elif cmd=='columns_dif': #show not need colomn in a form  
+        #sample /spks/data/rc/columns_dif/user/user
+        cols_1_done=db1.columns_list(tb_name)
+        cols_2_done=db1.columns_list(tb_name+"_backup")
+        x_fields=k_form.C_FORM_B((db_name,tb_name),1).get_x_fields()
+        cols_1_plan=['id']+x_fields['base']+x_fields['step_apps']+x_fields['form_need']
+        cols_2_plan=cols_1_plan+x_fields['backup_add']
+        cols_1_diff=list(set(cols_1_done) - set(cols_1_plan))
+        cols_2_diff=list(set(cols_2_done) - set(cols_2_plan))
+        rep= ["cols_1",[str(cols_1_done),str(cols_1_plan)],["dif=",cols_1_diff],"-"*50]
+        rep+=["cols_2",[str(cols_2_done),str(cols_2_plan)],["dif=",cols_2_diff],"-"*50]
+        if len(args)>3 and args[3]=='do':
+            rep1=db1.columns_del(tb_name,cols_1_diff)
+            rep2=db1.columns_del(tb_name+"_backup",cols_2_diff)
+        else:
+            rep1,rep2=[],[]
+            rep+=[len(args)]
+        return dict(msg=TABLE(rep,_class="table",dir="ltr"),x1=k_htm.val_report(rep1),x2=k_htm.val_report(rep2))
     elif cmd=='creat_backup_table':  #test ok 020905---------------------------
         #sample /spks/data/rc/creat_backup_table/user/user
         # note this pro run 1 time for every table 
@@ -967,8 +981,10 @@ def rc():#run 1 command
         # a_dspln/a  
         x_data_s=x_data[db_name][tb_name]
         cols1=list(x_data_s['tasks'].keys())
-        cols2=[f'step_{i}_{t}'  for i,x in enumerate(x_data_s['steps'].keys()) for t in ['un','dt','ap']]
-        cols2+=['f_nxt_s','f_nxt_u'] 
+        x_fields=k_form.C_FORM_B(x_data_s,1).get_x_fields()
+        cols2=x_fields['step_apps']
+        cols_add1=x_fields['form_need']
+        cols2+=cols_add1
         '''
         'f_nxt_st'=form_next_step_number 0=first  
         'f_nxt_un'=form_next_user  
@@ -1020,7 +1036,7 @@ def rc():#run 1 command
         else: 
             return f"select_cols={select_cols}"
         rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
-        x_data_s,msg1=get_x_data_s(db_name,tb_name)
+        x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
         ou=''
         trs=[]
         for i,row in enumerate(rows):
@@ -1046,7 +1062,7 @@ def rc():#run 1 command
     elif cmd=='copy_table_inf': 
         '''
         exam:
-            /spks/data/rc/copy_table_inf
+            /spks/data/rc/copy_table_inf/do-x
             /spks/data/rc/copy_table_inf/do
         goal:
             copy (append) inf of tb1 to tb2
@@ -1082,19 +1098,23 @@ def rc():#run 1 command
         '''
         #sample /spks/data/rc/copy_table_inf
         #dt=data
-        dt={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':''}#True
-   
+        dt_old={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':''}#True
+        dt={'db1':'off_morkhsi_saat_test','tb1':'a','db2':'off_morkhsi_saat','tb2':'a','cols':'*','uniq_field':'','ids':'8,16,17,18'}#True-
+        if 'ids' in dt:dt['ids']=dt['ids'].split(',')
+        
         db1=DB1(db_path+dt['db1']+'.db')
         db2=DB1(db_path+dt['db2']+'.db')
         
         if dt['cols']=='*':
-            dt['cols']=db1.columns_list(dt['tb1'])
+            cols1=db1.columns_list(dt['tb1'])
+            cols2=db2.columns_list(dt['tb2'])
+            dt['cols']=list(set.intersection(set(cols1),set(cols2)))
             dt['cols'].remove('id')
             
         rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
         trs=[] 
         i=0
-        if dt['uniq_field']:#only new data add to tb2
+        if dt['uniq_field']:# WIP : only new data add to tb2
             pass
         else: #All data add to tb2
             for row in rows:
@@ -1102,8 +1122,15 @@ def rc():#run 1 command
                 xxd=dict(zip(titles,row))
                 update_dic={x:xxd[x] for x in dt['cols']}
                 rep=''
-                if len(args)>0 and args[1]=='do':
-                    rep=db2.insert_data(dt['tb2'],update_dic)
+                xid=str(row[titles.index('id')])
+                if ('ids' in dt) and (xid in dt['ids']):
+                    if len(args)>0 and args[1]=='do':
+                    
+                        rep=db2.insert_data(dt['tb2'],update_dic)
+                    else:
+                        rep="DONT DO SQL"
+                else:
+                    rep=f"row id ({xid}) not in dt['ids']"
                 trs+=[[str(i),str(update_dic),str(rep)]]
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['i','update dict','report'],table_class='1')
@@ -1158,7 +1185,7 @@ def rc():#run 1 command
             arg[2]:tb_name
         '''
         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
-        x_data_s,msg1=get_x_data_s(db_name,tb_name)
+        x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
         trs=[]
         for i,row in enumerate(rows):
             rep=''
@@ -1168,7 +1195,7 @@ def rc():#run 1 command
             #fnu=f_nxt_u
             f_nxt_u_old=x_dic['f_nxt_u']
             f_nxt_u_new=c_form.f_nxt_u()
-            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new!=f_nxt_u_old): #run_sql:
+            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new and f_nxt_u_new!=f_nxt_u_old): #run_sql:
                 rep=db1.update_data(tb_name,{'f_nxt_u':f_nxt_u_new},{'id':xid})
             trs+=[[i,xid,x_dic['f_nxt_s'],f_nxt_u_old,f_nxt_u_new,rep,c_form.last_text_app]]
         from k_table import K_TABLE
