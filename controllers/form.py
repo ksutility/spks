@@ -139,12 +139,14 @@ def get_table_filter(tasks,x_data_s):
                 dict: object props
         '''
         
-        import x_data
+        import x_data, k_js,k_htm
+        
         if type(obj)==str:
             name=obj
             val=request.vars.get(name,_val)
             xw=f"width={width}" if width else ""
-            tt=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' style='width:{width};''>'''
+            tt=f'''<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' style='width:100%;''>'''
+            tjs=''
         else:
             name=obj['name']
             name2=name+'-x'
@@ -154,16 +156,22 @@ def get_table_filter(tasks,x_data_s):
             val=request.vars.get(name,_val)
             if width:obj['width']=width
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)['input'])
-            tt+=f'''=<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
-        return (f'''<td style='width:{width};'><label><a title='{_help}'>{caption}</a></label>{tt}</td>''')
+            tt+=f'''<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
+            tjs=k_js.toggle(clicking_name=name+"_label",hiding_name=name)
+        xcap=f"""<label id='{name}_label'><a title='{_help}'>{caption}</a></label>"""
+        tt1=k_htm.xtd([[xcap,4],[tt,8]])
+        return  f'''<td style='width:{width};'>
+                            {tt1}
+                        </td>
+                    ''' +tjs       
     htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
-                            +set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
-                            +set_htm_var(caption='data_filter',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
-                            +set_htm_var(caption='cols_filter',width='20vw',obj=cols_filter1,_help=hlp['cols_filter'])
-                            +set_htm_var(caption='table_class',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
-                            +set_htm_var(caption='page',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
-                            +set_htm_var(caption='rows',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
-                            +'<td><input type="submit"></td></tr></table></form>')
+                            #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
+                            +set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=data_filter1,_help=hlp['data_filter'])
+                            +set_htm_var(caption='فیلتر ستونها',width='30vw',obj=cols_filter1,_help=hlp['cols_filter'])
+                            +set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
+                            +set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
+                            +set_htm_var(caption='تعداد',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
+                            +'<td><input type="submit" value="انجام"></td></tr></table></form>')
     return select_cols, all_cols,htm_table_filter
 
 #===================================================================================================================
@@ -172,6 +180,8 @@ def xform():#view 1 row
     if request.vars['text_app']:
         return save()
     session.view_page='xform'
+    if not session.username:
+        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
     '''
     goal:
         show / manage a formated & costomize form
@@ -559,7 +569,7 @@ def list_0():
     trs=[]
     n=0
     if session["admin"]:
-        titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"ساخت فیلدهاو جدول","بروز رسانی نتیجه فرم"]
+        titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"M","U","D"]
         for db_name,db_obj in x_data.items():
             for tb_name,tb_obj in db_obj.items():
                 if tb_obj['base']['mode']=='form':
@@ -568,15 +578,15 @@ def list_0():
                     total_n=db1.count(tb_name)['count']
                     x_where=f'''f_nxt_u = "{session['username']}"'''
                     for_me_n=db1.count(tb_name,where=x_where)['count']
-                    make_link=A("MAKE",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) 
-                    f_nxt_u_link=A("f_nxt_u",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"]))
                     tx=[n,
                         A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
                         A(tb_obj['base']['title'],_href=URL('data','xtable',args=[db_name,tb_name])),
                         A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where})) if for_me_n else '',
                         total_n,
-                        make_link,
-                        f_nxt_u_link]
+                        A("M",_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,
+                        A("U",_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),
+                        A("D",_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"]))
+                        ]
                     trs+=[tx]
     else:
         titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل']
