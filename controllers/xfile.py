@@ -15,10 +15,12 @@ body {
     direction:rtl;
     font-family: BBadr;
     font-size: 20px;
+    padding:50px 50px 0 0px;
     
 }
 @media print {
-  h1 {page-break-before: always;}
+  h1:not(:first-child) {page-break-before :always;}
+  h1:first-child {page-break-before: avoid;}
 }
 h1:before {
 	content: counter(c_h1)") ";
@@ -27,9 +29,10 @@ h1:before {
 h1 {
 	counter-reset: c_h2;
     background-color: #fbb;
-    margin:4px;
+    margin:10px 0 0 0;
     font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 24px;
+    padding:50px 10px 0px 0px;
 }
 h2:before {
 	content: counter(c_h1)"." counter(c_h2)") ";
@@ -151,19 +154,22 @@ $(document).ready(function(){
     $("table").tablesorter();
     $("h1").click(function(e) {
         if (e.ctrlKey) {
-            $(this).nextUntil("h1").hide();
+            $(this).nextUntil("h1").show();
         } 
         else if (e.altKey){
             $(this).nextUntil("h1").hide();
             $(this).nextAll("h2").show();
         }
         else {
-            $(this).nextUntil("h1").show();
+            $(this).nextUntil("h1").hide();
         }
+    });
+    $("h1").dblclick(function(e){
+        $(this).nextUntil("h1").show();
     });
     $("h2").click(function(e){
         if (e.ctrlKey) {
-            $(this).nextUntil("h1,h2").hide();
+            $(this).nextUntil("h1,h2").show();
         } 
         else if (e.altKey){
             $(this).nextUntil("h1").hide();
@@ -171,20 +177,26 @@ $(document).ready(function(){
             $(this).nextAll("h3").show();
         }
         else {
-            $(this).nextUntil("h1,h2").show();
+            $(this).nextUntil("h1,h2").hide();
         }
     });    
+    $("h2").dblclick(function(e){
+        $(this).nextUntil("h1,h2").show();
+    });
     $("h3").click(function(e){
         if (e.ctrlKey) {
-            $(this).nextUntil("h1,h2,h3").hide();
+            $(this).nextUntil("h1,h2,h3").show();
         } 
         else if (e.altKey){
             
         }
         else {
-            $(this).nextUntil("h1,h2,h3").show();
+            $(this).nextUntil("h1,h2,h3").hide();
         }
-    });    
+    });  
+    $("h3").dblclick(function(e){
+        $(this).nextUntil("h1,h2,h3").show();
+    });
 });
 </script>
 </head>
