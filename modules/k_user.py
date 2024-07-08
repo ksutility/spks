@@ -115,7 +115,7 @@ def can_user_edit_step(step,step_index,form_sabt_data,un=''):
         
     return user_in_jobs(step['jobs'],row_data=form_sabt_data)
     #return form_sabt_data[f'step_{step_index}_un']    
-def jobs_masul(x_data_s,step_index,form_sabt_data ):
+def jobs_masul(x_data_s,step_index,form_sabt_data,form_all_data ):
     '''
         according form_inf(form_sabt_data) return masul of jobs  
         مسئول یک شغل را مشخص می کند - کسی که باید جواب یک مرحله یک فرم را بدهد
@@ -135,7 +135,7 @@ def jobs_masul(x_data_s,step_index,form_sabt_data ):
         un:str
             username
     '''
-    
+    #breakpoint()
     import k_tools
     if step_index>=len(x_data_s['steps']):
         return 'y' # y=form is fill ok 
@@ -155,7 +155,7 @@ def jobs_masul(x_data_s,step_index,form_sabt_data ):
         if job[0] == "#" and  len(job) > 6:
             jx=job.split('#')
             if jx[1]=="task":
-                x_un=form_sabt_data[jx[2]]
+                x_un=form_all_data[jx[2]]
                 return x_un
             elif jx[1]=="step":          
                 x_un=form_sabt_data[f'step_{jx[2]}_un']
