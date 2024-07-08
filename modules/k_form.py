@@ -1213,12 +1213,39 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     ##obj['js']=
     
     return obj #,cm.records()
-
-class C_FORM():
+class C_FORM_B():#
     def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
-        self.x_data_s=x_data_s
-        self.db_name=x_data_s['base']['db_name']
-        self.tb_name=x_data_s['base']['tb_name']
+        if type(x_data_s)==tuple:
+            db_name,tb_name=x_data_s
+            self.x_data_s=get_x_data_s(db_name,tb_name)[0]
+            self.db_name=db_name
+            self.tb_name=tb_name
+        else:
+            self.x_data_s=x_data_s
+            self.db_name=x_data_s['base']['db_name']
+            self.tb_name=x_data_s['base']['tb_name']
+    def get_x_fields(self):
+        #import k_err 
+        #k_err.xreport_var([self.x_data_s]) 
+        rep={
+        'base':[x for x in self.x_data_s['tasks'] ], #list(self.x_data_s['tasks'].keys()),
+        'step_apps':[f'step_{i}_{t}'  for i,x in enumerate(self.x_data_s['steps'].keys()) for t in ['un','dt','ap']],
+        'form_need':['f_nxt_s','f_nxt_u'],
+        'backup_add':['xid']
+        }
+        return rep #
+class C_FORM():
+
+    def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
+        if type(x_data_s)==tuple:
+            db_name,tb_name=x_data_s
+            self.x_data_s=get_x_data_s(db_name,tb_name)[0]
+            self.db_name=db_name
+            self.tb_name=tb_name
+        else:
+            self.x_data_s=x_data_s
+            self.db_name=x_data_s['base']['db_name']
+            self.tb_name=x_data_s['base']['tb_name']
         self.xid=int(xid)
         if form_sabt_data:
             self.form_sabt_data=form_sabt_data
@@ -1240,46 +1267,55 @@ class C_FORM():
     def set_step_app(self,step_i,reset=False):
         import k_date
         if reset:
-            x_data= {
+            x_d= {f'step_{step_i}_ap':''}
+            """    
                     f'step_{step_i}_un':'',
                     f'step_{step_i}_dt':'',
-                    f'step_{step_i}_ap':''
-                }
+                    
+                }"""
         else:
             text_app=current.request.vars['text_app'].lower()
-            x_data= {
+            x_d= {
                     f'step_{step_i}_un':current.session['username'],
                     f'step_{step_i}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
                     f'step_{step_i}_ap':text_app
                 }
-            if text_app=="x" :x_data['f_nxt_u']="x"
-        self.new_data.update(x_data)
-        self.all_data.update(x_data)
-        return x_data
+            if text_app=="x" :x_d['f_nxt_u']="x"
+        self.new_data.update(x_d)
+        self.all_data.update(x_d)
+        return x_d
     def set_form_app (self,f_nxt_s_new): 
-        x_data={'f_nxt_s':str(f_nxt_s_new)}
+        x_d={'f_nxt_s':str(f_nxt_s_new)}
         #import k_err k_err.xreport_var([f_nxt_s_new,re1,self.all_data,self.x_data_s])  
-        self.new_data.update(x_data)
-        self.all_data.update(x_data)
-        x_data["f_nxt_u"]=self.f_nxt_u()
-        return x_data
+        self.new_data.update(x_d)
+        self.all_data.update(x_d)
+        x_d["f_nxt_u"]=self.f_nxt_u()
+        return x_d
     def f_nxt_u(self):
         import k_user
         f_nxt_s=self.all_data['f_nxt_s'] #tas
         if not f_nxt_s: return '' 
         step_x_ap=f'step_{f_nxt_s}_ap'
         last_text_app=self.all_data[step_x_ap] if step_x_ap in self.all_data else ''
+        self.last_text_app=last_text_app
         #import k_err 
         #k_err.xreport_var([last_text_app,self.all_data,self.form_sabt_data,self.x_data_s]) 
-        _f_nxt_u=k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data) if last_text_app!="x" else "x"
-        x_data={
+        _f_nxt_u=k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data,self.all_data) if last_text_app!="x" else "x"
+        x_d={
                 'f_nxt_u':_f_nxt_u
             }
-        self.new_data.update(x_data)
-        self.all_data.update(x_data)
-        self.last_text_app=last_text_app
+        self.new_data.update(x_d)
+        self.all_data.update(x_d)
         return _f_nxt_u
 
 
+def get_x_data_s(db_name,tb_name):
+    from x_data import x_data
+    if not db_name in x_data:return False,'error : "{}" not in ( x_data )'.format(db_name)
+    x_data_s1=x_data[db_name]#x_data_select
+    
+    if not tb_name in x_data_s1:return False,'error : "{}" not in ( x_data["{}"] )'.format(tb_name,db_name)
+    x_data_s=x_data_s1[tb_name]
+    return x_data_s,'ok'
 
     
