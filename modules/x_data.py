@@ -678,14 +678,13 @@ x_data={
             'data_filter':{'':'همه',}
         }
     },
-    #--------------------------------------------------------------------
-    'off_mor_mam_sat':{
+    #---------------------------------------------------------------------
+    'off_morkhsi_saat_test':{
         'a':{
-            'base':{'mode':'form','title':'-',"x":'مرخصی و ماموریت ساعتی'+'حذف شده'
+            'base':{'mode':'form','title':'-'
             },
             'tasks':{
                 'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
-                'mor_mam':{'type':'select','select':{'مرخصی':'مرخصی','ماموریت':'ماموریت'},'title':'مرخصی / ماموریت','prop':[]},
                 'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
                 'time_st':{'type':'time_c','title':'از ساعت'},
                 'time_len':{'type':'time_t','title':'به مدت','time_inf':{'maxTime':"03:30"}},
@@ -696,19 +695,22 @@ x_data={
                 'des_off':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
             },
             'steps':{
-                's0':{'tasks':'frd_1,mor_mam,date,time_st,time_len,frd_modir,lable_1,des_0','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'frd_1,date,time_st,lable_1,time_len,frd_modir,des_0','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'des_modir','jobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
-                's2':{'tasks':'des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
-                's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['انجام شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+                's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'mor_mam,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
+                'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
             },
             'labels':{
-                'lable_1':'برای ماموریت  توضیحات مربوطه  شامل محل ماموریت  باید ذکر شود',
+                'lable_1':'حداکثرمیزان مرخصی ساعتی مجاز 3:30 می باشد',
             },
             'cols_filter':{'':'همه',},
-            'data_filter':{'':'همه',}
+            'data_filter': 
+                {'':'همه موارد',
+                'step_0_un = "{_i_}"':'فرم های من',
+                'f_nxt_u = "{{=_i_}}"':'فرمهای منتظر من',
+                },
         }
     },
     #--------------------------------------------------------------------
