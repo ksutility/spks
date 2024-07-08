@@ -111,7 +111,7 @@ def index():
         </body>
     """
     return dict(im_url=im_url,login_ulr=login_ulr,x_url=x_url,m1=T('سیستم مدیریت محتوا'),m2=T('-'),m3=T('Kind Smart Web Tools'),
-        link=A('ورود', _href=URL('spks','data','index')))
+        link=A('ورود', _href=URL('spks','form','list_0'),_class="btn btn-primary"))
 def index1():
     t=[ A('جداول اطلاعات',_href=URL('data','index')),
         A('ویرایشگر اتوکد',_href=URL('acpe','index'))
