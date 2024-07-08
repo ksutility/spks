@@ -165,3 +165,16 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary'):
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
     elif _target=="box":   
         return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=f"""j_box_show("{_href}",true)""") 
+def xtd(td_list):#
+    rep=""
+    for td_obj in td_list:
+        rep+=f"""
+            <div class="col-{td_obj[1]}">
+                {td_obj[0]}
+            </div> 
+        """
+    return f"""
+        <div class="row">
+            {rep}
+        </div>
+    """
