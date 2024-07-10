@@ -8,10 +8,12 @@
 from gluon.custom_import import track_changes; track_changes(True)
 from datetime import datetime
 from k_sql import DB1
-import kytable
+import kytable,k_err
 now = datetime.now().strftime("%H:%M:%S")
 db_name=r'applications\spks\databases\user.db'
 db1=DB1(db_name)
+def _set_val_inf():
+    pass
 def _isok_un_ps (un,ps):
     #input un:user abb  ps:password
     #output		if un and ps is ok	=>	true
@@ -37,15 +39,19 @@ def _isok_un_ps (un,ps):
         response.cookies["user_fullname"]=""
         return False
 #------------------------------------------------
-def _user_chek_ps_get_Inf (un,ps):#,fullname):
+def _user_chek_ps_get_Inf (un,ps):#,fullname):-
     #return result , fullname
     if un=="admin" and ps==";,vasuhnjd" : return True,"admin"
-    ps=f_cod(ps)
-    sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
+    import k_tools
+    if k_tools.server_is_test(): 
+        sql=db1.sql_set("","*","user",{'un': un } ,"")
+    else:
+        ps=f_cod(ps)
+        sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
+        
     #- print ('sql='+sql)
     rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
     if rs:
-        #- print(str(rs))
         return True, '{m_w} {name} {family}'.format(**rs),rs
     else:
         return False,False,False
@@ -125,7 +131,42 @@ def retrieve_password():
             }
         </script>'''
     return dict(ou=XML(ou))
-      
+def _toggle_ip_login_case(): 
+    import k_user
+    if session['login_ip']:
+        session['login_ip']=''
+    else:
+        ip_b=request.client
+        ip_i=ip_b.split(".")
+        if "192.168.80." in ip_b :
+            session['login_ip']=ip_i[3]
+        else:
+            return "امکان فعال سازی وجود ندارد"
+    db_path='applications\\spks\\databases\\'
+    rep=DB1(db_path+'user.db').update_data('user',{'login_ip':session['login_ip']},{'un':session['username']})
+    k_user.all_users.reset()
+    #print (str(rep))
+def set_ip_login_case():
+    if session['login_ip']:
+        title="ورود با آی پی"
+        txt="ورود خودکار"
+        cc="primary"
+    else:
+        title="ورود با رمز و نام کاربری"
+        txt="ورود عادی"
+        cc="secondary"
+    return dict(y=XML(f""" <div class="btn btn-{cc}" title="{title}">{txt} </div> """  ))
+def login_by_ip():
+    import k_user
+    ip_b=request.client
+    ip_i=ip_b.split(".")
+    #k_err.xreport_var([ip_b,k_user.a_users.items()])
+    if "192.168.80." in ip_b :
+        for user,user_inf in k_user.all_users.inf.items():
+            if user_inf['login_ip']==ip_i[3]:
+                return user,user_inf #f"login_by_ip:ok =>{ip_i[3]} -- {user}"
+    return '','' #f"""login_by_ip: err => {ip_b} --- {ip_i[3]} --- {"192.168.80." in ip_b}"""
+        
 def login():
     
     #call page_set("f","ورود","-")
@@ -143,7 +184,17 @@ def login():
             ou+=" نام وارد شده در سيستم ثبت نشده است <br>" + un
         return ou
     """    
-    if "username" in request.cookies and "password" in request.cookies:
+    un,un_inf=login_by_ip()
+    if un:
+        for x in un_inf:
+            #print (f"ses--{x}={un_inf[x]}")
+            session[x]=un_inf[x]
+        ou=f'''<div align=center>
+            <h2>{un_inf["fullname"]}</h2>-
+            <h2>شما با استفاده از آی پی وارد برنامه شدید</h2>
+            <hr>
+        </div>'''    
+    elif "username" in request.cookies and "password" in request.cookies:
         un=request.cookies["username"].value
         ps=request.cookies["password"].value
         ou=_chek_un_ps(un,ps)
@@ -246,7 +297,7 @@ def reset_password():
         if user_ab:
             import k_user
             tt=[user_ab]
-            tt+=[k_user.a_users[user_ab]['fullname']]
+            tt+=[k_user.all_users.inf[user_ab]['fullname']]
             xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
             if xr['rowcount']>0:
                tt+=["رمز با موفقیت ریست شد"]
