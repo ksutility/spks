@@ -18,11 +18,14 @@ def _func_inf(inspect_n=0,trace_n=0):
         USE IN (Service to) : xxprint(),xxxprint()
     '''    
     def trace_step_parser(trace_step):
-        return {
+        func={
             'file':trace_step[1].rpartition('\\')[2].partition('.')[0],
             'name':trace_step[3],
+            'args':trace_step[0].f_code.co_consts,
             'line':trace_step[2]}
+        func["inf"]='{} #{} : {} () =>'.format(trace_step[1],func['line'],func['name'],func['args'])   
             #[4][:-1]]}
+        return func
     ## -----------------------------
     
     import inspect
@@ -46,8 +49,9 @@ def _func_inf(inspect_n=0,trace_n=0):
         func["xtrace_v"]=str(len(sts2))+'+'*(len(sts2)-5)
         #func_inf=file name- ,func name)
         ## -------
-        func["inf"]='{}({}):{}=>'.format(func['file'],func['line'],func['name'])
-        func['all']='\n'.join([f'{i} ** {x[1]} - {x[3]} - {x[2]}' for i,x in enumerate(sts2)])
+        #func["inf"]='{} #{} : {} () =>'.format(func['file'],func['line'],func['name'],func['args'])
+        #func['all']='\n'.join([f'{i} ** {x[1]} - {x[3]} - {x[2]}' for i,x in enumerate(sts2)])
+        func['all']='\n'.join([f'{i} ** '+trace_step_parser(x)["inf"] for i,x in enumerate(sts2)]+[''])
         '''exam output of all=>
             0 ** D:\Dropbox\1-my-data\0-py\Lib\k_err.py - func_inf - 195
             1 ** D:\Dropbox\1-my-data\0-py\Lib\k_err.py - xxprint - 215
@@ -484,51 +488,71 @@ def xxprint_reset_html(last_file_add=''):
 #print (1)
 def xreport_var(x_var_list,reset=False):
     import k_date
-    import k_file
+    import k_file,k_htm
     br="<br>" #"\n"
     hr="<HR>"
     ttt=k_date.ir_date('yy/mm/dd-hh:gg:ss')+br
     lunch=True
-    
+    nl="\n"
     for i,x_var in enumerate(x_var_list):
-        ttt+="="*3+f" {i} "+"-"*50+br
+        ttt+="="*3+f" {i} "+"-"*50+br+nl
         
         if not x_var:
-            ttt+='- emplty value'+br
-            ttt+=f"val = {x_var}"+br
+            ttt+='----- emplty value'+"-"*20+br+nl
+            ttt+=f"val = {x_var}"+br+nl
         elif type(x_var)== dict:
-            ttt+=f'dict:len={len(x_var)}'+br
-            ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])
+            ttt+=f'---- dict:len={len(x_var)}'+"-"*20+br+nl
+            ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])+nl
+            ttt+="++++"+br+nl
+            ttt+=val_report(x_var)
         elif type(x_var)== list:
-            ttt+=f'list:len={len(x_var)}'+br
-            ttt+=br.join([f"{x}" for x in x_var]+[''])
+            ttt+=f'---- list:len={len(x_var)}'+"-"*20+br+nl
+            ttt+=br.join([f"{x}" for x in x_var]+[''])+nl
+            ttt+="++++"+br+nl
+            ttt+=val_report(x_var)
         else:
-            ttt+='- else type'+br
-            ttt+=br+f"{x_var}"
+            ttt+='---- else type'+"-"*20+br+nl
+            ttt+=br+f"{x_var}"+nl
     func =_func_inf(inspect_n=1,trace_n=1)
-    ttt+=hr+br.join([x+":"+str(func[x]) for x in ["name","line","xtrace_title","xtrace_v","inf"]])
-    ttt+=hr+"all:<br>"+br.join([x for x in func["all"].split('\n')])
+    ttt+=k_htm.x_toggle(br.join([x+":"+str(func[x])+nl for x in ["name","line","xtrace_title","xtrace_v","inf"]]))
+    ttt+=k_htm.x_toggle("all:<br>"+br.join([x+nl for x in func["all"].split('\n')]))
 
     # ('w' if reset else 'a')
-    fname='var_report-'+k_date.ir_date('yymmdd-hhggss')+'.htm'
-    with open(fname,'w' ,encoding='UTF8') as file:
-        file.write(ttt)
+    fname='c:\\temp\\report\\var_report-'+k_date.ir_date('yymmdd-hhggss')+'.htm'
+    import os.path
+    if not os.path.isfile(fname):
+        ttt="""
+            <html><head>
+                <link rel="stylesheet" href="need/do_report.css">
+                <script src="need/jquery-3.7.1.min.js"></script>
+                
+                <link rel="stylesheet" href="need/bootstrap4/css/bootstrap.min.css">
+                <script src="need/bootstrap4/js/bootstrap.min.js" ></script>
+            </head>
+            <body>
+            """+ttt
+    with open(fname,'a' ,encoding='UTF8') as file:
+        file.write(k_htm.x_toggle(ttt))
     if lunch:
         k_file.launch_file(fname)
     print("------------")
     return True
 #------------------------------------
 def val_report(xv):
-    tt="""<a onclick="$(this).next().toggle()",class="toggle" >+</a>"""
+    import k_htm
+    tt=''
     if type(xv)==dict:
-        for x in vals:
-            y=vals[x] 
+        for x in xv:
+            y=xv[x] 
             #if 'file' in x:y=htm_file(y)
             tt+='<div class="row border"><div class="col-2 bg-info">{}:</div><div  class="col-10">{}</div></div>'.format(x,val_report(y))
+        return k_htm.x_toggle(tt)
     elif type(xv)==list:
         for i,y in enumerate(xv):
             tt+='<div class="row border"><div class="col-2 bg-info">{}:</div><div  class="col-10">{}</div></div>'.format(i,val_report(y))
+        return k_htm.x_toggle(tt)
     else: 
-        tt=xv
+        tt+="type="+type(xv).__name__+"<br>"+str(xv)
     return tt
 #-------------------------------------    
+
