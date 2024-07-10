@@ -79,58 +79,65 @@ def _get_init_data():
         return x_data_s,db_name,tb_name,'ok'
     return False,'','','error : args not set correctly'    
 #--------------------------------------------
-def get_table_filter(tasks,x_data_s):
-    '''
-        use in:2(show_xtable,show_kxtable)
-    goal:
-    ------
-        -show input filter form for customizing filter data
-        نمایش فرم فیلتر جهت تنظیم اطلاعات فیلتر ها
-        -set new_value of filter data in goal variabl
-        
-    
+class C_FILTER():
+    """
+    old:
+        _def get_table_filter(tasks,x_data_s)
     output:
     ------
-        select_cols, all_cols,htm_table_filter
-    '''
-    hlp={'cols_filter':'''
-                text    => result
-                ---------------------------------
-                        => show all defined cols in data_str
-                #1      => filter by cols_filter[1]
-                1,3,4   => show cols[1],cols[3],cols[4]
-                des,prj => shoe cols['des'],cols['prj']''',
-                
-        'data_filter':'''
-               "des" like "%L%"
-               "prj"="29" AND "des" like "%L-%"
-               date_e > "1401/09/01"
-            ''',
-        'prj':'''
-            
+        select_cols, all_cols
+        htm()
+    """
+    def __init__(self,tasks,x_data_s):
         '''
-        }
+            use in:2(show_xtable,show_kxtable)
+        goal:
+        ------
+            -show input filter form for customizing filter data
+            نمایش فرم فیلتر جهت تنظیم اطلاعات فیلتر ها
+            -set new_value of filter data in goal variabl
+            
+        
+        output:
+        ------
+            select_cols, all_cols,htm_table_filter
+        '''
+        #share data for class
+        self.tasks=tasks
+        self.x_data_s=x_data_s
+        
+        
 
-    cols_filter=x_data_s['cols_filter']
-    cols_filter1={'name':'cols_filter','type':'select','select':cols_filter}#,$hlp='prop':["can_add"],}
-    data_filter=x_data_s['data_filter'] 
-    data_filter1={'name':'data_filter','type':'select','select':data_filter}
-    all_cols=list(tasks.keys())
-    #print(f'all_cols={all_cols}')
-    
-    flt=request.vars['cols_filter']
-    if flt:
-        if flt[0]=='#':
-            select_cols=cols_filter[int(flt[1:])] 
-        else:
-            flt_list=flt.split(',')
-            if flt_list[0][0] in [0,1,2,3,4,5,6,7,8,9] :
-                select_cols = [all_cols[int(x)] for x in flt_list]
+        cols_filter=x_data_s['cols_filter']
+        self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter}#,$hlp='prop':["can_add"],}
+        data_filter=x_data_s['data_filter'] 
+        
+        data_filter={k_form.template_parser(x):y for x,y in data_filter.items()}
+        def_value=k_form.template_parser(x_data_s['base'].get('data_filter',''))
+        self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value}
+        
+        #import k_err
+        #k_err.xreport_var([data_filter,self.data_filter_obj])
+        
+        all_cols=list(tasks.keys())
+        #print(f'all_cols={all_cols}')
+        
+        flt=request.vars['cols_filter']
+        if flt:
+            if flt[0]=='#':
+                select_cols=cols_filter[int(flt[1:])] 
             else:
-                select_cols = flt_list
-    else:
-        select_cols= all_cols
-    def set_htm_var(caption,obj,width='15vw',_help='',_val='',_meta=''):
+                flt_list=flt.split(',')
+                if flt_list[0][0] in [0,1,2,3,4,5,6,7,8,9] :
+                    select_cols = [all_cols[int(x)] for x in flt_list]
+                else:
+                    select_cols = flt_list
+        else:
+            select_cols= all_cols
+        self.select_cols=select_cols
+        self.all_cols=all_cols
+        self.htm=self._htm()
+    def set_htm_var(self,caption,obj,width='15vw',_help='',_val='',_meta=''):
         '''
         inputs:
         ------
@@ -153,26 +160,49 @@ def get_table_filter(tasks,x_data_s):
             obj['onchange']=f"document.getElementById('{name}').value=document.getElementById('{name2}').value;"
             x_data.x_data_verify_task(name2,obj)
             obj['def_value']=request.vars.get(name2,obj['def_value'])
-            val=request.vars.get(name,_val)
+            val=request.vars.get(name,_val) or obj['def_value']
             if width:obj['width']=width
-            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=x_data_s, need=['input'],request=request)['input'])
+            tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=self.x_data_s, need=['input'],request=request)['input'])
+            ##import k_err
+            ##k_err.xreport_var([tt,XML(tt),obj,self.x_data_s])
             tt+=f'''<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
             tjs=k_js.toggle(clicking_name=name+"_label",hiding_name=name)
+            obj['value']=val #===> output
         xcap=f"""<label id='{name}_label'><a title='{_help}'>{caption}</a></label>"""
         tt1=k_htm.xtd([[xcap,4],[tt,8]])
+        
+        
         return  f'''<td style='width:{width};'>
                             {tt1}
                         </td>
                     ''' +tjs       
-    htm_table_filter=XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
-                            #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
-                            +set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=data_filter1,_help=hlp['data_filter'])
-                            +set_htm_var(caption='فیلتر ستونها',width='30vw',obj=cols_filter1,_help=hlp['cols_filter'])
-                            +set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
-                            +set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
-                            +set_htm_var(caption='تعداد',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
-                            +'<td><input type="submit" value="انجام"></td></tr></table></form>')
-    return select_cols, all_cols,htm_table_filter
+    def _htm(self):
+        hlp={'cols_filter':'''
+                    text    => result
+                    ---------------------------------
+                            => show all defined cols in data_str
+                    #1      => filter by cols_filter[1]
+                    1,3,4   => show cols[1],cols[3],cols[4]
+                    des,prj => shoe cols['des'],cols['prj']''',
+                    
+            'data_filter':'''
+                   "des" like "%L%"
+                   "prj"="29" AND "des" like "%L-%"
+                   date_e > "1401/09/01"
+                ''',
+            'prj':'''
+                
+            '''
+            }
+        return XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
+                    #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
+                    +self.set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=self.data_filter_obj,_help=hlp['data_filter'])
+                    +self.set_htm_var(caption='فیلتر ستونها',width='30vw',obj=self.cols_filter_obj,_help=hlp['cols_filter'])
+                    +self.set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
+                    +self.set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
+                    +self.set_htm_var(caption='تعداد',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
+                    +'<td><input type="submit" value="انجام"></td></tr></table></form>')
+    #return select_cols, all_cols,htm_table_filter,
 
 #===================================================================================================================
 def xform():#view 1 row
@@ -245,7 +275,7 @@ def xform():#view 1 row
             #print("==>"+str(form_sabt_data[f'step_{step["i"]}_un']))   
             hx['app']=[ 
                         (val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["i"]}_ap'])),
-                        (" توسط "+val_in_dic(k_user.a_users,form_sabt_data[f'step_{step["i"]}_un']).get('fullname','')),
+                        (" توسط "+val_in_dic(k_user.all_users.inf,form_sabt_data[f'step_{step["i"]}_un']).get('fullname','')),
                         (" در تاریخ "+(form_sabt_data[f'step_{step["i"]}_dt'] or '')),
                         ]
             # breakpoint()
@@ -279,8 +309,9 @@ def xform():#view 1 row
                     DIV('',_class='col-4')
                     ,_class='row')]
             htm_1+=[HR()]
-            return FORM(DIV(htm_1,_class="container form_step_cur"),INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')
+            htm= FORM(DIV(htm_1,_class="container form_step_cur"),INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')
                         ,_action=URL('save_app_review',args=request.args),_id="form1") 
+            return XML(k_htm.x_toggle_s(XML(htm),sign='...'))
         #-- def show_form:start ----------------------------------------------
         def inf_g():
             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
@@ -352,12 +383,13 @@ def xform():#view 1 row
         x_arg=request.args[:2]
         xid=int(xid)
         args=request.args
-        htm_form+=[
-                A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary'),'-',
+        htm_form+=[XML(k_htm.x_toggle_s(DIV(
                 A('T',_title='نمایش جدول مربوطه',_href=URL('data','xtable',args=args[:2]+['edit']+[args[2]]),_class='btn btn-primary'),'-',
                 A('تغییرات',_title='تغییرات این ثبت از فرم',_href='javascript:void(0)',_onclick=f'j_box_show("{xlink}")',_class='btn btn-primary'),'-',
                 A('+',_title='فرم بعدی',_href=URL('xform',args=x_arg+[str(xid+1)]),_class='btn btn-primary'),'-',  
-                A('-',_title='tvl rfgd',_href=URL('xform',args=x_arg+[str(xid-1)]),_class='btn btn-primary'),]                
+                A('-',_title='فرم قبلی',_href=URL('xform',args=x_arg+[str(xid-1)]),_class='btn btn-primary')
+                ))),
+                A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary')]
         return DIV(htm_form,_dir="rtl")
     #-- def xform:start ------------------------------------------------------------
     x_data_s,db_name,tb_name,msg=_get_init_data()
@@ -581,7 +613,7 @@ def list_0():
                     tx=[n,
                         A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
                         A(tb_obj['base']['title'],_href=URL('data','xtable',args=[db_name,tb_name])),
-                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where})) if for_me_n else '',
+                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where}),_class="btn btn-primary") if for_me_n else '',
                         total_n,
                         A("M",_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,
                         A("U",_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),
@@ -600,7 +632,7 @@ def list_0():
                     for_me_n=db1.count(tb_name,where=x_where)['count']
                     tx=[n,
                         A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
-                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where})) if for_me_n else '',
+                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where}),_class="btn btn-primary") if for_me_n else '',
                         total_n]
                     trs+=[tx]
     from k_table import K_TABLE
@@ -634,7 +666,8 @@ def xtable():
         '''
         rows,titles,rows_num=db1.select(table=tb_name,where=where,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
         #if rows:rows.reverse()
-        select_cols, all_cols,htm_table_filter=get_table_filter(tasks,x_data_s)
+
+
         select_cols='form_v_cols_1'#form_v_cols_full  
         ''' form_v_cols_1=form view columns ALT 1 
             form_v_cols_full= form view columns FULL
@@ -672,7 +705,7 @@ def xtable():
             for st_n,step in x_data_s['steps'].items():
                 cornometer2=Cornometer("c2","+ - ")
                 x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
-                tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)#, all_cols,ref_i)
+                tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)
                 tds+=[TD(x) for x in tds_i]
                 #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
                 cornometer2.print('a---b')
@@ -684,11 +717,11 @@ def xtable():
             cornometer.print('c')
             tds+=[TD(x_dic[f"f_nxt_s"],_class=cls1),TD(x_dic[f"f_nxt_u"],_class=cls1)]
             ''' '''
-            #tds=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)#, all_cols,ref_i)
+            #tds=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)
             
             trs.append(TR(*tds))
         cc='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
-        return TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num,htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
+        return TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num #DIV(,_style='height:100%;overflow:auto;')
     #----------------------------------------------------------------------------------------
     #tasks,f_views
     script1='''<script>
@@ -703,8 +736,8 @@ def xtable():
     </script>
     '''      
 
-    filter_data=k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
-    print ('filter_data='+str(filter_data))
+    
+
     args=request.args
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
@@ -716,9 +749,13 @@ def xtable():
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return dict(htm=H1("شما اجازه دسترسی به این فرم را ندارید"))
+               
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']
-        table,nr,rows_num,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
+        c_filter=C_FILTER(tasks,x_data_s) 
+        filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
+        
+        table,nr,rows_num=xtable_show(tb_name,tasks,filter_data,x_data_s)
         jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
         #print(f'job={job}')
         if session["admin"] or k_user.user_in_jobs(jobs):
@@ -731,7 +768,7 @@ def xtable():
                             ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
                             ,TD(A(f"{rows_num}",_title="تعداد کل بر اساس فیلتر جاری"),_width='30px')
                             ,TD(DIV('...',_id='viewcell',_name='viewcell')))),_style='position:sticky;top:0px')
-        return dict(htm=DIV(XML(style1),XML(script1),htm_table_filter,htm_head,table,))
+        return dict(htm=DIV(XML(style1),XML(script1),c_filter.htm,htm_head,table,))
 #--------------------------------------
 def _sabege():
     if len(request.args)<3 :
