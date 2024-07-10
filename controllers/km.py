@@ -70,7 +70,7 @@ def test_count_row():
                
 def test_user():
     import k_htm
-    return dict(h=k_htm.val_report(k_user.a_users))
+    return dict(h1=k_htm.val_report(k_user.a_users),h2=k_htm.val_report(k_user.all_users.inf))
 def test_parser():
     import k_form
     return k_form.template_parser("{a}+{{=b+','.join([x for x in 'abc'])}}",x_dic={'a':'1','b':'2'})
@@ -158,6 +158,25 @@ def chek_uniq():
         INPUT(_value="",_id='x_val',_name='x_val',_onchange=f"ajax_chek_uniq('{args[0]}','{args[1]}','{args[2]}','#x_val');"),#,'#x_val_div'
         DIV("",_id='x_val_div'),
         ))   
+def ajax_val_get():
+    '''
+    goal:
+        use in ajax for get 1 value from server
+    args:
+        0:session / request /
+        1:value name
+    test:
+        /spks/km/ajax_val_get/test/a/txt
+    '''
+    args=request.args
+    try:
+        if len(args)>1:
+            return {'val':session[arg[1]],'msg':'ok'}
+        msg='shoud len(args)>2'
+    except Exception as err:
+        msg='err='+str(err)
+    return {'val':'','msg':msg}    
+      
 #--------------------
 def uniq_inf():
     '''
