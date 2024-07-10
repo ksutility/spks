@@ -960,7 +960,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 if _multiple:
                      return ','.join([_select[x] for x in _value.split(',')])
                 else:
-                    return _select[_value]
+                    if _value in _select:
+                        return _select[_value]
+                    else:
+                        return ''
             
             obj['output']=XML(f'''<a  title="{select_1_or_multi(_value,_multiple)}">{_value}</a>''')
         except Exception as err:
