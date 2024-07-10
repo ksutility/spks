@@ -390,7 +390,7 @@ x_data={
     #--------------------------------------------------------------------
     'user':{
         'user':{
-            'base':{'mode':'form','title':'لیست همکاران'
+            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"'
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
@@ -417,6 +417,7 @@ x_data={
                 'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'صفحه اول شناسنامه','auth':'dcc_prj'},
                 'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی'},
                 'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dcc_prj'},
+                'login_ip':{'type':'text','title':'آی پی ورود ویژه','len':'3'}
                 },
             'steps':{
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,p_id,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -424,12 +425,14 @@ x_data={
                 'st2':{'tasks':'job','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
-                'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot','view1':'un,name,family','view2':'p_id,ps'},
+                'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot','view1':'un,name,family','view2':'p_id','auth':'dccm'},
                 },
             'cols_filter':{'':'همه',},
             'data_filter':{
                 '':'همه همکاران',
                 'loc = "100"':'همکاران دفتر مرکزی مشهد',
+                'loc = "101"':'همکاران دفتر تهران',
+                'loc = "102"':'همکاران دفتر حرم رضوی',
                 },
         }
     },
@@ -716,7 +719,7 @@ x_data={
     #--------------------------------------------------------------------
     'off_morkhsi_saat':{
         'a':{
-            'base':{'mode':'form','title':'مرخصی ساعتی'
+            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"'
             },
             'tasks':{
                 'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
