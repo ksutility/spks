@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # ver 1.00 1401/08/14 
 # -------------------------------------------------------------------------
+"""
+body {
++    padding:50px 50px 0 0px;
+ }
+@media print {
+-  h1 {page-break-before: always;}
++  h1:not(:first-child) {page-break-before :always;}
++  h1:first-child {page-break-before: avoid;}
+ }
+h1 {
+-    margin:4px;
++    margin:10px 0 0 0;
++    padding:50px 10px 0px 0px;
+ } 
+"""
 htm_head=XML(f"""
 <head>
 <script type="text/javascript" src="{URL('static','js/datepicker/jquery-1.8.2.min.js')}"></script>
