@@ -34,15 +34,31 @@ def load_user_inf():
     users={}
     for row in rows:
         u_inf=dict(zip(titles,row))
-        users[u_inf['un']]={'fullname':'{m_w} {pre_n} {name} {family}'.format(**u_inf)}
-        #users[u_inf['un']]=u_inf
-    return users
+        #fullname='{m_w} {pre_n} {name} {family}'.format(**u_inf)
+        fullname='{m_w} {name} {family}'.format(**u_inf)
+        unx=u_inf['un']#
+        #unx=unx.lower()
+        users[u_inf['un']]={
+            "user_fullname":fullname,
+            "fullname":fullname,
+            "username":unx,
+            "un":unx,
+            'login_ip':u_inf['login_ip'],
+            'ps':u_inf["ps"],
+            'file_access':u_inf["file_access"],
+            "my_folder":f'{u_inf["eng"].strip()}-{unx}'}
+        #users[u_inf['un']]=u_inf-
+    #import k_err 
+    #k_err.xreport_var(['users',users]) #,[titles],rows
+    return users #           'fullname' report--
 class ALL_USERS():
     inf={}
     def __init__(self):
         self.inf=load_user_inf()
+    def reset(self):  
+        self.inf=load_user_inf()
 a_users=load_user_inf()
-all_user=ALL_USERS()
+all_users=ALL_USERS()
 
 def load_job_inf():
     db1=DB1(db_path+'job.db')
