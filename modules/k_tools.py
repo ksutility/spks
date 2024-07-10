@@ -72,4 +72,10 @@ def nth_item_of_dict(xdic,n,up_result=''):
     x=list(xdic)[n]
     return xdic[x]
 #class X_DIC():
+def server_is_test():
+    from gluon import current
+    srv_port=current.request.env.SERVER_PORT 
+    print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
+    return srv_port == '50'
+
     
