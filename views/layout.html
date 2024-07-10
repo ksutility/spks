@@ -36,6 +36,7 @@
 	<!-- ks -->	
 		<link rel="stylesheet" href="{{=URL('static','css/fonts_b.css')}}"/>
 		<link rel="stylesheet" href="{{=URL('static','css/ks.css')}}"/>
+		<link rel="stylesheet" href="{{=URL('static','css/ks_swich.css')}}"/>
 		<link rel="stylesheet" href="{{=URL('static','css/ks-x.css')}}"/>
 		<script type="text/javascript" src="{{=URL('static','js/ks-form.js')}}"></script>
 	<!-- ks-input-placeholder -->	
@@ -132,7 +133,8 @@
 						//alert(JSON.stringify($(this)));
 						//lert(event.target.getAttribute("maxTime"));
 					}
-				});	
+				});
+				$(".a_toggle_hide").click(); //hide all toggle that shoud be hide in first
  			}); 
 	</script>
     <style>
@@ -301,29 +303,39 @@
                     -->
                     <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                       <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" title="{{=session["user_fullname"]}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          {{if session["username"]:}}
-							{{=session["username"]}}
-						  {{else:}}
-							LOGIN{{pass}}
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                          {{if session["username"]:}}
-							<!--
-                            <a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','profile')}}",true);'>{{=T('Profile')}}</a>
-							-->
-                            <a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','change_password')}}",true);'>{{=T('Change Password')}}</a>
-                            <a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','logout')}}",true);'>{{=T('Logout')}}</a>
-                          {{else:}}
-                            <a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','login')}}",true);'>{{=T('Login')}}</a>
-                            <!--
-                            <a class="dropdown-item" href="{{=URL('user','register')}}">{{=T('Sign up')}}</a>
-                            
-                            <a class="dropdown-item" href="{{=URL('user','retrieve_password')}}">{{=T('Lost Password')}}</a>   
-							-->
-                                          
-                          {{pass}}
-                        </div>
+						{{if session["username"]:}}
+							<a class="nav-link dropdown-toggle" href="#" title="{{=session["user_fullname"]}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								{{=session["username"]}}
+							</a>
+							<div class="dropdown-menu dropdown-menu-right">
+								<form class="px-4 py-3">
+									<div id="xxab" onclick='if (window.event.ctrlKey) {
+									$.get("{{=URL('user','_toggle_ip_login_case')}}", function(data){ });
+									$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});}'>
+									تنظیم ورود اتوماتیک
+									</div>
+									<script>
+									$( document ).ready(function() {
+									$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});});
+									</script>
+									
+								</form>
+								<!--
+								<div class="form-group">
+										<label class="switch">
+											<input type="checkbox">
+											<span class="slider"></span>
+										</label>
+									</div>
+								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','profile')}}",true);'>{{=T('Profile')}}</a>
+								
+								-->
+								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','change_password')}}",true);' >تغییر رمز</a>
+								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','logout')}}",true);'>خروج</a>
+							</div>
+						{{else:}}
+							<a class="nav-link" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','login')}}",true);'>ورود</a>
+						{{pass}}
                       </li>
                     </ul>
                     <!-- ab
