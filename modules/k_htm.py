@@ -127,9 +127,11 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
         if vs and v in vs:op['_selected']='selected'
         opts+=[op]
     sel=TAG.SELECT(*opts,_id=_name,_name=_name,_style="width:100%;",_onchange=XML(_onchange))
+    ##import k_err
+    ##k_err.xreport_var([vs,_dict,opts,sel])
     if _multiple:
         sel['_multiple']='multiple'#_multiple
-        print ("multiple"+str(_multiple))
+        #print ("multiple"+str(_multiple))
     if can_add:sel['_class']="can_add"
     if not _title:
         return DIV(sel)#,str(vs),type(vs),str("2" in vs))
@@ -178,3 +180,23 @@ def xtd(td_list):#
             {rep}
         </div>
     """
+def x_toggle(txt):
+    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary " >+</a></div>\n
+                <div style='border:2px outset red;margin:0 0 0 10px;'>\n
+                {txt}\n
+                </div>\n
+            """
+def x_toggle_s(txt,sign='+'):
+    js="""
+        <script>
+            $( document ).ready(function() {
+            $(".a_toggle_hide").click();})
+            </script>
+        </div>\n
+    """
+    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="a_toggle_hide" >{sign}</a>\n
+                </div>
+                <div>\n
+                {txt}\n
+                </div>\n
+            """
