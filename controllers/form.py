@@ -109,12 +109,12 @@ class C_FILTER():
         
 
         cols_filter=x_data_s['cols_filter']
-        self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter}#,$hlp='prop':["can_add"],}
+        self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter,'add_empty_first':False}#,$hlp='prop':["can_add"],}
         data_filter=x_data_s['data_filter'] 
         
         data_filter={k_form.template_parser(x):y for x,y in data_filter.items()}
         def_value=k_form.template_parser(x_data_s['base'].get('data_filter',''))
-        self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value}
+        self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value,'add_empty_first':False}
         
         #import k_err
         #k_err.xreport_var([data_filter,self.data_filter_obj])
@@ -597,46 +597,57 @@ def save_app_review():
         return DIV(htm_form) #,x=response.toolbar())
 #------------------------------------------------------------------------------------------------------------
 def list_0():
-    
-    trs=[]
+    from x_data import x_data_cat
+    #x_data_cat=x_data.x_data_cat
+    trsx={x:[] for x in x_data_cat}
     n=0
-    if session["admin"]:
-        titels=['n','نام فرم','جدول','تعداد منتظر اقدام شما','تعداد کل',"M","U","D"]
-        for db_name,db_obj in x_data.items():
-            for tb_name,tb_obj in db_obj.items():
-                if tb_obj['base']['mode']=='form':
-                    n+=1
-                    db1=DB1(db_path+db_name+'.db')
-                    total_n=db1.count(tb_name)['count']
-                    x_where=f'''f_nxt_u = "{session['username']}"'''
-                    for_me_n=db1.count(tb_name,where=x_where)['count']
-                    tx=[n,
-                        A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
-                        A(tb_obj['base']['title'],_href=URL('data','xtable',args=[db_name,tb_name])),
-                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where}),_class="btn btn-primary") if for_me_n else '',
-                        total_n,
-                        A("M",_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,
-                        A("U",_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),
-                        A("D",_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"]))
-                        ]
-                    trs+=[tx]
-    else:
-        titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل']
-        for db_name,db_obj in x_data.items():
-            for tb_name,tb_obj in db_obj.items():
-                if tb_obj['base']['mode']=='form':
-                    n+=1
-                    db1=DB1(db_path+db_name+'.db')
-                    total_n=db1.count(tb_name)['count']
-                    x_where=f'''f_nxt_u = "{session['username']}"'''
-                    for_me_n=db1.count(tb_name,where=x_where)['count']
-                    tx=[n,
-                        A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
-                        A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where}),_class="btn btn-primary") if for_me_n else '',
-                        total_n]
-                    trs+=[tx]
+    titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل',""]
+  
+    for db_name,db_obj in x_data.items():
+        for tb_name,tb_obj in db_obj.items():
+            if tb_obj['base']['mode']=='form':
+                n+=1
+                db1=DB1(db_path+db_name+'.db')
+                total_n=db1.count(tb_name)['count']
+                x_where=f'''f_nxt_u = "{session['username']}"'''
+                for_me_n=db1.count(tb_name,where=x_where)['count']
+                code=tb_obj['base']['code'] if 'code' in tb_obj['base'] else '900'
+                xcat=code[0] 
+                n1=len(trsx[xcat])+1
+                if session["admin"]:
+                    _class="btn btn-primary btn-sm"
+                    tools=DIV(
+                        A("T",_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),"-",
+                        A("M",_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
+                        A("U",_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),"-",
+                        A("D",_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),"-",
+                        A("A",_class=_class,_title="به روز رسانی فیلدهای اتوماتیک",
+                            _href=URL("data","rc",args=["update_auto_filed",db_name,tb_name,"do-x"]
+                                    ,vars={'select_cols':XML(','.join([x for x in tb_obj['tasks'] if tb_obj['tasks'][x]['type']=='auto']))}
+                                    ))
+                    )
+                else:
+                    tools=''
+                tx=[A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
+                    A(for_me_n,_href=URL('xtable',args=[db_name,tb_name],vars={'data_filter':x_where}),_class="btn btn-primary") if for_me_n else '',
+                    total_n,
+                    tools,
+                    ]
+                tn= [DIV(n,_title=code)]  
+                tn1= [DIV(n1,_title=code)] 
+                trsx[xcat]+=[tn1+tx]
+                trsx["-"]+=[tn+tx]
+ 
     from k_table import K_TABLE
-    tt= K_TABLE.creat_htm ( trs,titels,table_class="1")                     
+    # tt=['<div class="tab-content">']
+    # for cat in x_data_cat:
+        # tt+=[XML(k_htm.x_toggle_h(x_data_cat[cat], K_TABLE.creat_htm ( trsx[cat],titels,table_class="1"))) ]      
+    # tt+=['</div>']
+    tt=[DIV(H3("لیست فرمها",_style="text-align:center;"))]
+    tbl={}
+    for cat in x_data_cat:
+        tbl[cat]=XML(K_TABLE.creat_htm ( trsx[cat],titels,table_class="1")) 
+    tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
     return dict(htm=DIV(tt,_dir='rtl'))
 #@k_tools.x_cornometer
 def xtable():
