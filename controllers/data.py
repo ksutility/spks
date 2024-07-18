@@ -646,10 +646,12 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))
+        if not ('all' in x_data_s['views']) :
+            return DIV(H1("برای این فرم جدول تعریف نشده است"))
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
         tasks=x_data_s['tasks']
-        f_views=x_data_s['views']['all']
+        f_views=x_data_s['views']['all'] 
         
         #db=DB1(db_name)
         if len(args)>3 and args[2]=='view':
@@ -1022,13 +1024,43 @@ def rc():#run 1 command
             rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn} LIKE '{x}'")#{fldn:x})
             rep1+=[k_htm.val_report(rep)]
         return DIV(rep1)
+    elif cmd=='update_f_nxt_u':   
+        '''
+        exam:
+            /spks/data/rc/update_f_nxt_u/test/b/do
+        goal:
+            به روز رسانی فیلد f_nxt_u
+            به روز رسانی نام نفراتی که مرحله بعدی فرم منتظر آنهاست
+        input:
+            arg[1]:db_name
+            arg[2]:tb_name
+        '''
+        rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
+        x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
+        trs=[]
+        for i,row in enumerate(rows):
+            rep=''
+            x_dic=dict(zip(titles,row))
+            xid=row[0]
+            c_form=k_form.C_FORM(x_data_s,xid,form_sabt_data=x_dic)
+            #fnu=f_nxt_u
+            f_nxt_u_old=x_dic['f_nxt_u']
+            f_nxt_u_new=c_form.f_nxt_u()
+            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new and f_nxt_u_new!=f_nxt_u_old): #run_sql:
+                rep=db1.update_data(tb_name,{'f_nxt_u':f_nxt_u_new},{'id':xid})
+            trs+=[[i,xid,x_dic['f_nxt_s'],f_nxt_u_old,f_nxt_u_new,rep,c_form.last_text_app]]
+        from k_table import K_TABLE
+        rep=K_TABLE.creat_htm(trs,['i','id','f_nxt_s','f_nxt_u old','f_nxt_u new','run_sql={run_sql}'],table_class='1')
+        return dict(x=DIV(rep))    
     elif cmd=='update_auto_filed': 
         '''
             update select_cols of a table automaticaly
-            فعلا برنامه در حال تکامل بوده و فقط موارد زیر را انجام می دهد
             برنامه بررسی می کند که فیلد های داده شده بر اساس اخرین متن تعریف فرم مقدار جدیددشان چقدر می شود  و این مقدار جدید با مقدار ذخیره شده چه تفاوتی دارد
+            if arg[3]='do' =>   run sql + show sql report and difference 
+                else :      => dont run sql ,only show difference
         '''
         #sample /spks/data/rc/update_auto_filed/paper/a?select_cols=prj,man_crt
+        # /spks/data/rc/update_auto_filed/off_morkhsi_saat/a/do-x?select_cols=time_en
         select_cols=request.vars['select_cols']
         print(select_cols)
         if select_cols:
@@ -1044,21 +1076,26 @@ def rc():#run 1 command
             x_dic=dict(zip(titles,row))
             xid=row[0]
             tds=[xid]
-            for fn in select_cols:
+            for fn in x_data_s['tasks']:#select_cols:
                 i_obj=x_data_s['tasks'][fn]
-                x_obj =k_form.obj_set(i_obj=i_obj,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
-                x_saved=x_dic[fn]
-                import k_tools
-                tds+=[k_tools.var_compare(x_saved,x_obj['output_text'])['msg']]#output_text
-                #if x_saved:x_saved.strip()
-                #if x_saved!=x_obj['output']:
-                #    tds+=[f" != ,{len(x_saved)},{len(x_obj['output_text'])},{x_saved},{x_obj['output_text']}"]
-                #else:
-                #   tds+=[f" == {x_saved}"]
+                x_obj =k_form.obj_set(i_obj=i_obj,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output','input'])
+                if fn in select_cols:
+                    #import k_err
+                    #k_err.xreport_var([i_obj,x_dic,x_obj])
+                    x_old=x_dic[fn]
+                    x_new=x_obj['output_text']
+                    import k_tools
+                    rep=''
+                    if (len(request.args)>3 and request.args[3]=='do' and x_new and x_new!=x_old): #run_sql:
+                        rep=db1.update_data(tb_name,{x_obj['name']:x_new},{'id':xid})
+                    tds+=[k_tools.var_compare(x_old,x_new)['msg'],rep]#output_text
             trs+=[tds]
         from k_table import K_TABLE
-        rep=K_TABLE.creat_htm(trs,['id']+select_cols,table_class='1')
-        return dict(x=DIV(rep))
+        tit=[]
+        for x in select_cols:
+            tit+=[x,x+"-rep"]
+        rep2=K_TABLE.creat_htm(trs,['id']+tit,table_class='1')
+        return dict(x=DIV(rep2))
     elif cmd=='copy_table_inf': 
         '''
         exam:
@@ -1099,7 +1136,8 @@ def rc():#run 1 command
         #sample /spks/data/rc/copy_table_inf
         #dt=data
         dt_old={'db1':'a_sub_p','tb1':'a','db2':'prj','tb2':'a','cols':'*','uniq_field':''}#True
-        dt={'db1':'off_morkhsi_saat_test','tb1':'a','db2':'off_morkhsi_saat','tb2':'a','cols':'*','uniq_field':'','ids':'8,16,17,18'}#True-
+        dt_old2={'db1':'off_morkhsi_saat_test','tb1':'a','db2':'off_morkhsi_saat','tb2':'a','cols':'*','uniq_field':'','ids':'8,16,17,18'}#True-
+        dt={'db1':'off_mamurit_saat_test','tb1':'a','db2':'off_mamurit_saat','tb2':'a','cols':'*','uniq_field':'','ids':'6,7'}#True-
         if 'ids' in dt:dt['ids']=dt['ids'].split(',')
         
         db1=DB1(db_path+dt['db1']+'.db')
@@ -1173,34 +1211,7 @@ def rc():#run 1 command
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['i','r-a','db_tb1','fld','type','db_tb2','data'],table_class='1')
         return dict(x=DIV(rep))
-    elif cmd=='update_f_nxt_u':   
-        '''
-        exam:
-            /spks/data/rc/update_f_nxt_u/test/b/do
-        goal:
-            به روز رسانی فیلد f_nxt_u
-            به روز رسانی نام نفراتی که مرحله بعدی فرم منتظر آنهاست
-        input:
-            arg[1]:db_name
-            arg[2]:tb_name
-        '''
-        rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
-        x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
-        trs=[]
-        for i,row in enumerate(rows):
-            rep=''
-            x_dic=dict(zip(titles,row))
-            xid=row[0]
-            c_form=k_form.C_FORM(x_data_s,xid,form_sabt_data=x_dic)
-            #fnu=f_nxt_u
-            f_nxt_u_old=x_dic['f_nxt_u']
-            f_nxt_u_new=c_form.f_nxt_u()
-            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new and f_nxt_u_new!=f_nxt_u_old): #run_sql:
-                rep=db1.update_data(tb_name,{'f_nxt_u':f_nxt_u_new},{'id':xid})
-            trs+=[[i,xid,x_dic['f_nxt_s'],f_nxt_u_old,f_nxt_u_new,rep,c_form.last_text_app]]
-        from k_table import K_TABLE
-        rep=K_TABLE.creat_htm(trs,['i','id','f_nxt_s','f_nxt_u old','f_nxt_u new','run_sql={run_sql}'],table_class='1')
-        return dict(x=DIV(rep))
+
     #return dict(table=TABLE(THEAD([rep[0]],_class="thead-light"),TBODY(rep[1:]),_class="table table-bordered table-hover"))  
     return dict(x=k_htm.val_report(rep))
     #return dict(table=TABLE(THEAD(['cols_list'],_class="thead-light"),TBODY(rep),_class="table table-bordered table-hover"))        
