@@ -125,8 +125,10 @@
 							alert('زمان وارد شده از زمان مجاز بیشتر است');
 							$(this).attr("value",m);
 						}
-						//alert();
-						//alert(window.myvar);
+						if ($(this).attr("update")=="update") {
+							$("form").submit();
+						}
+						alert($(this).attr("onchange2"));
 						//alert($(this).timepicker('timeFormat'));
 						//alert(JSON.stringify(time.result));
 						//alert(JSON.stringify($(this).parent()));
