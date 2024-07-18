@@ -186,7 +186,7 @@ def x_toggle(txt):
                 {txt}\n
                 </div>\n
             """
-def x_toggle_s(txt,sign='+'):
+def x_toggle_s(txt,sign='+'):#s=small
     js="""
         <script>
             $( document ).ready(function() {
@@ -200,3 +200,35 @@ def x_toggle_s(txt,sign='+'):
                 {txt}\n
                 </div>\n
             """
+def x_toggle_h(head,txt):#s=head dar
+    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary a_toggle_hide" >{head}</a>\n
+                </div>
+                <div>\n
+                {txt}\n
+                </div>\n
+            """
+def tabs(cat_dict,content_dict,x_active=''):
+    head=''
+    body=''
+    for x,y in cat_dict.items():
+        _class=' active' if x==x_active else ''
+        head+=f'''<li class="nav-item" >
+                    <a class="nav-link{_class}" data-toggle="tab" href="#tab_{x}">{y}</a>
+                </li>'''
+        _class='active' if x==x_active else 'fade'
+        body+=f"""
+            <div id="tab_{x}" class="tab-pane container {_class}">\n
+                {content_dict[x]}\n
+            </div>\n
+        """
+    return  f"""
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs justify-content-center" >
+                    {head}
+                </ul>\n
+                
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {body}
+                </div>
+   """
