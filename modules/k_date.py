@@ -104,6 +104,14 @@ def site_time():
     ird=ir_date() #irdate
     t1,t2=ir_weekday(w_case=4)
     xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
+    xs1="style='background-color:#444;color:#fff'"
+    return f"""<div dir="lrt">
+                <a title='{t2}'><i {xs1}>{t1}</i></a> 
+                 
+                {ird["hh"]}:{ird["gg"]}
+                {ird["yy"]}/{ird["mm"]}/<b {xs1}>{ird["dd"]}</b> 
+                <div>
+                """
     return f"""
                 <a title='{t2}' {xcs}>{t1}</a>
                 <a title='{ird["hh"]}:{ird["gg"]}:{ird["hh"]}' {xcs}>{ird["hh"]}:{ird["gg"]}</a>
