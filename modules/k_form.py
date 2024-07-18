@@ -568,6 +568,7 @@ def template_parser(x_template,x_dic={}):
     abc-C
     '''
     #return x_template.format(task=task_inf,step=form['steps'],session=session,**x_dic)
+    import k_date
     if type(x_template)==str:
         try:
             xx=x_template.strip()
@@ -575,7 +576,7 @@ def template_parser(x_template,x_dic={}):
             x_dic1=x_dic.copy()
             from gluon import current
             session=current.session
-            x_dic1.update({'session':session,'_i_':session['username']})
+            x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
             x1= template.render(content=xx,context=x_dic1) 
             return x1.format(**x_dic1)  #remove 020926
         except Exception as err:
@@ -898,10 +899,11 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             if "uniq" in obj: 
                 uniq_where=obj["uniq"]
                 onact_txt= f''' onchange="ajax_chek_uniq('{db_name}','{tb_name}','{_name}','#{_name}','{uniq_where}');"'''#;event.preventDefault()
-            x_min=f"min={obj['min']} " if 'min' in obj else ""
-            x_max=f"max={obj['max']}" if 'max' in obj else ""
+            x_min=f" min={obj['min']} " if 'min' in obj else ""
+            x_max=f" max={obj['max']}" if 'max' in obj else ""
+            x_step=f" step={obj['step']}" if 'step' in obj else ""
             obj['input']=XML(f'''
-                <input type="number" {_n} {x_min} {x_max} value="{_value}" {onact_txt} required>''')
+                <input type="number" {_n}{x_min}{x_max}{x_step} value="{_value}" {onact_txt} required>''')
                 #onchange='num_key("{_name}",{obj["min"]},{obj["max"]});' 
             
             ##--
@@ -975,7 +977,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         if 'input' in need:
             import k_htm
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
-                ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple,add_empty_first=True )
+                ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
+                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first']
+                )
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
         obj['help']=''
@@ -994,13 +998,17 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         obj['help']=DIV(obj['format'],_dir='ltr')
         msg ,or_v,js_ff_chek="",'',''
     elif sc=='time_c':
+        onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         if 'input' in need :
-            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_c",_required=True,_dir="ltr")#_type="time"
+            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_c",_required=True,_dir="ltr",_onchange=onchange)#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     elif sc=='time_t':
+        onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
+        update="update" if "update" in obj['prop'] else ""
         if 'input' in need :
-            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_t",_required=True,_dir="ltr",_time_inf=obj['time_inf'],_maxtime=obj['time_inf']['maxTime'])#_type="time"
+            obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_t",
+                _required=True,_dir="ltr",_time_inf=obj['time_inf'],_maxtime=obj['time_inf']['maxTime'],_update=update)#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     elif sc=="auto":
