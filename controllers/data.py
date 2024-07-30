@@ -763,6 +763,7 @@ def index():
     "home":lnk+"""data/index""",
     "spks-file-index":lnk+"""file/index""",
     }
+    
     if session["admin"]:
         trs+=[TR(*[TH(f_l+x) for x in ['0','x','kx','sp','select']])]#[TR(TH(f_l+'0'),TH(f_l+'X'),TH(f_l+'KX'),TH(f_l+'SP'),TH('update'))]
         for arg in [['a_sub_p','a'],['paper','a'],['a_dspln','a'],['user','user'],['job','a']]:#,'a'),('eng','a'),('user','user')]:
@@ -784,8 +785,12 @@ def index():
         for arg in [['a_sub_p','a'],['paper','a'],['a_dspln','a'],['user','user']]:
             trs+=[TR(*[A(ff1[xtbl].format(ff[arg[0]]),_href=URL(xtbl,args=(arg)))   for xtbl in ['xtable','select']])]
         t1=DIV('-')
-        t2=''
+        t2="<hr>"
+        
     t2+=f"<br><a href={URL('user_inf')}>همکاران وارد شده به سیستم</a> "
+    t2+=f"<br><a href={URL('km','test_pivot')}>گزارش پایوت از لیست گزارش عملکرد همکاران</a> "
+    t2+=f"<br><a href={URL('km','test_mermaid')}>نمونه اجرای فایل با فرمت عروس دریایی mermaid</a> "
+    
     return dict(x=DIV(TABLE(*trs,_class="table"),t1,XML(t2)))
 def inf():
     import k_user
@@ -1086,8 +1091,13 @@ def rc():#run 1 command
                     x_new=x_obj['output_text']
                     import k_tools
                     rep=''
-                    if (len(request.args)>3 and request.args[3]=='do' and x_new and x_new!=x_old): #run_sql:
-                        rep=db1.update_data(tb_name,{x_obj['name']:x_new},{'id':xid})
+                    if x_new and x_new!=x_old:
+                        if 'error' in x_new :
+                            rep='err => not do'
+                        elif (len(request.args)>3 and request.args[3]=='do' ): #run_sql:
+                            rep=db1.update_data(tb_name,{x_obj['name']:x_new},{'id':xid})
+                        else:
+                            rep='=> to do'
                     tds+=[k_tools.var_compare(x_old,x_new)['msg'],rep]#output_text
             trs+=[tds]
         from k_table import K_TABLE
