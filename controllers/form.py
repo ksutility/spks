@@ -648,6 +648,9 @@ def list_0():
     for cat in x_data_cat:
         tbl[cat]=XML(K_TABLE.creat_htm ( trsx[cat],titels,table_class="1")) 
     tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
+
+    t0=f"<hr><a class='btn btn-primary' target='_blank' href='http://192.168.88.179:100/spks/km/aqc_report_daily_pivot/user_day'>گزارش عملکرد </a> "
+    tt+=[XML(t0)]
     return dict(htm=DIV(tt,_dir='rtl'))
 #@k_tools.x_cornometer
 def xtable():
@@ -773,12 +776,14 @@ def xtable():
             new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
         else:
             new_record_link='-'
-        htm_head=DIV(TABLE(TR(  TD(new_record_link,_width='20px')
+        htm_head=DIV(TABLE(TR( TD(new_record_link,_width='20px')
                             ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='30px')
                             ,TD(A("T",_title="Table",_class="btn btn-primary",_href=URL('data','xtable',args=args,vars=request.vars)),_width='30px')
                             ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
                             ,TD(A(f"{rows_num}",_title="تعداد کل بر اساس فیلتر جاری"),_width='30px')
-                            ,TD(DIV('...',_id='viewcell',_name='viewcell')))),_style='position:sticky;top:0px')
+                            ,TD(DIV('...',_id='viewcell',_name='viewcell'))
+                            ,TD(x_data_s['base']['title'],_width='10%')
+                    )),_style='position:sticky;top:0px')
         return dict(htm=DIV(XML(style1),XML(script1),c_filter.htm,htm_head,table,))
 #--------------------------------------
 def _sabege():
