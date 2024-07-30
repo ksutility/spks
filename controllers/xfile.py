@@ -26,11 +26,11 @@ htm_head=XML(f"""
 <style>
 body {
 	counter-reset: c_h1;
-    background-color: #ffe;
+    /* background-color: #ffe; */
     direction:rtl;
     font-family: BBadr;
     font-size: 20px;
-    padding:50px 50px 0 0px;
+    /* padding:50px 50px 0 0px; */
     
 }
 @media print {
@@ -47,33 +47,33 @@ h1 {
     margin:10px 0 0 0;
     font-family: BTitrBold,Tahoma, sans-serif;
     font-size: 24px;
-    padding:50px 10px 0px 0px;
+    padding:50px 20px 0px 0px;
 }
 h2:before {
 	content: counter(c_h1)"." counter(c_h2)") ";
 	counter-increment: c_h2;
 }
 h2 {
-    text-indent: 25px;
+    text-indent: 40px;
     background-color: #eef;
     counter-reset: c_h3;
     margin:2px;
     font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 22px;
+    font-size: 20px;
 }
 h3:before {
 	content: counter(c_h1)"." counter(c_h2)"." counter(c_h3)") ";
 	counter-increment: c_h3;
 }
 h3 {
-    text-indent: 50px;
+    text-indent: 60px;
     background-color: #eed;
     margin:2px;
     font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 20px;
+    font-size: 16px;
 }
 h4 {
-    text-indent: 60px;
+    text-indent: 80px;
     background-color: #ccc;
     margin:2px;
     font-family: BTitrBold,Tahoma, sans-serif;
@@ -90,7 +90,26 @@ table td, table th {
   border: 2px solid #ddd;
   padding: 8px;
 }
+.title1 {
+    background-color: #523e6b;
+    color: #edebc5; 
+    text-align: center;
+    font-size: 40px;
+    font-family: BTitrBold,Tahoma, sans-serif;
+    padding:100px;
+}
+.title2 {
 
+    color: #523e6b; 
+    text-align: center;
+    font-size: 20px;
+    font-family: BTitrBold,Tahoma, sans-serif;
+    padding:30px;
+}
+.menu {
+    font-size: 14px;
+    text-align: center;
+}
 table tr:nth-child(odd){background-color: hsl(166, 90%, 90%);}
 table tr:nth-child(even){background-color: hsl(166, 90%, 80%);}
 table thead tr td,
@@ -311,18 +330,10 @@ def read_xl():
     wb=kxl.wb(f_name)
     return (wb.sheetnames)
 def _read_csv(f_name):
-    enc_list={'utf8':',','utf-16':'\t'}
-    for enc in enc_list:
-        try:
-            with open(f_name,'r',encoding=enc) as csvfile:
-                data=[row.split(enc_list[enc]) for row in csvfile]
-            break    
-        except:   
-            pass
-    else:
-        return 'error in encoding file'
-    import k_err    
-    k_err.xxxprint(msg=['err','',''],args=data,launch=True)    
+    import k_file_x
+    data=k_file_x.read_csv(f_name,'list')
+    if len(data)>5 and 'error'==data[:5]:
+        return data #'error in encoding file'   
     #return TABLE([TR([TD(XML(x)) for x in row]) for row in data],_class='table2')#XML()
     x_head=TAG.thead([TH(XML(x)) for x in data[0]]) #THEAD([TH(XML(x)) for x in data[0]])
     return TAG.table(x_head,TBODY([TR([TD(XML(x)) for x in row]) for row in data[1:]]),_class='table2')#XML()
@@ -339,6 +350,58 @@ def read_csv2():
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
     return dict(x_table = _read_csv(f_name))
+def read_mermaid():
+    f_name,f_msg,file_inf=_x_file()
+    with open(f_name,'r',encoding='utf8') as file: 
+        lines = [line for line in file]
+    style='''
+    .center {
+        width:"100%";
+        margin: auto;
+        text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+    }
+    '''
+    """
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
+        <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
+        <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
+        <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
+        <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
+    """
+    htm1=f'''
+    <html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>marmid</title>
+        
+        <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
+
+        <style>
+        {style}
+        </style>
+    </head>
+    <body >
+        <div class="container1">
+            <div class="center">
+                <h1 class="center">
+                    {lines[0]}
+                </h1>
+                <hr>
+                <div>
+                    <pre class="mermaid">
+                        {''.join(lines[1:])}
+                    </pre>
+                </div>
+            </div
+        </div>
+    </body>
+    '''
+    return htm1    
+    pass
 def read(): #read all markup
     f_name,f_msg,file_inf=_x_file()
     ext=file_inf['ext'][1:]
@@ -549,10 +612,9 @@ def _read_markup(mm_case):
             #:return XML(DIV(html.replace('<','^').replace('\n','/n').replace('\t','/t'),_style='direction:ltr'))
         #return '<hr><div style="width:100%><div style="width:45%;float: left;">data'+tbl0(data)+'</div><div style="width:45%;float: left;>html_1'+tbl(html_1)+'</div></div>html_2'+tbl(html_2)+'<hr>html_2<br>'+r2(html_2)+'<hr>data<br>'+r2(data)
         return '<hr>data'+tbl0(data)+'<hr>html_1'+tbl(html_1)+'<hr>html_2'+tbl(html_2)+'<hr>html_2<br>'+r2(html_2)+'<hr>data<br>'+r2(data)
-    view_link=f"<a href={URL('edit_r',args=request.args,vars=request.vars)}>edit</a> | "
-    list_link=f"<a href={URL('file','f_list',args=request.args[:-1],vars=request.vars)}>list</a> | "
-    file_name=f"<a title={f_name}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
-    return htm_head+XML(view_link+list_link+file_name)+ html_2 + report(data,html_1,html_2)
+    list_link=f"<a title='سیستم مدیریت محتوا' href={URL('file','f_list',args=request.args[:-1],vars=request.vars)}>SPKS </a> | "
+    file_name=f"<a title={f_name} href={URL('edit_r',args=request.args,vars=request.vars)}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
+    return htm_head+DIV(XML(list_link+file_name),_class="menu")+ html_2 + report(data,html_1,html_2)
     #return "----"+ html_1
     #return dict(xml=XML(view_link+list_link+html_2)+ report(data,html_1,html_2)
     #return dict(htm_head=htm_head,xml=XML(html),htm1=rr(html))
