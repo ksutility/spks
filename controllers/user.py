@@ -138,7 +138,7 @@ def _toggle_ip_login_case():
     else:
         ip_b=request.client
         ip_i=ip_b.split(".")
-        if "192.168.80." in ip_b :
+        if "192.168.88." in ip_b :
             session['login_ip']=ip_i[3]
         else:
             return "امکان فعال سازی وجود ندارد"
@@ -161,11 +161,11 @@ def login_by_ip():
     ip_b=request.client
     ip_i=ip_b.split(".")
     #k_err.xreport_var([ip_b,k_user.a_users.items()])
-    if "192.168.80." in ip_b :
+    if "192.168.88." in ip_b :
         for user,user_inf in k_user.all_users.inf.items():
             if user_inf['login_ip']==ip_i[3]:
                 return user,user_inf #f"login_by_ip:ok =>{ip_i[3]} -- {user}"
-    return '','' #f"""login_by_ip: err => {ip_b} --- {ip_i[3]} --- {"192.168.80." in ip_b}"""
+    return '','' #f"""login_by_ip: err => {ip_b} --- {ip_i[3]} --- {"192.168.88." in ip_b}"""
         
 def login():
     
