@@ -309,5 +309,226 @@ def test_stdout_redirect():
 def test_kform_template_parser():
     import k_form
     return k_form.template_parser("""abc-{{=a[2].upper()}}""",{'a':'abc'})
-    abc-C
+def test_pivot():
+    file_path=r"C:\Users\XMART\Desktop\temp\test\x3.csv"
+    set1="""{
+            rows: ["name"], 
+            cols: ["prj"],
+            vals: ["time"],
+            aggregatorName: "Sum",
+            rendererName: "Bar Chart",
+            renderers: $.extend(
+                $.pivotUtilities.renderers, 
+              $.pivotUtilities.plotly_renderers
+            )
+            }"""
+    import k_file_x
+    data1="""a,b,c
+1,2,3
+4,5,6
+7,8,9"""
+    data1=k_file_x.read_csv(file_path)
+    htm1=f"""
+    <html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <title>pivot</title>
+            <script type="text/javascript" src="{URL('static','js/pivot/plotly-basic-latest.min.js')}"></script>
+            <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
+            <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
+            <script type="text/javascript" src="{URL('static','js/pivot/papaparse.min.js')}"></script>
+            <!-- PivotTable.js libs from ../dist -->
+            <link rel="stylesheet" type="text/css" href="{URL('static','js/pivot/pivot.css')}">
+            <script type="text/javascript" src="{URL('static','js/pivot/pivot.js')}"></script>
+            <script type="text/javascript" src="{URL('static','js/pivot/plotly_renderers.js')}"></script>
+            <style>
+                
+            </style>
+            <!-- optional: mobile support with jqueryui-touch-punch -->
+            <script type="text/javascript" src="{URL('static','js/pivot/jquery.ui.touch-punch.min.js')}"></script>
+
+            <!-- for examples only! script to show code to user 
+            <script type="text/javascript" src="{URL('static','js/pivot/show_code.js')}"></script>-->
+            <link rel="stylesheet" type="text/css" href="{URL('static','js/pivot/color-brewer.min.css')}">
+            <link rel="stylesheet" type="text/css" href="{URL('static','js/pivot/css')}">
+    </head>
+    <body style="">
+    """
+    """
+           <script type="text/javascript">
+    // This example loads the "Canadian Parliament 2012"
+    // dataset from a CSV instead of from JSON.
+
+    $(function(){
+		data1=[
+                {color: "blue", shape: "circle"},
+                {color: "red", shape: "triangle"}
+            ];
+
+		setting1={
+                rows: ["color"],
+                cols: ["shape"]
+            };
+        //$("#output").pivot(data1,setting1);
+		$("#output").pivotUI(
+			data1,setting1
+        );
+     });
+        
+    </script>
+    """
+    htm1+="""
+    <script type="text/javascript">
+        function ar2d_2_objar(ar){
+            //alert(ar.length);
+            const obj_ar = [];
+            for (let i = 1; i < ar.length; i++) {
+                const obj_i = {};
+                for (let j = 0; j < ar[i].length; j++) {
+                    
+                    obj_i[ar[0][j]]=ar[i][j];
+                }
+                //alert(JSON.stringify(obj_i));
+                obj_ar.push(obj_i)
+            }
+            return obj_ar
+        }
+        $(function(){
+            csvString=`%%%1`;
+            results = Papa.parse(csvString);
+            //alert(JSON.stringify(results.data));
+            obj_ar=ar2d_2_objar(results.data);
+            //alert(JSON.stringify(obj_ar));
+            
+            var derivers = $.pivotUtilities.derivers;
+            var renderers = $.extend($.pivotUtilities.renderers,
+                $.pivotUtilities.plotly_renderers);
+            $("#output").pivotUI(obj_ar,%%%2);
+		});
+    </script>
+    """ .replace("%%%1",data1).replace("%%%2",set1)
+    htm1+="""
+        <div id="output" style="margin: 30px;"><div>
+    </body></html>
+    """    
+    return htm1
+def test_mermaid():
+    style='''
+    .center {
+        width:"100%";
+        margin: auto;
+        text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+    }
+    '''
+    """
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
+        <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
+        <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
+        <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
+        <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
+    """
+    htm1=f'''
+    <html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>marmid</title>
+        
+        <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
+
+        <style>
+        {style}
+        </style>
+    </head>
+    <body >
+        <div class="container1">
+            <div class="center">
+                <h1 class="center">
+                    چارت سازمانی شرکت مشاور قدس
+                </h1>
+                <hr>
+                <div>
+                    <pre class="mermaid">
+                        graph TD
+                        A[مدیر عامل] --> B1[معاون طراحی]
+                        A --> B2[معاون اجرایی]
+                        A --> B3[معاون برنامه ریزی]
+                        B1 --> C[سرپرست معماری]
+                        B1 --> D[سرپرست شهرسازی]
+                    </pre>
+                </div>
+            </div
+        </div>
+    </body>
+    '''
+    return htm1
+def test_xl():
+    import k_file_x
+    tbl=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',# r'C:\temp\test1.xlsm',
+                    ws_name='daily-report',
+                    row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
+    #return (str(tbl))
+    set1="""{
+        rows: ["نام و نام خانوادگی"], 
+        cols: ["روز"],
+        vals: ["زمان"],
+        aggregatorName: "Sum",
+        rendererName: "Table"}"""
+    import json
+    tb2=json.dumps(tbl)
+    return (k_file_x.pivot_make(tb2,set1))  
+
+    
+def test_xl_old():
+    read_xl(wb_path,ws_name,row_st,row_en,col_st,col_en)
+    xl_path = r'C:\temp\test.xlsx'
+    import pylightxl as xl
+    
+    # pylightxl also supports pathlib as well
+    db = xl.readxl(xl_path)
+    #return (db.ws_names)
+    tbl=[]
+    for i in range(3):
+        row=[]
+        for j in range(7):
+            row+=[(db.ws(ws='a12').index(row=i+1, col=j+1))]
+        tbl+=[row]
+    return (str(tbl))
+    
+def aqc_report_daily_pivot():
+    try:
+        import k_file_x,k_tools
+        if k_tools.server_is_python():
+            tbl=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',
+                            ws_name='daily-report',
+                            row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
+            #return (str(tbl))
+            case=request.args[0]
+            if case=="user_day":
+                set1="""{
+                    rows: ["نام و نام خانوادگی"], 
+                    cols: ["روز"],
+                    vals: ["زمان"],
+                    aggregatorName: "Sum",
+                    rendererName: "Table"}"""
+            elif case=="prj":
+                set1="""{
+                    rows: ["پروژه"], 
+                    vals: ["زمان"],
+                    aggregatorName: "Sum",
+                    rendererName: "Heatmap"}"""
+            import json
+            tb2=json.dumps(tbl)
+            htm0= f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
+            htm0+=f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
+            return k_file_x.pivot_make_free(tb2,set1,htm0=htm0)
+            
+            return dict(table=XML(k_file_x.pivot_make_free(tb2,set1,htm0=htm0)))
+        else:
+            return ("port shoud be :100") 
+    except Exception as err:
+        return ("یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err))
+        
     
