@@ -290,7 +290,7 @@ def delete():
             return (_delete(args))
         else:
             ok_do=request.vars['ok_do']
-            if ok_do=='yes' :
+            if ok_do=='y' :
                 return (_delete(args))
             else:    
                 xp=os.path.join(xpath,*args)    
@@ -305,7 +305,7 @@ def delete():
                         </div>
                         <hr>
                         <div class="row">
-                            <div class="col-2">در صورت اطمینان عبارت yes را تایپ کنید</div>
+                            <div class="col-2">در صورت اطمینان عبارت y را تایپ کنید</div>
                             <div class="col-8">{ok_do_htm}</div>
                         </div>
                         <div class="well">{b_s}</div>
@@ -605,7 +605,8 @@ def f_list():#file_browser=file.index
         pass
 
     def link_view(x_file,link_txt,link_title='View'):
-        xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win'}
+        xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win','mermaid':'read_mermaid',
+            'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]
         if ext in xd:
             return A(link_txt,_href=URL('xfile',xd[ext],args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
@@ -872,7 +873,7 @@ def index():
     def link_delete(fname):
         # return A('Del',_href=URL(f='delete',args=['share',fname]),_target="x_frame") #if request.vars['del'] else ''
         return XML(j_box_txt.format(URL(f='delete',args=[*args,fname],vars=request.vars),'X','Delete file')) #A('Del',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=['share',fname])}",true)""") #_target="x_frame"
-    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3"}))
+    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}','file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3"}))
     '''samplemple : 
     link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{un}-{user_filename}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx"}))
     '''
