@@ -1007,8 +1007,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         update="update" if "update" in obj['prop'] else ""
         if 'input' in need :
+            _maxtime=obj['time_inf']['maxTime'] if ('time_inf' in obj and 'maxTime' in obj['time_inf']) else '24:00'
+            _time_inf=obj['time_inf'] if 'time_inf' in obj else ''
             obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_t",
-                _required=True,_dir="ltr",_time_inf=obj['time_inf'],_maxtime=obj['time_inf']['maxTime'],_update=update)#_type="time"
+                _required=True,_dir="ltr",_time_inf=_time_inf,_maxtime=_maxtime,_update=update)#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     elif sc=="auto":
