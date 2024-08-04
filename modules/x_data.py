@@ -726,7 +726,7 @@ x_data={
             'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201'
             },
             'tasks':{
-                'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
                 'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
                 'time_st':{'type':'time_c','title':'از ساعت','prop':['update'],'def_value':'7:00'},
                 'time_len':{'type':'time_t','title':'به مدت','time_inf':{'maxTime':"03:30"},'prop':['update'],'def_value':'0:30'},
@@ -760,10 +760,10 @@ x_data={
             'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203'
             },
             'tasks':{
-                'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'مامور'},
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
                 'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
                 'time_st':{'type':'time_c','title':'ساعت شروع ماموریت'},
-                'time_len':{'type':'time_t','title':'مدت ماموریت','time_inf':{'maxTime':"20:00"}},
+                'time_len':{'type':'time_t','title':'مدت ماموریت','time_inf':{'maxTime':"20:00"},'prop':['update'],'def_value':'0:30'},
                 'time_en':{'type':'auto','title':'تا ساعت','auto':'''{{import k_time}}{{=k_time.add(__objs__['time_st']['value'],__objs__['time_len']['value'])}}'''},
                 'frd_modir':{'type':'reference','width':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
                 'des_0':{'type':'text','len':150,'lang':'fa','title':'شرح ماموریت'},
