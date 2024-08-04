@@ -644,7 +644,8 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
         return msg
     else:
         if 'auth' in x_data_s['base']:
-            if not (session["admin"] or k_user.user_in_jobs(x_data_s['base']['auth'])):
+            if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
+                #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))
         if not ('all' in x_data_s['views']) :
             return DIV(H1("برای این فرم جدول تعریف نشده است"))
@@ -1067,7 +1068,7 @@ def rc():#run 1 command
         #sample /spks/data/rc/update_auto_filed/paper/a?select_cols=prj,man_crt
         # /spks/data/rc/update_auto_filed/off_morkhsi_saat/a/do-x?select_cols=time_en
         select_cols=request.vars['select_cols']
-        print(select_cols)
+        #print(select_cols)
         if select_cols:
             select_cols=select_cols.split(',')
         else: 
@@ -1088,7 +1089,7 @@ def rc():#run 1 command
                     #import k_err
                     #k_err.xreport_var([i_obj,x_dic,x_obj])
                     x_old=x_dic[fn]
-                    x_new=x_obj['output_text']
+                    x_new=x_obj['value']
                     import k_tools
                     rep=''
                     if x_new and x_new!=x_old:
