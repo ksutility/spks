@@ -295,15 +295,18 @@ def reset_password():
     if request:
         user_ab=request.vars.user_ab
         if user_ab:
-            import k_user
             tt=[user_ab]
-            tt+=[k_user.all_users.inf[user_ab]['fullname']]
-            xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
-            if xr['rowcount']>0:
-               tt+=["رمز با موفقیت ریست شد"]
+            if user_ab in k_user.all_users.inf:
+                import k_user
+                tt+=[k_user.all_users.inf[user_ab]['fullname']]
+                xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
+                if xr['rowcount']>0:
+                   tt+=["رمز با موفقیت ریست شد"]
+                else:
+                   tt+=["برنامه با مشکل مواجه شد لطفا به مسئول مربوطه اطلاع دهید"]
+                tt+=["<a href='reset_password' class='btn btn-primary'>new reset</a>"]
             else:
-               tt+=["برنامه با مشکل مواجه شد لطفا به مسئول مربوطه اطلاع دهید"]
-            tt+=["<a href='reset_password' class='btn btn-primary'>new reset</a>"]
+                tt+=["یوزر وارد شده در سیستم موجود نیست"]
             return dict(tt=XML('<br>'.join(x for x in tt)))
     import k_form
     from x_data import x_data_verify_task
