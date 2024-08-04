@@ -234,14 +234,14 @@ def xform():#view 1 row
             jobs_title=k_user.jobs_title(step['jobs'],x_data_s)
             form_case=int(request.vars['form_case'] or '2')
             if form_case==1:
-                return [DIV(DIV(hx['stp'],_class='col text-right'), DIV(jobs_title,_class='col text-warning',_dir='rtl'),_class='row text-light bg-dark' )]+hx['data']+[
+                return [DIV(DIV(hx['stp'],_class='col text-right'), DIV(jobs_title,_title=step['jobs'],_class='col text-warning',_dir='rtl'),_class='row text-light bg-dark' )]+hx['data']+[
                     DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
                     ]
                 #return DIV(DIV(hx['stp'],_class='col-2 text-right border-left'),DIV(htm_1,_class='col-10'),_class='row border-bottom')
             elif form_case==2:
                 htm_1=[DIV(x,_class='row') for x in hx['app']]
                 return DIV(
-                    DIV(DIV(hx['stp'],_class='row'),DIV(jobs_title,_class='row text-warning'),_class='col-2 text-right border-left text-light bg-dark'),
+                    DIV(DIV(hx['stp'],_class='row'),DIV(jobs_title,_title=step['jobs'],_class='row text-warning'),_class='col-2 text-right border-left text-light bg-dark'),
                     DIV(hx['data'],_class='col-8'),
                     DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
                     _class="row border-bottom "),
@@ -281,6 +281,7 @@ def xform():#view 1 row
             # breakpoint()
             hx['app-color']="bg-"+val_in_dic(x_color,form_sabt_data[f'step_{step["i"]}_ap'])
             hx['stp']=[str(step['i']+1) +' - '+ step['title']]
+            
 
             return DIV(chidman(hx,x_data_s,step),_class="container-fluid "+fsc_mode)#DIV(,_style="background-color:#555;")
         def show_step_cur(x_data_s,xid,form_sabt_data,step): #like=row_edit
@@ -315,7 +316,7 @@ def xform():#view 1 row
         #-- def show_form:start ----------------------------------------------
         def inf_g():
             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-            xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'---xid==-1 : '+str(xid=='-1')])
+            #xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'--- (xid==-1) : '+str(xid=='-1')])
             
             if xid=='-1':
                 form_sabt_data={x:'' for x in titles}
@@ -356,12 +357,15 @@ def xform():#view 1 row
                     htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'b')]
                 elif i == f_nxt_s:
                     
-                    if k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
+                    if k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
+                        #k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
                         #k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
                         htm_form+=[show_step_cur(x_data_s,xid,form_sabt_data,step)]
                     else :
-                        if step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
-                            #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):# show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+                        # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+                        if step_befor and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i-1):
+                            #step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
+                            #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):
                             htm_form+=[app_review()]
                         htm_form+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
                         #htm_form+=[DIV(DIV(_class='col-1'),DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')],_class='col-10'),DIV(_class='col-1'),_class='row')]
@@ -372,10 +376,14 @@ def xform():#view 1 row
                 step_befor=step_n
             # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
             # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
-            if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
+            if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=f_nxt_s-1)):
+                #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
+                # test = form(morakhsi_saat).rec(15 steps=comple) : user(mlk) =>can view (app_review but) ,other users(atl,ks,..) cannot view (app_review but)
                 htm_form+=[app_review()]
             # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
-            elif f_nxt_s < 0 and k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
+            elif (f_nxt_s < 0 and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
+                #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
+                # test = 
                 htm_form+=[app_review()]
             
         bx=x_data_s['base']
@@ -654,6 +662,8 @@ def list_0():
     return dict(htm=DIV(tt,_dir='rtl'))
 #@k_tools.x_cornometer
 def xtable():
+    if not session.username:
+        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
     cornometer=Cornometer("xtable")
     def xtable_show(tb_name,tasks,where,x_data_s):
         ''' func desc
@@ -761,7 +771,8 @@ def xtable():
     else:
         # check access /auth
         if 'auth' in x_data_s['base']:
-            if not (session["admin"] or k_user.user_in_jobs(x_data_s['base']['auth'])):
+            if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
+                #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return dict(htm=H1("شما اجازه دسترسی به این فرم را ندارید"))
                
         db1=DB1(db_path+db_name+'.db')
@@ -770,9 +781,11 @@ def xtable():
         filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
         
         table,nr,rows_num=xtable_show(tb_name,tasks,filter_data,x_data_s)
-        jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
+        
         #print(f'job={job}')
-        if session["admin"] or k_user.user_in_jobs(jobs):
+        if session["admin"] or k_user.user_in_jobs_can('creat',x_data_s,step_index=0):
+            #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
+            #k_user.user_in_jobs(jobs):
             new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
         else:
             new_record_link='-'
