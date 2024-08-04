@@ -540,7 +540,7 @@ def formname_to_formcode(form_name):
 #=================================================================================================================
 #====================================================== used =====================================================    
 #---------------------------------------------------------------------------------################################
-def template_parser(x_template,x_dic={}):
+def template_parser(x_template,x_dic={},rep=''):
     '''
     use in kswt:ok 020905
     rename:021126 - old name=format_parser
@@ -578,6 +578,7 @@ def template_parser(x_template,x_dic={}):
             session=current.session
             x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
             x1= template.render(content=xx,context=x_dic1) 
+            #xxxprint(msg=['inf',x1+"|"+str(rep),xx],vals=x_dic)
             return x1.format(**x_dic1)  #remove 020926
         except Exception as err:
             
@@ -801,7 +802,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     def obj_pars(i_obj,obj_type,force=False):
         if force or 'input' in need or obj_type in ['file']:
             #cm.tik('obj template_parser start')
-            obj={x:template_parser(i_obj[x],x_dic) for x in i_obj}#['file_name','ext','path','pre_folder']}
+            obj={x:template_parser(i_obj[x],x_dic,rep=f'{x}:{i_obj["name"]}') for x in i_obj}#['file_name','ext','path','pre_folder']}
             #xreport_var([i_obj,x_dic,obj,''],True)
             #cm.tik('obj template_parser end')
         else:
@@ -847,6 +848,43 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     obj['input']=_value  # if read im prop
     #xprint('output='+str(obj['output']))
     #cm.tik('step 3')
+    def x_auto():
+        ''' 
+            اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
+            this field info is show in ["auto"] item or in ["ref"] item
+        '''
+        obj["value"]=obj['output_text']=_value #au_txt
+        obj['output']=DIV(_value,_class="input_auto")
+        obj['help']="خود کار"
+        if 'input' in need :
+            if 'auto' in obj:
+                au_txt=obj['auto']
+            elif 'ref' in obj:
+                x_dt=reference_select(obj['ref'],form_data=x_dic)
+                #xxxprint(vals=obj['ref'])
+                #xxxprint(vals=x_dic)
+                #xxxprint(msg=['x_dt','',''],vals=x_dt)
+                au_txt=x_dt['__0__'] if x_dt else ''
+            _len=60 if len(au_txt)>60 else len(au_txt)+2
+            obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
+            
+            msg=""
+            jcode1=""
+            form=share.form
+            if "uniq" in obj : #"singel" 
+                xquery1=f"[{form['tb']}].[{_name}]='{au_txt}' and [{form['tb']}].[id]<> {session('form_index')}"
+                n= x_sql.sql_count(share.form['db'],share.form['tb'], xquery1)
+                if n>0 : 
+                    msg="خطا : اطلاعات این فیلد تکراری می باشد و قبلا در فرم دیگری ثبت شده است. لطفا از اطلاعات غیر تکراری در گذشته برای این فیلد استفاده نمایید." 
+                    jcode1="alert('" + msg + "');re=false;"
+                    obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
+            if _value!=au_txt:
+                obj["value"]=au_txt
+                msg1=_alert_not_match_value("AUTO Field (Computed) ",new_val=au_txt,old_val=_value)
+                obj['output_text']=obj['output']=XML(f'''
+                    <div >
+                    {au_txt}{msg1}
+                    ''')
     if sc=='text':
         def htm_correct(x):
             if x:
@@ -1013,38 +1051,17 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 _required=True,_dir="ltr",_time_inf=_time_inf,_maxtime=_maxtime,_update=update)#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
+    
+    
+        #xxxprint(msg=['auto',obj["value"],''],vals=obj)
     elif sc=="auto":
-        ''' 
-            اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
-            this field info is show in ["auto"] item or in ["ref"] item
-        '''
-        obj["value"]=obj['output_text']=_value #au_txt
-        obj['output']=DIV(_value,_class="input_auto")
-        obj['help']="خود کار"
-        if 'input' in need :
-            if 'auto' in obj:
-                au_txt=obj['auto']
-            elif 'ref' in obj:
-                x_dt=reference_select(obj['ref'],form_data=x_dic)
-                #xxxprint(vals=obj['ref'])
-                #xxxprint(vals=x_dic)
-                #xxxprint(msg=['x_dt','',''],vals=x_dt)
-                au_txt=x_dt['__0__'] if x_dt else ''
-            _len=60 if len(au_txt)>60 else len(au_txt)+2
-            obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
-            
-            msg=""
-            jcode1=""
-            form=share.form
-            if "uniq" in obj : #"singel" 
-                xquery1=f"[{form['tb']}].[{_name}]='{au_txt}' and [{form['tb']}].[id]<> {session('form_index')}"
-                n= x_sql.sql_count(share.form['db'],share.form['tb'], xquery1)
-                if n>0 : 
-                    msg="خطا : اطلاعات این فیلد تکراری می باشد و قبلا در فرم دیگری ثبت شده است. لطفا از اطلاعات غیر تکراری در گذشته برای این فیلد استفاده نمایید." 
-                    jcode1="alert('" + msg + "');re=false;"
-                    obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
-            if not _value:
-                obj["value"]=obj['output_text']=obj['output']=au_txt
+        x_auto()
+    elif sc=="auto-x":
+        obj2=obj.copy()
+        obj2['type']='auto'
+        if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
+        return obj_set(obj2,x_dic,x_data_s,xid, need,request)
+        #x_auto()    
     elif sc=="index":
         if 'input' in need:
             x_dt=reference_select(obj['ref'],form_data=x_dic)
@@ -1092,7 +1109,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             '''
             if old_file_full_name and new_file_name:
                 old_file_name=old_file_full_name.rpartition(".")[0]
-                if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}\n old name = {old_file_name}" class="bg-danger">error<h3>""" 
+                return _alert_not_match_value("File Name (Computed) ",new_file_name,old_file_name)
+                #if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}\n old name = {old_file_name}" class="bg-danger">error<h3>""" 
             return ''
         msg1=file_rename_manage(_value,obj['file_name'])#check fine is renamed ?
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
@@ -1330,5 +1348,9 @@ def get_x_data_s(db_name,tb_name):
     if not tb_name in x_data_s1:return False,'error : "{}" not in ( x_data["{}"] )'.format(tb_name,db_name)
     x_data_s=x_data_s1[tb_name]
     return x_data_s,'ok'
+def _alert_not_match_value(val_title,old_val,new_val):
+    if old_val !=new_val :
+        return f"""<h3 title="{val_title} is not match \n new = {new_val}\n old = {old_val}" class="bg-danger">error<h3>""" 
+    return ''
 
     
