@@ -439,7 +439,7 @@ def show_table():
     return 'error: argumwnt is needed'
 #----------------------------------------------------------------------  
 #@k_tools.x_cornometer
-def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
+def xtable():
     '''
     goal:
         show / manage a formated & costomize table
@@ -451,7 +451,8 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     '''
     #from k_sql import DB1
     #set_table()
-    def xtable_show(tb_name,tasks,where,x_data_s):
+    ref_case='one'
+    def xtable_show(rows,titles,tasks,x_data_s):
         ''' func desc
         goal:
         ------
@@ -459,12 +460,9 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             - link to edit each row for auth users
         input:
         ------
-            tb_name:str
-                name of table
+            
             tasks:dict
                 column/field selected {name:{props}}
-            where:
-                data filter = sql where
             x_data_s:dict
                 table data structur
                 کل ساختار اطلاعاتی مرتبط با جدول مورد نظر 
@@ -474,7 +472,7 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             open url:
                 /spks/data/xtable/paper/a
         '''
-        rows,titles,rows_num=db1.select(table=tb_name,where=where,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+        
         #if rows:rows.reverse()
         select_cols, all_cols,htm_table_filter=get_table_filter(tasks,x_data_s)
         new_titles={'n':{'width':'30px'},'id':{'width':'30px'}}
@@ -491,17 +489,18 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
             form_url=URL(args=(args[0],args[1],'edit',row[0])) if session["admin"] else ""
             #URL('xform',args=(args[0],args[1],idx))
             id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
-            tds=[TD(n),TD(id_l)]
+            tds=[n,id_l]
             
             tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s,request=request)#, all_cols,ref_i)
-            tds+=[TD(x) for x in tds_i]
+            tds+=[x for x in tds_i]
             #n=str(i+1)
             #n=A(n,_title='edit',_href=URL(args=(args[0],args[1],'edit',row[0]))) if session["admin"] else n
             # ؟ x_edit={'title-name':'id','args':[args[0],args[1],'edit']}
-            trs.append(TR(*tds))
-        from k_table import K_TABLE
-        table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
-        return K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type=""),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
+            trs+=[tds]
+        return trs,new_titles,len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')   
+        #from k_table import K_TABLE
+        #table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
+        #return K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type=""),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
     
     def row_view(tb_name,tasks,f_views,x_data_s,xid): 
         '''
@@ -608,7 +607,6 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
 
         """
         tasks_val_set(tasks,vals_dic,titles)
-        edit_xtable_show(tasks,xid,f_views)
         """
 
         #return "tasks="+str(tasks)+"<br>vals_dic="+str(vals_dic)+"<br>titles="+str(titles)
@@ -640,37 +638,73 @@ def show_xtable(x_data,ref_case='one'):#,tb_name,tasks):#'example2.db'
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
     x_data_s,db_name,tb_name,msg=get_init_data()#x_data)
+    out_dic={'script':'','table_filter':'','table_head':'','table':''}
+    from k_tools import X_DICT
+    x_dict=X_DICT(out_dic)
     if not x_data_s:
-        return msg
+        return x_dict.add({'table':msg}).out()
     else:
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
-                return DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))
+                return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))}).out()
         if not ('all' in x_data_s['views']) :
-            return DIV(H1("برای این فرم جدول تعریف نشده است"))
+            return x_dict.add({'table':DIV(H1("برای این فرم جدول تعریف نشده است"))}).out()
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
         tasks=x_data_s['tasks']
         f_views=x_data_s['views']['all'] 
         
         #db=DB1(db_name)
-        if len(args)>3 and args[2]=='view':
-            return DIV(XML(style1_x),row_view(tb_name,tasks,f_views,x_data_s,int(args[3])))
-        if len(args)>3 and args[2]=='edit':
-            return DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s,int(args[3])))
-        if len(args)>2 and args[2]=='insert':
-            return DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s))
+        if len(args)>2 and args[2] in ['view','edit','insert']:
+            if len(args)>3 and args[2]=='view':
+                table=DIV(XML(style1_x),row_view(tb_name,tasks,f_views,x_data_s,int(args[3])))
+            if len(args)>3 and args[2]=='edit':
+                table=DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s,int(args[3])))
+            if len(args)>2 and args[2]=='insert':
+                table=DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s))
+            return x_dict.add({'table':table}).out()
         else:
-            table,nr,htm_table_filter=xtable_show(tb_name,tasks,filter_data,x_data_s)
-            htm_head=DIV(TABLE(TR(  
-                                TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
-                                ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='40px')
-                                ,TD(A("F",_title="Table",_class="btn btn-primary",_href=URL('form','xtable',args=args,vars=request.vars)),_width='40px')
-                                ,TD(A(str(nr),_title="تعداد نمایش داده شده"),_width='40px')
-                                ,TD(DIV('...',_id='viewcell',_name='viewcell'))),_class="table0"))#,_style='position:sticky;top:0px')
-            #return DIV(XML(style1_x),XML(script1),htm_table_filter,htm_head,table,)
-            return DIV(XML(script1),htm_table_filter,htm_head,table,)
+            """
+            tb_name:str
+                name of table
+            where:
+                data filter = sql where
+            x_data_s:dict
+                table data structur
+                کل ساختار اطلاعاتی مرتبط با جدول مورد نظر 
+                base json inf that tasks is 1 part of it
+            """
+            
+            rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+            trs,new_titles,nr,htm_table_filter=xtable_show(rows,titles,tasks,x_data_s)
+            
+            from k_tools import C_URL
+            c_url=C_URL()
+            
+            if c_url.ext=='': #html
+                
+                
+                from k_table import K_TABLE
+                table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
+                table1=K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type="")
+                
+                htm_head=DIV(TABLE(TR(  
+                                    TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
+                                    ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='40px')
+                                    ,TD(A("F",_title="Table",_class="btn btn-primary",_href=URL('form','xtable',args=args,vars=request.vars)),_width='40px')
+                                    ,TD(A(str(nr),_title="تعداد نمایش داده شده"),_width='40px')
+                                    ,TD(DIV('...',_id='viewcell',_name='viewcell'))),_class="table0"))#,_style='position:sticky;top:0px')
+                #return DIV(XML(style1_x),XML(script1),htm_table_filter,htm_head,table,)
+                import k_date,k_icon
+                
+                btm_mnu= A(XML(k_icon.download(30)),_title="Download CSV",_class="btn btn-success",_href=URL('xtable.csv',args=args+[args[0]+"_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars))
+                return dict(script=XML(script1),table_filter=htm_table_filter,table_head=htm_head,table=table1,btm_mnu=btm_mnu)
+            elif c_url.ext=='csv':
+                tt="\ufeff" # BOM
+                return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
+                return dict(data=rows)
+                
 #----------------------------------------------------------------------------------------------------------    
 def show_kxtable(x_data):
     x_data_s,db_name,tb_name,msg=get_init_data()
@@ -777,8 +811,16 @@ def index():
         t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
         t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
         t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
-        t2+=f"<br><a href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>"
-        
+        t2+=f"""<br><div class="row">
+            <div class="col">
+                <a class='btn btn-primary' href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>
+            </div>
+            <div class="col">
+                <a class='btn btn-primary' href={URL('km','test_ipgrid')}>test_ipgrid</a>
+            </div>
+        </div>
+            """
+
      
     else:
         #redirect(URL('spks','file','index'))
@@ -798,6 +840,15 @@ def inf():
     msg,user_inf=k_user.how_is_connect('test')
     response.show_toolbar=True
     return dict(tt=XML(msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+ str(BEAUTIFY(request))))
+def infx():
+    import k_user
+    msg,user_inf=k_user.how_is_connect('test')
+    response.show_toolbar=True
+    url_f=request.url.split("/")[3]
+    x=url_f.partition["."][1]
+
+    return url_ext
+    return XML(msg+"<hr>"+str(BEAUTIFY(user_inf))+"<hr>"+ str(BEAUTIFY(request)))
 def user_inf():
     import k_user
     user_log=k_user.USER_LOG()
@@ -813,9 +864,6 @@ def set_tables():
 def table():
     return dict(table=show_table())
 
-def xtable():
-
-    return dict(table=show_xtable(x_data))#,'paper',tasks['paper']))
 def sptable():
     return dict(table=show_sptable(x_data,'prj'))
 def kxtable():
