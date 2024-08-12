@@ -656,8 +656,15 @@ def list_0():
     for cat in x_data_cat:
         tbl[cat]=XML(K_TABLE.creat_htm ( trsx[cat],titels,table_class="1")) 
     tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
-
-    t0=f"<hr><a class='btn btn-primary' target='_blank' href='http://192.168.88.179:100/spks/km/aqc_report_daily_pivot/user_day'>گزارش عملکرد </a> "
+    server_add=k_tools.server_python_add()
+    t0=f"""<hr><div class="row">
+        <div class="col">
+            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_pivot/user_day'>نمودار های جادویی از گزارش عملکرد همکاران طراحی </a>
+        </div>
+        <div class="col">
+            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_kytable'>گزارش مدیریتی هفته جاری از گزارش عملکرد همکاران طراحی </a> 
+        </div>
+    </div>"""
     tt+=[XML(t0)]
     return dict(htm=DIV(tt,_dir='rtl'))
 #@k_tools.x_cornometer
@@ -699,22 +706,22 @@ def xtable():
         #thead=THEAD(TR(TH('n',_width='30px'),TH('id',_width='30px'),*[TH(A(tasks[x]['title'],_title=f'{i} : {x}')) for i,x in enumerate(select_cols)]))
         app_dic1={'un':'کاربر','ap':'نتیجه','dt':'زمان'}
         #--table head
-        tds=[TH('n',_width='30px'),TH('id',_width='30px')]
+        cols=[{'name':'n','width':'30px'},{'name':'id','width':'30px'}]
         for st_n,step in x_data_s['steps'].items():
-            tds+=[TH(A(tasks[x]['title'],_title=x)) for x in step['tasks'].split(',') if x not in x_data_s['labels']]
+            cols+=[{'name':tasks[x]['title'],'title':x} for x in step['tasks'].split(',') if x not in x_data_s['labels']]
             if select_cols=='form_v_cols_full':
-                tds+=[TH(A("^"+str(step['i']+1)+"-"+y,_title=" مرحله "+f"step_{step['i']}_{x}")) for x,y in app_dic1.items()]
+                cols+=[{'name':"^"+str(step['i']+1)+"-"+y,'title':" مرحله "+f"step_{step['i']}_{x}",'class':'bg-info'} for x,y in app_dic1.items()]
             elif select_cols=='form_v_cols_1':
-                tds+=[TH(A("^"+str(step['i']+1),_title=" مرحله "+",".join([f"step_{step['i']}_{x}" for x in app_dic1])))]
-        tds+=[TH("S",_title='f_nxt_s',_width='30px'),TH("U",_title='f_nxt_u',_width='30px')]
-        thead=THEAD(TR(*tds))
+                cols+=[{'name':"^"+str(step['i']+1),'title':" مرحله "+",".join([f"step_{step['i']}_{x}" for x in app_dic1]),'class':'bg-info'}]
+        cols+=[{'name':"S",'title':'f_nxt_s','width':'30px'},{'name':"U",'title':'f_nxt_u','width':'30px'}]
+        #thead=THEAD(TR(*tds))
         #---------------        
         trs=[]
         
         ref_i={}
         #xxxprint(msg=['xdic','',''],reset=True)
         for i,row in enumerate(rows):
-            cornometer.print('a')
+            #cornometer.print('a')
             x_dic=dict(zip(titles,row))
             #xxxprint(msg=['xdic','',''],vals=x_dic,launch=True)
             ''' '''
@@ -724,28 +731,30 @@ def xtable():
             form_url=URL('xform',args=(args[0],args[1],idx))
             id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
             cls1='app_'+x_dic[f"f_nxt_u"] if x_dic[f"f_nxt_u"] else ''
-            tds=[TD(n,_class=cls1),TD(id_l)]
-            cornometer.print('b')
+            tds=[{'value':n,'class':cls1},{'value':id_l}]
+            #cornometer.print('b')
             for st_n,step in x_data_s['steps'].items():
                 cornometer2=Cornometer("c2","+ - ")
                 x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
                 tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)
-                tds+=[TD(x) for x in tds_i]
+                tds+=[{'value':x} for x in tds_i]
                 #tds+=[TD(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=row[0], need=['output'],request=request)['output']) for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]# fn=field name
-                cornometer2.print('a---b')
+                #cornometer2.print('a---b')
                 if select_cols=='form_v_cols_full':
-                    tds+=[TD(x_dic[f"step_{step['i']}_{x}"],_class='bg-info') for x in app_dic1]
+                    tds+=[{'value':x_dic[f"step_{step['i']}_{x}"]} for x in app_dic1]
                 elif select_cols=='form_v_cols_1':  
-                    tds+=[TD(str(x_dic[f"step_{step['i']}_ap"]),_title=",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1]),_class='bg-info')]
-                cornometer2.print('a---c')
+                    tds+=[{'value':str(x_dic[f"step_{step['i']}_ap"]),'title':",".join([str(x_dic[f"step_{step['i']}_{x}"]) for x in app_dic1])}]
+                #cornometer2.print('a---c')
             cornometer.print('c')
-            tds+=[TD(x_dic[f"f_nxt_s"],_class=cls1),TD(x_dic[f"f_nxt_u"],_class=cls1)]
+            tds+=[{'value':x_dic[f"f_nxt_s"],'class':cls1},{'value':x_dic[f"f_nxt_u"],'class':cls1}]
             ''' '''
             #tds=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)
             
-            trs.append(TR(*tds))
-        cc='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
-        return TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num #DIV(,_style='height:100%;overflow:auto;')
+            trs.append(tds)
+        #class_table='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
+        class_table=request.vars['table_class'] or '2' # 'table2'
+        return k_htm.table_x(cols,trs,class_table),len(rows),rows_num 
+        #TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num #DIV(,_style='height:100%;overflow:auto;')
     #----------------------------------------------------------------------------------------
     #tasks,f_views
     script1='''<script>
