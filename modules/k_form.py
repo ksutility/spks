@@ -840,7 +840,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     _n=f"name='{_name}' id='{_name}'" 
     _len=int(obj['len']) if 'len' in obj else 256
     _value=request.vars[_name] if request else ''
-    _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value',obj['def_value'])) if 'input' in need else  '')
+    _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  '')
     obj['value']=_value
     obj['help']=''
     obj['output']=_value 
@@ -1352,5 +1352,41 @@ def _alert_not_match_value(val_title,old_val,new_val):
     if old_val !=new_val :
         return f"""<h3 title="{val_title} is not match \n new = {new_val}\n old = {old_val}" class="bg-danger">error<h3>""" 
     return ''
-
+def input_validate(in_data,data_inf):
+    '''
+    goal :
+        check that 1 input data is valid according type
+    input:
+    ------
+        data_inf:dict
+            'type': text / num / ref
+    '''
+    sc=data_inf['type']
+    if sc=='text':
+        if type(in_data)==str:
+            return True
+        return False  
+    if sc=='num':
+        def is_str_int(txt):
+            try:
+                x=int(txt)
+                return True
+            except:
+                return False
+        def is_str_float(txt):
+            try:
+                x=float(txt)
+                return True
+            except:
+                return False        
+        if type(in_data) in [int,float]:
+            return True
+        elif is_str_float(in_data) or  is_str_int(in_data): 
+            return True
+        return False 
+    if sc=='ref':
+        if in_data in in_data['select']:
+            return True
+        else:
+            return False
     
