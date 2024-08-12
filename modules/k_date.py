@@ -12,14 +12,17 @@ def i_date():
         if d<1:d+=30
         dt = '{:0>2}'.format (d)
         return {'d':d,'m':m,'iso':mt + dt}
-def ir_date(xformat=''):
-    today=jdatetime.date.today().strftime('%Y-%m-%d')
-    yyyy,mm,dd=today.split('-')
+def ir_date(xformat='',add=0):
+    date_obj=jdatetime.date.today()+jdatetime.timedelta(days=add)
+    date_txt=(date_obj).strftime('%Y-%m-%d')
+    yyyy,mm,dd=date_txt.split('-')
     yy=yyyy[-2:]
     now=time.strftime("%H:%M:%S", time.localtime())
     hh,gg,ss=now.split(':')
+    w,ww,www=ir_weekday(in_time=date_obj,w_case=4)
     ll={'yyyy':yyyy,'yy':yy,'mm':mm,'dd':dd,
-        'hh':hh,'gg':gg,'ss':ss}
+        'hh':hh,'gg':gg,'ss':ss,
+        'w':str(w),'ww':ww,'www':www}
     if xformat:  
         for x in ll:
             xformat=xformat.replace(x,ll[x])
@@ -89,7 +92,7 @@ def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
             ['ش','1ش','2ش','3ش','4ش','5ش','ج'],
             ['شنبه','1 شنبه','2 شنبه','3 شنبه','4 شنبه ','5 شنبه ','جمعه']]
     if w_case==4:
-        return w_days[1][wd_f],w_days[2][wd_f] 
+        return w_days[0][wd_f],w_days[1][wd_f],w_days[2][wd_f] 
     elif w_case==3:
         t1,t2=w_days[1][wd_f],w_days[2][wd_f]  
         return f"<a title='{t2}' class='btn btn-light'>{t1}</a>"
@@ -102,7 +105,7 @@ def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
 def site_time():
     #=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}-
     ird=ir_date() #irdate
-    t1,t2=ir_weekday(w_case=4)
+    t0,t1,t2=ir_weekday(w_case=4)
     xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
     xs1="style='background-color:#444;color:#fff'"
     return f"""<div dir="lrt">
