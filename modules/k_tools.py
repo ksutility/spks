@@ -88,5 +88,19 @@ def server_python_add():
         return ip+":150"
     else:
         return ip+":100"
+class X_DICT():
+    def __init__(self,in_dic):
+        self.x_dic=in_dic.copy()
+    def add(self,in_dic):
+        self.x_dic.update(in_dic)
+    def out(self):
+        return self.x_dic
+class C_URL():
+    def __init__(self):
+        from gluon import current
+        url_f=current.request.url.split("/")[3]
+        uri=url_f.split(".")
+        self.ext=uri[1] if len(uri)>1 else ''
+        self.port=current.request.env.SERVER_PORT 
 
     
