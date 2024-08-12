@@ -97,6 +97,75 @@ def table_4_diclist_glon(i_diclist,base_cols,id_col):
         d1.append(dd)
         d1.append(BR())
     return DIV(tt,d1)
+def table_x(cols,rows,class_table=''):
+    '''
+    inputs:
+    ------
+        cols:list of dict / list
+            list of dict:
+                [
+                    {'name':'name_val','title':'title_val','width':'width_val','class':'class_val'} #col0
+                    {'name':'name_val','title':'title_val','width':'width_val','class':'class_val'} #col1
+                    ...
+                ]
+            list:
+                ['col0','col1','col2',...]
+        rows:list of list of dict / list of list
+            list of list of dict:
+                [
+                    [
+                        {'value':'x_val','title':'title_val','class':'class_val'} #row0_col0
+                        {'value':'x_val','title':'title_val','class':'class_val'} #row0_col1
+                        ,...
+                    ],
+                    [
+                        {'value':'x_val','title':'title_val','class':'class_val'} #row1_col0
+                        {'value':'x_val','title':'title_val','class':'class_val'} #row1_col1
+                        ,...
+                    ]
+                ...
+                ]
+            list of list:
+                [
+                    [row0_col0,row0_col1,row0_col2,...],
+                    [row1_col0,row1_col1,row1_col2,...],
+                    ...    
+                ]
+    '''
+    tds=[]
+    for col in cols:
+        if type(col)==dict:
+            tds+=[TH(col['name'],_title=col.get('title',''),_width=col.get('width',''))]
+        elif type(col)==str:
+            tds+=[TH(col)]
+        else:
+            print('type(cell)='+str(type(cell)))
+        
+    #tds=[TH(col['name'],_title=col.get('title',''),_width=col.get('width','')) for col in cols]
+    thead=THEAD(TR(*tds))
+    trs=[]
+    for row in rows:
+        tds=[]
+        for i,cell in enumerate(row):
+            
+            if type(cell)==dict:
+                _class_l=[cols[i]['class']] if 'class' in cols[i] else []
+                _class_l+=[cell['class']] if 'class' in cell else []
+                _class=",".join(_class_l)
+                tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''))]
+            elif type(cell) in [str,int,float]:
+                try:
+                    _class=cols[i]['class'] if 'class' in cols[i] else ''
+                except:  
+                    _class=''
+                tds+=[TD(cell,_class=_class)]
+            else:
+                print('type(cell)='+str(type(cell)))
+        trs.append(TR(*tds))
+    #import k_err    
+    #k_err.xreport_var([cols,rows,thead,trs])  
+    class_table='table'+class_table if class_table else 'table2'
+    return TABLE(thead,TBODY(*trs),_class=class_table,_dir="rtl")
  #---------------------------------------
 def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):
     '''
