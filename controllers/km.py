@@ -465,6 +465,26 @@ def test_mermaid():
     '''
     return htm1
 def test_ipgrid():
+    sh={'inf':{'cols_n':'9','rows_n':'20'},
+        'col_widths':'10,5,3,3,5,20,15,30,5',
+        'col_titels':['نام و نام خانوادگی',
+                      'سال','ماه','روز','روز هفته',
+                      'نام پروژه','موضوع','اقدامات','زمان']
+      }
+    import json
+    data=request.vars['data']
+    if data:
+        style=XML("""
+        <style>
+            th, td {
+              border-bottom: 1px solid #ddd;
+            }
+        </style>
+        """)
+        data=json.loads(data)
+        if 'table' in data:
+            #return style+TABLE(data['table'])
+            return _aqc_report_daily_updata(data['table'])
     style='''
     <style>
         body {
@@ -494,15 +514,85 @@ def test_ipgrid():
         }
     </style>
     '''
+    #$('#jqs').on('ip_CellInput', function (event, args) {
+    #alert(JSON.stringify(table));
+    if 'col_widths' in sh:
+        cw_ts=sh['col_widths'].split(',') #col_widths texts
+        cw_ns=[int(x) for x in cw_ts]
+        cw_sum=sum(cw_ns)
+        cw_p=[int(x*1200/cw_sum) for x in cw_ns]
+        col_widths="\n".join([f"$('#jqs').ip_ResizeColumn({{ columns: [{i}], size: {x} }});" for i,x in enumerate(cw_p)])
+    if 'col_titels' in sh:
+        col_titels="\n".join([f"$('#jqs_q2_columnSelectorCell_{i} div').text('{x}');" for i,x in enumerate(sh['col_titels'])])
+    clipboard1="""
+        $('#bt_clp').on('change', function () {
+            alert('change');
+            txt=$('#bt_clp').val();
+            var rows = txt.split('\\n');
+            alert (rows.length);
+            for (const x in rows) {
+                row=rows[x];
+                var cels = row.split('\\t');
+                for (const xc in cels) {
+                    alert(x+" , "+xc+" : "+cels[xc] + " => "+report(cels[xc]));
+                }
+            }
+       });
+    """
+    clipboard="""
+        $('#bt_clp').on('selectionchange', function () {
+            txt=$('#bt_clp').val();
+            if (txt=='') {return; };
+            var rows = txt.split('\\n');
+            for (const r in rows) {
+                row=rows[r];
+                var cels = row.split('\\t');
+                for (const c in cels) {
+                    $('#jqs').ip_CellInput({ valueRAW:cels[c], row: r, col: c })
+                    //alert(r+" , "+c+" : "+cels[c] + " => "+report(cels[c]));
+                }
+            }
+            $('#bt_clp').val('')
+       });
+    """
     script='''
     <script>
+        function report(txt){
+            var tt=''
+            for(let i = 0; i < txt.length; i++){
+                tt+= txt.charAt(i) + " : " + txt.charCodeAt(i) + " : " + txt.codePointAt(i)+" , " ;
+            }
+            return tt
+        }
         $( document ).ready(function() {
-            alert("b");
-            $('#jqs').ip_Grid({ rows: 50, cols: 12 });
+            //alert("b");
+            $('#jqs').ip_Grid({ rows: % rows_n %, cols: % cols_n %});
+            % col_titels %
+            $('#jqs').ip_ResizeRow({ rows: [-1], size: 50 }); 
+            % col_widths %
+            % clipboard %
+            $('#bt_send').on('click', function (event, args) {
+                //alert("aaa");
+                table=[]
+                $('#jqs_q4_table_tbody').children().each(function () {
+                    row=[]
+                    $(this).children().each(function () {
+                        row.push($(this).text()); // "this" is the current element in the loop
+                    });
+                    table.push(row);
+                });
+                data={table:table};
+                var dataString = JSON.stringify(data);
+                var dataStringBase64Safe = encodeURIComponent(dataString); //dataStringBase64
+                var url = '/spks/km/test_ipgrid?data=' + dataStringBase64Safe;
+                window.open(url,'popUpWindow','height=400,width=600,left=10,top=10,scrollbars=yes,menubar=no'); 
+                return false;
+            });
             
         });
     </script>
-    '''
+    '''.replace('% rows_n %',sh['inf']['rows_n']).replace('% cols_n %',sh['inf']['cols_n']).replace('% col_widths %',col_widths).replace('% col_titels %',col_titels)
+    script=script.replace('% clipboard %',clipboard)
     htm1=f'''
     <html><head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -512,16 +602,17 @@ def test_ipgrid():
         <script src="{URL('static','js/ipgrid/jquery_ui_min_1_13_2.js')}"></script>
         <script src="{URL('static','js/ipgrid/ip.grid.js')}"></script>
         <link href="{URL('static','js/ipgrid/ip.grid.css')}" rel="stylesheet" />
-        
         {script}
         {style}
         
     </head>
     <body >
-        <div class="gridContainer">
-            <div id="jqs">
-            </div
-        </div>
+           <div class="gridContainer" >
+                <div id="jqs">
+                </div
+            </div>
+        <button id="bt_send" type="button">send</button>
+        <textarea id="bt_clp" rows="1" cols="50"></textarea>
     </body>
     '''
     return htm1    
@@ -680,7 +771,30 @@ def aqc_report_daily_kytable():
             #return dict(t=TABLE(n_rows,_class="table table-border"))
     else:
         return ("port shoud be :100") 
-
+def _aqc_report_daily_updata(data):
+    import k_file
+    un_list=k_file.read('text',r"C:\temp\test\un_list.txt").split('\n')
+    prj_list=k_file.read('text',r"C:\temp\test\prj_list.txt").split('\n')
+    data_inf={'0':{'type':'select','list':un_list},
+            '1':{'type':'num'}, #sal
+            '2':{'type':'num'}, #mah
+            '3':{'type':'num'}, #ruz
+            '4':{'type':'num'}, #sal
+            }
+    return str(un_list) + str(prj_list)
+    def validate_data(data):
+        rep=''
+        data1=[]
+        for i,x in enumerate(data):
+            if not x[1]:break
+            rep+=str(i)+ ":" + str(x) + "<hr>"
+            data1.append(x)
+        return {'ok':True,'report':rep}
+    vldt=validate_data(data)
+    if vldt['ok']:
+        return vldt['report']
+    else:
+        return vldt['report']
 def test_kytable1():
     return '''
     
@@ -752,4 +866,51 @@ var kxtable_sum_col='{sum_colomn}';
 kxtable_make_table(cookiePage);
 </script>
     '''
+def test_muti_row_approve():
+    import k_form,k_htm
+    from x_data import x_data_verify_task
+    
+    data=[
+    ['a','a1',1],
+    ['b','b2',2],
+    ['c','c3',3],
+    ['a','a1',4],
+    ['b','b2',5],
+    ['c','c3',6],
+    ['a','a1',1],
+    ['b','b2',2],
+    ['c','c3',3],
+    ['a','a1',4],
+    ['b','b2',5],
+    ['c','c3',6],
+        ]
+    if request.vars:
+        rows_ch={}
+        for i in range(len(data)):
+            rows_ch[i] = True if (request.vars[f'row_{i}']) else False 
+        return str(rows_ch)    
+    data1=[]
+    for i,row in enumerate(data):
+        obj_inf={'type':'check'}
+        nn=f'row_{i}'
+        x_data_verify_task(f'row_{i}',obj_inf)
+        xh=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])['input']
+        xh=XML(f"""
+            <input name='{nn}' id='{nn}' type="hidden" value=0 >
+            <input style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' 
+                class='largercheckbox' type='checkbox' value='1' onchange="this.previousSibling.value=this.checked ?'1':'0' ">
+        """)
+        xh=XML(f"""
+            <div class="form-check-inline">
+                <input name='{nn}' id='{nn}' value=1 type="checkbox" class='largercheckbox'
+                style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' >
+            </div>
+        """)
+        #print (str(xh))
+        row1=[xh]+row
+        data1.append(row1)
+    tbl=k_htm.table_x(['c','x','y','z'],data1)
+    bt_a=INPUT(_type='submit',_style='width:100%,background-color:#ff00ff' )
+    htm1=XML(f"""<form>{tbl}{bt_a}</form>""")
+    return dict(t=htm1)
 
