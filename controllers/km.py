@@ -464,6 +464,112 @@ def test_mermaid():
     </body>
     '''
     return htm1
+def test_ipgrid():
+    style='''
+    <style>
+        body {
+            font-family: Arial;
+            color: white;
+            background-color: #3d3d3d;
+            margin: 0;
+            padding: 10px;
+            position: relative;
+        }
+
+        a {
+            color: #46b3ff;
+            text-decoration: dotted;
+        }
+
+        .gridContainer {
+
+            position: relative;
+            width: 100%;
+            height: 700px;
+        }
+        #jqs {
+
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    '''
+    script='''
+    <script>
+        $( document ).ready(function() {
+            alert("b");
+            $('#jqs').ip_Grid({ rows: 50, cols: 12 });
+            
+        });
+    </script>
+    '''
+    htm1=f'''
+    <html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>ipgrid</title>
+        
+        <script src="{URL('static','js/ipgrid/jquery_min_2_1_3.js')}"></script>
+        <script src="{URL('static','js/ipgrid/jquery_ui_min_1_13_2.js')}"></script>
+        <script src="{URL('static','js/ipgrid/ip.grid.js')}"></script>
+        <link href="{URL('static','js/ipgrid/ip.grid.css')}" rel="stylesheet" />
+        
+        {script}
+        {style}
+        
+    </head>
+    <body >
+        <div class="gridContainer">
+            <div id="jqs">
+            </div
+        </div>
+    </body>
+    '''
+    return htm1    
+def test_kytable():
+    import k_file_x
+    titles=['id','x','y','z','a']
+    rows=[
+        ['1','5','6','55','45'],
+        ['2','8','10','55','45'],
+        ]
+    
+    widths=['3','5','6','5','6']        
+    return k_file_x.kytable_make(rows,titles)#,widths)
+    htm1=f'''
+<!DOCTYPE html> 
+    <html lang="fa">
+    <style type="text/css" id="dark-mode-custom-style"></style>
+    <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>   kx table </title>
+			<meta http-equiv="Cache-control" content="no-cache">
+			<!-- kxtable -->
+				<script src="{URL('static','kxtable/jquery-1.8.2.min.js')}" type="text/javascript"></script>
+				
+				<link rel="stylesheet" href="{URL('static','kxtable/jquery-ui.css')}">
+				<script src="{URL('static','kxtable/jquery-ui.js')}"></script>
+				
+				<link rel="stylesheet" href="{URL('static','kxtable/kxtable.css')}">
+				<script src="{URL('static','kxtable/kxtable-21.js')}"></script>
+				
+				<link rel="stylesheet" href="{URL('static','kxtable/jquery.contextMenu.css')}" type="text/css">
+				<script src="{URL('static','kxtable/jquery.contextMenu.js')}" type="text/javascript"></script>
+			<!-- /kxtable -->	
+				
+
+    </head>
+   <body bgcolor="#888888">
+   <div id='output' style='width:100%' >
+    ...
+    </div>
+    '''
+    import kytable
+    ttls2=['id','x','y','z','a']
+    wids2=['3','5','6','5','6']
+    rows2=[
+        ['1','5','6','55','45'],
+        ['2','8','10','55','45'],
+        ]
+    return XML(htm1+kytable.kxtable_prepar(rows2,ttls2,wids2,""))
 def test_xl():
     import k_file_x
     tbl=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',# r'C:\temp\test1.xlsm',
@@ -478,7 +584,7 @@ def test_xl():
         rendererName: "Table"}"""
     import json
     tb2=json.dumps(tbl)
-    return (k_file_x.pivot_make(tb2,set1))  
+    return (k_file_x.pivot_make_free(tb2,set1))  
 
     
 def test_xl_old():
@@ -530,5 +636,120 @@ def aqc_report_daily_pivot():
             return ("port shoud be :100") 
     except Exception as err:
         return ("یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err))
-        
+
+def aqc_report_daily_kytable():
+
+    case="0" #request.args[0]
+    import k_file_x,k_tools,k_date
+    if k_tools.server_is_python():
+        rows=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',
+                        ws_name='daily-report',
+                        row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
+        t=rows[0]
+        cols=[  {'name':'id','width':'20px'},
+                {'name':t[0],'width':'100px'},
+                {'name':t[1],'width':'20px'},
+                {'name':t[2],'width':'10px'},
+                {'name':t[3],'width':'10px'},
+                {'name':t[4],'width':'20px'},
+                {'name':t[5],'width':'150px'},
+                {'name':t[6],'width':'150px'},
+                {'name':t[7],'width':'250px'},
+                {'name':t[8],'width':'20px'}
+                ]
+        tm={}  
+        n_rows={}        
+        for d in range(7):
+            tm[d]=k_date.ir_date(add=-d)    
+            n_rows[d]=[]         
+        #return (str(tbl))
+        for i,row in enumerate(rows[1:]):
+            for d in range(7):
+                if (row[1]==int(tm[d]['yyyy']) and row[2]==int(tm[d]['mm']) and row[3]==int(tm[d]['dd'])):
+                    n_rows[d]+=[[i]+row]
+                    break
+                #n_rows=[[i]+row for i,row in enumerate(rows[1:]) if (row[1]==int(tm['yyyy']) and row[2]==int(tm['mm']) and row[3]==int(tm['dd']))]
+        dv=[]
+        for d in range(7):
+            dv+=[H2(f"{tm[d]['yyyy']}/{tm[d]['mm']}/{tm[d]['dd']} - {tm[d]['www']}",_class="text-center"),
+            k_htm.table_x(cols,n_rows[d]),HR()]
+        if case=="1":
+            return k_file_x.kytable_make(rows=n_rows,titles=['id']+rows[0],widths=['3,3,20,5,2,2,7,10,10,10,4'],sum_colomn="زمان")
+        else:
+            return dict(div=DIV(dv))
+            #return dict(t=TABLE(n_rows,_class="table table-border"))
+    else:
+        return ("port shoud be :100") 
+
+def test_kytable1():
+    return '''
     
+<!DOCTYPE html> 
+    <html lang="fa">
+    <style type="text/css" id="dark-mode-custom-style"></style>
+    <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>   kx table </title>
+			<meta http-equiv="Cache-control" content="no-cache">
+			<!-- kxtable -->
+				<script src="/spks/static/kxtable/jquery-1.8.2.min.js" type="text/javascript"></script>
+				
+				<link rel="stylesheet" href="/spks/static/kxtable/jquery-ui.css">
+				<script src="/spks/static/kxtable/jquery-ui.js"></script>
+				
+				<link rel="stylesheet" href="/spks/static/kxtable/kxtable.css">
+				<script src="/spks/static/kxtable/kxtable-21.js"></script>
+				
+				<link rel="stylesheet" href="/spks/static/kxtable/jquery.contextMenu.css" type="text/css">
+				<script src="/spks/static/kxtable/jquery.contextMenu.js" type="text/javascript"></script>
+			<!-- /kxtable -->	
+				
+
+    </head>
+   <body bgcolor="#888888">
+   <div id='output' style='width:100%' >
+    ...
+    </div>
+    <script>
+
+var kxtable_data =[
+{
+"id" :"1008", 
+"نام و نام خانوادگی" :"آیدا صباغیان طوسی", 
+"سال" :"1403", 
+"ماه" :"5", 
+"روز" :"10", 
+"روز هفته" :"4 شنبه", 
+"پروژه" :"امور روزانه و ستادی", 
+"موضوع" :"", 
+"اقدامات" :"",},
+{
+"id" :"1009", 
+"نام و نام خانوادگی" :"آیدا صباغیان طوسی", 
+"سال" :"1403", 
+"ماه" :"5", 
+"روز" :"11", 
+"روز هفته" :"5 شنبه", 
+"پروژه" :"امور روزانه و ستادی", 
+"موضوع" :"توضیح و هم اندیشی در خصوص نواقص", 
+"اقدامات" :"هم اندیشی در خصوص نواقص زمانبر در گروه ", 
+"زمان" :"1",},
+{
+"id" :"1010", 
+"نام و نام خانوادگی" :"آیدا صباغیان طوسی", 
+"سال" :"1403", 
+"ماه" :"5", 
+"روز" :"11", 
+"روز هفته" :"5 شنبه", 
+"پروژه" :"ارتقا توانمندی ها و جایگاه شرکت", 
+"موضوع" :"تحقیق و توسعه ", 
+"اقدامات" :"پیگیری از دکتر بهروزفر - پیرو نامه مهندس سعادتی ",}];
+
+var kxtable_data_cols =["id","نام و نام خانوادگی","سال","ماه","روز","روز هفته","پروژه","موضوع","اقدامات","زمان"];
+
+var kxtable_data_width =["1","1","1","1","1","1","1","1","1","1"];
+
+var kxtable_sum_col='{sum_colomn}';
+kxtable_make_table(cookiePage);
+</script>
+    '''
+
