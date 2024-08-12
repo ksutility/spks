@@ -31,7 +31,7 @@ def kxtable_prepar (rows,titls,wids,sum_colomn):
     x+=[json_object_2_array(json_obj_txt),
         vb_2_json_array("kxtable_data_cols",titls),
         vb_2_json_array("kxtable_data_width",wids),
-        "var kxtable_sum_col='{sum_colomn}';",
+        f"var kxtable_sum_col='{sum_colomn}';",
         "kxtable_make_table(cookiePage);",
         '</script>']
     #print('-'*50+str(x))
