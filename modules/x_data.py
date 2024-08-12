@@ -154,7 +154,29 @@ x_data_cat={
     '9':'موارد متفرقه',
     }
 x_data={
+    'a_cur_subject':{
+        'a':{
+            'base':{'mode':'form','title':'موضوعات و پروژه های جاری','code':'100'},
+            'tasks':{
+                'cp_code':{'type':'text','title':'کد موضوع','len':'4','uniq':''},
+                'cp_name':{'type':'text','title':'نام موضوع','len':'140','lang':'fa'},
+                'cp_date':{'type':'fdate','title':'تاریخ ثبت'},
+            },
+            'steps':{
+                'pre':{'tasks':'cp_code,cp_name,cp_date','jobs':'dcc_prj','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+            },
+            'cols_filter':
+                {'':'همه',
+                'code':'شماره',
+                'code,name':'شماره و موضوع',
+                },
+            'data_filter':{'':'همه',}
+        }
+    },
     
+    #-------------------------------------------------------------------- prj
     'a_prj':{
         'a':{
             'base':{'mode':'form','title':'کد پروژه','code':'101'},
@@ -198,6 +220,7 @@ x_data={
                 'x_act_todo != ""':'نیاز به اقدام',
                 'act_pey != ""':'پی گیری',
                 'lno like "%xxxx%"':'جستجوی نامه'},
+            
         }
     },
     
@@ -743,7 +766,7 @@ x_data={
                 's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_jnshin','view2':'des_modir'}
+                'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_off','view2':'des_modir'}
             },
             'labels':{
                 'lable_1':'حداکثرمیزان مرخصی ساعتی مجاز 3:30 می باشد',
