@@ -98,6 +98,7 @@ def table_4_diclist_glon(i_diclist,base_cols,id_col):
         d1.append(BR())
     return DIV(tt,d1)
 def table_x(cols,rows,class_table=''):
+    import gluon
     '''
     inputs:
     ------
@@ -139,7 +140,7 @@ def table_x(cols,rows,class_table=''):
         elif type(col)==str:
             tds+=[TH(col)]
         else:
-            print('type(cell)='+str(type(cell)))
+            print('k_form.table_x =err=> type(cell)='+str(type(cell)))
         
     #tds=[TH(col['name'],_title=col.get('title',''),_width=col.get('width','')) for col in cols]
     thead=THEAD(TR(*tds))
@@ -153,7 +154,7 @@ def table_x(cols,rows,class_table=''):
                 _class_l+=[cell['class']] if 'class' in cell else []
                 _class=",".join(_class_l)
                 tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''))]
-            elif type(cell) in [str,int,float]:
+            elif type(cell) in [str,int,float,gluon.html.XML]:
                 try:
                     _class=cols[i]['class'] if 'class' in cols[i] else ''
                 except:  
