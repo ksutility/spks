@@ -638,18 +638,18 @@ def xtable():
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
     x_data_s,db_name,tb_name,msg=get_init_data()#x_data)
-    out_dic={'script':'','table_filter':'','table_head':'','table':''}
+    out_dic={'script':'','table_filter':'','table_head':'','table':'','btm_mnu':''}
     from k_tools import X_DICT
     x_dict=X_DICT(out_dic)
     if not x_data_s:
-        return x_dict.add({'table':msg}).out()
+        return x_dict.add({'table':msg})
     else:
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
-                return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))}).out()
+                return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))})
         if not ('all' in x_data_s['views']) :
-            return x_dict.add({'table':DIV(H1("برای این فرم جدول تعریف نشده است"))}).out()
+            return x_dict.add({'table':DIV(H1("برای این فرم جدول تعریف نشده است"))})
         db1=DB1(db_path+db_name+'.db')
         #- print(db_name)
         tasks=x_data_s['tasks']
@@ -663,7 +663,7 @@ def xtable():
                 table=DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s,int(args[3])))
             if len(args)>2 and args[2]=='insert':
                 table=DIV(XML(style1_x),row_edit(tb_name,tasks,f_views,x_data_s))
-            return x_dict.add({'table':table}).out()
+            return x_dict.add({'table':table})
         else:
             """
             tb_name:str
