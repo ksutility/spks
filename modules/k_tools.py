@@ -93,7 +93,6 @@ class X_DICT():
         self.x_dic=in_dic.copy()
     def add(self,in_dic):
         self.x_dic.update(in_dic)
-    def out(self):
         return self.x_dic
 class C_URL():
     def __init__(self):

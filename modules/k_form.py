@@ -1385,7 +1385,7 @@ def input_validate(in_data,data_inf):
             return True
         return False 
     if sc=='ref':
-        if in_data in in_data['select']:
+        if in_data in data_inf['select']:
             return True
         else:
             return False
