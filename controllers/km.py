@@ -484,7 +484,7 @@ def test_ipgrid():
         data=json.loads(data)
         if 'table' in data:
             #return style+TABLE(data['table'])
-            return _aqc_report_daily_updata(data['table'])
+            return _aqc_report_daily_updata(data['table'],['']+sh['col_titels'])
     style='''
     <style>
         body {
@@ -663,7 +663,9 @@ def test_kytable():
     return XML(htm1+kytable.kxtable_prepar(rows2,ttls2,wids2,""))
 def test_xl():
     import k_file_x
-    tbl=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',# r'C:\temp\test1.xlsm',
+    #path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
+    path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
+    tbl=k_file_x.read_xl(wb_path =path1,
                     ws_name='daily-report',
                     row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
     #return (str(tbl))
@@ -693,108 +695,158 @@ def test_xl_old():
             row+=[(db.ws(ws='a12').index(row=i+1, col=j+1))]
         tbl+=[row]
     return (str(tbl))
-    
-def aqc_report_daily_pivot():
+def _aqc_report_daily_read(): 
     try:
         import k_file_x,k_tools
         if k_tools.server_is_python():
-            tbl=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',
+            if k_tools.server_is_test():
+                path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
+            else:
+                path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
+            data=k_file_x.read_xl(wb_path =path1,
                             ws_name='daily-report',
                             row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
-            #return (str(tbl))
-            case=request.args[0]
-            if case=="user_day":
-                set1="""{
-                    rows: ["نام و نام خانوادگی"], 
-                    cols: ["روز"],
-                    vals: ["زمان"],
-                    aggregatorName: "Sum",
-                    rendererName: "Table"}"""
-            elif case=="prj":
-                set1="""{
-                    rows: ["پروژه"], 
-                    vals: ["زمان"],
-                    aggregatorName: "Sum",
-                    rendererName: "Heatmap"}"""
-            import json
-            tb2=json.dumps(tbl)
-            htm0= f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
-            htm0+=f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
-            return k_file_x.pivot_make_free(tb2,set1,htm0=htm0)
-            
-            return dict(table=XML(k_file_x.pivot_make_free(tb2,set1,htm0=htm0)))
+            return {'ok':True,'data':data}
         else:
-            return ("port shoud be :100") 
+            return {'ok':False,'msg':"port shoud be :100"}   
     except Exception as err:
-        return ("یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err))
+        return {'ok':False,'msg':"یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err)}
+def aqc_report_daily_pivot():
+    inp=_aqc_report_daily_read()
+    if not inp['ok']:return inp['msg']
+    data=inp['data']
+    
+    import k_file_x
+    #return (str(data))
+    case=request.args[0]
+    if case=="user_day":
+        set1="""{
+            rows: ["نام و نام خانوادگی"], 
+            cols: ["روز"],
+            vals: ["زمان"],
+            aggregatorName: "Sum",
+            rendererName: "Table"}"""
+    elif case=="prj":
+        set1="""{
+            rows: ["پروژه"], 
+            vals: ["زمان"],
+            aggregatorName: "Sum",
+            rendererName: "Heatmap"}"""
+    import json
+    tb2=json.dumps(data)
+    htm0= f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
+    htm0+=f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
+    return k_file_x.pivot_make_free(tb2,set1,htm0=htm0)
+    
+    return dict(table=XML(k_file_x.pivot_make_free(tb2,set1,htm0=htm0)))
+
 
 def aqc_report_daily_kytable():
-
+    inp=_aqc_report_daily_read()
+    if not inp['ok']:return inp['msg']
+    rows=inp['data']
+    
     case="0" #request.args[0]
-    import k_file_x,k_tools,k_date
-    if k_tools.server_is_python():
-        rows=k_file_x.read_xl(wb_path =r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm',
-                        ws_name='daily-report',
-                        row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
-        t=rows[0]
-        cols=[  {'name':'id','width':'20px'},
-                {'name':t[0],'width':'100px'},
-                {'name':t[1],'width':'20px'},
-                {'name':t[2],'width':'10px'},
-                {'name':t[3],'width':'10px'},
-                {'name':t[4],'width':'20px'},
-                {'name':t[5],'width':'150px'},
-                {'name':t[6],'width':'150px'},
-                {'name':t[7],'width':'250px'},
-                {'name':t[8],'width':'20px'}
-                ]
-        tm={}  
-        n_rows={}        
+    import k_file_x,k_date
+
+    t=rows[0]
+    cols=[  {'name':'id','width':'20px'},
+            {'name':t[0],'width':'100px'},
+            {'name':t[1],'width':'20px'},
+            {'name':t[2],'width':'10px'},
+            {'name':t[3],'width':'10px'},
+            {'name':t[4],'width':'20px'},
+            {'name':t[5],'width':'150px'},
+            {'name':t[6],'width':'150px'},
+            {'name':t[7],'width':'250px'},
+            {'name':t[8],'width':'20px'}
+            ]
+    tm={}  
+    n_rows={}        
+    for d in range(7):
+        tm[d]=k_date.ir_date(add=-d)    
+        n_rows[d]=[]         
+    #return (str(tbl))
+    for i,row in enumerate(rows[1:]):
         for d in range(7):
-            tm[d]=k_date.ir_date(add=-d)    
-            n_rows[d]=[]         
-        #return (str(tbl))
-        for i,row in enumerate(rows[1:]):
-            for d in range(7):
-                if (row[1]==int(tm[d]['yyyy']) and row[2]==int(tm[d]['mm']) and row[3]==int(tm[d]['dd'])):
-                    n_rows[d]+=[[i]+row]
-                    break
-                #n_rows=[[i]+row for i,row in enumerate(rows[1:]) if (row[1]==int(tm['yyyy']) and row[2]==int(tm['mm']) and row[3]==int(tm['dd']))]
-        dv=[]
-        for d in range(7):
-            dv+=[H2(f"{tm[d]['yyyy']}/{tm[d]['mm']}/{tm[d]['dd']} - {tm[d]['www']}",_class="text-center"),
-            k_htm.table_x(cols,n_rows[d]),HR()]
-        if case=="1":
-            return k_file_x.kytable_make(rows=n_rows,titles=['id']+rows[0],widths=['3,3,20,5,2,2,7,10,10,10,4'],sum_colomn="زمان")
-        else:
-            return dict(div=DIV(dv))
-            #return dict(t=TABLE(n_rows,_class="table table-border"))
+            if (row[1]==int(tm[d]['yyyy']) and row[2]==int(tm[d]['mm']) and row[3]==int(tm[d]['dd'])):
+                n_rows[d]+=[[i]+row]
+                break
+            #n_rows=[[i]+row for i,row in enumerate(rows[1:]) if (row[1]==int(tm['yyyy']) and row[2]==int(tm['mm']) and row[3]==int(tm['dd']))]
+    dv=[]
+    for d in range(7):
+        dv+=[H2(f"{tm[d]['yyyy']}/{tm[d]['mm']}/{tm[d]['dd']} - {tm[d]['www']}",_class="text-center"),
+        k_htm.table_x(cols,n_rows[d]),HR()]
+    if case=="1":
+        return k_file_x.kytable_make(rows=n_rows,titles=['id']+rows[0],widths=['3,3,20,5,2,2,7,10,10,10,4'],sum_colomn="زمان")
     else:
-        return ("port shoud be :100") 
-def _aqc_report_daily_updata(data):
+        return dict(div=DIV(dv))
+        #return dict(t=TABLE(n_rows,_class="table table-border"))
+        
+def _aqc_report_daily_updata(new_data,col_titels):
+    inp=_aqc_report_daily_read()
+    if not inp['ok']:return inp['msg']
+    file_data=inp['data']
+    return XML("<hr>".join([str(x) for x in new_data]))
     import k_file
     un_list=k_file.read('text',r"C:\temp\test\un_list.txt").split('\n')
     prj_list=k_file.read('text',r"C:\temp\test\prj_list.txt").split('\n')
-    data_inf={'0':{'type':'select','list':un_list},
-            '1':{'type':'num'}, #sal
-            '2':{'type':'num'}, #mah
-            '3':{'type':'num'}, #ruz
-            '4':{'type':'num'}, #sal
+    data_inf={'1':{'type':'ref','select':un_list},
+            '2':{'type':'num'}, #sal
+            '3':{'type':'num'}, #mah
+            '4':{'type':'num'}, #ruz
+            '5':{'type':'text'}, #wd
+            '6':{'type':'ref','select':prj_list}, #prj
+            '7':{'type':'text'}, #subj
+            '8':{'type':'text'}, #act
+            '9':{'type':'num'}, #time
+            '0':{'type':'text'},
             }
-    return str(un_list) + str(prj_list)
+    #return str(un_list) + str(prj_list)
     def validate_data(data):
+        import k_form,k_htm
+        rep_n=0
         rep=''
-        data1=[]
-        for i,x in enumerate(data):
-            if not x[1]:break
-            rep+=str(i)+ ":" + str(x) + "<hr>"
-            data1.append(x)
-        return {'ok':True,'report':rep}
-    vldt=validate_data(data)
-    if vldt['ok']:
-        return vldt['report']
-    else:
-        return vldt['report']
+        trs=[]
+        ok=True
+        for r,row in enumerate(data):
+            if not row[1]:break
+            tds=[]
+            for c,cell in enumerate(row):
+                r_ok=k_form.input_validate(cell,data_inf[f'{c}'])
+                
+                if not r_ok: 
+                    ok = False
+                    rep+=f"{r},{c}:{cell}<br> "
+                    rep_n+=1
+                    tds+=[{'value':cell,'class': 'bg-danger'}]
+                else:  
+                    tds+=[{'value':'-','title':cell,'class':'bg-success' }]
+            trs+=[tds]
+        return {'ok':ok,'report':k_htm.table_x(col_titels,trs),'rep':XML(rep),'rep_n':rep_n}
+    def check_duplicate(new_data,file_data,duplicate_col_check=[1,2,3,4]):
+        #base:base data xtract from new_data to speed check across file_data
+        base=[]
+        for row in new_data:
+            s_row=[str(row[x+1]) for x in duplicate_col_check]
+            if not s_row in base:base.append(s_row)
+        rep=''
+        rep_n=0
+        for row in file_data:
+            s_row=[str(row[x]) for x in duplicate_col_check]
+            if s_row in base:
+                rep+='<hr>'+str(s_row)+"<br>"+str(row)  
+                rep_n+=1
+        return XML(f'{len(new_data)}<hr>{len(base)}<hr>{str(base)}<hr>{rep_n} <hr>{rep}<hr>{str(s_row)}')
+        
+    vldt=validate_data(new_data)
+    if not vldt['ok']:
+        return dict(v="err",rep_n=vldt['rep_n'],rep=vldt['rep'],d1=vldt['report'])
+    re2=check_duplicate(new_data,file_data,duplicate_col_check=[0,1,2,3])
+    return DIV(H2('مرحله ارزیابی اولیه اطلاعات با موفقت پاس شد',_class='bg-success'),HR()
+                ,DIV(re2))
+    #ch_dbl=check_duplicate()
+    
 def test_kytable1():
     return '''
     
