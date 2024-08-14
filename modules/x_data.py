@@ -384,7 +384,7 @@ x_data={
                 'pre':{'tasks':'prj_id,prj1,prj2','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'lable_1,x_act_type,man_crt,x_num,x_des,x_act_rec,act_todo,x_act_pey,x_act_todo','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'lable_2,x_act_type,folder','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'date_s,date_e,lno,sbj,io_t','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                's3':{'tasks':'date_s,date_e,lno,sbj,comment,io_t','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'all':{'input':'prj_id,man_crt,x_num,x_des,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_t,sbj','view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,attach,folder'}
