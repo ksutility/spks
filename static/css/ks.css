@@ -385,5 +385,17 @@ div{
 .app_y {
 	background-color: #afa;
 }
+@media print{
+	@page {
+		size: landscape;
+	}
+	body { 
+        /* writing-mode: tb-rl; */
+    }
+	.div_table {
+		overflow-y:none;
+	}
+}
+
 
 
