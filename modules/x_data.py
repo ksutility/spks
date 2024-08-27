@@ -458,6 +458,7 @@ x_data={
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},#'jobs':'#task#un,dccm,as1',
                 'st2':{'tasks':'p_id','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+                'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','order':'1'},
             },
             'views':{
                 'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off','view1':'un,name,family','view2':'p_id','auth':'dccm'},
@@ -623,7 +624,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_contract':{
         'a':{
-            'base':{'mode':'form','title':'ثبت قراردادهای شرکت','help':'','auth':'dcc_prj','code':'120','data_filter':''
+            'base':{'mode':'form','title':'ثبت قراردادهای شرکت','help':'','code':'120','data_filter':''
             },
             'tasks':{
                 'subject':{'type':'text','title':'موضوع قرارداد','len':'250'},
@@ -631,14 +632,14 @@ x_data={
                 'date':{'type':'fdate','title':'تاریخ ابلاغ قرارداد'},
                 'prj_dur':{'type':'num','min':1,'max':1200,'len':'4','step':'0.1','title':'مدت قرارداد - ماه'},
                 'serv_type':{'type':'select','title':'نوع خدمات','select':{'D':'design-طراحی','S':'supervition-نظارت','M':'MC-مدیریت طرح','-':'نا مشخص'},'prop':['multiple']},
-                'f_cnt':{'type':'file','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf",'path':'form,contract'},
-                'f_cnt_1p':{'type':'file','len':'40','title':'فایل قرارداد نهایی امضا نشده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-1p','file_ext':"pdf",'path':'form,contract'},
+                'f_cnt':{'type':'file','auth':'dcc_prj','len':'40','title':'فایل متن قرارداد امضا شده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-','file_ext':"pdf",'path':'form,contract'},
+                'f_cnt_1p':{'type':'file','auth':'dcc_prj','len':'40','title':'فایل قرارداد نهایی امضا نشده','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-1p','file_ext':"pdf",'path':'form,contract'},
                 'verify_note':{'type':'text','len':'40','title':'توضیحات بررسی کننده'},
                 'des':{'type':'text','len':'250','title':'توضیح'},
                 'n_contr':{'type':'text','len':'40','title':'شماره قرارداد'},
                 'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
                 'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
-                'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ اولیه','title_add':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه بر حسب میلیون تومان'},
+                'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ اولیه','title_add':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه بر حسب میلیون تومان','auth':'dcc_prj'},
                 'price_se':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ نهایی','title_add':'مبلغ صورت وضعیت ارسالی بر حسب میلیون تومان'},
                 'date_lse':{'type':'fdate','title':'تاریخ آخرین صورت وضعیت ارسالی'},
                 'frd_peygir':{'type':'reference','width':'5','title':'مسئول پیگیری','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
@@ -795,7 +796,7 @@ x_data={
                 'des_off':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
             },
             'steps':{
-                's0':{'tasks':'frd_1,date,time_st,frd_modir,lable_1,des_0','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'frd_1,date,lable_2,time_st,time_len,time_en,frd_modir,lable_1,des_0','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'des_modir','jobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
                 's2':{'tasks':'time_len,time_en,des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
                 's3':{'tasks':'des_off','jobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['انجام شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
@@ -805,6 +806,7 @@ x_data={
             },
             'labels':{
                 'lable_1':'محل و هدف ماموریت را ذکر بفرمایید',
+                'lable_2':'در مرحله اول زمان ماموریت را به صورت حدودی وارد نمایید در مرحله سوم و پس از تایید مدیر و بازگشت از ماموریت می توانیر آنرا تدقیق نمایید',
             },
             'cols_filter':{'':'همه',},
             'data_filter': 
