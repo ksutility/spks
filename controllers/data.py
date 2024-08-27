@@ -449,6 +449,8 @@ def xtable():
             show all ref table filde or one
         
     '''
+    if not session.username:
+        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
     #from k_sql import DB1
     #set_table()
     ref_case='one'
