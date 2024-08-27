@@ -471,6 +471,13 @@ def test_ipgrid():
                       'سال','ماه','روز','روز هفته',
                       'نام پروژه','موضوع','اقدامات','زمان']
       }
+    if 'col_widths' in sh:
+        table_width=1200
+        cw_ts=sh['col_widths'].split(',')
+        cw_ns=[int(x) for x in cw_ts]
+        cw_sum=sum(cw_ns)
+        sh['col_widths']=[int(x*table_width/cw_sum) for x in cw_ns]
+    col_titels=[{'name':'id','width':'1'}]+[{'name':sh['col_titels'][i],'width':sh['col_widths'][i]} for i in range(len(sh['col_titels']))]  
     import json
     data=request.vars['data']
     if data:
@@ -484,7 +491,7 @@ def test_ipgrid():
         data=json.loads(data)
         if 'table' in data:
             #return style+TABLE(data['table'])
-            return _aqc_report_daily_updata(data['table'],['']+sh['col_titels'])
+            return _aqc_report_daily_updata(data['table'],col_titels)
     style='''
     <style>
         body {
@@ -517,11 +524,7 @@ def test_ipgrid():
     #$('#jqs').on('ip_CellInput', function (event, args) {
     #alert(JSON.stringify(table));
     if 'col_widths' in sh:
-        cw_ts=sh['col_widths'].split(',') #col_widths texts
-        cw_ns=[int(x) for x in cw_ts]
-        cw_sum=sum(cw_ns)
-        cw_p=[int(x*1200/cw_sum) for x in cw_ns]
-        col_widths="\n".join([f"$('#jqs').ip_ResizeColumn({{ columns: [{i}], size: {x} }});" for i,x in enumerate(cw_p)])
+        col_widths="\n".join([f"$('#jqs').ip_ResizeColumn({{ columns: [{i}], size: {x} }});" for i,x in enumerate(sh['col_widths'])])
     if 'col_titels' in sh:
         col_titels="\n".join([f"$('#jqs_q2_columnSelectorCell_{i} div').text('{x}');" for i,x in enumerate(sh['col_titels'])])
     clipboard1="""
@@ -564,6 +567,18 @@ def test_ipgrid():
             }
             return tt
         }
+        function get_table_data(){
+            table=[]
+            for (let ir = 0; ir < 20; ir++) {
+                row=[ir]
+                for (let ic = 0; ic < 9; ic++) {
+                    row.push($('#jqs').ip_CellData(ir,ic).value); 
+                }
+                table.push(row);
+            }
+            return table
+            //alert(JSON.stringify($('#jqs').ip_CellData(1,1)));
+        }
         $( document ).ready(function() {
             //alert("b");
             $('#jqs').ip_Grid({ rows: % rows_n %, cols: % cols_n %});
@@ -572,21 +587,40 @@ def test_ipgrid():
             % col_widths %
             % clipboard %
             $('#bt_send').on('click', function (event, args) {
-                //alert("aaa");
-                table=[]
-                $('#jqs_q4_table_tbody').children().each(function () {
-                    row=[]
-                    $(this).children().each(function () {
-                        row.push($(this).text()); // "this" is the current element in the loop
-                    });
-                    table.push(row);
-                });
-                data={table:table};
+                data={table:get_table_data()};
                 var dataString = JSON.stringify(data);
                 var dataStringBase64Safe = encodeURIComponent(dataString); //dataStringBase64
                 var url = '/spks/km/test_ipgrid?data=' + dataStringBase64Safe;
                 window.open(url,'popUpWindow','height=400,width=600,left=10,top=10,scrollbars=yes,menubar=no'); 
                 return false;
+            });
+            $('#bt_x').on('click', function (event, args) {
+                
+                table=get_table_data()
+                alert(JSON.stringify(table));
+                return
+                var columnData = [];
+
+                // یافتن همه سلول‌های ستون دوم
+                $('#jqs').each(function() {
+                    columnData.push(JSON.stringify($(this)));
+                });
+                // تبدیل آرایه به یک رشته برای نمایش
+                var dataString = columnData.join(', ');
+
+                alert(dataString);
+                /*
+                myObject=$('#jqs')
+                for (let property in myObject) {
+                    if (typeof myObject[property] === 'function') {
+                        console.log(property + " یک تابع است.");
+                    } else {
+                        console.log(property + " یک متغیر است.");
+                    }
+                }
+                */
+                
+
             });
             
         });
@@ -612,10 +646,58 @@ def test_ipgrid():
                 </div
             </div>
         <button id="bt_send" type="button">send</button>
+        <button id="bt_x" type="button">x</button>
         <textarea id="bt_clp" rows="1" cols="50"></textarea>
     </body>
     '''
-    return htm1    
+    return htm1   
+    
+    archiv1_test="""
+                $('#bt_send').on('click', function (event, args) {
+                //alert("aaa");
+                table=[]
+                $('#jqs_q4_table_tbody').children().each(function () {
+                    row=[]
+                    $(this).children().each(function () {
+                        row.push($(this).text()); // "this" is the current element in the loop
+                    });
+                    table.push(row);
+                });
+                data={table:table};
+                var dataString = JSON.stringify(data);
+                var dataStringBase64Safe = encodeURIComponent(dataString); //dataStringBase64
+                var url = '/spks/km/test_ipgrid?data=' + dataStringBase64Safe;
+                window.open(url,'popUpWindow','height=400,width=600,left=10,top=10,scrollbars=yes,menubar=no'); 
+                return false;
+            });
+            $('#bt_x').on('click', function (event, args) {
+                alert(JSON.stringify($('#jqs').ip_CellData(1,1)));
+                return
+                var columnData = [];
+
+                // یافتن همه سلول‌های ستون دوم
+                $('#jqs').each(function() {
+                    columnData.push(JSON.stringify($(this)));
+                });
+                // تبدیل آرایه به یک رشته برای نمایش
+                var dataString = columnData.join(', ');
+
+                alert(dataString);
+                /*
+                myObject=$('#jqs')
+                for (let property in myObject) {
+                    if (typeof myObject[property] === 'function') {
+                        console.log(property + " یک تابع است.");
+                    } else {
+                        console.log(property + " یک متغیر است.");
+                    }
+                }
+                */
+                
+
+            });
+    """
+    
 def test_kytable():
     import k_file_x
     titles=['id','x','y','z','a']
@@ -711,6 +793,20 @@ def _aqc_report_daily_read():
             return {'ok':False,'msg':"port shoud be :100"}   
     except Exception as err:
         return {'ok':False,'msg':"یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err)}
+def _aqc_report_daily_title(in_titels=''): #rows[0]
+    t=in_titels if in_titels else ''
+    x_titles=[  {'name':'id','width':'20px'},
+            {'name':t[0],'width':'100px'},
+            {'name':t[1],'width':'20px'},
+            {'name':t[2],'width':'10px'},
+            {'name':t[3],'width':'10px'},
+            {'name':t[4],'width':'20px'},
+            {'name':t[5],'width':'150px'},
+            {'name':t[6],'width':'150px'},
+            {'name':t[7],'width':'250px'},
+            {'name':t[8],'width':'20px'}
+            ]
+    return x_titles
 def aqc_report_daily_pivot():
     inp=_aqc_report_daily_read()
     if not inp['ok']:return inp['msg']
@@ -748,19 +844,8 @@ def aqc_report_daily_kytable():
     
     case="0" #request.args[0]
     import k_file_x,k_date
-
-    t=rows[0]
-    cols=[  {'name':'id','width':'20px'},
-            {'name':t[0],'width':'100px'},
-            {'name':t[1],'width':'20px'},
-            {'name':t[2],'width':'10px'},
-            {'name':t[3],'width':'10px'},
-            {'name':t[4],'width':'20px'},
-            {'name':t[5],'width':'150px'},
-            {'name':t[6],'width':'150px'},
-            {'name':t[7],'width':'250px'},
-            {'name':t[8],'width':'20px'}
-            ]
+    cols=_aqc_report_daily_title(rows[0])
+    
     tm={}  
     n_rows={}        
     for d in range(7):
@@ -776,18 +861,29 @@ def aqc_report_daily_kytable():
     dv=[]
     for d in range(7):
         dv+=[H2(f"{tm[d]['yyyy']}/{tm[d]['mm']}/{tm[d]['dd']} - {tm[d]['www']}",_class="text-center"),
-        k_htm.table_x(cols,n_rows[d]),HR()]
+            k_htm.C_TABLE(cols,n_rows[d]).creat_htm(),HR()] 
     if case=="1":
         return k_file_x.kytable_make(rows=n_rows,titles=['id']+rows[0],widths=['3,3,20,5,2,2,7,10,10,10,4'],sum_colomn="زمان")
     else:
         return dict(div=DIV(dv))
         #return dict(t=TABLE(n_rows,_class="table table-border"))
         
-def _aqc_report_daily_updata(new_data,col_titels):
+def _aqc_report_daily_updata(new_data,col_titels):      
+    
+    #read data 
     inp=_aqc_report_daily_read()
     if not inp['ok']:return inp['msg']
     file_data=inp['data']
-    return XML("<hr>".join([str(x) for x in new_data]))
+    
+    #cut empty rows at end
+    t_r=[]
+    for row in new_data:
+        if not row[1]:
+            break
+        t_r.append(row)
+    new_data=t_r 
+    
+    #return XML("<hr>".join([str(x) for x in new_data]))
     import k_file
     un_list=k_file.read('text',r"C:\temp\test\un_list.txt").split('\n')
     prj_list=k_file.read('text',r"C:\temp\test\prj_list.txt").split('\n')
@@ -800,51 +896,105 @@ def _aqc_report_daily_updata(new_data,col_titels):
             '7':{'type':'text'}, #subj
             '8':{'type':'text'}, #act
             '9':{'type':'num'}, #time
-            '0':{'type':'text'},
+            '0':{'type':'num'},
             }
+      
     #return str(un_list) + str(prj_list)
     def validate_data(data):
+        act_help="بررسی ساختار اطلاعات ورودی  بر حسب فرمت ستون داده ها"
+        act_help_des="""در این مرحله برای هر کدام از ستونهای اطلاعات ورودی یک ساختار مشخص می شود و اطلاعات ورودی با آن ساختار مطابقت داده می شود
+        انواع ساختار : متن، عدد، لیست 
+        توضیح : لیست  یعنی مقدار داخل جدول باید یکی از مقادر یک لیست باشد
+        اگر همه چیز درست باشد فقط پیقغام پاس شدن این مرحله نمایش داده می شود
+        ولی اگر اشکالی موجود باشد اطلاعات دارای اشکال در داخل یک جدول در محل خود با رنگ قرمز نشان داده می شوند و سایر اطلاعات درست در جدول مربوطه به صورت خالی نشان داده می شوند
+        """
         import k_form,k_htm
         rep_n=0
-        rep=''
+
         trs=[]
         ok=True
         for r,row in enumerate(data):
-            if not row[1]:break
             tds=[]
             for c,cell in enumerate(row):
                 r_ok=k_form.input_validate(cell,data_inf[f'{c}'])
                 
                 if not r_ok: 
                     ok = False
-                    rep+=f"{r},{c}:{cell}<br> "
                     rep_n+=1
-                    tds+=[{'value':cell,'class': 'bg-danger'}]
+                    tds+=[{'value':cell,'style':'background-color:#f55'}]
+                    
                 else:  
-                    tds+=[{'value':'-','title':cell,'class':'bg-success' }]
+                    tds+=[{'value':'-','title':cell,'style':'background-color:#5f5' }]
+                 
             trs+=[tds]
-        return {'ok':ok,'report':k_htm.table_x(col_titels,trs),'rep':XML(rep),'rep_n':rep_n}
+        if ok:    
+            rep_des=' با موفقیت پاس شد' 
+            bg_color="#5f5"
+        else:
+            rep_des=' : اشتباه در اطلاعات ورودی'
+            bg_color="#f55"   
+        return {'ok':ok,'report_table':k_htm.C_TABLE(col_titels,trs).creat_htm(),'rep_n':rep_n,
+            'rep_des':DIV(act_help+rep_des,_title=act_help_des,_style=f"background-color:{bg_color};text-align:center;font-size:35px;")}
     def check_duplicate(new_data,file_data,duplicate_col_check=[1,2,3,4]):
+        act_help="بررسی عدم  ورود دوباره اطلاعات موجود در اثر اشتباه کاربر"
+        act_help_des="""هدف از این بخش این است که با کمک یک سری روشها اطلاعاتی را که ممکن است  داپلیکیت و یا کپی ناقص  شده باشند و ورود آنها مشکل دار است را به کاربر نشان دهد
+        تا کاربر پس از بررسی گزارش این مرحله در مورد ورود یا عدم ورود اطلاعات تصمیم  بگیرد
+        در حال حاضر برای این موضوع روش زیر استفاده می شود
+        یک سری ستون شاخص  کننده اطلاعات مشخص می شوند
+        سپس برا اساس آن ستونها ردیف های هر 2 جدول ( اطلاعات جدید و اطلاعات روی فایل) بررسی می شوند و فصل مشترک آنها مشخص و نمایش داده می شود
+        مثال : فرض کنید  ستونهای شاخص عبارتند از : فرد، سال، ماه و روز
+        در این صورت هر کدام از 2 جدول در دسته های فرضی  که با فرد، ،سال،ماه و روز  مشخص می شوند  دسته بندی می شوند  اگر 2 جدول  دسته با مشخصه یکسانی داشته باشند یعنی در این قسمت احتمال خطا وجود دارد  و برنامه این دسته ها را نشان می دهد
+        """
+        #creat base dictionary for manage
         #base:base data xtract from new_data to speed check across file_data
-        base=[]
+        base={'new_data':[],'file_data':[],'sc':[]}#sc=selected colomn
         for row in new_data:
             s_row=[str(row[x+1]) for x in duplicate_col_check]
-            if not s_row in base:base.append(s_row)
-        rep=''
+            if not s_row in base['sc']:
+                base['sc'].append(s_row)
+                base['new_data'].append([])
+                base['file_data'].append([])
+            ix=base['sc'].index(s_row)
+            base['new_data'][ix].append(row)
+
         rep_n=0
-        for row in file_data:
+        for i_f,row in enumerate(file_data):
             s_row=[str(row[x]) for x in duplicate_col_check]
-            if s_row in base:
-                rep+='<hr>'+str(s_row)+"<br>"+str(row)  
+            if s_row in base['sc']:
+                ix=base['sc'].index(s_row)
+                base['file_data'][ix].append([i_f]+row) 
                 rep_n+=1
-        return XML(f'{len(new_data)}<hr>{len(base)}<hr>{str(base)}<hr>{rep_n} <hr>{rep}<hr>{str(s_row)}')
         
+        rep=[]
+        ok=[]
+        for i,s_row in enumerate(base['sc']):
+            if base['file_data'][i]:
+                intro=TABLE(TR(*[x for x in s_row],_style="background-color:#faa;text-align:center;font-size:30px;"),_style="direction: rtl;")
+                t1=DIV('اطلاعات جدید',_style="background-color:#afa;text-align:center;font-size:24px")
+                t2=DIV('اطلاعات ثبت شده در فایل',_style="background-color:#aaf;text-align:center;;font-size:24px")
+                rep+=[intro,t1,k_htm.C_TABLE(col_titels,base['new_data'][i]).creat_htm(),t2,k_htm.C_TABLE(col_titels,base['file_data'][i]).creat_htm(),HR()]
+            else:
+                ok+=[row for row in base['new_data'][i]]
+        style=XML("""<style>
+            table, td, th {  
+              border: 1px solid #ddd;
+              text-align: right;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
+            th, td { padding: 5px;}
+            th { background-color:#f2f2f2; }
+            </style>""")    
+        return DIV(style,XML(f'new_data={len(new_data)} - base={len(base)}-rep_n={rep_n}'),
+                *rep,HR(),DIV(H1("OK"),k_htm.C_TABLE(col_titels,ok).creat_htm()))
     vldt=validate_data(new_data)
     if not vldt['ok']:
-        return dict(v="err",rep_n=vldt['rep_n'],rep=vldt['rep'],d1=vldt['report'])
+        return DIV(vldt['rep_des'],H1(f"ERROR : {vldt['rep_n']} item"),vldt['report_table'])
+    re1=vldt['rep_des']
     re2=check_duplicate(new_data,file_data,duplicate_col_check=[0,1,2,3])
-    return DIV(H2('مرحله ارزیابی اولیه اطلاعات با موفقت پاس شد',_class='bg-success'),HR()
-                ,DIV(re2))
+    return DIV(re1,HR(),re2)
     #ch_dbl=check_duplicate()
     
 def test_kytable1():
@@ -919,7 +1069,8 @@ kxtable_make_table(cookiePage);
 </script>
     '''
 def test_muti_row_approve():
-    import k_form,k_htm
+    import k_form
+    from k_htm import C_TABLE
     from x_data import x_data_verify_task
     
     data=[
@@ -961,8 +1112,30 @@ def test_muti_row_approve():
         #print (str(xh))
         row1=[xh]+row
         data1.append(row1)
-    tbl=k_htm.table_x(['c','x','y','z'],data1)
+    tbl=C_TABLE(['c','x','y','z'],data1).creat_htm()
     bt_a=INPUT(_type='submit',_style='width:100%,background-color:#ff00ff' )
     htm1=XML(f"""<form>{tbl}{bt_a}</form>""")
     return dict(t=htm1)
 
+def test030528_tag():
+    import k_s_dom
+    tt="abc<div id='id-a1' class='class1'>div_text</div>"
+    tt="""
+    <a class="btn btn-primary" href="/spks/form/xform.csv/user/user/133" title="open form 133">133</a>,<a  title="خانم">خانم</a>,<a  title="مهندس">مهندس</a>,فاطمه,برزوی گلستانی,-,<a  title="شهر سازی">UR</a>,<a  title="طراحی">طراحی</a>,کارشناس شهرسازی,fbg,دفتر مرکزی مشهد- سجاد,y,
+            <div >
+                
+            </div> ,
+            <div >
+                
+            </div> ,
+            <div >
+                
+            </div> ,
+            <div >
+                
+            </div> ,
+            <div >
+                <a class="btn btn-info" title='مشاهده فایل AQC0-HRM-CV-fbg4-off.pdf' href = 'javascript:void(0)' onclick='j_box_show("/spks/file/download.csv/auto/form/hrm/cv/fbg/AQC0-HRM-CV-fbg4-off.pdf",false);'>F</a>
+            </div>
+    """
+    return k_s_dom.report_tag(tt)
