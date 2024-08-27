@@ -116,7 +116,48 @@ def test():
     return "<div>"+x2+"</div>"    
     return "<div>"+html.replace('<p>$$l</p>',"</div><div dir='ltr'>").replace('<p>$$r</p>',"</div><div dir='rtl'>")+"</div>"   
     
-"""    
-
+""" 
+def tag_inf(tag):
+    import gluon
+    inf={x:(tag["_"+x] or '') for x in['id','name','class','style','onclick','onchange','object']}
+    inf['type']='gluon.html.__tag_div__'
+    inf['attr_len']=len(tag.attributes)
+    inf['attr']=str(tag.attributes)
+    inf['tag']=str(tag.tag)
+    inf['text']=[]
+    inf['elements']=str([x.tag for x in tag.elements()])
+    items=[]
+    for x_part in tag:
+        if type(x_part) in [gluon.html.__tag_div__]:
+            tip=tag_inf(x_part)
+            items+=[tip]
+            inf['text']+=[tip['text']]
+        else:
+            items+=[{'value':x_part,'type':'str'}]#str(type(x_part))}]
+            inf['text']+=[str(x_part)]
+    inf['items']=items
+    inf['text']=",".join([str(x) for x in inf['text']])
+    return inf
+        
+def report_tag(x_htm):
+    import gluon,k_htm
+    '''
+        report all tag in str by gloun module
+    '''
+    
+        
+    ob=TAG(x_htm) if not type(x_htm) in [gluon.html.__tag_div__] else x_htm
+    #yy=[y for y in ob]
+    #txt_o+=["###"+str(yy)] 
+    txt_o=[]
+    txt_o+=[str(x_htm)]#BEAUTIFY(htm_str).xml()
+    txt_o+=[tag_inf(ob)]
+    txt_o+=[(dir(ob))]
+    txt_o+=[ob.xml()]
+    
+    return dict(x1="x", #k_htm.val_report_prety(txt_o),
+                x=k_htm.val_report(txt_o))
+  
+                    
 
             
