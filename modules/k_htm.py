@@ -47,6 +47,40 @@ def val_report(xv):
         elif xv.lower().strip()=='false':
             return DIV(xv,_class="bg-danger")
     return xv
+def val_report_prety(xv):
+    
+    #make tree type : exam =>['list','list'] or ['list','dict'] or ['dict','dict'] or dict,list,list
+    def make_tree_type(xv):
+        if type(xv) in [dict,list]:
+            mtt=[{type(xv)}]
+            for x in xv:
+                mtt_n=make_tree_type(x)
+                if len(mtt_n)+1>len(mtt):
+                    for ii in range(len(mtt),len(mtt_n)):mtt+=[{}]
+                for i in range(len(mtt_n)-1):
+                    mtt[i+1]=mtt[i+1]|mtt_n[i]
+        else:
+            mtt=[]
+        return mtt
+    #------------------------------------------------------------------------
+    return make_tree_type(xv)
+    if type(xv)==dict:
+        #return DIV(p,TABLE(THEAD(TR(TH('key'),TH('val'))),TBODY(*[TR(x,val_report(y)) for x,y in xv.items()]),_class="table"))
+        return DIV(p,TABLE(TBODY(*[TR(x,val_report(y)) for x,y in xv.items()]),_class="table"))
+    elif type(xv)==list:
+        #return DIV(p,TABLE(THEAD(TR(TH('key'))),TBODY(*[TR(val_report(x)) for x in xv]),_class="table"))  
+        return DIV(p,TABLE(TBODY(*[TR(val_report(x)) for x in xv]),_class="table"))
+    elif type(xv)==bool:
+        if xv==True:
+            return DIV(str(xv),_class="bg-success")
+        elif xv==False:
+            return DIV(str(xv),_class="bg-danger")
+    elif type(xv)==str:
+        if xv.lower().strip()=='true':
+            return DIV(xv,_class="bg-success")
+        elif xv.lower().strip()=='false':
+            return DIV(xv,_class="bg-danger")
+    return xv    
 def dict_2_table(i_dict,_class='table'):
     return TABLE(THEAD(TR(TH('key'),TH('val'))),TBODY(*[TR(x,y) for x,y in i_dict.items()]),_class=_class)
 #---------------------- not use
@@ -97,12 +131,179 @@ def table_4_diclist_glon(i_diclist,base_cols,id_col):
         d1.append(dd)
         d1.append(BR())
     return DIV(tt,d1)
-def table_x(cols,rows,class_table=''):
+class C_TABLE:
+    """
+    @author: ks
+    creat = 1402/11/17
+    """
+    def __init__(self,heads,rows):
+        '''
+        inputs:
+        ------
+            heads:list of dict / list / dict :(titles)
+                list of dict:
+                    [
+                        {'name':'name_val','title':'title_val','width':'width_val','class':'class_val'} #col0
+                        {'name':'name_val','title':'title_val','width':'width_val','class':'class_val'} #col1
+                        ...
+                    ]
+                list:
+                    ['col0','col1','col2',...]
+                dict
+                    {
+                    'col_name':{'title':'title_val','width':'width_val','class':'class_val'},
+                    'col_name':{'title':'title_val','width':'width_val','class':'class_val'},
+                    }
+                    
+            rows:list of list of dict / list of list
+                list of list of dict:
+                    [
+                        [
+                            {'value':'x_val','title':'title_val','class':'class_val'} #row0_col0
+                            {'value':'x_val','title':'title_val','class':'class_val'} #row0_col1
+                            ,...
+                        ],
+                        [
+                            {'value':'x_val','title':'title_val','class':'class_val','style':'style_val'} #row1_col0
+                            {'value':'x_val','title':'title_val','class':'class_val','style':'style_val'} #row1_col1
+                            ,...
+                        ]
+                    ...
+                    ]
+                list of list:
+                    [
+                        [row0_col0,row0_col1,row0_col2,...],
+                        [row1_col0,row1_col1,row1_col2,...],
+                        ...    
+                    ]
+        '''
+        self.rows=rows
+        self.heads=heads
+    def export_csv(self):
+        import gluon,k_s_dom
+        rows=self.rows
+        heads=self.heads
+        trs=[]
+        
+        #creat thead of table
+        if type(heads)==list:
+            tds=[]
+            for col in heads:
+                if type(col)==dict:
+                    tds+=[col['name']]#,_title=col.get('title',''),_width=col.get('width',''))]
+                elif type(col)==str:
+                    tds+=[col]
+                else:
+                    tds+=["error"]
+                    #print('k_form.C_table =err=> type(cell)='+str(type(cell)))
+        
+            
+        elif type(heads)==dict:
+            tds=[x for x in heads]
+        trs+=[tds]
+        
+        #creat tbody of table
+        for row in rows:
+            tds=[]
+            for i,cell in enumerate(row):
+                
+                if type(cell)==dict:
+                    vv=cell['value']
+                elif type(cell) == str:
+                    vv=cell
+                elif type(cell) in [float,int]:
+                    vv=cell
+                elif type(cell) in [gluon.html.XML]:
+                    tag=k_s_dom.tag_inf(cell)
+                    if tag.tag=='a' and tag['onclick']:#file link
+                        vv=tag['onclick']
+                    elif tag.tag=='a':
+                        vv="A:"+tag['items'][0]['value']+tag['titele']
+                    else:
+                       vv= tag['items'][0]['value']
+                    #xx=[x for x in cell]
+                    #tds+=[cell[0]] 
+                else:
+                    vv="error"
+                    
+                if "<" in vv:
+                    ob=TAG(vv)
+                    tag=k_s_dom.tag_inf(ob)
+                    if tag['tag']=='a' and tag['onclick']:#file link
+                        vv=tag['onclick']
+                    elif tag['tag']=='a' and 'value' in tag['items'][0] :
+                        vv="A:"+tag['items'][0]['value']+tag['titele']
+                    else:
+                       vv="ELS"+tag['text']
+ 
+                tds+=[vv]    
+            trs+=[tds]
+        
+        #preper export
+        tt="\ufeff" # BOM
+        return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
+        #return trs
+        
+    def creat_htm(self,table_class="0",table_type=""):
+        import gluon
+        '''
+            old name= htm_table
+        '''
+        rows=self.rows
+        heads=self.heads
+        
+        #creat thead of table
+        if type(heads)==list:
+            tds=[]
+            for col in heads:
+                if type(col)==dict:
+                    tds+=[TH(col['name'],_title=col.get('title',''),_width=col.get('width',''))]
+                elif type(col)==str:
+                    tds+=[TH(col)]
+                else:
+                    print('k_form.C_table =err=> type(cell)='+str(type(cell)))
+        
+            thead=THEAD(TR(*tds))#,_style="top:0;position: sticky;")
+        elif type(heads)==dict:
+            thead=THEAD(TR(*[TH(x,_width=y.get('width'),_title=y.get('title')) for x,y in heads.items()]))
+        
+        
+        #creat tbody of table
+        trs=[]
+        for row in rows:
+            tds=[]
+            for i,cell in enumerate(row):
+                
+                if type(cell)==dict:
+                    _class_l=[heads[i]['class']] if 'class' in heads[i] else []
+                    _class_l+=[cell['class']] if 'class' in cell else []
+                    _class=",".join(_class_l)
+                    
+                    _style=cell['style'] if 'style' in cell else ''
+                    tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''),_style=_style)]
+                elif type(cell) in [str,int,float,gluon.html.XML]:
+                    try:
+                        _class=heads[i]['class'] if 'class' in heads[i] else ''
+                    except:  
+                        _class=''
+                    tds+=[TD(cell,_class=_class)]
+                else:
+                    print('type(cell)='+str(type(cell)))
+            trs.append(TR(*tds))
+
+        #creat table
+        class_table='table'+ table_class if (table_class !="-1") else 'table table-sm table-hover table-responsive'
+        #import k_err    
+        #k_err.xreport_var([heads,rows,thead,trs])  
+        #class_table='table'+class_table if class_table else 'table2'
+        #return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl"),_class="div_table") #DIV(,_style='height:100%;overflow:auto;')  
+        return TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl")
+def table_x_not_used(cols,rows,class_table=''):
     import gluon
     '''
     inputs:
     ------
-        cols:list of dict / list
+        cols:list of dict / list (titles)
             list of dict:
                 [
                     {'name':'name_val','title':'title_val','width':'width_val','class':'class_val'} #col0
@@ -120,8 +321,8 @@ def table_x(cols,rows,class_table=''):
                         ,...
                     ],
                     [
-                        {'value':'x_val','title':'title_val','class':'class_val'} #row1_col0
-                        {'value':'x_val','title':'title_val','class':'class_val'} #row1_col1
+                        {'value':'x_val','title':'title_val','class':'class_val','style':'style_val'} #row1_col0
+                        {'value':'x_val','title':'title_val','class':'class_val','style':'style_val'} #row1_col1
                         ,...
                     ]
                 ...
@@ -153,7 +354,9 @@ def table_x(cols,rows,class_table=''):
                 _class_l=[cols[i]['class']] if 'class' in cols[i] else []
                 _class_l+=[cell['class']] if 'class' in cell else []
                 _class=",".join(_class_l)
-                tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''))]
+                
+                _style=cell['style'] if 'style' in cell else ''
+                tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''),_style=_style)]
             elif type(cell) in [str,int,float,gluon.html.XML]:
                 try:
                     _class=cols[i]['class'] if 'class' in cols[i] else ''
