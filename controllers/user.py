@@ -291,6 +291,7 @@ def test():
 def test1():
     response.cookies["username"]="abc"
 def reset_password():
+    import k_user
     # sample use : spks/user/reset_password 
     if request:
         user_ab=request.vars.user_ab
