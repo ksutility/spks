@@ -24,7 +24,7 @@ debug= False #True #False # True: for check error
 db_path='applications\\spks\\databases\\'
 
 
-style1='''
+style1=XML('''
         <style>
             table {
               font-family: Arial, Helvetica, sans-serif;
@@ -48,7 +48,7 @@ style1='''
               
               color: white; }
         </style>
-      '''
+      ''')
 def _get_init_data():
     '''
     اطلاعات مورد نیاز را حسب آدرس صفحه از اطلاعات ساختاری جدول مورد نظر استخراج می کند
@@ -353,9 +353,7 @@ def xform():#view 1 row
             for i,step_n in enumerate(x_data_s['steps']):
                 step=x_data_s['steps'][step_n]
                 step['i']=i
-                if i < f_nxt_s:
-                    htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'b')]
-                elif i == f_nxt_s:
+                if i == f_nxt_s:
                     
                     if k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
                         #k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
@@ -372,7 +370,11 @@ def xform():#view 1 row
                         htm_form+=[DIV([show_step_not_cur(x_data_s,xid,form_sabt_data,step,'c')])]
                         htm_form+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
                 else:
-                    htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,'a')]
+                    if 'order' in step and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
+                        htm_form+=[show_step_cur(x_data_s,xid,form_sabt_data,step)]
+                    else:
+                        ab_case="b" if i < f_nxt_s else "a"
+                        htm_form+=[show_step_not_cur(x_data_s,xid,form_sabt_data,step,ab_case)]
                 step_befor=step_n
             # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
             # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
@@ -669,10 +671,13 @@ def list_0():
     return dict(htm=DIV(tt,_dir='rtl'))
 #@k_tools.x_cornometer
 def xtable():
+    from k_tools import X_DICT
+    x_dict=X_DICT({'style':'','script':'','table_filter':'','table_head':'','table':'','btm_mnu':''})
     if not session.username:
-        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
+        msg=H1("لطفا اول وارد سیستم بشوید")
+        return x_dict.add({'table':msg})
     cornometer=Cornometer("xtable")
-    def xtable_show(tb_name,tasks,where,x_data_s):
+    def xtable_show(rows,titles,tasks,x_data_s):
         ''' func desc
         goal:
         ------
@@ -680,12 +685,8 @@ def xtable():
             - link to edit each row for auth users
         input:
         ------
-            tb_name:str
-                name of table
             tasks:dict
                 column/field selected {name:{props}}
-            where:
-                data filter = sql where
             x_data_s:dict
                 table data structur
                 کل ساختار اطلاعاتی مرتبط با جدول مورد نظر 
@@ -695,8 +696,7 @@ def xtable():
             open url:
                 /spks/data/xtable/paper/a
         '''
-        rows,titles,rows_num=db1.select(table=tb_name,where=where,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
-        #if rows:rows.reverse()
+        
 
 
         select_cols='form_v_cols_1'#form_v_cols_full  
@@ -706,14 +706,14 @@ def xtable():
         #thead=THEAD(TR(TH('n',_width='30px'),TH('id',_width='30px'),*[TH(A(tasks[x]['title'],_title=f'{i} : {x}')) for i,x in enumerate(select_cols)]))
         app_dic1={'un':'کاربر','ap':'نتیجه','dt':'زمان'}
         #--table head
-        cols=[{'name':'n','width':'30px'},{'name':'id','width':'30px'}]
+        new_titles=[{'name':'n','width':'30px'},{'name':'id','width':'30px'}]
         for st_n,step in x_data_s['steps'].items():
-            cols+=[{'name':tasks[x]['title'],'title':x} for x in step['tasks'].split(',') if x not in x_data_s['labels']]
+            new_titles+=[{'name':tasks[x]['title'],'title':x} for x in step['tasks'].split(',') if x not in x_data_s['labels']]
             if select_cols=='form_v_cols_full':
-                cols+=[{'name':"^"+str(step['i']+1)+"-"+y,'title':" مرحله "+f"step_{step['i']}_{x}",'class':'bg-info'} for x,y in app_dic1.items()]
+                new_titles+=[{'name':"^"+str(step['i']+1)+"-"+y,'title':" مرحله "+f"step_{step['i']}_{x}",'class':'bg-info'} for x,y in app_dic1.items()]
             elif select_cols=='form_v_cols_1':
-                cols+=[{'name':"^"+str(step['i']+1),'title':" مرحله "+",".join([f"step_{step['i']}_{x}" for x in app_dic1]),'class':'bg-info'}]
-        cols+=[{'name':"S",'title':'f_nxt_s','width':'30px'},{'name':"U",'title':'f_nxt_u','width':'30px'}]
+                new_titles+=[{'name':"^"+str(step['i']+1),'title':" مرحله "+",".join([f"step_{step['i']}_{x}" for x in app_dic1]),'class':'bg-info'}]
+        new_titles+=[{'name':"S",'title':'f_nxt_s','width':'30px'},{'name':"U",'title':'f_nxt_u','width':'30px'}]
         #thead=THEAD(TR(*tds))
         #---------------        
         trs=[]
@@ -750,14 +750,11 @@ def xtable():
             ''' '''
             #tds=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s)
             
-            trs.append(tds)
-        #class_table='table'+request.vars['table_class'] if request.vars['table_class'] else 'table2'
-        class_table=request.vars['table_class'] or '2' # 'table2'
-        return k_htm.table_x(cols,trs,class_table),len(rows),rows_num 
-        #TABLE(thead,TBODY(*trs),_class=cc,_dir="rtl"),len(rows),rows_num #DIV(,_style='height:100%;overflow:auto;')
+            trs+=[tds]
+        return trs,new_titles,len(rows)
     #----------------------------------------------------------------------------------------
     #tasks,f_views
-    script1='''<script>
+    script1=XML('''<script>
         $(document).ready(function(){
             $("table td").click(function(){
                 $("#viewcell").text($(this).text());
@@ -767,46 +764,65 @@ def xtable():
             });
         });
     </script>
-    '''      
-
-    
-
+    ''' )    
+ 
     args=request.args
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
     x_data_s,db_name,tb_name,msg=_get_init_data()#x_data)
     if not x_data_s:
-        return dict(htm=msg)
+        return x_dict.add({'table':msg})
     else:
         # check access /auth
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
-                return dict(htm=H1("شما اجازه دسترسی به این فرم را ندارید"))
+                msg=H1("شما اجازه دسترسی به این فرم را ندارید")
+                return x_dict.add({'table':msg})
                
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']
         c_filter=C_FILTER(tasks,x_data_s) 
         filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
         
-        table,nr,rows_num=xtable_show(tb_name,tasks,filter_data,x_data_s)
+        rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+        #if rows:rows.reverse()
+        trs,new_titles,nr=xtable_show(rows,titles,tasks,x_data_s)
         
-        #print(f'job={job}')
-        if session["admin"] or k_user.user_in_jobs_can('creat',x_data_s,step_index=0):
-            #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
-            #k_user.user_in_jobs(jobs):
-            new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
-        else:
-            new_record_link='-'
-        htm_head=DIV(TABLE(TR( TD(new_record_link,_width='20px')
-                            ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='30px')
-                            ,TD(A("T",_title="Table",_class="btn btn-primary",_href=URL('data','xtable',args=args,vars=request.vars)),_width='30px')
-                            ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
-                            ,TD(A(f"{rows_num}",_title="تعداد کل بر اساس فیلتر جاری"),_width='30px')
-                            ,TD(DIV('...',_id='viewcell',_name='viewcell'))
-                            ,TD(x_data_s['base']['title'],_width='10%')
-                    )),_style='position:sticky;top:0px')
-        return dict(htm=DIV(XML(style1),XML(script1),c_filter.htm,htm_head,table,))
+        from k_tools import C_URL
+        c_url=C_URL()
+        from k_htm import C_TABLE
+        c_table=C_TABLE(new_titles,trs)
+        
+        if c_url.ext=='': #html
+  
+            table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
+            table1=c_table.creat_htm(table_class)   
+            
+            #print(f'job={job}')
+            if session["admin"] or k_user.user_in_jobs_can('creat',x_data_s,step_index=0):
+                #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
+                #k_user.user_in_jobs(jobs):
+                new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
+            else:
+                new_record_link='-'
+            htm_head=DIV(TABLE(TR( TD(new_record_link,_width='20px')
+                                ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='30px')
+                                ,TD(A("T",_title="Table",_class="btn btn-primary",_href=URL('data','xtable',args=args,vars=request.vars)),_width='30px')
+                                ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
+                                ,TD(A(f"{rows_num}",_title="تعداد کل بر اساس فیلتر جاری"),_width='30px')
+                                ,TD(DIV('...',_id='viewcell',_name='viewcell'))
+                                ,TD(x_data_s['base']['title'],_width='10%')
+                        )),_style='position:sticky;top:0px')
+            import k_date,k_icon
+            btm_mnu= A(XML(k_icon.download(30)),_title="Download CSV",_class="btn btn-success",_href=URL('xtable.csv',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars))
+            return dict(style=style1,script=script1,
+                table_filter=c_filter.htm,table_head=htm_head,table=table1,btm_mnu=btm_mnu)
+        elif c_url.ext=='csv':
+            tt="\ufeff" # BOM
+            #return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
+            return c_table.export_csv()
+            #return dict(data=rows)
 #--------------------------------------
 def _sabege():
     if len(request.args)<3 :
