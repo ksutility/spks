@@ -91,10 +91,23 @@
 	}
 	//iframe
 	function j_box_show(path,reload=false) {
+		let f_loc=window.location.href;
+		
 		x_reload=reload  //reload page when hide jbox
 		document.getElementById('j_box_light').style.display='block';
 		document.getElementById('j_box_fade').style.display='block'; 
 		var $iframe = $('#j_box_iframe_win');
+		
+		let is_offline=String(f_loc).includes("file://");
+		if (is_offline) {
+			if (!window.event.ctrlKey) {
+				pp=path.split("/");
+				path="link\\"+pp[pp.length - 1];
+			} else {
+				path="http://192.168.88.179"+path;
+			}
+			//alert(path);
+		}
 		if ( $iframe.length ) {
 			$iframe.attr('src',path);
 		}
