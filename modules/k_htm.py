@@ -179,8 +179,8 @@ class C_TABLE:
         '''
         self.rows=rows
         self.heads=heads
-    def export_csv(self):
-        import gluon,k_s_dom
+    def export_csv(self,folder_name):
+        import gluon,k_s_dom,os
         rows=self.rows
         heads=self.heads
         trs=[]
@@ -202,6 +202,41 @@ class C_TABLE:
             tds=[x for x in heads]
         trs+=[tds]
         
+        att_files=set() # set for store
+        
+        def _tag_pars(tag):
+            c_tag=k_s_dom.C_TAG(tag)
+            tag_inf=c_tag.tag_inf()
+            #vv=vv+":::"+str(tag_inf['elements'])+":::"+str(tag_inf['text'])+":::"+tag_inf['onclick']
+            onclick=c_tag.find('_onclick')
+            if onclick and 'j_box_show' in onclick:#file link
+                #help => j_box_show("%%",false)
+                v1=onclick[12:-9].split("/")
+                file_path=v1[4:-1]
+                file_name=v1[-1]
+                file_inf=os.path.join(*file_path,file_name)
+                att_files.add(file_inf)
+                vv=file_name
+            #tag=k_s_dom.C_TAG().tag_inf(tag)
+            #if tag_inf['tag']=='a' and tag_inf['onclick']:#file link
+            #    vv=tag_inf['onclick']
+            elif tag_inf['tag']=='a' and 'value' in tag_inf['items'][0] :
+                vv="A:"+tag_inf['items'][0]['value']+tag_inf['titele']
+            else:
+               vv=tag.flatten()#tag_inf['text']
+            return vv
+            
+        def export_files(att_files):
+            if not filename:return
+            import k_file
+            dest_folder=os.path.join("C:",os.sep,"temp","x_export",folder_name)
+            k_file.dir_make(dest_folder)
+            for file_path in att_files:
+                ff=k_file.file_name_split(file_path)
+                base_file=os.path.join("D:",os.sep,"ks","0-file",file_path)
+                dest_file=os.path.join(dest_folder,ff['filename'])
+                k_file.file_copy(base_file,dest_file)
+            
         #creat tbody of table
         for row in rows:
             tds=[]
@@ -214,33 +249,20 @@ class C_TABLE:
                 elif type(cell) in [float,int]:
                     vv=cell
                 elif type(cell) in [gluon.html.XML]:
-                    tag=k_s_dom.tag_inf(cell)
-                    if tag.tag=='a' and tag['onclick']:#file link
-                        vv=tag['onclick']
-                    elif tag.tag=='a':
-                        vv="A:"+tag['items'][0]['value']+tag['titele']
-                    else:
-                       vv= tag['items'][0]['value']
-                    #xx=[x for x in cell]
-                    #tds+=[cell[0]] 
+                    vv=_tag_pars(cell)
                 else:
                     vv="error"
-                    
-                if "<" in vv:
-                    ob=TAG(vv)
-                    tag=k_s_dom.tag_inf(ob)
-                    if tag['tag']=='a' and tag['onclick']:#file link
-                        vv=tag['onclick']
-                    elif tag['tag']=='a' and 'value' in tag['items'][0] :
-                        vv="A:"+tag['items'][0]['value']+tag['titele']
-                    else:
-                       vv="ELS"+tag['text']
+                vv=str(vv)
+                tag=TAG(vv)
+                if "<" in vv or (('elements' in tag)):# and  len(tag['elements'])>1):
+                    vv=_tag_pars(tag)
  
-                tds+=[vv]    
+                tds+=[vv.replace("\n","")]    
             trs+=[tds]
         
         #preper export
         tt="\ufeff" # BOM
+        export_files(att_files)
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
