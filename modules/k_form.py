@@ -698,10 +698,12 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
 #@k_tools.x_cornometer
-def reference_select (ref_0,form_nexu=False,form_data={}):
-    debug=False
+def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
+    #debug=False
     #ceck cach
+    
     idx="-".join([ref_0[x] for x in ref_0])+"|"+str(form_data)
+    #if debug: print(f"idx={idx}")
     if idx in k_cache:
         if k_cache[idx]['time']-time.time()<5:
             #print (f'k-cache = ok {time.time()}|'+idx)
@@ -734,7 +736,7 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
             {'key_1':'val/tit_1','key_2':'val/tit_2',...}
     '''
     ref=ref_0.copy()
-    if debug :xxxprint(msg=['ref1',idx,''],vals=ref) 
+    #if debug :xxxprint(msg=['ref1',idx,''],vals=ref) 
     for x in ['db','tb','key','val']:
         if not x in ref:
             do_report('err',x + " is not in Ref /n ref shoud have ['db','tb','key','val']" +  ref)
@@ -746,11 +748,13 @@ def reference_select (ref_0,form_nexu=False,form_data={}):
     dbn=db_path+ ref['db']+".db"
     if form_nexu:
         ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nexu <> 'x' "
-    rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0)
-    if debug :xxxprint(msg=['where',idx,ref['where']],args=rows)
+    rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
+    if debug :
+        print(f"where={ref['where']}")
+        xxxprint(msg=['where',idx,ref['where']],args=rows)
     if rows :
         output_data={ref['key'].format(**dict(zip(tits,row))):ref['val'].format(**dict(zip(tits,row))) for row in rows}
-        if debug :xxxprint(msg=['output_data',idx,''],vals=output_data) 
+        #if debug :xxxprint(msg=['output_data',idx,''],vals=output_data) 
         k_cache[idx]={'val':output_data,'time':time.time()}
         return output_data
     return {}#'msg':ref['where']}
@@ -978,7 +982,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 #if ref_t not in cache_ram:
                 #    cache_ram[ref_t]=reference_select(obj['ref'],form_data=x_dic)
                 #_select= cache_ram[ref_t]   
-                _select= reference_select(obj['ref'],form_data=x_dic)
+                _select= reference_select(obj['ref'],form_data=x_dic,debug=False)
                 tt_dif=(time.time()-tt_dif)*10000
                 obj['select']=_select
             else:
@@ -1231,7 +1235,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #obj[r1]=XML(A(DIV(obj[r1],_href=URL(*p,args=tuple(args),vars=vars))))
         show_link=URL(*p,args=tuple(args),vars=vars)
         obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}",false)' ))
-
+      
     ##----------------------
     if "private" in obj['prop']:
         pass
