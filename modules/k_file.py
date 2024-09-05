@@ -159,6 +159,7 @@ def empty_download_folder():
             for i in range(2):
                 if file_move(path1,path2)['ok']:
                     break
+
 #@check_err
 def file_move(base_path,des_path):
     #_path can be str or 1 tuple => ( path,filename)
@@ -412,18 +413,19 @@ def read(_format,file_path):
         return {}
     '''
 @check_err  
-def write(_format,file_path,data):
+def write(_format,file_path,data,append=False):
 	#010618
+    file_mode='a' if append else 'w'
     if _format=='json':
         import json
-        with open(file_path,'w',encoding='utf8') as f:
+        with open(file_path,file_mode,encoding='utf8') as f:
             json.dump(data,f,indent=4)#,ensure_ascii=False)
     elif _format=='text':
-        with open(file_path,'w',encoding='utf8') as f:
+        with open(file_path,file_mode,encoding='utf8') as f:
             f.write(str(data))
     elif _format=='pickle':
         import pickle
-        with open(file_path, 'wb') as fp:
+        with open(file_path, file_mode+'b') as fp:
             pickle.dump(data, fp)
     #except:    
     #   print("error: {error}\n in k_file.write")   
@@ -461,6 +463,7 @@ def find (path,sub_path=''):
  #---------------------------------------------------------------------------------################################
 def file_copy(base_path_filename,dest_path_filename):
     f_inf=('file','file_copy')
+    
     if not find_path(base_path_filename): 
         return xxprint('err',"file not fond=>"+base_path_filename)
     import shutil
@@ -470,6 +473,18 @@ def file_copy(base_path_filename,dest_path_filename):
         return xxprint(True,rep)
     except:
          return xxprint(False,rep)
+         
+         
+    """
+         
+    bf=file_name_split(base_file_path)
+    new_file_path=os.path.join(dest_folder,bf['name']+bf['ext'])
+    import shutil
+    dir_make(dest_folder)
+    print("{file_path}=>{new_file_path}"}
+    #shutil.copy(file_path, new_file_path)
+    return new_file_path
+    """
 #---------------------------------------------------------------------------------################################
 def folder_isempty(path):
     if not os.path.exists(path):return False
