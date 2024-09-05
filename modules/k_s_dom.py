@@ -117,28 +117,60 @@ def test():
     return "<div>"+html.replace('<p>$$l</p>',"</div><div dir='ltr'>").replace('<p>$$r</p>',"</div><div dir='rtl'>")+"</div>"   
     
 """ 
-def tag_inf(tag):
-    import gluon
-    inf={x:(tag["_"+x] or '') for x in['id','name','class','style','onclick','onchange','object']}
-    inf['type']='gluon.html.__tag_div__'
-    inf['attr_len']=len(tag.attributes)
-    inf['attr']=str(tag.attributes)
-    inf['tag']=str(tag.tag)
-    inf['text']=[]
-    inf['elements']=str([x.tag for x in tag.elements()])
-    items=[]
-    for x_part in tag:
-        if type(x_part) in [gluon.html.__tag_div__]:
-            tip=tag_inf(x_part)
-            items+=[tip]
-            inf['text']+=[tip['text']]
-        else:
-            items+=[{'value':x_part,'type':'str'}]#str(type(x_part))}]
-            inf['text']+=[str(x_part)]
-    inf['items']=items
-    inf['text']=",".join([str(x) for x in inf['text']])
-    return inf
-        
+class C_TAG():
+    
+    def __init__(self,tag=''):
+        import gluon
+        if tag:
+            tag=TAG(tag) if not type(tag) in [gluon.html.__tag_div__] else tag
+            self.inf=self.tag_inf(tag)
+        else :
+            self.inf=''
+        self.tag=tag
+        self.find_tag=''
+    def tag_inf(self,tag=''):
+        import gluon
+        if not tag:tag=self.find_tag or self.tag
+        inf={x:(tag["_"+x] or '') for x in['id','name','class','style','onclick','onchange','object']}
+        inf['type']='gluon.html.__tag_div__'
+        inf['attr_len']=len(tag.attributes)
+        inf['attr']=str(tag.attributes)
+        inf['tag']=str(tag.tag)
+        inf['text']=[]
+        inf['el_tree']=[] #elements tree
+        inf['elements']=str([x.tag for x in tag.elements()])
+        items=[]
+        for x_part in tag:
+            if type(x_part) in [gluon.html.__tag_div__]:
+                tip=self.tag_inf(x_part)
+                items+=[tip]
+                inf['text']+=[tip['text']]
+                inf['el_tree']+=[[tip['tag'],tip['el_tree']]]
+            else:
+                items+=[{'value':x_part,'type':'str'}]#str(type(x_part))}]
+                inf['text']+=[str(x_part)]
+                inf['el_tree']+=['str']
+        inf['items']=items
+        inf['text']=",".join([str(x) for x in inf['text']])
+        inf['el_tree_x']=str(inf['el_tree'])
+        return inf
+    def _find(self ,attr,tag):
+        import gluon
+        if attr in tag.attributes:return tag
+        #res1=str(tag.attributes)+"$"+attr
+        for x_part in tag:
+            
+            if type(x_part) in [gluon.html.__tag_div__]:
+                res=self._find(attr,x_part)
+                if type(res) in [gluon.html.__tag_div__]:return res
+                #res1+="<br>a"+str(type(x_part))+":"+res+":"
+        #return res1
+    def find(self ,attr,tag=''):
+        if not tag:tag=self.tag
+        x=self._find(attr,tag)
+        if x:return x[attr]
+        #self.find_tag=
+        #return self.find_tag
 def report_tag(x_htm):
     import gluon,k_htm
     '''
@@ -151,7 +183,7 @@ def report_tag(x_htm):
     #txt_o+=["###"+str(yy)] 
     txt_o=[]
     txt_o+=[str(x_htm)]#BEAUTIFY(htm_str).xml()
-    txt_o+=[tag_inf(ob)]
+    txt_o+=[C_TAG().tag_inf(ob)]
     txt_o+=[(dir(ob))]
     txt_o+=[ob.xml()]
     
