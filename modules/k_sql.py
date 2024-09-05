@@ -207,18 +207,18 @@ class DB1():
         xorder=" ORDER BY {_order}" if _order else ""
         return f"SELECT {xtop} {_fields_name} FROM {_table_name} {xwhere} {xorder}"    
     # main func -----------------------------------------------------------------------------------------------------------------------------------------------    
-    def select(self,table='',sql='',where='',result='list',offset=0,page_n=1,page_len=20,limit=20,last=True,order='id'):
+    def select(self,table='',sql='',where='',result='list',offset=0,page_n=1,page_len=20,limit=20,last=True,order='id',debug=False):
         table_name=table
         #select_data 
         ''' 010909
             020905 add order to func
             ------------------------
-            where :str/dict
+            where : str/dict
         result='list/dict'
         '''
         def sql_add_limit(sql):
             if not limit:return sql
-            x_order = f'ORDER BY '+order
+            x_order = f'ORDER BY ' + order
             x_order += ' DESC' if last else ''
             if offset:        
                 return sql+f' {x_order} limit {offset},{limit}' if limit else sql
@@ -260,10 +260,13 @@ class DB1():
             sql_x=sql_add_limit(sql)
             #rows=self.cur.execute(sql_x).fetchall()
             #self.con.commit()
+            
             x_re=self._exec(sql_x,fetch=True)
             rows=x_re['data'] if x_re['done'] else []
             titles = self._titles()#[description[0] for description in self.cur.description]
-        if debug:xxxprint (msg=['data','tb:'+table_name,''],vals=locals(),args=titles)
+        if debug:
+            xxxprint (msg=['data','tb:'+table_name,''],vals=locals(),args=titles)
+            print(f"K-sql.select:\n\t : sql={sql_x}\n\t : path={self.path}\n\t : result_nim={len(rows)}")
         if result=='list':
             return rows,titles,row_num
         else: #dict
