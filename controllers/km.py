@@ -1117,11 +1117,20 @@ def test_muti_row_approve():
     htm1=XML(f"""<form>{tbl}{bt_a}</form>""")
     return dict(t=htm1)
 
-def test030528_tag():
+def test_tag():
+    #030528
     import k_s_dom
-    tt="abc<div id='id-a1' class='class1'>div_text</div>"
-    tt="""
-    <a class="btn btn-primary" href="/spks/form/xform.csv/user/user/133" title="open form 133">133</a>,<a  title="خانم">خانم</a>,<a  title="مهندس">مهندس</a>,فاطمه,برزوی گلستانی,-,<a  title="شهر سازی">UR</a>,<a  title="طراحی">طراحی</a>,کارشناس شهرسازی,fbg,دفتر مرکزی مشهد- سجاد,y,
+    tt0="abcd"
+    tt1="abc<div id='id-a1' class='class1'>div_text</div>"
+    tt2="""<div >
+                <a class="btn btn-info" title='مشاهده فایل AQC0-HRM-CV-fbg4-off.pdf' href = 'javascript:void(0)' onclick='j_box_show("/spks/file/download/auto/form/hrm/cv/fbg/AQC0-HRM-CV-fbg4-off.pdf",false);'>F</a>
+            </div>"""
+    tt3="""<div>
+    <a class="btn btn-primary" href="/spks/form/xform.csv/user/user/133" title="open form 133">133</a>,
+    <a  title="خانم">خانم</a>,
+    <a  title="مهندس">مهندس</a>,فاطمه,برزوی گلستانی,-,
+    <a  title="شهر سازی">UR</a>,
+    <a  title="طراحی">طراحی</a>,کارشناس شهرسازی,fbg,دفتر مرکزی مشهد- سجاد,y,
             <div >
                 
             </div> ,
@@ -1136,6 +1145,59 @@ def test030528_tag():
             </div> ,
             <div >
                 <a class="btn btn-info" title='مشاهده فایل AQC0-HRM-CV-fbg4-off.pdf' href = 'javascript:void(0)' onclick='j_box_show("/spks/file/download.csv/auto/form/hrm/cv/fbg/AQC0-HRM-CV-fbg4-off.pdf",false);'>F</a>
-            </div>
+            </div></div>
     """
-    return k_s_dom.report_tag(tt)
+    
+    return dict(at2=k_s_dom.report_tag(tt2),
+                at1=k_s_dom.report_tag(tt1),
+                at0=k_s_dom.report_tag(tt0),
+                aa=str(k_s_dom.C_TAG(tt2).find('_title')))#.tag_inf())
+def test_ppr():
+    import k_file,os
+    x_cmd="D:\\ks\\ext\\WPy64-31040\\python-3.10.4.amd64\\python.exe "#, to_md {file1} {file2} ".format(file1=doc_file_path,file2=md_file_path)
+    #x_cmd+=os.path.join("D:\ks\I\web2py","0-need\k_word_mammoth.py")
+    #x_cmd+=" to_md {file1} {file2} ".format(file1=doc_file_path,file2=md_file_path)
+    
+    #x_cmd="D:\\ks\\ext\\WPy64-3850\\python-3.8.5.amd64\\python.exe "
+    #x_cmd+=os.path.join("D:\ks","I","Dropbox","00-PRO","0-py","0-base","AQC_paper_playwright.py")
+    x_cmd+=os.path.join("D:\ks\I\web2py","0-need\k_q_atm_playwright.py.py")
+    x_cmd+=" 2266" 
+    import k_os
+    return k_os.run_cmd(x_cmd) 
+    '''
+    import subprocess
+    try:
+        os.startfile(filename)
+    except AttributeError:
+        #subprocess.call(['open', filename])
+        subprocess.call(('cmd', '/C', 'start', '', filename))
+    k_file.launch_file(x_cmd)
+    '''
+    return x_cmd
+def test_ppr1():
+    from k_q_atm_playwright import C_Q_ATM_PR
+    c_q_atm_pr=C_Q_ATM_PR()
+    c_q_atm_pr.run_pp("2266")
+    return ("2266")
+def set_ppr():
+    def paper_num_min(papaer_num):
+        '''
+        goal:
+        ------
+            تهیه شماره مختصر برای هر نامه از روی شماره ثبت شده در اتوماسیون روان
+        '''
+        import re
+        num_list=re.findall("\d+", papaer_num)
+        pnm=num_list[0] #pnm=paper_num_min
+        if len(num_list)>1 and (not num_list[1] in ["1404","1403","1402","1401","1400"]):
+            pnm=num_list[1]
+        return pnm
+    if not 'lno' in request.vars:return "lno not in vars"
+    papaer_num=request.vars['lno'] #request.args[0] 
+    #from k_q_atm_ppi import C_PAPER
+    pp_num_min=paper_num_min(papaer_num) #C_PAPER().
+    import k_file
+    f_name='c:\\temp\\x_export\\paper_num.txt'
+    k_file.write('text',f_name,pp_num_min+",",append=True)
+    new_list=k_file.read('text',f_name)
+    return f"<h2>ok</h2>{pp_num_min}<br> saved to => <br>{f_name}<hr>new list=<hr>{new_list}"
