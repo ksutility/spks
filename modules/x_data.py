@@ -325,6 +325,25 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
+    'a_contact_grup':{
+        'a':{
+            'base':{'mode':'form','title':'گروه مقابل مکاتبه','code':'103'},
+            'tasks':{
+                'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'sub_p':{'type':'reference','width':'5','title':' زیر پروژه','ref':{'db':'a_sub_p','tb':'a','key':'{code}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
+                'grup_code':{'type':'text','title':'کد گروه','len':'4','uniq':"prj=`{{=__objs__['prj']['value']}}`,sub_p=`{{=__objs__['sub_p']['value']}}`"},
+                'grup_name':{'type':'text','title':'نام گروه'},
+            },
+            'steps':{
+                'pre':{'tasks':'prj,sub_p,grup_code,grup_name','jobs':'dccm','title':'تعریف اولیه','app_keys':'y','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
     'a_loc':{
         'a':{
             'base':{'mode':'form','title':'نام و آدرس دفاتر شرکت','code':'106'
@@ -349,6 +368,8 @@ x_data={
     },
     #-----------------------------------------------------------------------
     'paper':{
+        #from paper='cdate','sbj','comment','attach','lv_archiv','lv_per_archiv','lv_onvan','io_t','paper_num','num_x','num_link','folder'
+        
         'a':{
             'base':{'mode':'form','title':'نامه ها','auth':'dccm','code':'901'
             },
@@ -358,36 +379,52 @@ x_data={
                 'prj2':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{code2}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد کامل زیر پروژه'},
                 'man_crt':{'type':'reference','width':'5','title':'تهیه کننده','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{family}'},'prop':['read']},#,'prop':['read']
                 'man_ar_mng':{'type':'reference','width':'5','title':'مسئول طرح معماری','ref':{'db':'user','tb':'user','key':'{id}','val':'{un}-{family}'}},#,'prop':['read']
-                'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[]},#'hide']},
                 
-                'lno':{'type':'text','width':'10','title':'شماره نامه','prop':['read']},
+                
+                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['read']},
                 'lno_t':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
-                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['read']},
+                
                 'date_s':{'type':'fdate','width':'10','title':'تاریخ اولین ارجاع','prop':[]},
                 'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['read']},
-                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['read']},
+                
+                
                 'cdate':{'type':'fdate','width':'10','title':'تاریخ ثبت','prop':['read']},#'prop':['hide']
-                'io_t':{'type':'text','width':'5','title':'نوع','prop':['read']},
-                'outbox':{'type':'text','width':'5','title':'ارسالی','prop':['read']},
-                'x_des':{'type':'text','width':'20','title':'توضیح دستی'},#,'prop':['read']
-                'x_num':{'type':'text','width':'5','title':'شماره دستی'},#,'prop':['read']
-                'paper_num':{'type':'text','width':'6','title':'شماره کوچک','prop':[]},
+                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['read']},
+                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['read']},
                 'attach':{'type':'text','width':'10','title':'ضمایم','prop':['hide']},
+                'io_t':{'type':'text','width':'5','title':'نوع','prop':['read']},
+                'lv_archiv':{'type':'text','width':'50','title':'کلاس آرشیو','prop':['read']},
+                'lv_per_archiv':{'type':'text','width':'50','title':'آرشیو شخصی','prop':['read']},
+                'lv_onvan':{'type':'text','width':'250','title':'به- عنوان','prop':['read']},
+                'paper_num':{'type':'text','width':'6','title':'شماره کوچک','prop':[]},
+                'num_x':{'type':'text','width':'10','title':'num_x','prop':[]},
+                'num_link':{'type':'text','width':'10','title':'num_link','prop':[]},
+                'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[]},#'hide']},
+                
+                'outbox':{'type':'text','width':'5','title':'ارسالی','prop':['read']},
+                'x_des':{'type':'text','width':'30','title':'مفهوم*','title_add':'توضیح دستی'},#,'prop':['read']
+                'x_num':{'type':'text','width':'30','title':'کد*','title_add':'جهت انتخاب و یا مرتب سازی راحتتر نامه ها و موضوعات خاص'},#,'prop':['read']
+                'x_inf':{'type':'text','width':'30','title':'اطلاعات*','title_add':'اطلاعات اضافی'},
+                'x_to_grup':{'type':'reference','width':'5','title':'گروه گیرنده*','ref':{'db':'a_contact_grup','tb':'a','key':'{grup_code}','val':'{grup_name}',
+                    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['read']},#,'prop':['read']
+                
+                
                 'act_todo':{'type':'text','width':'150','title':'ارجاع نامه','prop':[]},
-                'x_act_todo':{'type':'text','width':'150','title':'اقدامات لازم','prop':[]},
-                'x_act_rec':{'type':'text','width':'150','title':'اقدامات انجام شده','prop':[]},
-                'x_act_pey':{'type':'text','width':'150','title':'پیگیری','prop':[]},      
-                'x_act_type':{'type':'select','title':'نوع اقدام','select':{'I':'INFO-اطلاع','D':'DO-اقدام','F':'FOLLOW UP-پیگیری','DF':'DO & FOLLOW UP-اقدام و پیگیری','OK':'ALL ACT DONE-اقدامات انجام شده'}},
+                'x_act_todo':{'type':'text','width':'150','title':'اقدامات لازم*','prop':[]},
+                'x_act_rec':{'type':'text','width':'150','title':'اقدامات انجام شده*','prop':[]},
+                'x_act_pey':{'type':'text','width':'150','title':'پیگیری*','prop':[]},      
+                'x_act_type':{'type':'select','title':'نوع اقدام*','select':{'I':'INFO-اطلاع','D':'DO-اقدام','F':'FOLLOW UP-پیگیری','DF':'DO & FOLLOW UP-اقدام و پیگیری','OK':'ALL ACT DONE-اقدامات انجام شده'}},
                  #,'get_inf':{'type':'xlink','width':'20','title':'دانلود','link':{'pro':['ksw','aqc','import_paper_inf'],'args':['{lno}']},'prop':['hide']}                
             },
             'steps':{
                 'pre':{'tasks':'prj_id,prj1,prj2','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'lable_1,x_act_type,man_crt,x_num,x_des,x_act_rec,act_todo,x_act_pey,x_act_todo','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'lable_2,x_act_type,folder','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'date_s,date_e,lno,sbj,comment,io_t','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+                's1':{'tasks':'x_act_type,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_rec,x_act_pey,x_act_todo,lable_1,act_todo,lable_2','jobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'x_act_type','jobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'folder,lno,sbj,comment,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate,date_s,date_e','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'prj_id,man_crt,x_num,x_des,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_t,sbj','view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,attach,folder'}
+                'all':{'input':'prj_id,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_t,sbj',
+                    'view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,num_x,num_link,attach,folder,lv_onvan,lv_archiv,lv_per_archiv'}
             },
             'labels':{
                 'lable_1':'فیلد ارجاع نامه توسط نرم افزار اسکرپ اتوماسیون پر می شود در زمان بررسی هر نامه باید آنرا خالی کرد تا نشانه تکمیل اقدامات لازم باشد',
