@@ -788,7 +788,8 @@ def xtable():
         rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
         #if rows:rows.reverse()
         trs,new_titles,nr=xtable_show(rows,titles,tasks,x_data_s)
-        
+        #import k_err
+        #k_err.xreport_var([trs,new_titles])
         from k_tools import C_URL
         c_url=C_URL()
         from k_htm import C_TABLE
@@ -815,14 +816,17 @@ def xtable():
                                 ,TD(x_data_s['base']['title'],_width='10%')
                         )),_style='position:sticky;top:0px')
             import k_date,k_icon
-            btm_mnu= A(XML(k_icon.download(30)),_title="Download CSV",_class="btn btn-success",_href=URL('xtable.csv',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars))
+            btm_mnu= DIV(A("XLS",XML(k_icon.download(20)),_title="Download XLS",_class="btn btn-success",_href=URL('xtable.xls',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars)),
+                         A("CSV",XML(k_icon.download(20)),_title="Download CSV",_class="btn btn-warning",_href=URL('xtable.csv',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars)))
             return dict(style=style1,script=script1,
                 table_filter=c_filter.htm,table_head=htm_head,table=table1,btm_mnu=btm_mnu)
-        elif c_url.ext=='csv':
+        elif c_url.ext=='xls':
             tt="\ufeff" # BOM
             #return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
-            return c_table.export_csv()
+            return c_table.export_csv(request.args[-1])
             #return dict(data=rows)
+        elif c_url.ext=='csv':
+            return dict(x=c_table.creat_htm())
 #--------------------------------------
 def _sabege():
     if len(request.args)<3 :
