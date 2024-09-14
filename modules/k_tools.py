@@ -75,7 +75,7 @@ def nth_item_of_dict(xdic,n,up_result=''):
 def server_is_test():
     from gluon import current
     srv_port=current.request.env.SERVER_PORT 
-    #print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
+    print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
     return (srv_port == '50' or srv_port == '150')
 def server_is_python():
     from gluon import current
@@ -83,7 +83,9 @@ def server_is_python():
     #print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
     return srv_port == '100' or srv_port == '150'
 def server_python_add():
+    from gluon import current
     ip='http://192.168.88.179'
+    ip="""http://"""+ current.request.env.HTTP_HOST.partition(":")[0]
     if server_is_test():
         return ip+":150"
     else:
