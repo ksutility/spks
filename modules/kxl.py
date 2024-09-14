@@ -333,6 +333,21 @@ def read(wb_path,sheet_name):
             rows.append(row_new)
             dic_list.append({t:row_new[i] for i,t in enumerate(titles)})
     return titles,rows,dic_list
+def append(wb_path,sheet_name,new_rows):
+    import os,k_file
+    if os.path.exists(wb_path):
+        wb = load_workbook( wb_path )
+        if sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+        else:
+            ws = wb.create_sheet(sheet_name)
+    end_row=ws.max_row        
+    for i,row in enumerate(new_rows):
+        for j,cell in enumerate(row):
+            ws.cell(row=end_row+i+1, column=j+1, value=cell)
+            #ws.update_index(row=end_row+i+1, col=j+1, val=cell)
+    k_file.backup(wb_path)
+    wb.save(wb_path)    
 def save(data,file_name=r'c:\test\test.xlsx',titels=[]):
     ''' 01/09/14
         input:
