@@ -101,6 +101,7 @@ fildes={'paper':[{'name':'lno','type':'text','title':'شماره نامه','disa
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def index():
+    redirect(URL('spks','user','login',args=['go']))
     response.flash = T("سیستم مدیریت محتوا")
     im_url=URL('spks','static','images/AQC-entrance-web-page-030401.jpg')
     login_ulr=URL('spks','user','login')
@@ -110,8 +111,10 @@ def index():
         <div>سیستم مدیریت محتوا</div>
         </body>
     """
+    url2=URL('spks','form','list_0')
+    url3=URL('spks','user','login',args=['go'])
     return dict(im_url=im_url,login_ulr=login_ulr,x_url=x_url,m1=T('سیستم مدیریت محتوا'),m2=T('-'),m3=T('Kind Smart Web Tools'),
-        link=A('ورود', _href=URL('spks','form','list_0'),_class="btn btn-primary"))
+        link=A('ورود', _href=url3,_class="btn btn-primary"))
 def index1():
     t=[ A('جداول اطلاعات',_href=URL('data','index')),
         A('ویرایشگر اتوکد',_href=URL('acpe','index'))

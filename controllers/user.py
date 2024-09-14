@@ -26,6 +26,7 @@ def _isok_un_ps (un,ps):
         session["admin"]=True if session["username"]=='ks' else False
         session["file_access"]=rs["file_access"]
         session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
+        #session["auth_prj"]=rs["auth_prj"]
         #Session.Timeout=15
 
         response.cookies["username"]=un
@@ -55,10 +56,8 @@ def _user_chek_ps_get_Inf (un,ps):#,fullname):-
         return True, '{m_w} {name} {family}'.format(**rs),rs
     else:
         return False,False,False
-#--------------------------------------------'
-def _chek_un_ps(un,ps):
-    goback="<BR><a href='login'><h3> بازگشت </h3></a>"
-    if _isok_un_ps(un,ps):
+def _login_report(isok_un_ps):
+    if isok_un_ps:
         #session["username"]=un
         ou='''  <div align=center><h2>{}</h2>
                 <h3>شما با موفقیت وارد سیستم شدید</h3><hr>
@@ -72,8 +71,13 @@ def _chek_un_ps(un,ps):
                 <h3>نام و يا رمز را اشتباه وارد کرده ايد</h3>
                 {}
                 </div>
-        '''.format(goback,)
-    return ou
+        '''
+    return ou    
+#--------------------------------------------'
+def _chek_un_ps(un,ps):
+    isok_un_ps=_isok_un_ps(un,ps)
+    ou=_login_report(isok_un_ps)
+    return ou,isok_un_ps
     #------------------------------------------------------------------------------------------
 def f_cod(s1, enc_st='09377953310'):
     return s1
@@ -95,7 +99,7 @@ def logout():
     return dict(ou=XML('''  <br><br><div align=center>
                 <h2>{}</h2>
                 <h4>شما با موفقیت از سيستم خارج شديد </h4><br><br>
-                <a href='login'><h3> بازگشت </h3></a></div>'''.format(uf)))
+                <a href='login'><h3> ورود به سیستم </h3></a></div>'''.format(uf)))
 def retrieve_password():     
     def send_ps(un): #,re):
         sql=db1.sql_set(_top="",_fields_name="*",_table_name="[un]",_where=f"un='{un}'" ,_order="")
@@ -183,8 +187,10 @@ def login():
         else:
             ou+=" نام وارد شده در سيستم ثبت نشده است <br>" + un
         return ou
-    """    
+    """
+    print(str(session))
     un,un_inf=login_by_ip()
+    isok_un_ps=False
     if un:
         for x in un_inf:
             #print (f"ses--{x}={un_inf[x]}")
@@ -193,36 +199,84 @@ def login():
             <h2>{un_inf["fullname"]}</h2>-
             <h2>شما با استفاده از آی پی وارد برنامه شدید</h2>
             <hr>
-        </div>'''    
+        </div>''' 
+        isok_un_ps=True     
     elif "username" in request.cookies and "password" in request.cookies:
         un=request.cookies["username"].value
         ps=request.cookies["password"].value
-        ou=_chek_un_ps(un,ps)
+        ou,isok_un_ps=_chek_un_ps(un,ps)
         #- print(f'cookies-{un}-{ps}')
         #redirect(URL('index'))
-    elif "username" in session and session["username"] and session["password"]:
+    elif "username" in session and session["username"]: #and session["password"]:
+        '''
         un=session["username"]
         ps=session["password"]
-        ou=_chek_un_ps(un,ps)
-        #- print(f'session-{un}-{ps}')
+        ou,isok_un_ps=_chek_un_ps(un,ps)
+        print(f'session-{un}-{ps}')
         #redirect(URL('index'))
+        '''
+        isok_un_ps=True
+        ou=_login_report(isok_un_ps)
     elif request.vars["username"]:  #!="":
         un=request.vars["username"]
         ps=request.vars["password"]
         #session["ir_date"]= iran_time("","",0,x_w,"t")
         #session("ir_weak")=x_w
         #set_inf()
-        ou=_chek_un_ps(un,ps)
+        ou,isok_un_ps=_chek_un_ps(un,ps)
     else:
         ou=f'''<div align=center>
-        <h2>لطفا براي ورود نام کاربری و پسورد خود را وارد کنيد</h2>
+        
         <hr>
         <Form action = "login" method="POST"  id=form1 name=form1>
-        Username:<input type="text" name="username" id="username"  size="20" value="{request.vars["username"]}" ><br><br>
-        Password:<input type="password" name="password" size="20"><br><br>
-        <input type="submit" value="ورود"  style="width:200px;" id=submit1 name=submit1>
-        </Form></div>'''
-    return dict(ou=XML(ou))
+            <div class="row">
+                <div class="col">
+                    <input type="text" name="username" id="username"  size="20" value="{request.vars["username"]}" > 
+                </div>
+                <div class="col">
+                    : کد کاربری
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="password" name="password" size="20"> 
+                </div>
+                <div class="col">
+                    : رمز عبور
+                </div>
+            </div>
+            <hr>
+            <input type="submit" value="ورود"  style="width:200px;" id=submit1 name=submit1>
+        </Form>
+        
+        </div>
+        '''
+        ou1=f'''<div align=center>
+        <h2>لطفا براي ورود نام کاربری و پسورد خود را وارد کنيد</h2>
+        {ou}
+        <hr>
+        </div>'''
+    if request.args :
+        if isok_un_ps:
+            redirect(URL('spks','form','list_0'))
+        else:
+            response.flash = T("سیستم مدیریت محتوا")
+            im_url=URL('spks','static','images/AQC-entrance-web-page-030401.jpg')
+            login_ulr=URL('spks','user','login')
+            x_url=URL('spks','static','images/AQC-')
+            html=f"""
+                <body style="background-image: url('{im_url}');">
+                <div>سیستم مدیریت محتوا</div>
+                </body>
+            """
+            url2=URL('spks','form','list_0')
+            url3=URL('spks','user','login',args=['go'])
+            return dict(im_url=im_url,login_ulr=login_ulr,x_url=x_url,m1=T('سیستم مدیریت محتوا'),m2=T('-'),m3=T('Kind Smart Web Tools'),
+                link=A('ورود', _href=url3,_class="btn btn-primary")
+                ,ou=XML(ou)
+                ,go=True)
+    else:    
+        return dict(ou=XML(ou),go=False)
 def change_password():
     #chek_un_ps(2,"")
     uf=session["user_fullname"]
