@@ -1255,3 +1255,7 @@ def set_ppr():
     k_file.write('text',f_name,pp_num_min+",",append=True)
     new_list=k_file.read('text',f_name)
     return f"<h2>ok</h2>{pp_num_min}<br> saved to => <br>{f_name}<hr>new list=<hr>{new_list}"
+def reports():
+    import k_htm #k_err
+    #return k_err.htm_dict(session['reports'])
+    return k_htm.val_report(session['reports'])
