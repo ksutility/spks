@@ -288,6 +288,8 @@ def test3():
     path=r'C:\temp\need.zip'
     re1=k_file.zip7_extract(path)
     return (f'<br> unzip_7 done successfully <br> {path} <hr> inf= {re1["inf"]} <hr> ok= {re1["ok"]}')
+def test4():
+    return request.env.HTTP_HOST.partition(":")[0]
 #-------------------------------------------------
 def rar_extract(rar_path):#rar or zip
     from unrar import rarfile
@@ -359,18 +361,18 @@ def test_pivot():
     // dataset from a CSV instead of from JSON.
 
     $(function(){
-		data1=[
+        data1=[
                 {color: "blue", shape: "circle"},
                 {color: "red", shape: "triangle"}
             ];
 
-		setting1={
+        setting1={
                 rows: ["color"],
                 cols: ["shape"]
             };
         //$("#output").pivot(data1,setting1);
-		$("#output").pivotUI(
-			data1,setting1
+        $("#output").pivotUI(
+            data1,setting1
         );
      });
         
@@ -403,7 +405,7 @@ def test_pivot():
             var renderers = $.extend($.pivotUtilities.renderers,
                 $.pivotUtilities.plotly_renderers);
             $("#output").pivotUI(obj_ar,%%%2);
-		});
+        });
     </script>
     """ .replace("%%%1",data1).replace("%%%2",set1)
     htm1+="""
@@ -713,21 +715,21 @@ def test_kytable():
     <html lang="fa">
     <style type="text/css" id="dark-mode-custom-style"></style>
     <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>   kx table </title>
-			<meta http-equiv="Cache-control" content="no-cache">
-			<!-- kxtable -->
-				<script src="{URL('static','kxtable/jquery-1.8.2.min.js')}" type="text/javascript"></script>
-				
-				<link rel="stylesheet" href="{URL('static','kxtable/jquery-ui.css')}">
-				<script src="{URL('static','kxtable/jquery-ui.js')}"></script>
-				
-				<link rel="stylesheet" href="{URL('static','kxtable/kxtable.css')}">
-				<script src="{URL('static','kxtable/kxtable-21.js')}"></script>
-				
-				<link rel="stylesheet" href="{URL('static','kxtable/jquery.contextMenu.css')}" type="text/css">
-				<script src="{URL('static','kxtable/jquery.contextMenu.js')}" type="text/javascript"></script>
-			<!-- /kxtable -->	
-				
+        <title>   kx table </title>
+            <meta http-equiv="Cache-control" content="no-cache">
+            <!-- kxtable -->
+                <script src="{URL('static','kxtable/jquery-1.8.2.min.js')}" type="text/javascript"></script>
+                
+                <link rel="stylesheet" href="{URL('static','kxtable/jquery-ui.css')}">
+                <script src="{URL('static','kxtable/jquery-ui.js')}"></script>
+                
+                <link rel="stylesheet" href="{URL('static','kxtable/kxtable.css')}">
+                <script src="{URL('static','kxtable/kxtable-21.js')}"></script>
+                
+                <link rel="stylesheet" href="{URL('static','kxtable/jquery.contextMenu.css')}" type="text/css">
+                <script src="{URL('static','kxtable/jquery.contextMenu.js')}" type="text/javascript"></script>
+            <!-- /kxtable -->   
+                
 
     </head>
    <body bgcolor="#888888">
@@ -744,12 +746,12 @@ def test_kytable():
         ]
     return XML(htm1+kytable.kxtable_prepar(rows2,ttls2,wids2,""))
 def test_xl():
-    import k_file_x
+    import k_file_x,k_xl_light
     #path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
     path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
-    tbl=k_file_x.read_xl(wb_path =path1,
+    tbl=k_xl_light.read(wb_path =path1,
                     ws_name='daily-report',
-                    row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
+                    row_st=2,row_en=100000,col_st=1,col_en=10,empty_row='b')
     #return (str(tbl))
     set1="""{
         rows: ["نام و نام خانوادگی"], 
@@ -763,7 +765,8 @@ def test_xl():
 
     
 def test_xl_old():
-    read_xl(wb_path,ws_name,row_st,row_en,col_st,col_en)
+    import k_xl_light
+    k_xl_light.read(wb_path,ws_name,row_st,row_en,col_st,col_en)
     xl_path = r'C:\temp\test.xlsx'
     import pylightxl as xl
     
@@ -777,22 +780,38 @@ def test_xl_old():
             row+=[(db.ws(ws='a12').index(row=i+1, col=j+1))]
         tbl+=[row]
     return (str(tbl))
+def _aqc_report_daily_file():
+    import k_file_x,k_tools,k_xl_light
+    
+    if k_tools.server_is_test():
+        path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
+    else:
+        path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
+    #path1=r"c:\temp\test\REPORT-DAILY-R03-030402_test.xlsx"
+    return path1
 def _aqc_report_daily_read(): 
-    try:
-        import k_file_x,k_tools
-        if k_tools.server_is_python():
-            if k_tools.server_is_test():
-                path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
-            else:
-                path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
-            data=k_file_x.read_xl(wb_path =path1,
-                            ws_name='daily-report',
-                            row_st=2,row_en=100000,col_st=1,col_en=10,to_empty=True)
-            return {'ok':True,'data':data}
-        else:
-            return {'ok':False,'msg':"port shoud be :100"}   
-    except Exception as err:
-        return {'ok':False,'msg':"یک خطا در سیستم وجود دارد لطفا به مهندس سعادتی اطلاع دهید" + str(err)}
+
+    import k_file_x,k_tools,k_xl_light
+    if k_tools.server_is_python():
+        data=k_xl_light.read(wb_path =_aqc_report_daily_file(),
+                        ws_name='daily-report',
+                        row_st=2,row_en=0,col_st=1,col_en=10,empty_row='continue')
+        return {'ok':True,'data':data}
+    else:
+        return {'ok':False,'msg':"port shoud be :100"}   
+
+def _aqc_report_daily_write(new_rows): 
+    new_rows=[row[1:] for row in new_rows]
+
+    import k_file_x,k_tools,kxl,k_xl_ms
+    if k_tools.server_is_python():
+        #k_file_x.xl_write(wb_path=path1,ws_name='daily-report',new_rows=new_rows)
+        #kxl.append(wb_path=path1,sheet_name='daily-report',new_rows=new_rows)
+        k_xl_ms.append(wb_path=_aqc_report_daily_file(),sheet_name='daily-report',new_rows=new_rows)
+        return {'ok':True}
+    else:
+        return {'ok':False,'msg':"port shoud be :100"}   
+       
 def _aqc_report_daily_title(in_titels=''): #rows[0]
     t=in_titels if in_titels else ''
     x_titles=[  {'name':'id','width':'20px'},
@@ -855,7 +874,7 @@ def aqc_report_daily_kytable():
     for i,row in enumerate(rows[1:]):
         for d in range(7):
             if (row[1]==int(tm[d]['yyyy']) and row[2]==int(tm[d]['mm']) and row[3]==int(tm[d]['dd'])):
-                n_rows[d]+=[[i]+row]
+                n_rows[d]+=[[i+1+2]+row]
                 break
             #n_rows=[[i]+row for i,row in enumerate(rows[1:]) if (row[1]==int(tm['yyyy']) and row[2]==int(tm['mm']) and row[3]==int(tm['dd']))]
     dv=[]
@@ -898,10 +917,24 @@ def _aqc_report_daily_updata(new_data,col_titels):
             '9':{'type':'num'}, #time
             '0':{'type':'num'},
             }
-      
+    def report_div(res,act_help,act_help_des):
+        if res:    
+            rep_des='نتیجه : اطلاعات مورد تایید است' 
+            bg_color="#5f5"
+        else:
+            rep_des='نتیجه : در اطلاعات ورودی عدم انطباق های زیر وجود دارد'
+            bg_color="#f55"   
+        return DIV(
+                DIV(act_help[1],_class="col-3"),
+                DIV(act_help[0],_title=act_help_des,_class="col-3"),HR(),
+                DIV(rep_des,_class="col-3"),
+                _style=f"background-color:{bg_color};text-align:center;font-size:35px;",
+                _class="row"
+                )
+    
     #return str(un_list) + str(prj_list)
     def validate_data(data):
-        act_help="بررسی ساختار اطلاعات ورودی  بر حسب فرمت ستون داده ها"
+        act_help=["بررسی ساختار اطلاعات ورودی  بر حسب فرمت ستون داده ها","گام 1 "]
         act_help_des="""در این مرحله برای هر کدام از ستونهای اطلاعات ورودی یک ساختار مشخص می شود و اطلاعات ورودی با آن ساختار مطابقت داده می شود
         انواع ساختار : متن، عدد، لیست 
         توضیح : لیست  یعنی مقدار داخل جدول باید یکی از مقادر یک لیست باشد
@@ -926,17 +959,13 @@ def _aqc_report_daily_updata(new_data,col_titels):
                 else:  
                     tds+=[{'value':'-','title':cell,'style':'background-color:#5f5' }]
                  
-            trs+=[tds]
-        if ok:    
-            rep_des=' با موفقیت پاس شد' 
-            bg_color="#5f5"
-        else:
-            rep_des=' : اشتباه در اطلاعات ورودی'
-            bg_color="#f55"   
-        return {'ok':ok,'report_table':k_htm.C_TABLE(col_titels,trs).creat_htm(),'rep_n':rep_n,
-            'rep_des':DIV(act_help+rep_des,_title=act_help_des,_style=f"background-color:{bg_color};text-align:center;font-size:35px;")}
+            trs+=[tds] 
+        return {'ok':ok,
+            'rep_des':report_div(ok,act_help,act_help_des),
+            'rep_err':DIV(H1(f"ERROR : {rep_n} item"),k_htm.C_TABLE(col_titels,trs).creat_htm())
+            }
     def check_duplicate(new_data,file_data,duplicate_col_check=[1,2,3,4]):
-        act_help="بررسی عدم  ورود دوباره اطلاعات موجود در اثر اشتباه کاربر"
+        act_help=["بررسی عدم  ورود دوباره اطلاعات موجود در اثر اشتباه کاربر","گام 2 "]
         act_help_des="""هدف از این بخش این است که با کمک یک سری روشها اطلاعاتی را که ممکن است  داپلیکیت و یا کپی ناقص  شده باشند و ورود آنها مشکل دار است را به کاربر نشان دهد
         تا کاربر پس از بررسی گزارش این مرحله در مورد ورود یا عدم ورود اطلاعات تصمیم  بگیرد
         در حال حاضر برای این موضوع روش زیر استفاده می شود
@@ -964,17 +993,20 @@ def _aqc_report_daily_updata(new_data,col_titels):
                 ix=base['sc'].index(s_row)
                 base['file_data'][ix].append([i_f]+row) 
                 rep_n+=1
-        
+        err_txt1="عدم انطباق بر اساس فیلدهای روبرو :"
         rep=[]
-        ok=[]
+        rep_ok=[]
         for i,s_row in enumerate(base['sc']):
             if base['file_data'][i]:
-                intro=TABLE(TR(*[x for x in s_row],_style="background-color:#faa;text-align:center;font-size:30px;"),_style="direction: rtl;")
+                intro=TABLE(TR(*[x for x in [err_txt1]+s_row],_style="background-color:#faa;text-align:center;font-size:30px;"),_style="direction: rtl;")
                 t1=DIV('اطلاعات جدید',_style="background-color:#afa;text-align:center;font-size:24px")
                 t2=DIV('اطلاعات ثبت شده در فایل',_style="background-color:#aaf;text-align:center;;font-size:24px")
-                rep+=[intro,t1,k_htm.C_TABLE(col_titels,base['new_data'][i]).creat_htm(),t2,k_htm.C_TABLE(col_titels,base['file_data'][i]).creat_htm(),HR()]
+                rep+=[DIV(intro,
+                    DIV(t1,k_htm.C_TABLE(col_titels,base['new_data'][i]).creat_htm(),
+                        t2,k_htm.C_TABLE(col_titels,base['file_data'][i]).creat_htm(),_style='border:10px dashed red;')
+                    ,HR())]
             else:
-                ok+=[row for row in base['new_data'][i]]
+                rep_ok+=[row for row in base['new_data'][i]]
         style=XML("""<style>
             table, td, th {  
               border: 1px solid #ddd;
@@ -986,17 +1018,39 @@ def _aqc_report_daily_updata(new_data,col_titels):
             }
             th, td { padding: 5px;}
             th { background-color:#f2f2f2; }
-            </style>""")    
-        return DIV(style,XML(f'new_data={len(new_data)} - base={len(base)}-rep_n={rep_n}'),
-                *rep,HR(),DIV(H1("OK"),k_htm.C_TABLE(col_titels,ok).creat_htm()))
-    vldt=validate_data(new_data)
-    if not vldt['ok']:
-        return DIV(vldt['rep_des'],H1(f"ERROR : {vldt['rep_n']} item"),vldt['report_table'])
-    re1=vldt['rep_des']
-    re2=check_duplicate(new_data,file_data,duplicate_col_check=[0,1,2,3])
-    return DIV(re1,HR(),re2)
-    #ch_dbl=check_duplicate()
-    
+            </style>""")  
+        ok = (not rep) or (len(rep)<=2)    
+        return {'ok':ok,
+            'rep_des':report_div(ok,act_help,act_help_des),
+            'rep_err':DIV(style,
+                        XML(f'new_data={len(new_data)} - base={len(base)}-rep_n={rep_n}-len(rep)={len(rep)}'),
+                        *rep,HR(),
+                        DIV(
+                            DIV("اطلاعات مورد تایید در گام 2 به شرح زیر می باشند",
+                                _style=f"background-color:#CFC;text-align:center;font-size:35px;")
+                            ,k_htm.C_TABLE(col_titels,rep_ok).creat_htm()
+                            )   
+                        )
+                    }
+    vldt1=validate_data(new_data)
+    if not vldt1['ok']:
+        return DIV(vldt1['rep_des'],vldt1['rep_err'])
+    re1=vldt1['rep_des']
+    vldt2=check_duplicate(new_data,file_data,duplicate_col_check=[0,1,2,3])
+    if not vldt2['ok']:
+        return DIV(re1,HR(),vldt2['rep_des'],vldt2['rep_err'])
+    re2=vldt2['rep_des']
+    import k_tools
+    if not k_tools.server_is_test():
+        return DIV(re1,HR(),re2,HR(),H1("ادامه این فرایند در حال آماده سازی می باشد"))
+    vldt3=_aqc_report_daily_write(new_rows=new_data)
+    act_help=["ذخیره اطلاعات جدید در فایل اکسل","گام 3 "]
+    act_help_des="""
+        """
+    re3=report_div(vldt3['ok'],act_help,act_help_des)
+    if not vldt3['ok']:
+         return DIV(re1,HR(),re2,HR(),re3,vldt3['msg'])
+    return DIV(re1,HR(),re2,HR(),re3)
 def test_kytable1():
     return '''
     
@@ -1004,21 +1058,21 @@ def test_kytable1():
     <html lang="fa">
     <style type="text/css" id="dark-mode-custom-style"></style>
     <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>   kx table </title>
-			<meta http-equiv="Cache-control" content="no-cache">
-			<!-- kxtable -->
-				<script src="/spks/static/kxtable/jquery-1.8.2.min.js" type="text/javascript"></script>
-				
-				<link rel="stylesheet" href="/spks/static/kxtable/jquery-ui.css">
-				<script src="/spks/static/kxtable/jquery-ui.js"></script>
-				
-				<link rel="stylesheet" href="/spks/static/kxtable/kxtable.css">
-				<script src="/spks/static/kxtable/kxtable-21.js"></script>
-				
-				<link rel="stylesheet" href="/spks/static/kxtable/jquery.contextMenu.css" type="text/css">
-				<script src="/spks/static/kxtable/jquery.contextMenu.js" type="text/javascript"></script>
-			<!-- /kxtable -->	
-				
+        <title>   kx table </title>
+            <meta http-equiv="Cache-control" content="no-cache">
+            <!-- kxtable -->
+                <script src="/spks/static/kxtable/jquery-1.8.2.min.js" type="text/javascript"></script>
+                
+                <link rel="stylesheet" href="/spks/static/kxtable/jquery-ui.css">
+                <script src="/spks/static/kxtable/jquery-ui.js"></script>
+                
+                <link rel="stylesheet" href="/spks/static/kxtable/kxtable.css">
+                <script src="/spks/static/kxtable/kxtable-21.js"></script>
+                
+                <link rel="stylesheet" href="/spks/static/kxtable/jquery.contextMenu.css" type="text/css">
+                <script src="/spks/static/kxtable/jquery.contextMenu.js" type="text/javascript"></script>
+            <!-- /kxtable -->   
+                
 
     </head>
    <body bgcolor="#888888">
@@ -1189,7 +1243,7 @@ def set_ppr():
         import re
         num_list=re.findall("\d+", papaer_num)
         pnm=num_list[0] #pnm=paper_num_min
-        if len(num_list)>1 and (not num_list[1] in ["1404","1403","1402","1401","1400"]):
+        if len(num_list)>1 and len(num_list[1])>3 and (not num_list[1] in ["1404","1403","1402","1401","1400"]):
             pnm=num_list[1]
         return pnm
     if not 'lno' in request.vars:return "lno not in vars"
