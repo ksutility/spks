@@ -382,7 +382,7 @@ x_data={
                 
                 
                 'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['read']},
-                'lno_t':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
+                'lno_p':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
                 
                 'date_s':{'type':'fdate','width':'10','title':'تاریخ اولین ارجاع','prop':[]},
                 'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['read']},
@@ -423,7 +423,7 @@ x_data={
                 's3':{'tasks':'folder,lno,sbj,comment,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate,date_s,date_e','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'prj_id,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_t,sbj',
+                'all':{'input':'prj_id,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_p,sbj',
                     'view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,num_x,num_link,attach,folder,lv_onvan,lv_archiv,lv_per_archiv'}
             },
             'labels':{
@@ -438,7 +438,10 @@ x_data={
                 'lno,sbj,date_s,io_t':'شماره، موضوع، تاریخ، نوع',
                 'lno,sbj,date_s,io_t,folder':'شماره،موضوع،تاریخ،ص-و،فایلها', 
                 'lno,sbj,date_s,io_t,x_num,x_des':'ش.م.ت.ن-دستی : شماره و شرح',
-                'prj,lno,sbj,date_s,io_t,x_num,x_des,act_todo,x_act_todo,x_act_rec,x_act_pey':'شماره،موضوع،تاریخ،ص-و،توضیح،اقدام (لازم،سابقه، پی گیری)'}, #table_view cols filter
+                'prj,lno,sbj,date_s,io_t,x_num,x_des,act_todo,x_act_todo,x_act_rec,x_act_pey':'شماره،موضوع،تاریخ،ص-و،توضیح،اقدام (لازم،سابقه، پی گیری)',
+                'folder,lno,sbj,date_s,comment,io_t,x_to_grup,act_todo,x_act_todo,x_act_rec,x_act_pey,x_act_type,x_inf,x_inf,x_des':'بررسی 1',
+                'folder,lno,sbj,date_s,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate':'بررسی 2',
+                }, #table_view cols filter
                 #cols_filter={'':'همه','lno,sbj':'2',}
             'data_filter':
                 {'':'همه نامه ها',
@@ -456,6 +459,26 @@ x_data={
                 'lno like "%xxxx%"':'جستجوی نامه'},
             'order':'date_s'    
                 
+        },#,
+        'p':{
+            'base':{'mode':'form','title':'نامه های پیش نویس','auth':'dccm','code':'9011'
+            },
+            'tasks':{
+                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['read']},
+                'lno_p':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
+                
+                'date_s':{'type':'fdate','width':'10','title':'تاریخ اولین ارجاع','prop':[]},
+                'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['read']},
+                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['read']},
+                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['read']},
+                'attach':{'type':'text','width':'10','title':'ضمایم','prop':['hide']},
+                'io_t':{'type':'text','width':'5','title':'نوع','prop':['read']},
+            },
+            'steps':{
+                'pre':{'tasks':'lno','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'cols_filter':{},
+            'data_filter':{}
         },#,
     },
     #--------------------------------------------------------------------
@@ -489,7 +512,8 @@ x_data={
                 'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی'},
                 'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dcc_prj'},
                 'file_off':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}4-off','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'مدارک اداری','auth':'dccm'},
-                'login_ip':{'type':'text','title':'آی پی ورود ویژه','len':'3'}
+                'login_ip':{'type':'text','title':'آی پی ورود ویژه','len':'3'},
+                'auth_prj':{'type':'reference','title':'حق دسترسی به پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['multiple']},
                 },
             'steps':{
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -886,11 +910,11 @@ x_data={
 }
 def x_data_verify_task(obj_name,obj):
     obj['name']=obj_name
-    if 'prop' not in obj:obj['prop']=[]
-    if 'width' not in obj:obj['width']='10'
-    if 'title' not in obj:obj['title']=obj['type']+'-'+obj_name
-    if 'def_value' not in obj:obj['def_value']=''
-    if 'onchange' not in obj:obj['onchange']=''
+    if not 'prop' in obj:obj['prop']=[]
+    if not 'width' in obj:obj['width']='10'
+    if not 'title' in obj:obj['title']=obj['type']+'-'+obj_name
+    if not 'def_value' in obj:obj['def_value']=''
+    if not 'onchange' in obj:obj['onchange']=''
 def x_data_verify(x_data): 
     #defult data_filter
     data_filter={'':'همه موارد',
@@ -904,31 +928,31 @@ def x_data_verify(x_data):
             for obj_name,obj in tb_obj['tasks'].items():
                 #for obj_name,obj in ff_o.items():
                 x_data_verify_task(obj_name,obj)
-            if 'views' not in tb_obj:tb_obj['views']={}  
+            if not 'views' in tb_obj:tb_obj['views']={}  
             if not tb_obj['views']:
                 tb_obj['views']={
                     'input':list(tb_obj['tasks'].keys()),
                     'view1':{},
                     'view2':{}
                 }
-            if 'base' not in tb_obj:tb_obj['base']={}  
-            if 'labels' not in tb_obj:tb_obj['labels']={} 
+            if not 'base' in tb_obj:tb_obj['base']={}  
+            if not 'labels' in tb_obj:tb_obj['labels']={} 
             #--------------------
-            if 'mode' not in tb_obj['base']:tb_obj['base']['mode']='table'  
+            if not 'mode' in tb_obj['base']:tb_obj['base']['mode']='table'  
             tb_obj['base']['tb_name']=tb_name
             tb_obj['base']['db_name']=db_name
             #--------------------
-            if 'order' not in tb_obj:tb_obj['order']='id'    
-            if 'cols_filter' not in tb_obj:tb_obj['cols_filter']:{'':'همه',}
-            if 'data_filter' not in tb_obj:tb_obj['data_filter']:{}  
+            if not 'order' in tb_obj:tb_obj['order']='id'    
+            if not 'cols_filter' in tb_obj:tb_obj['cols_filter']:{'':'همه',}
+            if not 'data_filter' in tb_obj:tb_obj['data_filter']:{}  
             tb_obj['data_filter'].update(data_filter)
             if 'steps' in tb_obj:
                 i=-1
                 for step_name,step in tb_obj['steps'].items():
                     i+=1
-                    if 'app_keys' not in step or not step['app_keys']:
+                    if not 'app_keys' in step or not step['app_keys']:
                         step['app_keys']='y,x,r' if i>0 else 'y,x'
-                    if 'app_titls' not in step or not step['app_titls']:
+                    if not 'app_titls' in step or not step['app_titls']:
                         step['app_titls']=[{'x':'حذف فرم','y':'تایید این مرحله','r':'بازگشت به مرحله قبل'}[x] for x in step['app_keys'].split(',')]
                     step['app_keys']=step['app_keys'].split(',')
                     #'app_kt'=app dict from keys and titels 
