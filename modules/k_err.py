@@ -23,7 +23,8 @@ def _func_inf(inspect_n=0,trace_n=0):
             'name':trace_step[3],
             'args':trace_step[0].f_code.co_consts,
             'line':trace_step[2]}
-        func["inf"]='{} #{} : {} () =>'.format(trace_step[1],func['line'],func['name'],func['args'])   
+        func["inf"]='{} #{} . {} () >>> '.format(trace_step[1],func['line'],func['name'],func['args']) 
+        func["inf_mini"]='{}#{}.{}()'.format(trace_step[1].split("\\")[-1],func['line'],func['name'],func['args'])
             #[4][:-1]]}
         return func
     ## -----------------------------
@@ -419,8 +420,8 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
     if out_case in [2,3]:
         x_case=cat[0]
         xc=str(x_case) if x_case else ''
-        print('\n'+xtime[-8:]+xc+f'-{func["inf"]}|{x_case}|{msg[0]}',end='')
-        if msg[1]:print(f'msg2={msg[1]}')
+        print('\n'+xtime[-8:]+xc+f'-{func["inf_mini"]} >>> {x_case} : {msg[0]},{msg[1]}')#,end=''
+        #if msg[1]:print(f'msg2={msg[1]}')
         
         
     if cat[0]=='err' or msg[0]=='err':
