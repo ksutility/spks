@@ -27,12 +27,87 @@ def report_db_change(db_name,t1,dif_list,nth=1):
     f.write('\n'+f_now() + " : " +t1 + f" - (#{nth})")
     if dif_list:f.write('\n####  '.join(['']+dif_list))
     f.close()
-class SQL():
-    a,b,c="","",""  
-    def __init__(self,a,b,c):
-        self.a = a
-        self.b = b
-        self.c = c 
+class C_SQL():
+    def __init__(self):
+        pass
+    def test_where(self,q_where,res1,db1,tb1): 
+        test_where=res1['sql_where']
+        sql_where=self.where(q_where)
+        sql_t2="SELECT * FROM {} WHERE ".format(tb1)+ sql_where
+        res2=db1._exec(sql_t2,fetch=True)
+        re_c=" != " if res2['data']!=res1['rows'] else " = "
+        re_c2 =" !=" if sql_where!=test_where else " = "
+        xxxprint(out_case=3,msg=["C_SQL",re_c, re_c2],vals={
+            "res1['rows']":res1['rows'],
+            "res2['rows']":res2['data'],
+            "sql_where 1":test_where,
+            "sql_where 2":sql_where,
+            "res1":res1,
+            "res2":res2,
+            })
+    def where(self,q_where):
+        """
+        q_where : str/dict/list
+            str: natural sql string
+            list: list of 2 list - list 1 =name_list ,list2= val_list
+                [['field_name 1',...],['field_select_data 1',...]]
+                sample:[['un','sub_prj'],['atl','hrsj-100']]
+            dict: {'field_name 1':'field_select_data 1',...}
+                sample:{'un':'atl','sub_prj':'hrsj-100'}
+            -------------------    
+            field_select_data : str / list  
+                str: natural sql string
+                    result(for sql_where) = field_name + " = " + field_select_data 
+                list : 
+                    result = field_name + " in " + (items of field_select_data)
+                dict :
+                    if field key=
+                        'sql':
+                            result = field_name + field_select_data['sql']
+        """
+        def _where_cell(field_name,field_select_data,int_2_int=True): #erwer
+            if type(field_select_data)==None:
+                return "`{}`='{}'".format(field_name,str(field_select_data))
+            elif type(field_select_data)==str:
+                return "`{}`='{}'".format(field_name,field_select_data) 
+            elif type(field_select_data)==int:
+                pt="`{}`={}" if int_2_int  else "`{}`='{}'"
+                return pt.format(field_name,field_select_data)
+            elif type(field_select_data)==list:
+                if len(field_select_data)==1:
+                    return "`{}`='{}'".format(field_name,field_select_data[0])
+                else:
+                    return "`{}` in {}".format(field_name,','.join([f'{x}' for x in field_select_data]))
+            elif type(field_select_data)==dict:   
+                if 'sql' in field_select_data:
+                    return field_name + " " + field_select_data['sql']
+            else:
+                return "`{}`=''".format(field_name,)
+        #--------------------------------------  
+        # " AND ".join(['{}=?'.format(n) for n in name_list])
+        #--------------------------------------      
+        q_name="" #  "WHERE "
+        if not q_where:return ''
+        if type(q_where)==str:
+            return q_name+q_where
+        elif type(q_where)==list:
+            if len(q_where)==2 and type(q_where[0])==list and type(q_where[1]) in [list,tuple]:
+                return q_name + " AND ".join([_where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
+        elif type(q_where)==dict:
+            return q_name + " AND ".join([_where_cell(n,q_where[n]) for n in q_where]) 
+    #-------------------------------------------
+    def add_limit(self,sql,offset,page_n,page_len,limit):
+        if not limit:return sql
+        x_order = f'ORDER BY ' + order
+        x_order += ' DESC' if last else ''
+        if offset:        
+            return sql+f' {x_order} limit {offset},{limit}' if limit else sql
+        else:   #if page_n:
+            x_page=int(page_n) if page_n else 1 
+            x_page_len=int(page_len) if page_len else 20
+            x_offset=(x_page-1) * x_page_len 
+            return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
+#===================================================================================
 class DB1():
     import sqlite3
     # path=d:\\temp\\example1.db
@@ -183,8 +258,7 @@ class DB1():
         return " AND ".join(['{}=?'.format(n) for n in name_list])
     def make_where(self,where_dic):
         return " AND ".join(["`{}`='{}'".format(n,where_dic[n]) for n in where_dic])
-    def make_select_role(self,table_name,name_list):
-        return "SELECT * FROM {} WHERE ".format(table_name) + self.make_where_role(name_list)
+    
     def count(self,table_name,where=''):
         result={}
         try:
@@ -213,10 +287,10 @@ class DB1():
         ''' 010909
             020905 add order to func
             ------------------------
-            where : str/dict
+                  
         result='list/dict'
         '''
-        def sql_add_limit(sql):
+        def _sql_add_limit(sql,offset,page_n,page_len,limit):
             if not limit:return sql
             x_order = f'ORDER BY ' + order
             x_order += ' DESC' if last else ''
@@ -225,13 +299,20 @@ class DB1():
             else:   #if page_n:
                 x_page=int(page_n) if page_n else 1 
                 x_page_len=int(page_len) if page_len else 20
-                x_offset=(x_page-1)* x_page_len 
+                x_offset=(x_page-1) * x_page_len 
                 return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
         #-------------------------------------------------------------------------------------
         row_num=self.count(table_name=table_name,where=where)['count']
         if where:
+            if type(where)==str:
+                sql="SELECT * FROM {} WHERE {} ".format(table_name,where)
+                sql_x=_sql_add_limit(sql,offset,page_n,page_len,limit)
+                rows=self._exec(sql_x,fetch=True)['data']
+                if debug:xxxprint(msg=[self.dbn,sql,"len="+str(len(rows))])
+                titles = self._titles()        
             if type(where)==dict:
                 find1=self.find_row(table_name,where)
+                
                 if find1:
                     rows=find1['rows']
                     titles=find1['titles']
@@ -239,40 +320,133 @@ class DB1():
                     rows=[[]]
                     titles=[]
                     xxxprint(msg=['err',f'sql={find1["sql"]}',''])
-            elif type(where)==str:
-                sql="SELECT * FROM {} WHERE {} ".format(table_name,where)
-                sql_x=sql_add_limit(sql)
-                
-                
-                rows=self._exec(sql_x,fetch=True)['data']
-                                
-                #rows=self.cur.execute(sql_x).fetchall()
-                #self.con.commit()
-                if debug:xxxprint(msg=[self.dbn,sql,"len="+str(len(rows))])
-                #xxprint('---',len(rows))
-                titles = self._titles()
             else:
                 find1=0/1
         else:
             #print('--'+str(type(where_dic))+'---'+str(where_dic))
             if sql=="":
                 sql="SELECT * FROM {} ".format(table_name)
-            sql_x=sql_add_limit(sql)
-            #rows=self.cur.execute(sql_x).fetchall()
-            #self.con.commit()
-            
+            sql_x=_sql_add_limit(sql,offset,page_n,page_len,limit)
+     
             x_re=self._exec(sql_x,fetch=True)
             rows=x_re['data'] if x_re['done'] else []
             titles = self._titles()#[description[0] for description in self.cur.description]
         if debug:
             xxxprint (msg=['data','tb:'+table_name,''],vals=locals(),args=titles)
             print(f"K-sql.select:\n\t : sql={sql_x}\n\t : path={self.path}\n\t : result_nim={len(rows)}")
+        '''    
+        test_rows,test_titles,test_row_num=self.select_a(table,'',where,result='list',offset=offset,page_n=page_n,page_len=page_len,limit=limit,last=last,order=order,debug=False)
+        if test_rows==rows:
+            print('secect=select_a')
+        '''
         if result=='list':
             return rows,titles,row_num
         else: #dict
             if rows:
                 return {t:rows[0][i] for i,t in enumerate(titles)}
         return False
+    def select_a(self,table='',sql='',where='',result='list',offset=0,page_n=1,page_len=20,limit=20,last=True,order='id',debug=False):
+        table_name=table
+        #select_data 
+        ''' 010909
+            020905 add order to func
+            ------------------------
+                  
+        result='list/dict'
+        '''
+        
+        #-------------------------------------------------------------------------------------
+        row_num=self.count(table_name=table_name,where=where)['count']
+        if where:
+            sql_where=C_SQL().where(where)
+            sql="SELECT * FROM {} WHERE ".format(tb1)+ sql_where
+        else:
+            sql_where=""
+            if sql=="":
+                sql="SELECT * FROM {} ".format(table_name)
+                
+        sql_x=C_SQL().add_limit(sql,offset,page_n,page_len,limit)
+            
+        x_re=self._exec(sql_x,fetch=True)
+        rows=x_re['data'] if x_re['done'] else []
+        titles = self._titles()
+        
+        result={'sql':sql_x,'sql_where':sql_where,
+        'rows':rows,'titles': titles,'exec_report':x_re,
+        'items':{},'ids':[],'id':-1,'n':0,'done':True}
+        #---------------------------
+        if not rows: 
+            result['done']=False
+        else:
+            result['items']= {t:rows[0][i] for i,t in enumerate(titles)}
+            result['ids']=[x[0] for x in rows] 
+            result['id']=result['ids'][0]
+            result['n']=len(result['ids'])    
+
+        if debug:
+            xxxprint (msg=['data','tb:'+table_name,''],vals=locals(),args=self._titles())
+            print(f"K-sql.select:\n\t : sql={sql_x}\n\t : path={self.path}\n\t : result_nim={len(rows)}")
+        if result=='list':
+            return rows,titles,row_num
+        else: #dict
+            if rows:
+                return {t:rows[0][i] for i,t in enumerate(titles)}
+        return False,False,False
+    def find_row(self,table_name,name_list_or_nv_dict,val_list=[],):
+        '''
+            input:
+                1=>find_row(table_name,name_list,val_list)
+                2=>find_row(table_name,name_value_dict)
+            return:
+                rs_id:list
+                    list of row id of find search
+                rows:list of list
+        '''
+        #try:
+        import k_err
+        x=name_list_or_nv_dict
+        if type(x)==list:
+            name_list=x
+            sql_where = self.make_where_role(name_list)
+            x1=[name_list_or_nv_dict,val_list]
+        elif type(x)==dict:
+            name_list=x.keys()
+            sql_where = self.make_where_role(name_list)
+            val_list=x.values()
+            x1=x
+        elif type(x)==str:
+            sql_where=x
+            x1=x
+        else:
+            
+            k_err.xxprint('err','type of name_list_or_nv_dict shoud be list/dict but is=>'+str(type(x)))
+            k_err.quit()
+            return False
+        
+        
+        if True:
+            sql_t2="SELECT * FROM {} WHERE ".format(table_name)#rowid,
+            if debug : k_err.xxxprint(msg=['sql',sql_t2 + sql_where,''],args=val_list)
+            self.cur.execute(sql_t2 + sql_where,tuple(val_list))
+            rows=self.cur.fetchall()
+            self.con.commit()
+            titles = self._titles()
+            result={'sql':sql_t2,'sql_where':sql_where,'val_list':val_list,
+            'rows':rows,'titles':titles,
+            'items':{},'ids':[],'id':-1,'n':0,'done':True}
+            #---------------------------
+            if not rows: 
+                result['done']=False
+            else:
+                result['items']= {t:rows[0][i] for i,t in enumerate(titles)}
+                result['ids']=[x[0] for x in rows] 
+                result['id']=result['ids'][0]
+                result['n']=len(result['ids'])
+            #C_SQL.test_where(x1,result,self,table_name)    
+            return  result
+        #except:
+        #    return none #not found
+    #----------------------------------------------------------------------------------------------------
     def row_backup(self,table_n,xid):
         '''
         020905
@@ -297,6 +471,7 @@ class DB1():
         ''' if data isnot exist => add data         , return add_row_number, insert_result = true
             if data is  exist   => don't add data   , return find_row_number,insert_result = false'''
         find=self.find_row(table_name,name_list,val_list)
+        
         if find['done']:
             find.update({'done':False,'result':'عدم وارد کردن اطلاعات به دلیل پیدا کردن اطلاعات مشابه'})
             return find
@@ -304,6 +479,7 @@ class DB1():
         where_dic={x:'-' for x in name_list}
         set_dic={n:val_list[i] for i,n in enumerate(name_list)}
         find2=self.find_row(table_name,where_dic)
+
         if find2['done']:
             rep=self.update_data(table_name,set_dic,{'id':find2['id']})
             rep['done']=True
@@ -337,10 +513,12 @@ class DB1():
         else:
             xxxprint(msg=["error","x_where type not in ['str,'dict']",''],launch=True)
         find1=self.find_row(table_name,x_where)
+        
         if debug:xxxprint(msg=["find1",'',''],vals=find1 )
         s_set=self._dic_2_set(set_dic)
         
         xr['sql']='UPDATE {} SET {} WHERE {}'.format(table_name,s_set,s_where)
+        xr['where']=s_where
         xr['exe']=self._exec(xr['sql'])
         xr['rowcount']=self.cur.rowcount
         r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
@@ -351,6 +529,7 @@ class DB1():
             report_db_change(self.path,r1, [])
             return xr
         find2=self.find_row(table_name,x_where)
+        
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
         xr['dif']={} #different s
         if not find2:   
@@ -384,54 +563,7 @@ class DB1():
         return xr
         #except: #Error as e:   print(e)
         #   return False
-    def find_row(self,table_name,name_list_or_nv_dict,val_list=[],):
-        '''
-            input:
-                1=>find_row(table_name,name_list,val_list)
-                2=>find_row(table_name,name_value_dict)
-            return:
-                rs_id:list
-                    list of row id of find search
-                rows:list of list
-        '''
-        #try:
-        import k_err
-        x=name_list_or_nv_dict
-        if type(x)==list:
-            name_list=x
-            sql_where = self.make_where_role(name_list)
-        elif type(x)==dict:
-            name_list=x.keys()
-            sql_where = self.make_where_role(name_list)
-            val_list=x.values()
-        elif type(x)==str:
-            sql_where=x
-        else:
-            
-            k_err.xxprint('err','type of name_list_or_nv_dict shoud be list/dict but is=>'+str(type(x)))
-            k_err.quit()
-            return False
-        if True:
-            sql_t2="SELECT * FROM {} WHERE ".format(table_name)#rowid,
-            if debug : k_err.xxxprint(msg=['sql',sql_t2 + sql_where,''],args=val_list)
-            self.cur.execute(sql_t2 + sql_where,tuple(val_list))
-            rows=self.cur.fetchall()
-            self.con.commit()
-            titles = self._titles()
-            result={'sql':sql_t2,'sql_where':sql_where,'val_list':val_list,
-            'rows':rows,'titles':titles,
-            'items':{},'ids':[],'id':-1,'n':0,'done':True}
-            #---------------------------
-            if not rows: 
-                result['done']=False
-            else:
-                result['items']= {t:rows[0][i] for i,t in enumerate(titles)}
-                result['ids']=[x[0] for x in rows] 
-                result['id']=result['ids'][0]
-                result['n']=len(result['ids'])
-            return  result
-        #except:
-        #    return none #not found
+    
     
     ##-----------------------------------------------------------------------------------------
     def grupList_of_colomn(self,table_name,colomn_name,where_field='',where_value='',have_sum=True,traslate_dict={}):
@@ -479,3 +611,54 @@ class DB1():
         like_list=[row[titles.index(field_name)] for row in rows]
         is_uniq=uniq_value not in like_list
         return is_uniq,like_list
+'''
+#============= not used =======================
+def make_select_role(self,table_name,name_list):
+        return "SELECT * FROM {} WHERE ".format(table_name) + self.make_where_role(name_list)
+
+
+
+data.py (12 hits)
+	Line  418:         rows,titles,rows_num=db1.select(table_name,limit=0)
+	Line  511:         rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+	Line  584:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+	Line  681:             rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+	Line  721:         rows1,ttls1,rows_num=db1.select(tb_name)#'paper')
+	Line  754:     rows1,titles1,rows_num=db1.select(tb_name,limit=0)
+	Line  761:     rows2,titles2,rows_num=db2.select(ref['tb'],limit=0)
+	Line 1094:         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
+	Line 1126:         rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
+	Line 1213:         rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
+	Line 1315:     rows1,titles1,row_num1=db1.select('a',limit=0)
+	Line 1316:     rows2,titles2,row_num2=db2.select('a',limit=0)
+	
+user.py (3 hits)
+	Line  54:     rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
+	Line 106:         rs=db1.select(table_name='user',sql=sql,result='dict')
+	Line 332:             rs=db1.select('user',sql)
+
+k_sql.py (4 hits)
+	Line 448:         rows,titles,base_row_id=self.select(table_n,where={'id':xid})
+	Line 529:             rows2,titles2,row_num2=self.select(table_name,limit=0)
+	Line 577:         rows,titles,row_n=self.select('',sql,limit=0)
+	Line 603:         rows,titles,rows_num=self.select(tb_name,where=uniq_where + f'{field_name} like "%{uniq_value}%"')
+	
+k_user.py (2 hits)
+	Line  33:     rows,titles,rows_num=db1.select('user',where={},limit=0)
+	Line  65:     rows,titles,rows_num=db1.select('a',where={},limit=0)
+	
+form.py (5 hits)
+	Line 318:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+	Line 519:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+	Line 570:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+	Line 795:         rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+	Line 846:     rows,titles,rows_num=db1.select(tb_name,where={'xid':str(xid)})
+  
+k_form.py (4 hits)
+	Line  315:     rs=db1.select(in_table_name,where={'id':in_index},limit=1,result='dict')
+	Line  650:             rows2,tit2,row_n=db2.select(ref['tb'],limit=0)
+	Line  751:     rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
+	Line 1297:         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
+
+
+'''
