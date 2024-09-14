@@ -873,7 +873,8 @@ def index():
     def link_delete(fname):
         # return A('Del',_href=URL(f='delete',args=['share',fname]),_target="x_frame") #if request.vars['del'] else ''
         return XML(j_box_txt.format(URL(f='delete',args=[*args,fname],vars=request.vars),'X','Delete file')) #A('Del',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=['share',fname])}",true)""") #_target="x_frame"
-    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}','file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3"}))
+    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}',
+        'file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3,m4a"}))
     '''samplemple : 
     link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{un}-{user_filename}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx"}))
     '''
