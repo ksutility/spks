@@ -414,7 +414,7 @@ def read(_format,file_path):
     '''
 @check_err  
 def write(_format,file_path,data,append=False):
-	#010618
+    #010618
     file_mode='a' if append else 'w'
     if _format=='json':
         import json
@@ -702,22 +702,22 @@ def move(base_path,des_path):
     return file_move(base_path,des_path)
 '''
 def find_sami_file(path,file_name_pattern,ext_list):
-	"""
-		find files 
-			path = path for serch
-			name_pattern = file name_pattern 
-				-a pice of name like('abc*-d') 
-				-or ..
-			ext_list=list of acceptable ext
-				- exam ['pdf','dwg','jpg']
-	"""
-	import glob,os
-	fn=os.path.join(path,file_name_pattern)
-	find=[]
-	for ext in ext_list:
-		#print ('fn='+fn+"."+ext)
-		find+=glob.iglob(fn+"."+ext) #"/mydir/*/*.txt"): # generator, search immediate subdirectories 
-	return find	
+    """
+        find files 
+            path = path for serch
+            name_pattern = file name_pattern 
+                -a pice of name like('abc*-d') 
+                -or ..
+            ext_list=list of acceptable ext
+                - exam ['pdf','dwg','jpg']
+    """
+    import glob,os
+    fn=os.path.join(path,file_name_pattern)
+    find=[]
+    for ext in ext_list:
+        #print ('fn='+fn+"."+ext)
+        find+=glob.iglob(fn+"."+ext) #"/mydir/*/*.txt"): # generator, search immediate subdirectories 
+    return find 
 def rename(file_path,new_name_format):
     '''
         new_name_format
