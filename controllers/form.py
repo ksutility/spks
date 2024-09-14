@@ -19,7 +19,7 @@ from k_time import Cornometer
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
-
+if not session['username']:redirect(URL('spks','user','login',args=['go']))
 debug= False #True #False # True: for check error
 db_path='applications\\spks\\databases\\'
 
@@ -488,6 +488,7 @@ def save():
             vv=get_vv(f_nxt_s,f_nxt_s_new,reset=(text_app=='x'))    
             #xxx->return "vv=<br>"+str(vv),"update not done"
             xu = db1.update_data(tb_name,vv,{'id':xid})
+            print("find_row 5")
             
             p1=A("#",_onclick="$(this).next().toggle()",_class='toggle')
             p2=DIV(XML(f"{db1.get_path()}<br> UPDATE: <hr>{rr}<hr>"))
@@ -661,10 +662,16 @@ def list_0():
     server_add=k_tools.server_python_add()
     t0=f"""<hr><div class="row">
         <div class="col">
-            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_pivot/user_day'>نمودار های جادویی از گزارش عملکرد همکاران طراحی </a>
+            <h2> گزارش عملکرد همکاران طراحی </a>
         </div>
         <div class="col">
-            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_kytable'>گزارش مدیریتی هفته جاری از گزارش عملکرد همکاران طراحی </a> 
+            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_pivot/user_day'>نمودار های جادویی </a>
+        </div>
+        <div class="col">
+            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_kytable'>گزارش مدیریتی هفته جاری </a> 
+        </div>
+        <div class="col">
+            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/test_ipgrid'>ورود اطلاعات</a> 
         </div>
     </div>"""
     tt+=[XML(t0)]
