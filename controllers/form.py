@@ -110,11 +110,13 @@ class C_FILTER():
 
         cols_filter=x_data_s['cols_filter']
         self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter,'add_empty_first':False}#,$hlp='prop':["can_add"],}
-        data_filter=x_data_s['data_filter'] 
         
+        data_filter=x_data_s['data_filter'] 
         data_filter={k_form.template_parser(x):y for x,y in data_filter.items()}
         def_value=k_form.template_parser(x_data_s['base'].get('data_filter',''))
         self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value,'add_empty_first':False}
+        
+        #self.data_sort={'name':'data_sort','type':'select','select':list(x_data_s['tasks'].keys()),'add_empty_first':False}
         
         #import k_err
         #k_err.xreport_var([data_filter,self.data_filter_obj])
@@ -190,6 +192,9 @@ class C_FILTER():
                    "prj"="29" AND "des" like "%L-%"
                    date_e > "1401/09/01"
                 ''',
+            'data_sort':'''
+                
+            ''',  
             'prj':'''
                 
             '''
@@ -197,6 +202,7 @@ class C_FILTER():
         return XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
                     #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
                     +self.set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=self.data_filter_obj,_help=hlp['data_filter'])
+                    #+self.set_htm_var(caption='روش مرتب سازی',width='30vw',obj=self.data_sort,_help=hlp['data_sort'])
                     +self.set_htm_var(caption='فیلتر ستونها',width='30vw',obj=self.cols_filter_obj,_help=hlp['cols_filter'])
                     +self.set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
                     +self.set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
@@ -491,17 +497,17 @@ def save():
             print("find_row 5")
             
             p1=A("#",_onclick="$(this).next().toggle()",_class='toggle')
-            p2=DIV(XML(f"{db1.get_path()}<br> UPDATE: <hr>{rr}<hr>"))
+            p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
             return DIV(p1,p2,k_htm.val_report(xu)),xu
         def insert():
             vv=get_vv(0,1)
             #xreport_var([vv])
             r1=db1.insert_data(tb_name,vv)#.keys(),vv.values())
-            #rr=f"{db1.get_path()}<br> INSERT:result=" + "<br>".join([f'{x}:{r1[x]}' for x in r1])
+            #rr=f"{db1.path}<br> INSERT:result=" + "<br>".join([f'{x}:{r1[x]}' for x in r1])
             
             p1=A("#",_onclick="$(this).next().toggle()",_class='toggle')
-            p2=DIV(XML(f"{db1.get_path()}<br> INSERT:<hr>"))
-            #rr=f"{db1.get_path()}<br> INSERT:{k_htm.val_report(r1)}"
+            p2=DIV(XML(f"{db1.path}<br> INSERT:<hr>"))
+            #rr=f"{db1.path}<br> INSERT:{k_htm.val_report(r1)}"
             return DIV(p1,p2,k_htm.val_report(r1)),r1['id'],r1
         #--------------------------------    
         if xid=='-1':
@@ -583,7 +589,7 @@ def save_app_review():
             htm_form+=[DIV("با موفقیت انجام شد",_class="container bg-info h3 text-center")]
     except:
         pass
-    htm_form=[f"{db1.get_path()}<br> UPDATE: "+str(xu)+"<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])]
+    htm_form=[f"{db1.path}<br> UPDATE: "+str(xu)+"<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])]
     htm_form+=[DIV(A('نمایش فرم',_href=URL('xform',args=request.args),_class="btn h4 btn-primary text-light"))]
     htm_form+=[DIV("timer",_id="div_time_counter",_class="bg-primary")]
     htm_form+=[XML("""
