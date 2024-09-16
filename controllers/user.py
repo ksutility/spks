@@ -26,6 +26,7 @@ def _isok_un_ps (un,ps):
         session["admin"]=True if session["username"]=='ks' else False
         session["file_access"]=rs["file_access"]
         session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
+        #session["reports"]={}
         #session["auth_prj"]=rs["auth_prj"]
         #Session.Timeout=15
 
