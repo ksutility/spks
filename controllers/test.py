@@ -25,13 +25,13 @@ def xxx():
                 f_nxt_s_new=f_nxt_s+1
             vv=get_vv(f_nxt_s,f_nxt_s_new)    
             xu = db1.update_data(tb_name,vv,{'id':xid})
-            rr=f"{db1.get_path()}<br> UPDATE: "+str(xu)+"<hr> backup<br>xi="+str(xi)+"<br> r1="+str(xi)+ "<br> rows_num="+str(rows_num)
+            rr=f"{db1.path}<br> UPDATE: "+str(xu)+"<hr> backup<br>xi="+str(xi)+"<br> r1="+str(xi)+ "<br> rows_num="+str(rows_num)
             #+"<brr>vv"+str(vv)+"<br>vars:"+str(list(request.vars))+"<br>titels:"+str(titles)
             return rr
         def insert():
             vv=get_vv(0,1)
             xi,r1=db1.insert_data(tb_name,vv.keys(),vv.values())
-            rr=f"{db1.get_path()}<br> INSERT:result="+str(r1)+" => "+str(xi)+" | "+str(r1) #+"<hr>"+str(vv)
+            rr=f"{db1.path}<br> INSERT:result="+str(r1)+" => "+str(xi)+" | "+str(r1) #+"<hr>"+str(vv)
             return rr
         #--------------------------------    
         if xid==-1:

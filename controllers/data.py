@@ -552,7 +552,7 @@ def xtable():
                     vv.update({'app_un':session['username'],'app_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),'app_ip':request.client})
                 result=db1.row_backup(tb_name,xid)
                 xu=db1.update_data(tb_name,vv,{'id':xid})
-                rr=f"{db1.get_path()}<br> UPDATE: {xu}<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
+                rr=f"{db1.path}<br> UPDATE: {xu}<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
                 #+"<brr>vv"+str(vv)+"<br>vars:"+str(list(request.vars))+"<br>titels:"+str(titles)
                 return rr
             def insert(titles):
@@ -561,7 +561,7 @@ def xtable():
                 #vv=[request.vars[t].strip() for t in titles ]
                 tt=[t for t in titles]#request.vars]
                 r1=db1.insert_data(tb_name,tt,vv)
-                rr=f"{db1.get_path()}<br> INSERT:result="+str(r1["done"])+" => "+str(r1["sql"])+" | "+str(r1["id"]) #+"<hr>"+str(vv)
+                rr=f"{db1.path}<br> INSERT:result="+str(r1["done"])+" => "+str(r1["sql"])+" | "+str(r1["id"]) #+"<hr>"+str(vv)
                 return rr
             #--------------------------------    
             if xid==-1:
