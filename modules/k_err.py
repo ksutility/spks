@@ -292,7 +292,7 @@ def xxprint(x_case='-',msg='',msg2='',add_msgs='',inspect_n=1,trace_n=1):
             program show str(add_msgs)
             (additional msg's that shout be write to file_output no to screen_output 
     '''
-def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},args=[],err='',inspect_n=1,trace_n=1,_slice=False,launch=False,reset=False):
+def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},args=[],err='',inspect_n=1,trace_n=1,_slice=False,launch=False,reset=False,session_report=False):
     '''
     WIP:
     
@@ -409,6 +409,8 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
     vals.update(vals2)
     msg[3]=htm_dict(vals)
     msg[4]=htm_list(args)
+    
+
     if out_case in [1,3]:
         ttt=html_out(func,cat,msg,err)  
         if _slice:
@@ -422,8 +424,21 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
         xc=str(x_case) if x_case else ''
         print('\n'+xtime[-8:]+xc+f'-{func["inf_mini"]} >>> {x_case} : {msg[0]},{msg[1]}')#,end=''
         #if msg[1]:print(f'msg2={msg[1]}')
+    
+    if session_report:
+
+        from gluon import current
+        if not 'reports' in current.session:current.session['reports']={}
         
-        
+        rep=current.session['reports']
+        if not msg[0] in rep:rep[msg[0]]={}
+        rep0=rep[msg[0]]
+        if not func["inf_mini"] in rep0:rep0[func["inf_mini"]]={}
+        if not msg[1] in rep0[func["inf_mini"]]:rep0[func["inf_mini"]][msg[1]]=0
+        rep0[func["inf_mini"]][msg[1]]+=1
+
+
+        pass
     if cat[0]=='err' or msg[0]=='err':
         import k_ui 
         #k_ui.var_report(
@@ -431,7 +446,8 @@ def xxxprint(out_case=1,cat=['-','-','-'], msg=['-','-','-'],vals={},vals2={},ar
         return False
     if launch:
         import k_file
-        k_file.launch_file(report_html['fullname'])    
+        k_file.launch_file(report_html['fullname'])  
+        
     return True 
 def _er_chk(x):
     #import sys 
