@@ -324,11 +324,14 @@ def json_read():
             json_dump=XML(json.dumps(meta,indent=4)),
             json_str=str(meta)) #<div class=''>+"</pre>"  
 def read_xl():
-    f_name,f_msg,file_inf=_x_file()
-    if not f_name:return f_msg
-    import kxl
-    wb=kxl.wb(f_name)
-    return (wb.sheetnames)
+    try:
+        f_name,f_msg,file_inf=_x_file()
+        if not f_name:return f_msg
+        import kxl
+        wb=kxl.wb(f_name)
+        return (wb.sheetnames)
+    except:
+        return "error in xfile.py => def(read_xl)"
 def _read_csv(f_name):
     import k_file_x
     data=k_file_x.read_csv(f_name,'list')
