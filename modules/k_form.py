@@ -277,63 +277,6 @@ def get_inf_file(form_name):
     #section_task=dd['section_task'] start from 1 (row 0 is for help)
     """
     return form #{'base':form_inf,'steps':step_inf,'tasks':task_inf,'pre_text':pre_text}
-##---------------------------------------------------------------------------------################################
-def get_inf_db(form,in_index):
-    '''
-    not_used 020905
-    
-    read database of form
-        input:
-        -------
-            form['base']['db_n']
-                old=in_db_name
-            form['base']['tb_n']
-                old=in_table_name
-            session["form_index"]
-                old=in_index
-            form['tasks']
-                old=task_inf
-            form['steps']
-                old=form['steps']
-         outpu:
-        -------
-            form['steps']
-            form['tasks']
-            form['xinf']:
-                form_xinf
-            
-    #--out use=3(file):x_sql(1 hit),install_db(1 hit),formshow(1 hit)
-    #db=database  session("form_index")
-    old use =get_inf_db(task_total,step_total,form_db_n,form_tb_n,f_step,f_revn,f_revs, rejecttext)'db=database
-    #*****get >> form['steps']  14,15,16     task_inf 0
-    '''
-    in_db_name=form['base']['db_n']
-    in_table_name=form['base']['tb_n']
-    task_inf=form['tasks']
-    # --- /input
-    db1=DB1(in_db_name)
-    rs=db1.select(in_table_name,where={'id':in_index},limit=1,result='dict')
-    if rs :
-        for step in form['steps'][1:]:
-            step['s_u']=rs[step['s_u_f']].lower()
-            step['s_d']=rs[step['s_d_f']].lower()
-            step['s_a']=rs[step['s_a_f']]
-        for task in form['tasks'][1:]:
-            if task['tbl_n']=="" : #*
-                task['val']=rs[task['field_n']] #*
-                #share.task_inf[i]['type']=field_vb_type(rs.fields(share.task_inf[i]['field_n']).type )'*
-        
-        form_xinf={
-            'f_step':int(rs["f_step"] or 0),
-            'f_revn':rs["f_revn"],
-            'f_revs':rs["f_revs"],
-            'f_nexu':rs["f_nexu"],
-            'rejecttext':rs["f_desc"]}
-    else:
-        session["new_form"]="ok"
-        form_xinf={'f_step':0}
-    form['xinf']=form_xinf  
-    return form
 #---------------------------------------------------------------------------------################################
 def set_data_by_form_code(): # t_form_name,t_form_code,t_form_rev,t_form_index)
     '''
