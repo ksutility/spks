@@ -248,15 +248,16 @@ class DB1():
     
     
     def count(self,table_name,where=''):
-        result={}
+        result={'sql':''}
         try:
             sql_where=C_SQL().where(where)
             sql="SELECT COUNT(*) FROM {}".format(table_name)+ sql_where
+            result['sql']=sql
             result=self._exec(sql,fetch=True)
             result['count']=result['data'][0][0]
         except Exception as err:
             result['count']=0
-            result.update({'done':False,'Error':str(err),'sql':sql})  
+            result.update({'done':False,'Error':str(err)})  
             xxxprint(msg=['err','count',table_name],vals=result)
         return result    
     #--------------------------------------------
@@ -344,7 +345,7 @@ class DB1():
             #val_list=val_list
         ''' if data isnot exist => add data         , return add_row_number, insert_result = true
             if data is  exist   => don't add data   , return find_row_number,insert_result = false'''
-        find=self.select(table_name,name_list,val_list)
+        find=self.select(table=table_name,where=[name_list,val_list],result='dict_x')
         
         if find['done']:
             find.update({'done':False,'result':'عدم وارد کردن اطلاعات به دلیل پیدا کردن اطلاعات مشابه'})
@@ -352,7 +353,7 @@ class DB1():
         #find empty
         where_dic={x:'-' for x in name_list}
         set_dic={n:val_list[i] for i,n in enumerate(name_list)}
-        find2=self.select(table_name,where_dic)
+        find2=self.select(table=table_name,where=where_dic,result='dict_x')
 
         if find2['done']:
             rep=self.update_data(table_name,set_dic,{'id':find2['id']})
@@ -380,7 +381,7 @@ class DB1():
         xr={}
         if debug:xxxprint(msg=["start",'',''])
         sql_where=C_SQL().where(x_where)
-        find1=self.select(table_name,x_where)
+        find1=self.select(table=table_name,where=x_where,result='dict_x')
         if debug:xxxprint(msg=["find1",'',''],vals=find1 )
         s_set=self._dic_2_set(set_dic)
         
@@ -395,7 +396,7 @@ class DB1():
             xr['msg']='find1=none'
             report_db_change(self.path,r1, [])
             return xr
-        find2=self.select(table_name,x_where)
+        find2=self.select(table=table_name,where=x_where,result='dict_x')
         
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
         xr['dif']={} #different s
