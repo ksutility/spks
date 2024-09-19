@@ -1043,6 +1043,7 @@ def rc():#run 1 command
         cols2=x_fields['step_apps']
         cols_add1=x_fields['form_need']
         cols2+=cols_add1
+        cols2+=[f'app_{t}' for t in ['un','dt','ip']]
         '''
         'f_nxt_st'=form_next_step_number 0=first  
         'f_nxt_un'=form_next_user  
