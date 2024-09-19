@@ -23,11 +23,15 @@ def _isok_un_ps (un,ps):
     if r1:
         session["user_fullname"]= fullname
         session["username"]=un.lower()
-        session["admin"]=True if session["username"]=='ks' else False
+        session["admin"]=False 
         session["file_access"]=rs["file_access"]
         session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
+        session["auth_prj"]=rs["auth_prj"]
+        if session["username"]=='ks':
+            session["admin"]=True
+            session["auth_prj"]="*"
         #session["reports"]={}
-        #session["auth_prj"]=rs["auth_prj"]
+        
         #Session.Timeout=15
 
         response.cookies["username"]=un
