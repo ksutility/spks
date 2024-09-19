@@ -45,13 +45,16 @@ class C_SQL():
             "res1":res1,
             "res2":res2,
             })
-    def where(self,q_where):
+    def where(self,q_where,add_where_text=True):
         """
         q_where : str/dict/list
             str: natural sql string
-            list: list of 2 list - list 1 =name_list ,list2= val_list
-                [['field_name 1',...],['field_select_data 1',...]]
-                sample:[['un','sub_prj'],['atl','hrsj-100']]
+            list: 
+                list of 2 list and (list[0] =name_list) and (list[1]= val_list):
+                    [['field_name 1',...],['field_select_data 1',...]]
+                    sample:[['un','sub_prj'],['atl','hrsj-100']]
+                list of q_where and (list[0] ="__where__list__")
+                    -list[
             dict: {'field_name 1':'field_select_data 1',...}
                 sample:{'un':'atl','sub_prj':'hrsj-100'}
             -------------------    
@@ -86,13 +89,15 @@ class C_SQL():
         #--------------------------------------  
         # " AND ".join(['{}=?'.format(n) for n in name_list])
         #--------------------------------------      
-        q_name=" WHERE "
+        q_name= " WHERE " if add_where_text else " "
         if not q_where:return ''
         if type(q_where)==str:
             return q_name+q_where
         elif type(q_where)==list:
             if len(q_where)==2 and type(q_where[0])==list and type(q_where[1]) in [list,tuple]:
                 return q_name + " AND ".join([_where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
+            elif q_where[0]=="__where__list__":
+                return q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])
         elif type(q_where)==dict:
             return q_name + " AND ".join([_where_cell(n,q_where[n]) for n in q_where]) 
         else:
@@ -127,6 +132,16 @@ class DB1():
     def _exec(self,sql,val_list=[],fetch=False):
         
         result={'def':'_exec','sql':sql,'data':[]}
+        
+        
+        self.cur.execute(sql,val_list)
+        if fetch:
+            result['data']=self.cur.fetchall()
+        self.con.commit()
+        result.update({'done':True})
+        return result
+        
+        
         #xxxprint(msg=[self.dbn,"sql="+sql,self.path])
         try:
             self.cur.execute(sql,val_list)
@@ -241,7 +256,10 @@ class DB1():
                         {});'''.format(table_n,field_t)
         #sql='''CREATE TABLE IF NOT EXISTS "xx" (`id` INTEGER PRIMARY KEY AUTOINCREMENT);'''
         xprint(sql)
-        rep=self._exec(sql)
+        try:
+            rep=self._exec(sql)
+        except:
+            rep={'sql':sql,'done':False}
         return {'def':'define_table','exec':rep}
 
     
@@ -293,7 +311,8 @@ class DB1():
         titles = self._titles()
         
         result_1={'sql':sql_x,'sql_where':sql_where,
-        'rows':rows,'titles': titles,'exec_report':x_re,
+        'rows':rows,'titles': titles,'row_num':row_num
+        ,'exec_report':x_re,
         'items':{},'ids':[],'id':-1,'n':0,'done':True}
         #---------------------------
         if not rows: 
@@ -319,6 +338,7 @@ class DB1():
         else: #dict
             if rows:
                 return {t:rows[0][i] for i,t in enumerate(titles)}
+            return {}
         return False,False,False
 
     #----------------------------------------------------------------------------------------------------
