@@ -513,13 +513,14 @@ def template_parser(x_template,x_dic={},rep=''):
     #return x_template.format(task=task_inf,step=form['steps'],session=session,**x_dic)
     import k_date
     if type(x_template)==str:
+        xx=x_template.strip()
+        from gluon import template
+        x_dic1=x_dic.copy()
+        from gluon import current
+        session=current.session
+        x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
+        #xxxprint(msg=['inf','template_parser',xx],vals=x_dic)
         try:
-            xx=x_template.strip()
-            from gluon import template
-            x_dic1=x_dic.copy()
-            from gluon import current
-            session=current.session
-            x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
             x1= template.render(content=xx,context=x_dic1) 
             #xxxprint(msg=['inf',x1+"|"+str(rep),xx],vals=x_dic)
             return x1.format(**x_dic1)  #remove 020926
