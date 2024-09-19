@@ -338,3 +338,18 @@ def user_in_jobs(jobs,row_data={},un=''):
                 if un==x_un:return True
     #print("user_in_jobs=>false")
     return False
+
+class C_AUTH_FORM():
+    def __init__(self,x_data_s):
+        self.x_data_s=x_data_s
+    def all(self):    
+        from gluon import current
+        if not 'auth' in self.x_data_s['base']:return {'auth':True}
+        if current.session["admin"] or user_in_jobs_can('view',jobs=self.x_data_s['base']['auth']):return {'auth':True}
+        return {'auth':False,'msg':"شما اجازه دسترسی به این فرم را ندارید"}
+    def auth_where(self):
+        from gluon import current
+        if 'auth_prj' in self.x_data_s['base']: # در صورت تعریف متغیر دسترسی بر حسب پروژه در قسمت مبنای دیکشنری اطلاعات فرم
+            if not current.session['auth_prj']=="*": # در صورتی که فرد ادمین نباشد
+                return {self.x_data_s['base']['auth_prj']:current.session['auth_prj'].split(",")}
+        return ''
