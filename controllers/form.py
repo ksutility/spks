@@ -116,7 +116,9 @@ class C_FILTER():
         def_value=k_form.template_parser(x_data_s['base'].get('data_filter',''))
         self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value,'add_empty_first':False}
         
-        #self.data_sort={'name':'data_sort','type':'select','select':list(x_data_s['tasks'].keys()),'add_empty_first':False}
+        data_sort_items={'id':'id'}
+        data_sort_items.update({x:y['title'] for x,y in x_data_s['tasks'].items()})
+        self.data_sort={'name':'data_sort','type':'select','select':data_sort_items,'add_empty_first':False}
         
         #import k_err
         #k_err.xreport_var([data_filter,self.data_filter_obj])
@@ -202,7 +204,7 @@ class C_FILTER():
         return XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
                     #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
                     +self.set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=self.data_filter_obj,_help=hlp['data_filter'])
-                    #+self.set_htm_var(caption='روش مرتب سازی',width='30vw',obj=self.data_sort,_help=hlp['data_sort'])
+                    +self.set_htm_var(caption='روش مرتب سازی',width='15vw',obj=self.data_sort,_help=hlp['data_sort'])
                     +self.set_htm_var(caption='فیلتر ستونها',width='30vw',obj=self.cols_filter_obj,_help=hlp['cols_filter'])
                     +self.set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
                     +self.set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
@@ -216,8 +218,7 @@ def xform():#view 1 row
     if request.vars['text_app']:
         return save()
     session.view_page='xform'
-    if not session.username:
-        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
+    
     '''
     goal:
         show / manage a formated & costomize form
@@ -409,7 +410,15 @@ def xform():#view 1 row
         return DIV(htm_form,_dir="rtl")
     #-- def xform:start ------------------------------------------------------------
     x_data_s,db_name,tb_name,msg=_get_init_data()
+    if not x_data_s:
+        return dict(htm=msg)
+    
+    # check access /auth
+    auth= k_user.C_AUTH_FORM(x_data_s).all()
+    if not auth['auth']:return dict(htm=H1(auth['msg']))
+    
     db1=DB1(db_path+db_name+'.db')
+    
     xid=request.args[2] or 1
     return dict(htm=show_form(x_data_s,db1,tb_name,xid))
 # ------------------------------------------------------------------------------------------ 
@@ -686,9 +695,7 @@ def list_0():
 def xtable():
     from k_tools import X_DICT
     x_dict=X_DICT({'style':'','script':'','table_filter':'','table_head':'','table':'','btm_mnu':''})
-    if not session.username:
-        msg=H1("لطفا اول وارد سیستم بشوید")
-        return x_dict.add({'table':msg})
+
     cornometer=Cornometer("xtable")
     def xtable_show(rows,titles,tasks,x_data_s):
         ''' func desc
@@ -787,18 +794,31 @@ def xtable():
         return x_dict.add({'table':msg})
     else:
         # check access /auth
+        auth= k_user.C_AUTH_FORM(x_data_s).all()
+        if not auth['auth']:return x_dict.add({'table':H1(auth['msg'])})
+        """
         if 'auth' in x_data_s['base']:
             if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 msg=H1("شما اجازه دسترسی به این فرم را ندارید")
                 return x_dict.add({'table':msg})
-               
+        """      
         db1=DB1(db_path+db_name+'.db')
         tasks=x_data_s['tasks']
+        
         c_filter=C_FILTER(tasks,x_data_s) 
         filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
         
-        rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+        """ 
+        """
+        if 'auth_prj' in x_data_s['base']: # در صورت تعریف متغیر دسترسی بر حسب پروژه در قسمت مبنای دیکشنری اطلاعات فرم
+            if not session['auth_prj']=="*": # در صورتی که فرد ادمین نباشد
+                auth_where={x_data_s['base']['auth_prj']:session['auth_prj'].split(",")}
+                filter_data=["__where__list__",filter_data,auth_where]
+        order=c_filter.data_sort["value"] or x_data_s['order']
+        x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
+        rows,titles,rows_num=x_select["rows"],x_select['titles'],x_select['row_num']
+        # xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})
         #if rows:rows.reverse()
         trs,new_titles,nr=xtable_show(rows,titles,tasks,x_data_s)
         #import k_err
