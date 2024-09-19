@@ -371,7 +371,7 @@ x_data={
         #from paper='cdate','sbj','comment','attach','lv_archiv','lv_per_archiv','lv_onvan','io_t','paper_num','num_x','num_link','folder'
         
         'a':{
-            'base':{'mode':'form','title':'نامه ها','auth':'dccm','code':'901'
+            'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'901','auth_prj':'prj1'
             },
             'tasks':{
                 'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
@@ -406,7 +406,8 @@ x_data={
                 'x_num':{'type':'text','width':'30','title':'کد*','title_add':'جهت انتخاب و یا مرتب سازی راحتتر نامه ها و موضوعات خاص'},#,'prop':['read']
                 'x_inf':{'type':'text','width':'30','title':'اطلاعات*','title_add':'اطلاعات اضافی'},
                 'x_to_grup':{'type':'reference','width':'5','title':'گروه گیرنده*','ref':{'db':'a_contact_grup','tb':'a','key':'{grup_code}','val':'{grup_name}',
-                    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['read']},#,'prop':['read']
+                     'where':'''prj = "{prj1}" and sub_p = "{prj2}"'''},'prop':['read']},#,'prop':['read']
+                #    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['read']},#,'prop':['read']
                 
                 
                 'act_todo':{'type':'text','width':'150','title':'ارجاع نامه','prop':[]},
@@ -514,6 +515,7 @@ x_data={
                 'file_off':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}4-off','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'مدارک اداری','auth':'dccm'},
                 'login_ip':{'type':'text','title':'آی پی ورود ویژه','len':'3'},
                 'auth_prj':{'type':'reference','title':'حق دسترسی به پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['multiple']},
+                'file_access':{'type':'text','title':'فایل های قابل دسترس','len':'20'},
                 },
             'steps':{
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -522,7 +524,7 @@ x_data={
                 'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','order':'1'},
             },
             'views':{
-                'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off','view1':'un,name,family','view2':'p_id','auth':'dccm'},
+                'all':{'input':'file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off,auth_prj','view1':'un,name,family','view2':'p_id','auth':'dccm'},
                 },
             'cols_filter':{'':'همه',},
             'data_filter':{
@@ -813,7 +815,7 @@ x_data={
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
                 'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
-                'time_st':{'type':'time_c','title':'از ساعت','prop':['update'],'def_value':'7:00'},
+                'time_st':{'type':'time_c','title':'از ساعت','prop':['update'],'def_value':'07:00'},
                 'time_len':{'type':'time_t','title':'به مدت','time_inf':{'maxTime':"03:30"},'prop':['update'],'def_value':'0:30'},
                 'time_en':{'type':'auto','title':'تا ساعت','auto':'''{{import k_time}}{{=k_time.add(__objs__['time_st']['value'],__objs__['time_len']['value'])}}'''},
                 'frd_modir':{'type':'reference','width':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
@@ -847,7 +849,7 @@ x_data={
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
                 'date':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
-                'time_st':{'type':'time_c','title':'ساعت شروع ماموریت'},
+                'time_st':{'type':'time_c','title':'ساعت شروع ماموریت','prop':['update'],'def_value':'07:00'},
                 'time_len':{'type':'time_t','title':'مدت ماموریت','time_inf':{'maxTime':"20:00"},'prop':['update'],'def_value':'0:30'},
                 'time_en':{'type':'auto','title':'تا ساعت','auto':'''{{import k_time}}{{=k_time.add(__objs__['time_st']['value'],__objs__['time_len']['value'])}}'''},
                 'frd_modir':{'type':'reference','width':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
