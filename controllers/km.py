@@ -1149,27 +1149,16 @@ def test_muti_row_approve():
     data1=[]
     for i,row in enumerate(data):
         obj_inf={'type':'check'}
-        nn=f'row_{i}'
+        nn=f'checkbox_{i}'
         x_data_verify_task(f'row_{i}',obj_inf)
         xh=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])['input']
-        xh=XML(f"""
-            <input name='{nn}' id='{nn}' type="hidden" value=0 >
-            <input style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' 
-                class='largercheckbox' type='checkbox' value='1' onchange="this.previousSibling.value=this.checked ?'1':'0' ">
-        """)
-        xh=XML(f"""
-            <div class="form-check-inline">
-                <input name='{nn}' id='{nn}' value=1 type="checkbox" class='largercheckbox'
-                style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' >
-            </div>
-        """)
+        
+        xh=k_htm.checkbox(name=nn)
         #print (str(xh))
         row1=[xh]+row
         data1.append(row1)
     tbl=C_TABLE(['c','x','y','z'],data1).creat_htm()
-    bt_a=INPUT(_type='submit',_style='width:100%,background-color:#ff00ff' )
-    htm1=XML(f"""<form>{tbl}{bt_a}</form>""")
-    return dict(t=htm1)
+    return dict(t=k_htm.form(inner_html=tbl))
 
 def test_tag():
     #030528
