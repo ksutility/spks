@@ -181,7 +181,6 @@ table th a{
 .table5 td,.table5 th {
     font-size: 12px;
     overflow: hidden;
-    white-space: pre;
     text-overflow: clip;
     padding:0px;
     margin:0px;
