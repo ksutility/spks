@@ -75,12 +75,10 @@ def nth_item_of_dict(xdic,n,up_result=''):
 def server_is_test():
     from gluon import current
     srv_port=current.request.env.SERVER_PORT 
-    print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
     return (srv_port == '50' or srv_port == '150')
 def server_is_python():
     from gluon import current
     srv_port=current.request.env.SERVER_PORT 
-    #print (f"srv_port == {srv_port} , srv_port == '50' :{srv_port == '50'}")
     return srv_port == '100' or srv_port == '150'
 def server_python_add():
     from gluon import current
@@ -103,5 +101,36 @@ class C_URL():
         uri=url_f.split(".")
         self.ext=uri[1] if len(uri)>1 else ''
         self.port=current.request.env.SERVER_PORT 
-
-    
+        self.refer=current.request.env.HTTP_REFERER
+    def check_refer(self,ref_f,cur_f):
+        from gluon import current
+        '''
+        
+        refer=current.request.env.HTTP_REFERER
+        if not refer or (not url in refer):
+            response.redirect(url)
+        print('refer='+ refer)
+        print("---=="+request.env.HTTP_REFERER)
+        '''
+        rf=current.session.view_page
+        if rf !=ref_f :
+            if rf == cur_f:
+                msg= """شما دوبار متوالی این صفحه را اجرا کردید 
+                        برای جلوگیری از خطا های ممکن در اثر 2 باره نویسی اطلاعات 
+                        این فرایند متوقف شد
+                       """
+            else:
+                msg= """ارجای شما به این صفحه به صورت نا مناسب بوده است
+                       """
+            from gluon.html import URL 
+            from gluon.http import redirect
+            redirect(URL('spks','form','msg',vars={'msg':msg}))     
+        current.session.view_page=cur_f
+    def set_refer(self,cur_f): 
+        from gluon import current
+        current.session.view_page=cur_f
+def int_force(x,n):
+    try:
+        return int(x)
+    except:
+        return n
