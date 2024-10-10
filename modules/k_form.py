@@ -93,6 +93,7 @@ import share_value as share
 from k_sql import DB1
 from k_err import xxxprint,xprint,xalert,xreport_var
 import time
+import k_htm
 from k_time import Cornometer
 debug=False  
 db_path='applications\\spks\\databases\\'
@@ -520,7 +521,13 @@ def template_parser(x_template,x_dic={},rep=''):
         session=current.session
         x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
         #xxxprint(msg=['inf','template_parser',xx],vals=x_dic)
+        
         try:
+            """
+                این فرایند خطا گیری برای کمک به رفع خطا در بخش های زیر می باشد
+                1-auto filed:                    before source field is filled
+                    فیلد های اتومات در مرحله قبل از پر شدن فیلد های مبنای اطلاعات آنها
+            """
             x1= template.render(content=xx,context=x_dic1) 
             #xxxprint(msg=['inf',x1+"|"+str(rep),xx],vals=x_dic)
             return x1.format(**x_dic1)  #remove 020926
@@ -1192,6 +1199,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     ##obj['js']=
     
     return obj #,cm.records()
+    
 class C_FORM_B():#
     def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
         if type(x_data_s)==tuple:
@@ -1213,9 +1221,16 @@ class C_FORM_B():#
         'backup_add':['xid']
         }
         return rep #
+        
 class C_FORM():
-
+    '''
+        مدیریت اقدامات مربوط به 1 فرم 
+        در حالت های نمایش تکی یا 1 ردیف از جدول سوابق ثبت فرم
+    '''
     def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
+        '''
+            بارگذاری اطلاعات لازم مرتبط با فرم در داخل متغیر های کلاس
+        '''
         if type(x_data_s)==tuple:
             db_name,tb_name=x_data_s
             self.x_data_s=get_x_data_s(db_name,tb_name)[0]
@@ -1229,21 +1244,31 @@ class C_FORM():
         if form_sabt_data:
             self.form_sabt_data=form_sabt_data
         else:
-            self._set_form_sabt_data()
+            self.__set_form_sabt_data()
         self.all_data=self.form_sabt_data.copy()
+        self.__set_new_data(new_data)
+        self.last_text_app=''
+    def __set_new_data(self,new_data): 
         self.new_data=new_data.copy()
         self.all_data.update(new_data)
-        self.last_text_app=''
-    def _set_form_sabt_data(self):
+    def __set_form_sabt_data(self):
+        '''
+            دریافت اطلاعات ثبت شده فرم از دیتابیس
+            #form_sabt_data= data of 1 sabt /record of 1 form
+        '''
         db1=DB1(db_path+self.db_name +'.db')
-
-        
         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
         if self.xid<1 or (not rows): #-1
             self.form_sabt_data={x:'' for x in titles}
         else:
             self.form_sabt_data=dict(zip(titles,rows[0]))
-    def set_step_app(self,step_i,reset=False):
+    def set_step_app(self,step_i,new_data,reset=False):
+        '''
+        input:
+            با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
+        output:    
+            به روز رسانی / ثبت اطلاعات مربوط به تایید 1 مرحله در داخل کلاس
+        '''
         import k_date
         if reset:
             x_d= {f'step_{step_i}_ap':''}
@@ -1253,7 +1278,7 @@ class C_FORM():
                     
                 }"""
         else:
-            text_app=current.request.vars['text_app'].lower()
+            text_app=new_data['text_app'].lower()
             x_d= {
                     f'step_{step_i}_un':current.session['username'],
                     f'step_{step_i}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
@@ -1263,7 +1288,13 @@ class C_FORM():
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return x_d
-    def set_form_app (self,f_nxt_s_new): 
+    def set_form_app (self,f_nxt_s_new):
+        '''
+        input:
+            با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
+        output:   
+            به روز رسانی اطلاعات مدیریت فرم در داخل کلاس
+        '''
         x_d={'f_nxt_s':str(f_nxt_s_new)}
         #import k_err k_err.xreport_var([f_nxt_s_new,re1,self.all_data,self.x_data_s])  
         self.new_data.update(x_d)
@@ -1286,8 +1317,123 @@ class C_FORM():
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return _f_nxt_u
+    def __new_db_data(self,f_nxt_s,f_nxt_s_new,new_data,reset=False):# USE ONLY BY : SAVE
+        '''
+        goal:
+            تهیه یک دیکشنری از اطلاعاتی که قرار است در دیتا بیس به روز رسانی شوند
+            reset:
+                True:all field in cur step of form shoud be reset =>(set to '')
+                False:all field in cur step of form shoud be save
+        inputs:
+        -------
+            new_data:dict
+                request.vars  \ or auto_data_by _pro
+        '''
+        x_data_s=self.x_data_s
+        steps=x_data_s['steps']
+        step=steps[list(steps.keys())[f_nxt_s]]
+        step_fields=step['tasks'].split(',')
+     
+        vv={}
+        for step_field in step_fields:#t=field name
+            if not step_field in new_data:
+                continue
+            req_field=new_data[step_field]
+            if step_field in x_data_s['labels']:
+                continue
+            if x_data_s['tasks'][step_field]['type']=='file':
+                continue
+            if 'uniq' in x_data_s['tasks'][step_field]:
+                url = f'''/spks/km/uniq_inf.json/{x_data_s['base']['db_name']}/{x_data_s['base']['tb_name']}/{step_field}'''
+                data = {'uniq_value':req_field,'uniq_where':x_data_s['tasks'][step_field]['uniq']};
+            vv[step_field]=(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(new_data[step_field]) if not reset else ''
+        #c_form=k_form.C_FORM(x_data_s,xid,vv)
+        self.__set_new_data(vv)
+        
+        dict2=self.set_step_app(f_nxt_s,new_data) 
+        dict2.update(self.set_form_app(f_nxt_s_new))
+        vv.update(dict2)
+        return vv
+        
+    def __update(self,f_nxt_s,text_app,new_data):# USE ONLY BY : SAVE
+        xid=self.xid
+        rr=''
+        if text_app=='r': 
+            db1=DB1(db_path+self.db_name +'.db')
+            result=db1.row_backup(self.tb_name,xid)
+            f_nxt_s_new = str(f_nxt_s-1)
+            rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
+        elif text_app=='x':
+            f_nxt_s_new = str(f_nxt_s)#"x-"+
+        elif text_app=='y':
+            f_nxt_s_new = str(f_nxt_s+1)
+        vv=self.__new_db_data(f_nxt_s,f_nxt_s_new,new_data,reset=(text_app=='x'))    
+        #xxx->return "vv=<br>"+str(vv),"update not done"
+        db1=DB1(db_path+self.db_name +'.db')
+        xu = db1.update_data(self.tb_name,vv,{'id':xid})
+         
+        p1=A(f"#{xid}-update",_onclick="$(this).next().toggle()",_class='toggle')
+        p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
+        return  {'html_report':DIV(p1,p2,k_htm.val_report(xu)),'id':xid,'db_report':xu}
+    def __insert(self,new_data):# USE ONLY BY : SAVE
+        vv=self.__new_db_data(0,1,new_data)
+        #xreport_var([vv])
+        db1=DB1(db_path+self.db_name +'.db')
+        r1=db1.insert_data(self.tb_name,vv)#.keys(),vv.values())
+        #rr=f"{db1.path}<br> INSERT:result=" + "<br>".join([f'{x}:{r1[x]}' for x in r1])
+        
+        p1=A(f"#{r1['id']}-insert",_onclick="$(this).next().toggle()",_class='toggle')
+        p2=DIV(XML(f"{db1.path}<br> INSERT:<hr>"))
+        #rr=f"{db1.path}<br> INSERT:{k_htm.val_report(r1)}"
+        return {'html_report':DIV(p1,p2,k_htm.val_report(r1)),'id':r1['id'],'db_report':r1}   
+    def save(self,new_data): #WIP 030701
+        #--------------------------------
+        xid=self.xid
+        text_app=new_data['text_app'].lower()
+        if xid==-1: #xid=='-1':
+            x_r=self.__insert(new_data)
+        else:
+            f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '0')
+            x_r=self.__update(f_nxt_s,text_app,new_data)
+        return x_r #DIV(XML(r1)),xid,r_dic
+        #--------------------------------     
+    def save_app_review(self,request_data):
+        xid=self.xid
+        db1=DB1(db_path+self.db_name+'.db')
+        
 
+        f_nxt_s=int(self.form_sabt_data['f_nxt_s'] )
+        f_nxt_s_new=f_nxt_s-1 if self.form_sabt_data['f_nxt_u']!='x' else f_nxt_s
 
+        dict2=self.set_step_app(f_nxt_s_new,request_data,reset=True) 
+        dict2.update(self.set_form_app(f_nxt_s_new))
+        result=db1.row_backup(self.tb_name,xid)
+        xu = db1.update_data(self.tb_name,dict2,{'id':xid})
+        htm_form=['UPDATE:'] 
+        try:
+            if xu['exe']['done']:
+                htm_form+=[DIV("با موفقیت انجام شد",_class="container bg-info h3 text-center")]
+        except:
+            pass
+        htm_form+=[f"{db1.path}<br> UPDATE: "+str(xu)+"<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])]
+        return htm_form
+    def show_step_1_row(self,field_name,request,mode): #)x_data_s,xid,form_sabt_data,field_name,mode(
+        #mode='output'/'input'
+        #print("c_form-show_step_1_row"+mode)
+        x_data_s=self.x_data_s
+        xid=self.xid
+        #form_sabt_data=self.form_sabt_data
+        form_sabt_data=self.all_data
+        
+        fd=x_data_s['tasks'][field_name]#fd=field_data
+        htm_1=DIV(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
+        if 'hide' in fd['prop']:
+            return [htm_1,'*','']
+        x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
+        return [htm_1,x_obj[mode],x_obj['help']]
+    
+    
+    
 def get_x_data_s(db_name,tb_name):
     from x_data import x_data
     if not db_name in x_data:return False,'error : "{}" not in ( x_data )'.format(db_name)
@@ -1337,4 +1483,20 @@ def input_validate(in_data,data_inf):
             return True
         else:
             return False
+def chidman(hx,x_data_s,step,form_case=2,request=''):
+    import k_user
+    form_case=k_tools.int_force(request.vars['form_case'] if request else form_case,form_case)
+    jobs_title=k_user.jobs_title(step['jobs'],x_data_s)
     
+    if form_case==1:
+        return [DIV(DIV(hx['stp'],_class='col text-right'), DIV(jobs_title,_title=step['jobs'],_class='col text-warning',_dir='rtl'),_class='row text-light bg-dark' )]+hx['data']+[
+            DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
+            ]
+        #return DIV(DIV(hx['stp'],_class='col-2 text-right border-left'),DIV(htm_1,_class='col-10'),_class='row border-bottom')
+    elif form_case==2:
+        htm_1=[DIV(x,_class='row') for x in hx['app']]
+        return DIV(
+            DIV(DIV(hx['stp'],_class='row'),DIV(jobs_title,_title=step['jobs'],_class='row text-warning'),_class='col-2 text-right border-left text-light bg-dark'),
+            DIV(hx['data'],_class='col-8'),
+            DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
+            _class="row border-bottom ")   
