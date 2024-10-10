@@ -299,7 +299,7 @@ class DB1():
         '''
         
         #-------------------------------------------------------------------------------------
-        row_num=self.count(table_name=table_name,where=where)['count']
+        rows_num=self.count(table_name=table_name,where=where)['count']
         sql_where=C_SQL().where(where)
         sql_x=sql or "SELECT * FROM {}".format(table_name)
         sql_x+=sql_where
@@ -311,7 +311,7 @@ class DB1():
         titles = self._titles()
         
         result_1={'sql':sql_x,'sql_where':sql_where,
-        'rows':rows,'titles': titles,'row_num':row_num
+        'rows':rows,'titles': titles,'rows_num':rows_num
         ,'exec_report':x_re,
         'items':{},'ids':[],'id':-1,'n':0,'done':True}
         #---------------------------
@@ -332,7 +332,7 @@ class DB1():
         # xxxprint(out_case=3,msg=[msg,'',''],inspect_n=2,session_report=True,vals={'sql_in':sql,'sql':sql_x,'test_sql':sql_1,'rows':rows,"test_rows":rows_1,"sql_where":sql_where,"where":where})
         
         if result=='list':
-            return rows,titles,row_num
+            return rows,titles,rows_num
         elif result=='dict_x':
             return result_1
         else: #dict
