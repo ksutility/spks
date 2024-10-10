@@ -227,7 +227,7 @@ class C_TABLE:
             return vv
             
         def export_files(att_files):
-            if not filename:return
+            if not att_files:return
             import k_file
             dest_folder=os.path.join("C:",os.sep,"temp","x_export",folder_name)
             k_file.dir_make(dest_folder)
@@ -266,7 +266,7 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type=""):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c"):
         import gluon
         '''
             old name= htm_table
@@ -319,7 +319,7 @@ class C_TABLE:
         #k_err.xreport_var([heads,rows,thead,trs])  
         #class_table='table'+class_table if class_table else 'table2'
         #return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl"),_class="div_table") #DIV(,_style='height:100%;overflow:auto;')  
-        return TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl")
+        return TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id)
 def table_x_not_used(cols,rows,class_table=''):
     import gluon
     '''
@@ -465,11 +465,18 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary'):
 def xtd(td_list):#
     rep=""
     for td_obj in td_list:
-        rep+=f"""
-            <div class="col-{td_obj[1]}">
-                {td_obj[0]}
-            </div> 
-        """
+        if type(td_obj)==list: 
+            rep+=f"""
+                <div class="col-{td_obj[1]}">
+                    {td_obj[0]}
+                </div> 
+            """
+        else:
+            rep+=f"""
+                <div class="col">
+                    {td_obj}
+                </div> 
+            """
     return f"""
         <div class="row">
             {rep}
@@ -481,7 +488,7 @@ def x_toggle(txt):
                 {txt}\n
                 </div>\n
             """
-def x_toggle_s(txt,sign='+'):#s=small
+def x_toggle_s(txt,sign='+',color='warning'):#s=small
     js="""
         <script>
             $( document ).ready(function() {
@@ -489,9 +496,11 @@ def x_toggle_s(txt,sign='+'):#s=small
             </script>
         </div>\n
     """
-    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="a_toggle_hide" >{sign}</a>\n
+    return  f"""<div class="text-center">
+                <a onclick="$(this).parent().next().toggle()" class="btn btn-{color} btn-sm a_toggle_hide" 
+                    style="width:5%">{sign}</a>\n
                 </div>
-                <div>\n
+                <div class="text-center">\n
                 {txt}\n
                 </div>\n
             """
@@ -527,3 +536,37 @@ def tabs(cat_dict,content_dict,x_active=''):
                     {body}
                 </div>
    """
+def checkbox(name):
+    '''
+        creat checkbox in html page
+    inputs:
+    ------ 
+        name:str
+            name of object
+            
+            
+            <div class="form-check-inline">
+            </div>
+            
+    '''
+    from gluon import current
+    _value=current.request.vars[name]
+    #print(f"checkbox {name} = {vv}")
+    checked="checked" if _value=="1" else ""
+    return XML(f"""<input name='{name}' id='{name}' value=1 type="checkbox" {checked} class='largercheckbox'
+                style='width: 50px;height: 30px;transform: scale(1.01);
+                margin: 0px;color:#hca;background color:#a00;' >""")
+  
+    '''
+    xh=XML(f"""
+                <input name='{nn}' id='{nn}' type="hidden" value=0 >
+                <input style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' 
+                    class='largercheckbox' type='checkbox' value='1' onchange="this.previousSibling.value=this.checked ?'1':'0' ">
+            """)
+    '''        
+def form(inner_html,action=''):
+    bt_a=DIV(INPUT(_type='submit',_value='تایید',_class='btn btn-primary w-50'),_class="text-center")#,_style='width:100%,background-color:#ff00ff' )
+    action='action='+action if action else ''
+    #URL(url),_method='post'
+    return XML(f"""<form {action}>{inner_html}<br>{bt_a}</form>""")
+    
