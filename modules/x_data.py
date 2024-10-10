@@ -153,6 +153,12 @@ x_data_cat={
     '4':'DCC',
     '9':'موارد متفرقه',
     }
+'''
+import json
+with open("myfile.json", "r",encoding='utf8') as fp:
+    data = fp.read()
+x_data=json.loads(data)
+'''      
 x_data={
     'a_cur_subject':{
         'a':{
@@ -371,7 +377,7 @@ x_data={
         #from paper='cdate','sbj','comment','attach','lv_archiv','lv_per_archiv','lv_onvan','io_t','paper_num','num_x','num_link','folder'
         
         'a':{
-            'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'901','auth_prj':'prj1'
+            'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'901','auth_prj':'prj1','multi_app':{'0':['ks'],'1':['ks']},
             },
             'tasks':{
                 'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
@@ -400,13 +406,14 @@ x_data={
                 'num_x':{'type':'text','width':'10','title':'num_x','prop':[]},
                 'num_link':{'type':'text','width':'10','title':'num_link','prop':[]},
                 'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[]},#'hide']},
+                'pr_err':{'type':'text','width':'250','title':'خطا','prop':[],'help':'خطا در دریافت خودکار اطلاعات نامه توسط playwright'},
                 
                 'outbox':{'type':'text','width':'5','title':'ارسالی','prop':['read']},
                 'x_des':{'type':'text','width':'30','title':'مفهوم*','title_add':'توضیح دستی'},#,'prop':['read']
                 'x_num':{'type':'text','width':'30','title':'کد*','title_add':'جهت انتخاب و یا مرتب سازی راحتتر نامه ها و موضوعات خاص'},#,'prop':['read']
                 'x_inf':{'type':'text','width':'30','title':'اطلاعات*','title_add':'اطلاعات اضافی'},
                 'x_to_grup':{'type':'reference','width':'5','title':'گروه گیرنده*','ref':{'db':'a_contact_grup','tb':'a','key':'{grup_code}','val':'{grup_name}',
-                     'where':'''prj = "{prj1}" and sub_p = "{prj2}"'''},'prop':['read']},#,'prop':['read']
+                     'where':'''prj = "{prj1}" and sub_p = "{{=prj2[-3:] if prj2 and len(prj2)>3 else ''}}"'''},'prop':['read']},#,'prop':['read']
                 #    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['read']},#,'prop':['read']
                 
                 
@@ -424,7 +431,7 @@ x_data={
                 's3':{'tasks':'folder,lno,sbj,comment,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate,date_s,date_e','jobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'prj_id,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_p,sbj',
+                'all':{'input':'prj_id,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_todo,x_act_rec,x_act_pey,act_todo','view1':'lno,lno_p,sbj,pr_err',
                     'view2':'comment,date_s,date_e,cdate,io_t,outbox,man_ar_mng,paper_num,num_x,num_link,attach,folder,lv_onvan,lv_archiv,lv_per_archiv'}
             },
             'labels':{
@@ -442,6 +449,7 @@ x_data={
                 'prj,lno,sbj,date_s,io_t,x_num,x_des,act_todo,x_act_todo,x_act_rec,x_act_pey':'شماره،موضوع،تاریخ،ص-و،توضیح،اقدام (لازم،سابقه، پی گیری)',
                 'folder,lno,sbj,date_s,comment,io_t,x_to_grup,act_todo,x_act_todo,x_act_rec,x_act_pey,x_act_type,x_inf,x_inf,x_des':'بررسی 1',
                 'folder,lno,sbj,date_s,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate':'بررسی 2',
+                'prj2,lno,sbj,date_s,io_t,lv_onvan,lv_archiv,paper_num,folder':'بررسی 3',
                 }, #table_view cols filter
                 #cols_filter={'':'همه','lno,sbj':'2',}
             'data_filter':
@@ -810,7 +818,7 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_saat':{
         'a':{
-            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201'
+            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -844,7 +852,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'off_mamurit_saat':{
         'a':{
-            'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203'
+            'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203','multi_app':{'1':['rms'],'3':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
@@ -876,6 +884,31 @@ x_data={
                 {'step_2_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',
                 },
         }
+    },
+    #-------------------------------------------------------------------- 's2':{'tasks':'des_2','jobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
+    'tel':{
+        'a':{
+            'base':{'mode':'form','title':'دفترچه تلفن شرکت','code':'203'
+            },
+            'tasks':{
+                'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
+                'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
+                'name':{'type':'text','title':'نام','len':'15'},
+                'family':{'type':'text','title':'فامیل','len':'35'},
+                'tel_mob':{'type':'text','title':'موبایل','len':'13'},
+                'tel_wrk':{'type':'text','title':'تلفن','len':'10','placeholder':"....-..-.."},
+                'job':{'type':'text','title':'سمت','len':'40'},
+                'des':{'type':'text','title':'توضیحات','len':'250'},
+            },
+            'steps':{
+                's0':{'tasks':'m_w,pre_n,name,family,tel_mob,tel_wrk,job,des','jobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'m_w,pre_n,name,family,tel_mob,tel_wrk,job,des','view1':'family','view2':'family'}
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter': {},
+         }
     },
     #--------------------------------------------------------------------
     'test':{
@@ -968,3 +1001,17 @@ x_data_verify(x_data)
 #import k_err
 #k_err.xxxprint(vals=x_data,launch=True)
 #--------------------------------------------------------------------lable_1,name, ['prj']['select'][prj]=>
+if __name__ == "__main__":
+    import json
+    # the json file where the output must be stored
+    out_file = open("myfile.json", "w",encoding='utf8')
+    json.dump(x_data, out_file, indent = 4,ensure_ascii=False)
+    out_file.close()
+    with open("myfile.json", "r",encoding='utf8') as fp:
+        data = fp.read()
+    x_data1= json.loads(data)  
+    if x_data1==x_data:
+        print("ok") 
+    else:
+        print("!=") 
+    print(x_data1['eblag']['a']['labels'])
