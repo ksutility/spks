@@ -340,16 +340,31 @@ def user_in_jobs(jobs,row_data={},un=''):
     return False
 
 class C_AUTH_FORM():
+    '''
+        بررسی حق دسترسی های مختلف 1 فرد به 1 فرم
+    '''
     def __init__(self,x_data_s):
         self.x_data_s=x_data_s
-    def all(self):    
+        x=self.all()
+        self.ok=x['auth']
+        self.msg=x.get('msg','')
+        self.where=self.auth_where()
+    def all(self):  
+        '''
+            بررسی دسترسی کلی 1 فرد به 1 فرد
+        '''
         from gluon import current
         if not 'auth' in self.x_data_s['base']:return {'auth':True}
         if current.session["admin"] or user_in_jobs_can('view',jobs=self.x_data_s['base']['auth']):return {'auth':True}
         return {'auth':False,'msg':"شما اجازه دسترسی به این فرم را ندارید"}
     def auth_where(self):
+        '''
+            تهیه بخش جستجو در اس کی ال برای فیلتر کردن فرمهایی از فرم که فرد اجازه دیدن آنها را دارد
+            این بخش بیشتر بر اساس دسترسی بر اساس پروژه تنظیم می شود
+        '''
         from gluon import current
         if 'auth_prj' in self.x_data_s['base']: # در صورت تعریف متغیر دسترسی بر حسب پروژه در قسمت مبنای دیکشنری اطلاعات فرم
             if not current.session['auth_prj']=="*": # در صورتی که فرد ادمین نباشد
-                return {self.x_data_s['base']['auth_prj']:current.session['auth_prj'].split(",")}
+                auth_prj_v=current.session['auth_prj']
+                return {self.x_data_s['base']['auth_prj']:auth_prj_v.split(",") if auth_prj_v else ['  ']}
         return ''
