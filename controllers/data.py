@@ -1092,6 +1092,10 @@ def rc():#run 1 command
             arg[1]:db_name
             arg[2]:tb_name
         '''
+        todo=(len(request.args)>3 and request.args[3]=='do')
+        if todo:
+            import k_file
+            k_file.backup(db1.path,"*,bak")
         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
         x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
         trs=[]
@@ -1103,8 +1107,24 @@ def rc():#run 1 command
             #fnu=f_nxt_u
             f_nxt_u_old=x_dic['f_nxt_u']
             f_nxt_u_new=c_form.f_nxt_u()
-            if (len(request.args)>3 and request.args[3]=='do' and f_nxt_u_new and f_nxt_u_new!=f_nxt_u_old): #run_sql:
-                rep=db1.update_data(tb_name,{'f_nxt_u':f_nxt_u_new},{'id':xid})
+            if f_nxt_u_old==None:
+                c_form.all_data['f_nxt_s']='0'
+                c_form.form_sabt_data['f_nxt_s']='0'
+                f_nxt_u_new=c_form.f_nxt_u()
+                x_set={'f_nxt_s':'0','f_nxt_u':f_nxt_u_new}
+            else:    
+                if f_nxt_u_new and f_nxt_u_new!=f_nxt_u_old: #run_sql:
+                    x_set={'f_nxt_u':f_nxt_u_new}
+                else:    
+                    x_set=''
+            
+            if x_set:           
+                if todo:
+                    rep=db1.update_data(tb_name,x_set,{'id':xid})
+                else:
+                    rep=" x_set : "+str(x_set) 
+             
+            
             trs+=[[i,xid,x_dic['f_nxt_s'],f_nxt_u_old,f_nxt_u_new,rep,c_form.last_text_app]]
         from k_table import K_TABLE
         rep=K_TABLE.creat_htm(trs,['i','id','f_nxt_s','f_nxt_u old','f_nxt_u new','run_sql={run_sql}'],table_class='1')
