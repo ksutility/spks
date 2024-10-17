@@ -267,11 +267,15 @@ def file_delete_rcl(file_path,path='',delete_empty_folder=False,recycle_sub_fold
         folder_delete_if_empty(ff['path'])
     return rep #xxxprint(True,rep)
 #---------------------------------------------------------------------------------################################     
-@check_err                      
-def get_downloded_file(new_path):
+#@check_err                      
+def get_downloded_file(new_path,show_ui=False):
     '''
         get 1 file frome "download" folder and save it to new_path
     '''
+    ui.msg(f"get_downloded_file:start \n new_path={new_path} \n ")
+    def err_manage(msg):
+        ui.ask("get_downloded_file:\n"+msg)
+        x=input("input ?")
     xprint(new_path)
     file_tg=file_name_split(new_path) #file_target
     dp=downloads_path()
@@ -376,7 +380,7 @@ def backup(file_path,bak_folder='',delete=False):
         shutil.copy(file_path, new_file_path)
     return new_file_path
    
-@check_err  
+#@check_err  
 def read(_format,file_path):
     '''
     Parameters
@@ -729,10 +733,16 @@ def rename(file_path,new_name_format):
     fdate=k_date.ir_date("yymmddhhggss")
     ff=file_name_split(file_path) 
     return ff['path']+"\\"+new_name_format.format(name=ff['name'],ext=ff['ext'][1:],date=fdate[:6],time=fdate[-6:])    
-def launch_file(filename):
+def launch_file(filename,pos=[],size=[]):
     #shell 
     import os
-    os.system("start " + filename)
+    if pos or size:
+        import k_win
+        wins=k_win.C_WINDOWS()
+        os.system("start " + filename)
+        win1=wins.find_new(pos=pos,size=size)
+    else:
+        os.system("start " + filename)
     '''
     import subprocess
     try:
