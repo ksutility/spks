@@ -110,8 +110,9 @@ class C_SQL():
         if offset:        
             return sql+f' {x_order} limit {offset},{limit}' if limit else sql
         else:   #if page_n:
-            x_page=int(page_n) if page_n else 1 
-            x_page_len=int(page_len) if page_len else 20
+            from k_tools import int_force
+            x_page=int_force(page_n,1) 
+            x_page_len=int_force(page_len,20) 
             x_offset=(x_page-1) * x_page_len 
             return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
 #===================================================================================

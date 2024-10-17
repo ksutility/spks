@@ -587,6 +587,7 @@ def f_list():#file_browser=file.index
     meta=k_file_meta.read(path,files,folders)
     #print(f'path={path} ,fiels len={len(files)}')
     def x_ext(x_file):
+        x_file['ext']=x_file['ext'].lower()
         if x_file['ext']=='.zip':
             return DIV(A('+zip',_title='unzip in this folder',_href=URL(f='unzip',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")
                 ,A('+7z',_title='unzip7 in this folder',_href=URL(f='unzip7',args=args+[x_file['filename']],vars=r_vars),_target="x_frame")) if fc_access else ''
