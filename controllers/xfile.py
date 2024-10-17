@@ -357,53 +357,61 @@ def read_mermaid():
     f_name,f_msg,file_inf=_x_file()
     with open(f_name,'r',encoding='utf8') as file: 
         lines = [line for line in file]
-    style='''
-    .center {
-        width:"100%";
-        margin: auto;
-        text-align: center;
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-    }
-    '''
-    """
-        <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
-        <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
-        <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
-        <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
-        <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
-        <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
-    """
-    htm1=f'''
-    <html><head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>marmid</title>
-        
-        <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
+    def mermaid_2_html(head,mermaid_base): 
+        style='''
+        .center {
+            width:"100%";
+            margin: auto;
+            text-align: center;
+        }
+        .container {
+          display: flex;
+          justify-content: center;
+        }
+        '''
+        """
+            <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
+            <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
+            <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
+            <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
+            <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
+            <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
+        """
+        return f'''
+        <html><head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <title>mermaid</title>
+            
+            <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
 
-        <style>
-        {style}
-        </style>
-    </head>
-    <body >
-        <div class="container1">
-            <div class="center">
-                <h1 class="center">
-                    {lines[0]}
-                </h1>
-                <hr>
-                <div>
-                    <pre class="mermaid">
-                        {''.join(lines[1:])}
-                    </pre>
-                </div>
-            </div
-        </div>
-    </body>
-    '''
-    return htm1    
+            <style>
+            {style}
+            </style>
+        </head>
+        <body >
+            <div class="container1">
+                <div class="center">
+                    <h1 class="center">
+                        {head}
+                    </h1>
+                    <hr>
+                    <div>
+                        <pre class="mermaid">
+                            {''.join(mermaid_base)}
+                        </pre>
+                    </div>
+                </div
+            </div>
+        </body>
+        '''
+        
+    #--------------
+    ext=file_inf['ext'][1:]
+    #return ext
+    if ext=="mermaid2":
+        return mermaid_2_html(lines[0],lines[1:]) 
+    if ext=="mermaid":
+        return mermaid_2_html("abc",lines) 
     pass
 def read(): #read all markup
     f_name,f_msg,file_inf=_x_file()

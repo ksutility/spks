@@ -436,7 +436,7 @@ def test_mermaid():
     htm1=f'''
     <html><head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>marmid</title>
+        <title>mermaid</title>
         
         <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
 
