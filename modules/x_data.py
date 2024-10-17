@@ -165,11 +165,15 @@ x_data={
             'base':{'mode':'form','title':'موضوعات و پروژه های جاری','code':'100'},
             'tasks':{
                 'cp_code':{'type':'text','title':'کد موضوع','len':'4','uniq':''},
-                'cp_name':{'type':'text','title':'نام موضوع','len':'140','lang':'fa'},
-                'cp_date':{'type':'fdate','title':'تاریخ ثبت'},
+                'cp_name':{'type':'text','title':'نام کامل','len':'140','lang':'fa'},
+                'sm_name':{'type':'text','title':'نام مختصر','len':'20','lang':'fa'},
+                'alt_names':{'type':'text','title':'نام های متفرقه','len':'250','lang':'fa'},
+                'salimi':{'type':'text','title':'نام در سیستم مهندس سلیمی','len':'150','lang':'fa'},
+                'o_prjs':{'type':'reference','width':'20','title':' پروژه','ref':{'db':'a_sub_p','tb':'a','key':'{code2}','val':'{code2}-{name2}'},'prop':['multiple']},
             },
             'steps':{
-                'pre':{'tasks':'cp_code,cp_name,cp_date','jobs':'dcc_prj','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'cp_code,cp_name','jobs':'dcc_prj','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'sm_name,alt_names,salimi,o_prjs','jobs':'dcc_prj','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
             },
@@ -448,8 +452,9 @@ x_data={
                 'lno,sbj,date_s,io_t,x_num,x_des':'ش.م.ت.ن-دستی : شماره و شرح',
                 'prj,lno,sbj,date_s,io_t,x_num,x_des,act_todo,x_act_todo,x_act_rec,x_act_pey':'شماره،موضوع،تاریخ،ص-و،توضیح،اقدام (لازم،سابقه، پی گیری)',
                 'folder,lno,sbj,date_s,comment,io_t,x_to_grup,act_todo,x_act_todo,x_act_rec,x_act_pey,x_act_type,x_inf,x_inf,x_des':'بررسی 1',
-                'folder,lno,sbj,date_s,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate':'بررسی 2',
+                'folder,lno,sbj,date_s,io_t,lv_onvan,lv_archiv,paper_num,num_x,num_link,cdate,attach,lv_per_archiv':'بررسی 2',
                 'prj2,lno,sbj,date_s,io_t,lv_onvan,lv_archiv,paper_num,folder':'بررسی 3',
+                'prj2,lno,sbj,date_s,io_t,lv_onvan,lv_archiv,paper_num,folder,pr_err':'بررسی 4',
                 }, #table_view cols filter
                 #cols_filter={'':'همه','lno,sbj':'2',}
             'data_filter':
@@ -458,7 +463,7 @@ x_data={
                 'prj_id = "110"':'مدیریت سوابق',
                 'prj_id is Null':'نیاز به تعیین پروژه',
                 'prj_id = "36"':'پروژه پیوندراه',
-                'prj_id = "29"':'پروژه گیتها',
+                'prj1 = "HRG1"':'پروژه گیتها',
                 'prj_id = "29" AND x_des like "%L-%"':'-Lپروژه گیتها',
                 'prj_id = "48"':'پروژه استاندارد سازی',
                 
@@ -490,10 +495,11 @@ x_data={
             'data_filter':{}
         },#,
     },
+    
     #--------------------------------------------------------------------
     'user':{
         'user':{
-            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"','code':'201'
+            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"','code':'201','auth':'dccm'
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
