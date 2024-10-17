@@ -318,8 +318,7 @@ class C_TABLE:
         #import k_err    
         #k_err.xreport_var([heads,rows,thead,trs])  
         #class_table='table'+class_table if class_table else 'table2'
-        #return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl"),_class="div_table") #DIV(,_style='height:100%;overflow:auto;')  
-        return TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id)
+        return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id),_class="div_table")
 def table_x_not_used(cols,rows,class_table=''):
     import gluon
     '''
