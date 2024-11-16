@@ -892,89 +892,91 @@ def select_i(x_data):
             sql: for selecting data that select_cat=data
     '''
     args=request.args
-    response.title='update-'+'-'.join(args)
+    response.title='S*S:'+'-'.join(args)
     x_data_s,db_name,tb_name,msg=get_init_data()
-    if not x_data_s:
-        return msg
-    else:
-        '''
+    if not x_data_s: return msg
+
+    '''
     if len(args)>0:
-        if args[0] not in tasks:
-            return f'error: >  "{args[0]}" not defined in Fieldes'
-        db_name=args[0]
-        if len(args)<2:args+=['a']
-        tb_name=args[1]
-        '''
-        db1=DB1(db_path+db_name+'.db')
-        tasks=x_data_s['tasks']#tasks[args[0]]
-        ##-----
-        val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
-        s1=k_htm.select(_options=val_dic,_name='sel1',_value=request.vars['sel1'],_onchange="submit();")#$('#res1').text($(this).val())")
-        ##-----
-        #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
-        ssw_select,ssl_table='',''
-        #--------------------------------------------------------------------------------------------------------------------------------------
-        #if request.vars['sel1']:
-        sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[0] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
-        #if sel1 in ["None",None]:sel1='prj'
-        traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
-        val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
-        #print(str(val_dic))
-        #ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="set_val();")
-        ssw_select=k_htm.select(_options=val_dic,_name='sel2',_value=request.vars['sel2'],_onchange="submit();")
-        #---------------------------------------------------------------------------
-        #ssl_table=sql select linked table : a table split category of a field and liked to each
-        def remove(base_str,chars):
-            #remove chars from base_str
-            for x in chars:
-                base_str=base_str.replace(x,'')
-            return base_str
-        #---- 
-        result1='"{}"{}'.format(sel1,(request.vars["sign"]) ) if (request.vars["sign"] and request.vars["sign"]!="-") else sel1 + " = "
-        ssl_table=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','T','F','Grup','number']])),
-                    TBODY(*[TR(
-                                str(i+1)
-                                ,A('T',_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
-                                ,A('F',_href=URL('form','xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
-                                ,val_dic[v]['title']
-                                ,val_dic[v]['num']
-                            ) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
-                    #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
-        #----
-        ##------------------------------------------------------------------------------------------------------------------------------------------
-        #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
-        i1=k_htm.select(_options=[" = "," != "," > "," < "," like "],_name='sign',_value=request.vars['sign'],_onchange="submit();")
-        v=request.vars
-        result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
-        result_htm=XML(f'<div name="result" id="result">{result}</div>')
-        return XML(f'''<form id="form5"><label>data_filter(dict)</label>
-                    {DIV(DIV(s1,_class="col-4"),DIV(i1,_class="col-2"),DIV(ssw_select,_class="col-4"),DIV(result_htm,_class="col-2"),_class="row")}
-                    <input type="submit">
-                    {A('Open Selected List-باز کردن لیست انتخاب شده',_href=URL('xtable',args=args,vars={'data_filter':result}))}
-                    </form>
-                    {ssl_table}
-                    <script>
-                    var filter1=0
-                    function submit() {{
-                        document.getElementById("form5").submit();
-                    }}
+    if args[0] not in tasks:
+        return f'error: >  "{args[0]}" not defined in Fieldes'
+    db_name=args[0]
+    if len(args)<2:args+=['a']
+    tb_name=args[1]
+    '''
+    db1=DB1(db_path+db_name+'.db')
+    tasks=x_data_s['tasks']#tasks[args[0]]
+    ##-----
+    val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
+    s1=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();")#$('#res1').text($(this).val())")
+    #,_value=request.vars['sel1']
+    ##-----
+    #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
+    ssw_select,ssl_table='',''
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #if request.vars['sel1']:
+    sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[0] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
+    #if sel1 in ["None",None]:sel1='prj'
+    traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
+    val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
+    #print(str(val_dic))
+
+    ssw_select=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();")#,_value=request.vars['sel2']_onchange="set_val();
+    #---------------------------------------------------------------------------
+    #ssl_table=sql select linked table : a table split category of a field and liked to each
+    def remove(base_str,chars):
+        #remove chars from base_str
+        for x in chars:
+            base_str=base_str.replace(x,'')
+        return base_str
+    #---- 
+    result1='"{}"{}'.format(sel1,(request.vars["sign"]) ) if (request.vars["sign"] and request.vars["sign"]!="-") else sel1 + " = "
+    ssl_table=DIV(TABLE(   THEAD(TR(*[TH(x) for x in ['index','T','F','Grup','number']])),
+                TBODY(*[TR(
+                            str(i+1)
+                            ,A('T',_href=URL('xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
+                            ,A('F',_href=URL('form','xtable',args=args,vars={'data_filter':f'{result1}"{v}"'}))
+                            ,val_dic[v]['title']
+                            ,val_dic[v]['num']
+                        ) for i,v in enumerate(val_dic)]),_class="table0"),_class="div_table")
+                #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
+    #----
+    ##------------------------------------------------------------------------------------------------------------------------------------------
+    #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
+    i1=k_htm.select(_options=[" = "," != "," > "," < "," like "],_name='sign',_onchange="submit();")#,_value=request.vars['sign']
+    v=request.vars
+    result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
+    result_htm=XML(f'<div name="result" id="result">{result}</div>')
+    return XML(f'''<form id="form5"><label>data_filter(dict)</label>
+                {A('جستجو',_href=URL('form','search',args=args[:2]),_class="btn btn-primary")}
+                {DIV(DIV(s1,_class="col-4"),DIV(i1,_class="col-2"),DIV(ssw_select,_class="col-4"),DIV(result_htm,_class="col-2"),_class="row")}
+                <input type="submit">
+                {A('Open Selected List-باز کردن لیست انتخاب شده',_href=URL('xtable',args=args,vars={'data_filter':result}))}
+                </form>
+                {ssl_table}
+                <script>
+                var filter1=0
+                function submit() {{
+                    document.getElementById("form5").submit();
+                }}
+                
+                $('input[type=submit]').hide();
+                </script>''')
+                
+    '''
+                function set_val(){{
+                    document.getElementById("result").innerHTML='"'+document.getElementById("sel1").value+'"'+document.getElementById("sign").value+'"'+ document.getElementById("sel2").value+'"';
                     
-                    $('input[type=submit]').hide();
-                    </script>''')
-                    
-        '''
-                    function set_val(){{
-                        document.getElementById("result").innerHTML='"'+document.getElementById("sel1").value+'"'+document.getElementById("sign").value+'"'+ document.getElementById("sel2").value+'"';
-                        
-                    }}  
-                    set_val();
-                    '''
+                }}  
+                set_val();
+                '''
         
     return 'error'
 def select():
     return dict(x=DIV(XML(style2),select_i(x_data)))
 #                    <a href='../xtable/paper?data_filter="prj=\\'36\\'"'>---</a>
 
+    
 def rc():#run 1 command
     '''
         final goal=update multi filed by sql
@@ -1144,7 +1146,7 @@ def rc():#run 1 command
             select_cols=select_cols.split(',')
         else: 
             return f"select_cols={select_cols}"
-        rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
+        rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=500)#limit=20)
         x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
         ou=''
         trs=[]
@@ -1167,6 +1169,8 @@ def rc():#run 1 command
                         if 'error' in x_new :
                             rep='err => not do'
                         elif (len(request.args)>3 and request.args[3]=='do' ): #run_sql:
+                            import k_file
+                            k_file.backup(db1.path,"*,bak")
                             rep=db1.update_data(tb_name,{x_obj['name']:x_new},{'id':xid})
                         else:
                             rep='=> to do'
@@ -1343,3 +1347,61 @@ def diff():
                 dd+=f'{titles1[j]}:({y}=>{rows2[i][j]})'
         dif[row[titles1.index('id')]]=dd
     return dict(a=k_htm.dict_2_table(dif))
+def search():
+    '''
+    030728
+    goal:
+    ------
+        URL_base search:
+            جستجو ساده مبنتی بر URL
+            ------
+            - search in 1 field or in all field
+                - search in 1 field : 4_ args => db/tb/search_text/field_name
+                - search in all field : 3_ args => db/tb/search_text
+                    عدم نوشتن نام فیلد جستجو
+                - search in n fields : vars => s_cols=field_name_1,field_name_2,...,field_name_n
+                    s_cols = search_colomns
+                    exam => db/tb/search_text?s_cols=field_name_1,field_name_2,...,field_name_n
+            - define out_colomns
+                -in url : vars => o_cols=field_name_1,field_name_2,...,field_name_n
+                    o_cols=output_colomns
+        search by form:
+            جستجو بر اساس اطلاعات پر شده در یک فرم
+            -------
+            - 2_ args => db/tb
+            
+
+    exam :
+        http://192.168.88.179/spks/data/search/paper/a/gate?s_cols=sbj&o_cols=sbj,id
+    '''
+    out=[]
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    if not x_data_s : return msg
+    if len(request.args)<2: return "len(request.args)<3"
+    args=request.args+['','','']
+    search_text=args[2] or request.vars['search_text']
+    
+    from k_sql import DB1,C_SQL
+    import k_htm
+    db1=DB1(db_path+db_name+'.db')
+    if args[2]=="":
+        val_dic={x:x for x in db1.columns_list(tb_name)}
+        out+=[FORM(DIV(
+                INPUT(_name='search_text',_value=request.vars['search_text']),
+                k_htm.select(_options=val_dic,_name='o_cols',_multiple=True),
+                INPUT(_value='جستجو',_type='submit')))]
+        #,DIV())]
+    if search_text:
+        
+        s_cols=request.vars['s_cols'].split(',') if request.vars['s_cols'] else ''
+        fields=s_cols or args[3] or db1.columns_list(tb_name) 
+        where=' OR '.join([C_SQL().where_cell(field_name,f'%{search_text}%','like') for field_name in fields])
+        rows,titles,rows_num=db1.select(tb_name,where=where,limit=0)
+        tasks=x_data_s['tasks']
+        #c_filter=C_FILTER(tasks,x_data_s) 
+        #rows,titles,nr=_xtable_show(rows,titles,tasks,x_data_s,c_filter)
+        table=k_htm.C_TABLE(titles,rows).creat_htm(titels=request.vars['o_cols'])
+        out+=["search_text => "+search_text]
+        out+=[table]
+        out+=[f"where={where}"]
+    return dict(x=DIV(*out))

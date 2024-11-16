@@ -1248,3 +1248,57 @@ def reports():
     import k_htm #k_err
     #return k_err.htm_dict(session['reports'])
     return k_htm.val_report(session['reports'])
+def user_timesheet():
+    import k_htm,jdatetime,k_form
+    x_date=request.vars['x_date'] or '14'+jdatetime.date.today().strftime('%y/%m/%d')
+    x_un=f'{session["username"]}- {session["user_fullname"]}'
+    db_name='person_act'
+    tb_name='a'
+    x_data_s=x_data[db_name][tb_name]
+    db1=DB1(db_path+db_name+'.db')
+    rows,titles,rows_num=db1.select(tb_name,where={'date1':x_date,'frd_1':x_un},limit=0)
+    
+    
+    #tuple to list , add link
+    rows1=[]
+    for row in rows:
+        row1=list(row)
+        id_n=titles.index('id')
+        url=URL('form','xform_sd',args=['person_act','a',row[id_n]])
+        row1[id_n]=XML(A(row[id_n],_href='javascript:void(0)',
+            _onclick=f"""j_box_show("{url}",true)""",
+            _class="btn btn-primary"))#link
+        rows1+=[row1]
+    table=k_htm.C_TABLE(titles,rows1).creat_htm(titels=['time','act_des','act_cat','cp_name','id',],table_class="x")  
+    
+    return dict(
+        inp_date=FORM(INPUT(_name="x_date",_id="x_date",_class='fDATE',_value=x_date,_onchange="submit();")),
+        sum_time=_sum_times([row[titles.index('time')] for row in rows]),
+        x_un=x_un,
+        new_form=k_htm.a('+',_href=URL('form','xform_sd',args=['person_act','a','-1'],vars={'date1':x_date,'act_cat':'-','form_case':1}),_target="box",_title='فرم جدید'),
+        table=table)
+def _sum_times(time_list):
+    '''
+    time_list=list of "hh:dd"
+        sample ["10:15","14:20","02:50"]
+    '''
+    hh,mm=0,0
+    for x_time in time_list:
+        h1,m1=x_time.split(":")
+        hh+=int(h1)
+        mm+=int(m1)
+    h2,m2=divmod(mm, 60)#hh=hh+mm\60
+    return str(hh+h2).zfill(2)+":"+str(m2).zfill(2)
+    #return round((hh+mm/60),1)
+def auth_of_form():
+    '''
+    db_name='person_act'
+    tb_name='a'
+    x_data_s=x_data[db_name][tb_name]
+    tasks=x_data_s['tasks']
+    for task in tasks:
+        if 'auth' in task:
+            
+        else:
+    '''
+            

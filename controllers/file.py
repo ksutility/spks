@@ -13,7 +13,7 @@ import os,time
 from jdatetime import datetime
 import k_file
 from k_file_meta import K_FILE_META 
-k_file_meta=K_FILE_META ()
+k_file_meta=K_FILE_META()
 import k_finglish
 import k_err,k_user,k_htm
 k_user.how_is_connect('file')
@@ -458,6 +458,8 @@ def file_tools():
         HR(),
         DIV(files_x_tools.link_rename()),
         HR(),
+        DIV(files_x_tools.link_rename_title(f_title="rename {} =>")), #'files',x_file['filename'],x_file['title'])),
+        HR(),
         DIV(files_x_tools.link_delete()),
         )
 def folder_tools(): 
@@ -524,12 +526,14 @@ class FILES_X_TOOLS():
         return A('Refine File Name',_title='اصلاح نام فایل',_class='btn btn-warning',_href=URL(f='name_correct',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
     def link_ren2(self):
         return A('Refine ALL Files Name in Folder',_title='اصلاح نام کلیه فایلها داخل فلدر',_class='btn btn-warning',_href=URL(f='correct_files_name_in_folder',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
-    def link_rename_title(self,case,f_name,f_title):
+    def link_rename_title(self,f_title='{}',vars={}):#,case,f_name,f_title):
         
-        if not f_title:f_title='-'
-        vars={'f_name':f_name,'f_title':f_title,'case':case}
+        #if not f_title:f_title='-'
+        #vars='f_name':f_name,'f_title':f_title,'case':case}
         vars.update(dict(self.r_vars))
-        return k_htm.a(f_title,_href=URL(f='file_meta_edit',args=self.args,vars=vars),_target="box",_class='btn') if self.fc_access else f_title 
+        f_title=f_title.format(vars['f_title'])
+        return A(f_title,_href=URL(f='file_meta_edit',args=self.args,vars=vars),_target="",_class='btn') if self.fc_access else f_title
+        # k_htm.a(_target="box")
         #return A(f_title,_href=URL(f='file_meta_edit',args=self.args,vars={'f_name':f_name,'f_title':f_title,'case':case}.update(dict(self.r_vars))),_target="x_frame") if self.fc_access else f_title 
     def link_comp(self):
         return A("compare",_href=URL('xfile','tools',args=self.args,vars=self.r_vars),_title="مقایسه")
@@ -609,12 +613,15 @@ def f_list():#file_browser=file.index
         xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win','mermaid':'read_mermaid','mermaid2':'read_mermaid'}
             #'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]
+        link_txt=link_txt[:50] if len(link_txt)>50 else link_txt
         if ext in xd:
             return A(link_txt,_href=URL('xfile',xd[ext],args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
         return link_download(x_file,link_txt,link_title)    
-    def link_file_tools(x_file,link_title='Tools'):        
-        return  A(" * ",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('file_tools',args=args+[x_file['filename']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title
-            ) if fc_access else ''      
+    def link_file_tools(x_file,link_title,vars):    
+        vars.update(r_vars)
+        #args=args+[x_file['filename']]
+        return  A(link_title,_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('file_tools',args=args,vars=vars)}",true)""",_target="x_frame",_title='tools'
+            ) if fc_access else link_title     
     def link_folder_tools(x_dir,link_txt,link_title='Tools'):        
         return  A(link_txt,_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('folder_tools',args=args+[x_dir['name']],vars=r_vars)}",true)""",_target="x_frame",_title=link_title
             ) if fc_access else ''      
@@ -701,10 +708,11 @@ def f_list():#file_browser=file.index
             k_htm.a('new',_target="box",_href =URL(f='new_file',args=request.args,vars={**r_vars}),_title='فایل جدید'),   
             ) if fc_access else ''
     def files_list(list_view_mod=1):
+        
         if list_view_mod==1:
             return TABLE(THEAD(TR(*[TH(x) for x in ['n','Title','Name','E_1','E_2','Size','Date','-','-','-']])),
                         TBODY(  *[TR((i+1),
-                                    files_x_tools.link_rename_title('folders',x_dir['name'],x_dir['title']),
+                                    files_x_tools.link_rename_title(vars={'f_name':x_dir['name'],'f_title':x_dir['title'],'case':'folders'}),#'folders',x_dir['name'],x_dir['title']),
                                     A(f"<{x_dir['name']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
                                     '<>',
                                     link_folder_tools(x_dir,'folder'),
@@ -716,11 +724,11 @@ def f_list():#file_browser=file.index
                                     _class=x_class('folder')
                                     ) for i,x_dir in enumerate(folders)],
                                 *[TR((i+1),
-                                    files_x_tools.link_rename_title('files',x_file['filename'],x_file['title']),
+                                    files_x_tools.link_rename_title(vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),#'files',x_file['filename'],x_file['title']),
                                     link_view(x_file,x_file['name'],link_title=x_file['fname']+'\n'+x_file['ext']),
                                     #A(x_file['name'],_href=URL(f='download',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=x_file['fname']+'\n'+x_file['ext']),
                                     x_file['ext'][1:],
-                                    DIV(link_download(x_file,'d'),"|",link_file_tools(x_file,'t'),"|",link_edit(x_file,'e')),
+                                    DIV(link_download(x_file,'d'),"|",link_file_tools(x_file,'*',vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),"|",link_edit(x_file,'e')),
                                     x_file['size'],
                                     x_file['mtime'],
                                     x_ext(x_file),
@@ -731,7 +739,7 @@ def f_list():#file_browser=file.index
                              ),
                 _class='table_file')
         elif list_view_mod==2: #'simple'
-            return TABLE(THEAD(TR(*[TH(x) for x in ['n','عنوان',A('S',_title='size'),A('D',_title='Date')]])),
+            return TABLE(THEAD(TR(*[TH(x) for x in ['n','عنوان',A('T',_title='نوع فایل + ابزارها'),A('S',_title='حجم فایل بر اساس لگاریتم 10'),A('D',_title='زمام فایل')]])),
                         TBODY(  *[TR((i+1),
                                     A(f"<{x_dir['title'] or x_dir['name']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
                                     '',
@@ -741,7 +749,7 @@ def f_list():#file_browser=file.index
                                 *[TR((i+1),
                                     link_view(x_file,x_file['title'] or x_file['name'],
                                             link_title=(x_file['name']+x_file['ext']+'\n'+'\n'.join(f'{xi} : {x_file[xi]}' for xi in ('fname','s_code','s_date','valid_org') if xi in x_file))),
-                                    x_ext(x_file),
+                                    link_file_tools(x_file,x_ext(x_file),vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),                                    
                                     x_file['size_min'],
                                     x_file['mtime_min'],
                                     
@@ -875,7 +883,7 @@ def index():
         # return A('Del',_href=URL(f='delete',args=['share',fname]),_target="x_frame") #if request.vars['del'] else ''
         return XML(j_box_txt.format(URL(f='delete',args=[*args,fname],vars=request.vars),'X','Delete file')) #A('Del',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='delete',args=['share',fname])}",true)""") #_target="x_frame"
     link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}',
-        'file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3,m4a"}))
+        'file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3,m4a,htm,html"}))
     '''samplemple : 
     link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{un}-{user_filename}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx"}))
     '''

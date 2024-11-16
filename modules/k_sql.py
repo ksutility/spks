@@ -19,12 +19,12 @@ def f_now():
 def report_txt(x_txt_list):
     x_list=x_txt_list.split(',')
     return ", ".join([x+'='+str(eval(x)) for x in x_list])
-def report_db_change(db_name,t1,dif_list,nth=1):
+def report_db_change(db_name,t1,dif_list,idx=1):#030815
     name_add='' if dif_list else '_no_change'
     file_path=db_name[:-3]+name_add+ '.txt'
     if debug:xxxprint(msg=['report','file_path='+file_path,''],args=dif_list)
     f = open(file_path,'a',encoding='utf8')
-    f.write('\n'+f_now() + " : " +t1 + f" - (#{nth})")
+    f.write('\n'+f_now() + " : " +t1 + f" - (#{idx})")
     if dif_list:f.write('\n####  '.join(['']+dif_list))
     f.close()
 class C_SQL():
@@ -45,6 +45,24 @@ class C_SQL():
             "res1":res1,
             "res2":res2,
             })
+    def where_cell(self,field_name,field_select_data,act="=",int_2_int=True): #erwer
+        if type(field_select_data)==None:
+            return "`{}` {} '{}'".format(field_name,act,str(field_select_data))
+        elif type(field_select_data)==str:
+            return "`{}` {} '{}'".format(field_name,act,field_select_data) 
+        elif type(field_select_data)==int:
+            pt="`{}` {} {}" if int_2_int  else "`{}` {} '{}'"
+            return pt.format(field_name,act,field_select_data)
+        elif type(field_select_data)==list:
+            if len(field_select_data)==1:
+                return "`{}` {} '{}'".format(field_name,act,field_select_data[0])
+            else:
+                return "`{}` in {}".format(field_name,','.join([f'{x}' for x in field_select_data]))
+        elif type(field_select_data)==dict:   
+            if 'sql' in field_select_data:
+                return field_name + " " + field_select_data['sql']
+        else:
+            return "`{}` = ''".format(field_name,)        
     def where(self,q_where,add_where_text=True):
         """
         q_where : str/dict/list
@@ -53,7 +71,7 @@ class C_SQL():
                 list of 2 list and (list[0] =name_list) and (list[1]= val_list):
                     [['field_name 1',...],['field_select_data 1',...]]
                     sample:[['un','sub_prj'],['atl','hrsj-100']]
-                list of q_where and (list[0] ="__where__list__")
+                list of q_where and (list[0] = "AND" / "OR"          help_search_text=("__where__list__")
                     -list[
             dict: {'field_name 1':'field_select_data 1',...}
                 sample:{'un':'atl','sub_prj':'hrsj-100'}
@@ -68,24 +86,7 @@ class C_SQL():
                         'sql':
                             result = field_name + field_select_data['sql']
         """
-        def _where_cell(field_name,field_select_data,int_2_int=True): #erwer
-            if type(field_select_data)==None:
-                return "`{}`='{}'".format(field_name,str(field_select_data))
-            elif type(field_select_data)==str:
-                return "`{}`='{}'".format(field_name,field_select_data) 
-            elif type(field_select_data)==int:
-                pt="`{}`={}" if int_2_int  else "`{}`='{}'"
-                return pt.format(field_name,field_select_data)
-            elif type(field_select_data)==list:
-                if len(field_select_data)==1:
-                    return "`{}`='{}'".format(field_name,field_select_data[0])
-                else:
-                    return "`{}` in {}".format(field_name,','.join([f'{x}' for x in field_select_data]))
-            elif type(field_select_data)==dict:   
-                if 'sql' in field_select_data:
-                    return field_name + " " + field_select_data['sql']
-            else:
-                return "`{}`=''".format(field_name,)
+        
         #--------------------------------------  
         # " AND ".join(['{}=?'.format(n) for n in name_list])
         #--------------------------------------      
@@ -95,11 +96,13 @@ class C_SQL():
             return q_name+q_where
         elif type(q_where)==list:
             if len(q_where)==2 and type(q_where[0])==list and type(q_where[1]) in [list,tuple]:
-                return q_name + " AND ".join([_where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
-            elif q_where[0]=="__where__list__":
+                return q_name + " AND ".join([self.where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
+            elif q_where[0]=="AND": #__where__list__":
                 return q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])
+            elif q_where[0]=="OR": #__where__list__":
+                return q_name + " OR ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])    
         elif type(q_where)==dict:
-            return q_name + " AND ".join([_where_cell(n,q_where[n]) for n in q_where]) 
+            return q_name + " AND ".join([self.where_cell(name,q_where[name]) for name in q_where]) 
         else:
             xxxprint(msg=["error","where type not correct",''],launch=True)
     #-------------------------------------------
@@ -133,7 +136,8 @@ class DB1():
     def _exec(self,sql,val_list=[],fetch=False):
         
         result={'def':'_exec','sql':sql,'data':[]}
-        
+        #if debug:
+        xxxprint(msg=["sql_exe",'',''],vals=result )
         
         self.cur.execute(sql,val_list)
         if fetch:
@@ -402,8 +406,17 @@ class DB1():
         xr={}
         if debug:xxxprint(msg=["start",'',''])
         sql_where=C_SQL().where(x_where)
+        
+        # بررسی وجود حداقل 1 رکورد با شرایط تعیین شده 
         find1=self.select(table=table_name,where=x_where,result='dict_x')
+        if not find1['done']: # any record not found
+            xr['msg']=' هیچ ردیفی پیدا نشد'
+            xr['msg']+=' لذا آپدیت انجام نشد '
+            report_db_change(self.path,r1, [])
+            return xr
         if debug:xxxprint(msg=["find1",'',''],vals=find1 )
+        
+        # انجام تغییرات و به روز رسانی
         s_set=self._dic_2_set(set_dic)
         
         xr['sql']='UPDATE {} SET {}' .format(table_name,s_set)+ sql_where
@@ -412,11 +425,11 @@ class DB1():
         xr['rowcount']=self.cur.rowcount
         r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
         if debug:xxxprint(msg=["data",'rowcount = updated',''] ,vals=xr)
-        #self.con.commit()
-        if not find1['done'] and xr['rowcount']==0:
-            xr['msg']='find1=none'
+        if xr['rowcount']==0:# any record not found
+            xr['msg']=' رکورد پیدا شد ولی تغییر توسط برنامه نتوانست اعمال شود'
             report_db_change(self.path,r1, [])
             return xr
+        # بررسی تغییرات  
         find2=self.select(table=table_name,where=x_where,result='dict_x')
         
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
@@ -432,12 +445,13 @@ class DB1():
                 row2=rows2[row_x]
                 dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
                 dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
-                report_db_change(self.path,r1, dif,nth=i+1)
+                report_db_change(self.path,r1, dif,idx=i+1)
                 xr['dif'][row[0]]=dif
             xr['id']=str(find1['ids'])
         else: 
             xr['id']=str(find2['ids'])
             tt=find2['titles']
+            # مقایسه اطلاعات قبل و بعد از تغییر به صورت ردیف به ردیف
             for i,f1 in enumerate(find1['rows']):
                 f2=find2['rows'][i]
                 dif_list=[j for j,x in enumerate(f1) if x!=f2[j]]
@@ -447,7 +461,8 @@ class DB1():
                 rrp.update({'updtaed':len(dif)})
                 if debug:xxxprint(msg=["result",'',''] ,vals=rrp)
                 #xxprint ('db-update','row {}:dif={}----\n####   {}'.format(f1[0],len(dif),'\n####   '.join(dif)))
-                xr['dif'][f1[0]]=[tt[j] for j in dif_list]                
+                xr['dif'][f1[0]]=[tt[j] for j in dif_list] 
+                xr['report']=rrp
         if debug:xxxprint(msg=["end",'',''] )
         return xr
         #except: #Error as e:   print(e)
@@ -643,60 +658,60 @@ def make_select_role(self,table_name,name_list):
 
 
 D:\ks\I\web2py-test\applications\spks\controllers\data.py (12 hits)
-	Line  418:         rows,titles,rows_num=db1.select(table_name,limit=0)
-	Line  511:         rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-	Line  584:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-	Line  681:             rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
-	Line  721:         rows1,ttls1,rows_num=db1.select(tb_name)#'paper')
-	Line  754:     rows1,titles1,rows_num=db1.select(tb_name,limit=0)
-	Line  761:     rows2,titles2,rows_num=db2.select(ref['tb'],limit=0)
-	Line 1094:         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
-	Line 1126:         rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
-	Line 1213:         rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
-	Line 1315:     rows1,titles1,row_num1=db1.select('a',limit=0)
-	Line 1316:     rows2,titles2,row_num2=db2.select('a',limit=0)
-	
+    Line  418:         rows,titles,rows_num=db1.select(table_name,limit=0)
+    Line  511:         rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+    Line  584:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+    Line  681:             rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+    Line  721:         rows1,ttls1,rows_num=db1.select(tb_name)#'paper')
+    Line  754:     rows1,titles1,rows_num=db1.select(tb_name,limit=0)
+    Line  761:     rows2,titles2,rows_num=db2.select(ref['tb'],limit=0)
+    Line 1094:         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
+    Line 1126:         rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
+    Line 1213:         rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
+    Line 1315:     rows1,titles1,row_num1=db1.select('a',limit=0)
+    Line 1316:     rows2,titles2,row_num2=db2.select('a',limit=0)
+    
 user.py (3 hits)
     Line  55:     rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
-	Line 107:         rs=db1.select(table_name='user',sql=sql,result='dict')
-	Line 333:             rs=db1.select('user',sql)
+    Line 107:         rs=db1.select(table_name='user',sql=sql,result='dict')
+    Line 333:             rs=db1.select('user',sql)
   
     controllers/user.py#54._user_chek_ps_get_Inf()
 
 k_sql.py (4 hits)
-	Line 448:         rows,titles,base_row_id=self.select(table_n,where={'id':xid})
-	Line 529:             rows2,titles2,row_num2=self.select(table_name,limit=0)
-	Line 577:         rows,titles,row_n=self.select('',sql,limit=0)
-	Line 603:         rows,titles,rows_num=self.select(tb_name,where=uniq_where + f'{field_name} like "%{uniq_value}%"')
+    Line 448:         rows,titles,base_row_id=self.select(table_n,where={'id':xid})
+    Line 529:             rows2,titles2,row_num2=self.select(table_name,limit=0)
+    Line 577:         rows,titles,row_n=self.select('',sql,limit=0)
+    Line 603:         rows,titles,rows_num=self.select(tb_name,where=uniq_where + f'{field_name} like "%{uniq_value}%"')
     
-	k_sql.py#457.row_backup()
-    k_sql.py#457.row_backup()	
+    k_sql.py#457.row_backup()
+    k_sql.py#457.row_backup()   
     k_sql.py#612.chek_uniq(
     
 k_user.py (2 hits)-ok
-	Line  33:     rows,titles,rows_num=db1.select('user',where={},limit=0)
-	Line  65:     rows,titles,rows_num=db1.select('a',where={},limit=0)
+    Line  33:     rows,titles,rows_num=db1.select('user',where={},limit=0)
+    Line  65:     rows,titles,rows_num=db1.select('a',where={},limit=0)
 
     16:10:17--k_user.py#33.load_user_inf() > - : secect = select_a,
     16:10:17--k_user.py#65.load_job_inf() > - : secect = select_a,    
-	
+    
 form.py (5 hits)-ok
-	Line 324:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-	Line 525:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-	Line 576:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-	Line 801:         rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
-	Line 852:     rows,titles,rows_num=db1.select(tb_name,where={'xid':str(xid)})
+    Line 324:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+    Line 525:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+    Line 576:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
+    Line 801:         rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
+    Line 852:     rows,titles,rows_num=db1.select(tb_name,where={'xid':str(xid)})
 
-    controllers/form.py#324.inf_g()	
-    controllers/form.py#525.save()	
-    controllers/form.py#576.save_app_review()	
+    controllers/form.py#324.inf_g() 
+    controllers/form.py#525.save()  
+    controllers/form.py#576.save_app_review()   
     controllers/form.py#801.xtable()
-    controllers/form.py#852._sabege()	   
+    controllers/form.py#852._sabege()      
     
 k_form.py (4 hits)
-	Line  593:             rows2,tit2,row_n=db2.select(ref['tb'],limit=0)
-	Line  751:     rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
-	Line 1240:         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
+    Line  593:             rows2,tit2,row_n=db2.select(ref['tb'],limit=0)
+    Line  751:     rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
+    Line 1240:         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
     
     k_form.py#751.reference_select()
     k_form.py#694.reference_select()
@@ -704,56 +719,56 @@ k_form.py (4 hits)
     k_form.py#1240._set_form_sabt_data()
     
     k_form.py#1297._set_form_sabt_data()
-    	
+        
 +
-k_user.py#33.load_user_inf()	
+k_user.py#33.load_user_inf()    
 
-k_user.py#65.load_job_inf()	
+k_user.py#65.load_job_inf() 
 
-controllers/user.py#55._user_chek_ps_get_Inf()	
+controllers/user.py#55._user_chek_ps_get_Inf()  
 
-	
+    
 
 
-k_user.py#33.load_user_inf()	
+k_user.py#33.load_user_inf()    
 
-k_user.py#65.load_job_inf()	
+k_user.py#65.load_job_inf() 
 
-controllers/user.py#55._user_chek_ps_get_Inf()	
-	
-k_user.py#33.load_user_inf()	
+controllers/user.py#55._user_chek_ps_get_Inf()  
+    
+k_user.py#33.load_user_inf()    
 +
-	2
-k_user.py#65.load_job_inf()	
+    2
+k_user.py#65.load_job_inf() 
 +
-	1
-controllers/user.py#55._user_chek_ps_get_Inf()	
+    1
+controllers/user.py#55._user_chek_ps_get_Inf()  
 +
-	1
-controllers/form.py#801.xtable()	
+    1
+controllers/form.py#801.xtable()    
 +
-	4
-	
+    4
+    
 +
-	42
-controllers/form.py#324.inf_g()	
+    42
+controllers/form.py#324.inf_g() 
 +
-	2
-controllers/form.py#852._sabege()	
+    2
+controllers/form.py#852._sabege()   
 +
-	1
-controllers/form.py#576.save_app_review()	
+    1
+controllers/form.py#576.save_app_review()   
 +
-	1
-    	
+    1
+        
 +
-	1
-k_sql.py#457.row_backup()	
+    1
+k_sql.py#457.row_backup()   
 +
-	1
-	
+    1
+    
 +
-	
+    
 
 
 

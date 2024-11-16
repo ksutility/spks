@@ -10,6 +10,12 @@ from tkinter import messagebox
 g_row=0 #global row
 width=50
 res=''
+def _config(app,x_setting):
+    window=app
+    window.config(bg='black')
+    window.title("Clock")
+    window.geometry('520x300')
+    window.resizable(0,1)
 def _set_row(row):
     global g_row
     if row==-1:
@@ -97,6 +103,11 @@ class _Checkbar(tk.Frame):
             if v==1:
                 res.append(self.vals[index])
         return res
+    def set(self,x_list):
+        if type(x_list)==str:
+            import json
+            x_list=json.loads(x_list)
+        
     #{v.get for v in self.vars} #list(map((lambda var: var.get()), self.vars))
 
 def input(x_list,result_case="dic"):

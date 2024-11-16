@@ -16,225 +16,235 @@ h1 {
 +    padding:50px 10px 0px 0px;
  } 
 """
-htm_head=XML(f"""
-<head>
-<script type="text/javascript" src="{URL('static','js/datepicker/jquery-1.8.2.min.js')}"></script>
-<script type="text/javascript" src="{URL('static','js/jquery.tablesorter.js')}"></script>
-<link rel="stylesheet" href="{URL('static','css/fonts_b.css')}"/>
-"""+
-"""
-<style>
-body {
-	counter-reset: c_h1;
-    /* background-color: #ffe; */
-    direction:rtl;
-    font-family: BBadr;
-    font-size: 20px;
-    /* padding:50px 50px 0 0px; */
-    
-}
-@media print {
-  h1:not(:first-child) {page-break-before :always;}
-  h1:first-child {page-break-before: avoid;}
-}
-h1:before {
-	content: counter(c_h1)") ";
-	counter-increment: c_h1;
-}
-h1 {
-	counter-reset: c_h2;
-    background-color: #fbb;
-    margin:10px 0 0 0;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 24px;
-    padding:50px 20px 0px 0px;
-}
-h2:before {
-	content: counter(c_h1)"." counter(c_h2)") ";
-	counter-increment: c_h2;
-}
-h2 {
-    text-indent: 40px;
-    background-color: #eef;
-    counter-reset: c_h3;
-    margin:2px;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 20px;
-}
-h3:before {
-	content: counter(c_h1)"." counter(c_h2)"." counter(c_h3)") ";
-	counter-increment: c_h3;
-}
-h3 {
-    text-indent: 60px;
-    background-color: #eed;
-    margin:2px;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 16px;
-}
-h4 {
-    text-indent: 80px;
-    background-color: #ccc;
-    margin:2px;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    font-size: 18px;
-}
-/* ---------------------------------------------------------- */
-table {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  
-}
+def htm_head(print_mode=1):
+    xr=f"""
+    <head>
+    <script type="text/javascript" src="{URL('static','js/datepicker/jquery-1.8.2.min.js')}"></script>
+    <script type="text/javascript" src="{URL('static','js/jquery.tablesorter.js')}"></script>
+    <link rel="stylesheet" href="{URL('static','css/fonts_b.css')}"/>
+    """
+    xr+="""
+    <style>
+    body {
+        counter-reset: c_h1;
+        /* background-color: #ffe; */
+        direction:rtl;
+        font-family: BBadr;
+        font-size: 20px;
+        /* padding:50px 50px 0 0px; */
+        
+    }"""
+    if print_mode==1:
+        xr+="""
+        @media print {
+          h1:not(:first-child) {page-break-before :always;}
+          h1:first-child {page-break-before: avoid;}
+        }"""
+    else:
+        xr+="""
+        @media print {
+          h1 {padding:0px 0px 0px 0px;}
+        }"""
+    xr+="""
+    h1:before {
+        content: counter(c_h1)") ";
+        counter-increment: c_h1;
+    }
+    h1 {
+        counter-reset: c_h2;
+        background-color: #fbb;
+        margin:10px 0 0 0;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        font-size: 24px;
+        padding:50px 20px 0px 0px;
+    }
+    h2:before {
+        content: counter(c_h1)"." counter(c_h2)") ";
+        counter-increment: c_h2;
+    }
+    h2 {
+        text-indent: 40px;
+        background-color: #eef;
+        counter-reset: c_h3;
+        margin:2px;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        font-size: 20px;
+    }
+    h3:before {
+        content: counter(c_h1)"." counter(c_h2)"." counter(c_h3)") ";
+        counter-increment: c_h3;
+    }
+    h3 {
+        text-indent: 60px;
+        background-color: #eed;
+        margin:2px;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        font-size: 16px;
+    }
+    h4 {
+        text-indent: 80px;
+        background-color: #ccc;
+        margin:2px;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        font-size: 18px;
+    }
+    /* ---------------------------------------------------------- */
+    table {
+      font-family: Arial, Helvetica, sans-serif;
+      border-collapse: collapse;
+      width:100%
+      
+    }
 
-table td, table th {
-  border: 2px solid #ddd;
-  padding: 8px;
-}
-.title1 {
-    background-color: #523e6b;
-    color: #edebc5; 
-    text-align: center;
-    font-size: 40px;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    padding:100px;
-}
-.title2 {
+    table td, table th {
+      border: 2px solid #ddd;
+      padding: 8px;
+    }
+    .title1 {
+        background-color: #523e6b;
+        color: #edebc5; 
+        text-align: center;
+        font-size: 40px;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        padding:100px;
+    }
+    .title2 {
 
-    color: #523e6b; 
-    text-align: center;
-    font-size: 20px;
-    font-family: BTitrBold,Tahoma, sans-serif;
-    padding:30px;
-}
-.menu {
-    font-size: 14px;
-    text-align: center;
-}
-table tr:nth-child(odd){background-color: hsl(166, 90%, 90%);}
-table tr:nth-child(even){background-color: hsl(166, 90%, 80%);}
-table thead tr td,
-table tfoot tr td {background-color:hsl(166, 90%, 30%);color:#fff}
-table tr:hover {background-color: #fdd;}
+        color: #523e6b; 
+        text-align: center;
+        font-size: 20px;
+        font-family: BTitrBold,Tahoma, sans-serif;
+        padding:30px;
+    }
+    .menu {
+        font-size: 14px;
+        text-align: center;
+    }
+    table tr:nth-child(odd){background-color: hsl(220, 90%, 95%);}
+    table tr:nth-child(even){background-color: hsl(220, 90%, 90%);}
+    table thead tr td,
+    table tfoot tr td {background-color:#fff;color:#fff}
+    table tr:hover {background-color: #fdd;}
 
-table th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  
+    table th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      background-color: hsl(220, 90%, 85%);
+    }
+    table td {text-align: center;}
+    /* ----------------------------------------------------------blockquote =>  */
+    blockquote {
+       
+       background-color:rgba(250, 200, 130, 0.5);
+       font-family: BYekan,Tahoma, sans-serif;
+       text-indent: 20px;
+       font-size: 18px;
+       width: 90%;
+       margin: 5 auto;
+    }
+    blockquote h1 {
+       font-size: 4rem;
+    }
+    blockquote p {
+       font-style: italic;
+       margin-bottom: 0;
+    }
 
-  color: white;
-}
-table td {text-align: center;}
-/* ----------------------------------------------------------blockquote =>  */
-blockquote {
-   
-   background-color:rgba(250, 200, 130, 0.5);
-   font-family: BYekan,Tahoma, sans-serif;
-   text-indent: 20px;
-   font-size: 18px;
-   width: 90%;
-   margin: 5 auto;
-}
-blockquote h1 {
-   font-size: 4rem;
-}
-blockquote p {
-   font-style: italic;
-   margin-bottom: 0;
-}
+    blockquote p::before,
+    blockquote p::after {
+       content: "“";
+       font-family: Georgia;
+       font-size: 1rem;
+       margin: 0 -1rem 0 0 ;
+       position: absolute;
+       opacity: 0.5;
+    }
 
-blockquote p::before,
-blockquote p::after {
-   content: "“";
-   font-family: Georgia;
-   font-size: 1rem;
-   margin: 0 -1rem 0 0 ;
-   position: absolute;
-   opacity: 0.5;
-}
+    blockquote p::after {
+       content: "”";
+       margin: +0rem +1rem 0 0;
+    }
 
-blockquote p::after {
-   content: "”";
-   margin: +0rem +1rem 0 0;
-}
-
-blockquote cite {
-   font-size: 1.5rem;
-}
-textarea {
-    background-attachment: local;
-    background-repeat: no-repeat;
-    padding-left: 35px;
-    padding-top: 10px;
-    border-color:#ccc;
-}
-/* ---------------------------------------------------------- */
-ul,li{
-    direction:rtl;
-    font-family:BNazanin,BYekan,BRoya,BTitrBold,BMehrBold,arial, sans-serif;
-    font-size: 18px;
-    margin:2px;
-}   
-pre {direction:ltr;}
-code {
-  font-family: Consolas,"courier new";
-  color: crimson;
-  background-color: #f1f1f1;
-  padding: 2px;
-  font-size: 14px;
-}
-</style>
-<script>
-$(document).ready(function(){
-    $("table").tablesorter();
-    $("h1").click(function(e) {
-        if (e.ctrlKey) {
+    blockquote cite {
+       font-size: 1.5rem;
+    }
+    textarea {
+        background-attachment: local;
+        background-repeat: no-repeat;
+        padding-left: 35px;
+        padding-top: 10px;
+        border-color:#ccc;
+    }
+    /* ---------------------------------------------------------- */
+    ul,li{
+        direction:rtl;
+        font-family:BNazanin,BYekan,BRoya,BTitrBold,BMehrBold,arial, sans-serif;
+        font-size: 18px;
+        margin:2px;
+    }   
+    pre {direction:ltr;}
+    code {
+      font-family: Consolas,"courier new";
+      color: crimson;
+      background-color: #f1f1f1;
+      padding: 2px;
+      font-size: 14px;
+    }
+    </style>
+    <script>
+    $(document).ready(function(){
+        $("table").tablesorter();
+        $("h1").click(function(e) {
+            if (e.ctrlKey) {
+                $(this).nextUntil("h1").show();
+            } 
+            else if (e.altKey){
+                $(this).nextUntil("h1").hide();
+                $(this).nextAll("h2").show();
+            }
+            else {
+                $(this).nextUntil("h1").hide();
+            }
+        });
+        $("h1").dblclick(function(e){
             $(this).nextUntil("h1").show();
-        } 
-        else if (e.altKey){
-            $(this).nextUntil("h1").hide();
-            $(this).nextAll("h2").show();
-        }
-        else {
-            $(this).nextUntil("h1").hide();
-        }
-    });
-    $("h1").dblclick(function(e){
-        $(this).nextUntil("h1").show();
-    });
-    $("h2").click(function(e){
-        if (e.ctrlKey) {
+        });
+        $("h2").click(function(e){
+            if (e.ctrlKey) {
+                $(this).nextUntil("h1,h2").show();
+            } 
+            else if (e.altKey){
+                $(this).nextUntil("h1").hide();
+                $(this).nextAll("h2").show();
+                $(this).nextAll("h3").show();
+            }
+            else {
+                $(this).nextUntil("h1,h2").hide();
+            }
+        });    
+        $("h2").dblclick(function(e){
             $(this).nextUntil("h1,h2").show();
-        } 
-        else if (e.altKey){
-            $(this).nextUntil("h1").hide();
-            $(this).nextAll("h2").show();
-            $(this).nextAll("h3").show();
-        }
-        else {
-            $(this).nextUntil("h1,h2").hide();
-        }
-    });    
-    $("h2").dblclick(function(e){
-        $(this).nextUntil("h1,h2").show();
-    });
-    $("h3").click(function(e){
-        if (e.ctrlKey) {
+        });
+        $("h3").click(function(e){
+            if (e.ctrlKey) {
+                $(this).nextUntil("h1,h2,h3").show();
+            } 
+            else if (e.altKey){
+                
+            }
+            else {
+                $(this).nextUntil("h1,h2,h3").hide();
+            }
+        });  
+        $("h3").dblclick(function(e){
             $(this).nextUntil("h1,h2,h3").show();
-        } 
-        else if (e.altKey){
-            
-        }
-        else {
-            $(this).nextUntil("h1,h2,h3").hide();
-        }
-    });  
-    $("h3").dblclick(function(e){
-        $(this).nextUntil("h1,h2,h3").show();
+        });
     });
-});
-</script>
-</head>
-""")
+    </script>
+    </head>
+    """
+    return XML(xr)
+#---------------------------------------------------------------------
 #e.shiftKey   if (e.ctrlKey) altKey
 #import share_value as share
 #xpath=share.xpath()
@@ -471,7 +481,8 @@ def _read_markup(mm_case):
             renderer = mistune.Renderer(escape=False, hard_wrap=True)
             markdown = mistune.Markdown(renderer=renderer)
             return markdown(data)
-            
+        elif ext=='htm':
+            return data
     def _r_mm(data):
         return file_2_htm(data,'mm')
     def _r_md(data):
@@ -509,6 +520,8 @@ def _read_markup(mm_case):
             #return (str(xlines))
         else :
             xlines=lines
+        ml_mode='md'
+        line_sum=''
         for line in xlines:
             if len(line)>6 and line[:6]=='%%read':
                 f_name=line[7:].rstrip()
@@ -519,12 +532,24 @@ def _read_markup(mm_case):
                 if ext in ['mm','md']:
                     with open(f_name1,'r',encoding='utf8') as f:
                         d1=f.read()
-                    d1=file_2_htm(d1,ext)
+                    d2+=file_2_htm(d1,ext)
                 elif ext=='csv':
-                    d1=_read_csv(f_name1)
+                    d2+=_read_csv(f_name1)
+            elif len(line)>3 and line[:2]=='%%':
+                if line_sum:
+                    d2+=file_2_htm(line_sum,ml_mode)
+                    line_sum=''
+                x_act=line[2:].strip().lower()
+                if x_act in ['md','mm','htm']:
+                    ml_mode=x_act
+                    #print (x_act)
+                else:
+                    print(f"error : {line} => {x_act}")
             else:
-                d1=file_2_htm(line,'md')
-            d2+=XML(d1) #<br>+f_name    
+                line_sum+=line
+                #d1=file_2_htm(line,ml_mode)
+            #d2+=d1 #XML(d1) #<br>+f_name    
+        d2+=file_2_htm(line_sum,ml_mode)
         return d2 #_r_mm(d2) #d2    #
             
     def html_visible(html):
@@ -625,7 +650,7 @@ def _read_markup(mm_case):
         return '<hr>data'+tbl0(data)+'<hr>html_1'+tbl(html_1)+'<hr>html_2'+tbl(html_2)+'<hr>html_2<br>'+r2(html_2)+'<hr>data<br>'+r2(data)
     list_link=f"<a title='سیستم مدیریت محتوا' href={URL('file','f_list',args=request.args[:-1],vars=request.vars)}>SPKS </a> | "
     file_name=f"<a title={f_name} href={URL('edit_r',args=request.args,vars=request.vars)}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
-    return htm_head+DIV(XML(list_link+file_name),_class="menu")+ html_2 + report(data,html_1,html_2)
+    return htm_head(print_mode=0)+DIV(XML(list_link+file_name),_class="menu")+ html_2 + report(data,html_1,html_2)
     #return "----"+ html_1
     #return dict(xml=XML(view_link+list_link+html_2)+ report(data,html_1,html_2)
     #return dict(htm_head=htm_head,xml=XML(html),htm1=rr(html))

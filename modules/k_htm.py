@@ -20,7 +20,7 @@ def html_form(data,url):
             en = INPUT(_value= x[0], _name=xx, _width=wid)  
         else:
             #x is a select and x[2] is options
-             en = SELECT(*x[1], value=x[0])
+            en = SELECT(*x[1], value=x[0])
         d=DIV(lb1,lb2,en) 
         page.append(d)
     return FORM(page,INPUT(_type='submit'),_action=URL(url),_method='post')
@@ -266,18 +266,26 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type="",_id="table_c"):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[]):
         import gluon
         '''
             old name= htm_table
         '''
         rows=self.rows
-        heads=self.heads
+        if titels:
+            if type(titels)==list:
+                heads=titels
+            elif type(titels)==str:
+                heads=titels.split(",")
+        else:
+            heads=self.heads
+        #heads=self.heads
         
         #creat thead of table
         if type(heads)==list:
             tds=[]
-            for col in heads:
+            for col in self.heads:
+                if not col in heads:continue
                 if type(col)==dict:
                     tds+=[TH(col['name'],_title=col.get('title',''),_width=col.get('width',''))]
                 elif type(col)==str:
@@ -295,7 +303,7 @@ class C_TABLE:
         for row in rows:
             tds=[]
             for i,cell in enumerate(row):
-                
+                if not self.heads[i] in heads:continue
                 if type(cell)==dict:
                     _class_l=[heads[i]['class']] if 'class' in heads[i] else []
                     _class_l+=[cell['class']] if 'class' in cell else []
@@ -392,8 +400,8 @@ def table_x_not_used(cols,rows,class_table=''):
     class_table='table'+class_table if class_table else 'table2'
     return TABLE(thead,TBODY(*trs),_class=class_table,_dir="rtl")
  #---------------------------------------
-def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):
-    '''
+def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):#k_htm.select
+    ''' (_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
         make 1 select html object
         update 01/08/09 ks
         _options:list or dict
@@ -405,10 +413,12 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     #convert _options :list to dict
     _dict={x:x for x in _options} if type(_options)==list else _options
     vs=''
-    if not _value:
-        if remember:
-            from gluon import current
-            _value=current.request.vars[_name]
+    #if not _value:
+    if remember:
+        from gluon import current
+        _value=current.request.post_vars[_name] or current.request.vars[_name] or _value
+        #import k_err
+        #k_err.xxxprint(msg=["err-s","current.request.vars[_name]="+str(current.request.vars[_name]),''],vals={'name':_name,'value':_value})
     if _value:
         vs=_value if type(_value)==list else _value.split(",")
     opts=[]

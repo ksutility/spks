@@ -192,21 +192,35 @@ def file_move(base_path,des_path):
         # xalert(rep + "\n not done")
         # return False
 #@k_err.until_result(1,"number of file in download folder ")
-def downloded_1_file_exist():
+def downloded_1_file_exist(show_ui=False):
     import time
     dp=downloads_path() # r"C:\Users\ks\Downloads"
     n,files=file_count(dp)
+    rep=f"check downloads_path =>{dp}"
     if n==0:
+        rep+="0 Fiels exist"
         for i in range(5):
             time.sleep(1)
             n,files=file_count(dp)
-            if n>0 : break
-    elif n==2:
-        f0=file_name_split(files[0])
-        f1=file_name_split(files[1])
-        if f1['name'] in f0['name'] or f0['name'] in f1['name']:
-            xalert(f"2 file is dowonload-its name is like\n{f0['name']},{f1['name']}\npro will delete => {f1['name']}")
-            os.remove(os.path.join(dp,files[1]))
+            if n>0 :
+                rep+=f"after {i} sec {n} files exist"
+                break
+    elif n>1:
+        import tk_ui as ui
+        rep+="2 Fiels exist"
+        ffn=[file_name_split(files[x])['filename'] for x in files]
+        ui.msg["more than 1 file is in download folder - select Base file - other file will be delete "]
+        ff=ui.input([["file",ffn,"c"]])["file"]
+        for i,fx in enumerate(ffn):
+            if fx!=ff:
+                os.remove(os.path.join(dp,files[i]))
+            '''
+            f0=file_name_split(files[0])
+            f1=file_name_split(files[1])
+            if f1['name'] in f0['name'] or f0['name'] in f1['name']:
+                xalert(f"2 file is dowonload-its name is like\n{f0['name']},{f1['name']}\npro will delete => {f1['name']}")
+                os.remove(os.path.join(dp,files[1]))
+            '''    
             return 1
     if n==1:
         path1=os.path.join(dp, files[0])
@@ -272,6 +286,7 @@ def get_downloded_file(new_path,show_ui=False):
     '''
         get 1 file frome "download" folder and save it to new_path
     '''
+    import tk_ui as ui
     ui.msg(f"get_downloded_file:start \n new_path={new_path} \n ")
     def err_manage(msg):
         ui.ask("get_downloded_file:\n"+msg)
@@ -279,30 +294,35 @@ def get_downloded_file(new_path,show_ui=False):
     xprint(new_path)
     file_tg=file_name_split(new_path) #file_target
     dp=downloads_path()
-    n=downloded_1_file_exist()
-    if n:
-        import time
-        n,files=file_count(dp)
+    er_msg=[]
+    while True:
+        n1=downloded_1_file_exist(show_ui=True)
+        n2,files=file_count(dp)
+        if not(n1 and n2 and n1==n2 and n1==1):
+            err_manage ("error : (n1 and n2 and n1==n2 and n1==1) != True")
+            continue
         path1=os.path.join(dp, files[0])
-        i=0
-        while i<31:
-            i+=1
-            if ("crdownload" not in path1) and os.access(path1, os.W_OK):
-                file_dn=file_name_split(path1)
-                if file_dn['ext']!=file_tg['ext']:xalert(f'error:ext of 2 file is different \n download file={file_dn["filename"]} \n target file={file_tg["filename"]}' )
-                if file_move(path1,new_path)['ok']:
-                    xprint(" ok ")
-                    return True
-            else:
-                xprint('sleep for file ')
-                time.sleep(4)
-                n,files=file_count(dp)
-                if n==0:xalert(f"error:1 file not exist \n path1={path1}") 
-                path1=os.path.join(dp, files[0])
-    else:
-        n1,files=file_count(dp)
-        xprint (f"error in get_downloded_file({new_path}>\n 1 file shoud be in download folder but <{n}> files is exist\n files={files}")
-    return False
+        if ("crdownload" in path1) or (not os.access(path1, os.W_OK)):
+            err_manage ("""error : (("crdownload" in path1) or (not os.access(path1, os.W_OK)) != True""")
+            continue
+        file_dn=file_name_split(path1)
+        if file_dn['ext']!=file_tg['ext']:
+            err_manage (f'error:ext of 2 file is different \n download file={file_dn["filename"]} \n target file={file_tg["filename"]}'+"""
+            پسوند فایل موجود با پسوند فایل مورد نظر یکی نیست 
+            اگر فایل صحیح در داخل فلدر قرار گرفت می توانید دکمه سعی مجدد را بزنید تا برنامه مجددا آنرا بررسی کند و در صورت صحیح بودن همه چیز آنرا در فلدر مورد نظر قرار دهد
+            در غیر این صورت دکمه خیر را بزنید تا برنامه از قرار دادن این فایل در داخل فلدر مورد نظر صرف نظر کند
+            """)
+            continue
+        do_move=file_move(path1,new_path)
+        if not do_move['ok']:
+            err_manage ("move: ({path1}) => ({new_path})"+"انتقال فایل با مشکل مواجه شد")
+            continue
+        else:
+            break
+           
+    return True
+        
+
 def downloads_dir_file_count()  :
     dp=downloads_path() # r"C:\Users\ks\Downloads"
     n,files=file_count(dp)
@@ -590,7 +610,7 @@ def doc2md(doc_file_path):
     md_file_path=f['path']+"\\"+f['name']+".md"
     print("f['path']"+f['path'])
     import os
-    x_cmd="D:\\ks\\ext\\WPy64-31040\\python-3.10.4.amd64\\python.exe "#, to_md {file1} {file2} ".format(file1=doc_file_path,file2=md_file_path)
+    x_cmd="H:\\WPy64-31040\\python-3.10.4.amd64\\python.exe "#, to_md {file1} {file2} ".format(file1=doc_file_path,file2=md_file_path)
     x_cmd+=os.path.join("D:\ks\I\web2py","0-need\k_word_mammoth.py")
     x_cmd+=" to_md {file1} {file2} ".format(file1=doc_file_path,file2=md_file_path)
     #print(x_cmd)

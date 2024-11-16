@@ -164,7 +164,7 @@ x_data={
         'a':{
             'base':{'mode':'form','title':'موضوعات و پروژه های جاری','code':'100'},
             'tasks':{
-                'cp_code':{'type':'text','title':'کد موضوع','len':'4','uniq':''},
+                'cp_code':{'type':'text','title':'کد موضوع','len':'10','uniq':''},
                 'cp_name':{'type':'text','title':'نام کامل','len':'140','lang':'fa'},
                 'sm_name':{'type':'text','title':'نام مختصر','len':'20','lang':'fa'},
                 'alt_names':{'type':'text','title':'نام های متفرقه','len':'250','lang':'fa'},
@@ -499,7 +499,7 @@ x_data={
     #--------------------------------------------------------------------
     'user':{
         'user':{
-            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"','code':'201','auth':'dccm'
+            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"','code':'201',
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
@@ -523,9 +523,9 @@ x_data={
                 'p_id':{'type':'num','len':4,'lang':'fa','title':'شماره پرسنلی','uniq':''},
                 'end':{'type':'fdate','title':'تاریخ خاتمه کار'},
                 'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی'},
-                'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'صفحه اول شناسنامه','auth':'dcc_prj'},
-                'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی'},
-                'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dcc_prj'},
+                'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'صفحه اول شناسنامه','auth':'dccm'},
+                'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,gif,jpg,jpeg,png",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی','auth':'dccm'},
+                'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dccm'},
                 'file_off':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}4-off','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'مدارک اداری','auth':'dccm'},
                 'login_ip':{'type':'text','title':'آی پی ورود ویژه','len':'3'},
                 'auth_prj':{'type':'reference','title':'حق دسترسی به پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['multiple']},
@@ -533,7 +533,7 @@ x_data={
                 },
             'steps':{
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':''},#'jobs':'#task#un,dccm,as1',
+                'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'jobs':'#task#un,dccm,as1',
                 'st2':{'tasks':'p_id','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
                 'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','order':'1'},
             },
@@ -650,18 +650,21 @@ x_data={
             'tasks':{
                 'frd_1':{'type':'auto','len':'24','auto':'{{=session["username"]}}- {{=session["user_fullname"]}}','title':'درخواست کننده'},
                 'date1':{'type':'fdate','width':'10','title':'تاریخ','prop':[]},
-                'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
-                'prj1':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
-                'prj2':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{code2}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد کامل زیر پروژه'},
+                'prj_id':{'type':'reference','width':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه','prop':['update']},
+                'cp_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
+                'cp_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'نام پروژه'},
                 'act_des':{'type':'text','len':'255','title':'شرح اقدام'},
                 'act_cat':{'type':'text','len':'35','title':'دسته اقدام'},
                 'time':{'type':'time_t','title':'به مدت','def_value':'0:30'},
             },
             'steps':{
-                'pre':{'tasks':'frd_1,date1,prj_id,prj1,prj2,act_cat,act_des,time','jobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'frd_1,date1,prj_id,cp_code,cp_name,act_cat,act_des,time','jobs':'dccm','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
             },
             'views':{
-                'all':{'input':'prj,sub_p,step,dspln,doc_t,doc_srl_code,doc_srl_name','view1':'','view2':''},
+                'all':{'input':'prj_id,act_cat,act_des,time','view1':'frd_1','view2':'frd_1,date1,cp_code,cp_name'},
+            },
+            'labels':{
+                'lable_1':'------------',
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -1003,17 +1006,17 @@ def x_data_verify(x_data):
                 #tt=','.join[step['tasks']+['step' for sn,step in tb_obj['steps'].items() ]
                 #tb_obj['cols_filter']['a']=[
 #------------------------------------------------------------------------------
-x_data_verify(x_data)
+
 #import k_err
 #k_err.xxxprint(vals=x_data,launch=True)
 #--------------------------------------------------------------------lable_1,name, ['prj']['select'][prj]=>
 if __name__ == "__main__":
     import json
     # the json file where the output must be stored
-    out_file = open("myfile.json", "w",encoding='utf8')
+    out_file = open("x_data.json", "w",encoding='utf8')
     json.dump(x_data, out_file, indent = 4,ensure_ascii=False)
     out_file.close()
-    with open("myfile.json", "r",encoding='utf8') as fp:
+    with open("x_data.json", "r",encoding='utf8') as fp:
         data = fp.read()
     x_data1= json.loads(data)  
     if x_data1==x_data:
@@ -1021,3 +1024,5 @@ if __name__ == "__main__":
     else:
         print("!=") 
     print(x_data1['eblag']['a']['labels'])
+else:
+    x_data_verify(x_data)

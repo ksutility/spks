@@ -624,27 +624,10 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
     tds=[]
     if id_cols:
         tds+=['{:03d}'.format(xid)]
-    #import k_py_list
-    #x_dic=k_py_list.list2dict(titles,row)
     x_dic=dict(zip(titles,row))
-    import k_user
-    for fn in select_cols:#fn=field name
-        if 'hide' in tasks[fn]['prop']:
-            tds.append('*')
-            continue
-        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
-            tds.append('*')
-            continue    
-        if 'file'== tasks[fn]['type']:
-            tds.append(obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
-            continue   
-        #print(tasks[fn]['type'])
-        x_obj=obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'],request=request)
-        
-        #cm.tik(fn+'-1'+str(recs))    
-        tds.append(x_obj['output'])
-        #cm.tik(fn+'-2')
-    #cm.report()    
+    c_form=C_FORM(x_data_s,xid)
+    for field_name in select_cols:#fn=field name  
+        tds.append(c_form.show_step_1_row(field_name,request,mode='output-mini')[1])
     return tds  
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
@@ -728,7 +711,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     input:
     ------
         i_obj:dict
-            data_def of this task (x_datat[db][tb]["tasks"][name])
+            data_def of this task (x_data[db][tb]["tasks"][name])
         x_dic=dict
             dict(zip(names,row)) = this form save and edited data
                 save data =xdic['field_name']
@@ -794,7 +777,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     onact_txt,x_class='',''
     _n=f"name='{_name}' id='{_name}'" 
     _len=int(obj['len']) if 'len' in obj else 256
-    _value=request.vars[_name] if request else ''
+    _value=(request.post_vars[_name] or request.vars[_name]) if request else ''
     _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  '')
     obj['value']=_value
     obj['help']=''
@@ -1419,6 +1402,12 @@ class C_FORM():
         return htm_form
     def show_step_1_row(self,field_name,request,mode): #)x_data_s,xid,form_sabt_data,field_name,mode(
         #mode='output'/'input'
+        '''
+        output:
+        ------
+            titel,value,help
+        '''
+        import k_user
         #print("c_form-show_step_1_row"+mode)
         x_data_s=self.x_data_s
         xid=self.xid
@@ -1429,9 +1418,14 @@ class C_FORM():
         htm_1=DIV(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
         if 'hide' in fd['prop']:
             return [htm_1,'*','']
+        if 'auth' in fd and (not k_user.auth(fd['auth'])):
+            return [htm_1,'*',''] 
+        if mode=='output-mini':
+            if 'file'!= fd['type'] : mode='output'
+            
         x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
         return [htm_1,x_obj[mode],x_obj['help']]
-    
+        #------------------------------------------------- 
     
     
 def get_x_data_s(db_name,tb_name):
@@ -1485,18 +1479,25 @@ def input_validate(in_data,data_inf):
             return False
 def chidman(hx,x_data_s,step,form_case=2,request=''):
     import k_user
-    form_case=k_tools.int_force(request.vars['form_case'] if request else form_case,form_case)
-    jobs_title=k_user.jobs_title(step['jobs'],x_data_s)
+    form_case=k_tools.int_force((request.post_vars['form_case'] or request.get_vars['form_case']) if request else form_case,form_case)
+    xusers=k_user.xusers_inf(step['jobs'],x_data_s)
+    
     
     if form_case==1:
-        return [DIV(DIV(hx['stp'],_class='col text-right'), DIV(jobs_title,_title=step['jobs'],_class='col text-warning',_dir='rtl'),_class='row text-light bg-dark' )]+hx['data']+[
-            DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
-            ]
+        return [DIV(
+                    DIV(hx['stp'],_class='col text-right'),
+                    DIV(xusers['describe'],_title=xusers['inf'],_class='col text-warning',_dir='rtl'),
+                    _class='row text-light bg-dark' )
+                ]+hx['data']+[
+                    DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
+                ]
         #return DIV(DIV(hx['stp'],_class='col-2 text-right border-left'),DIV(htm_1,_class='col-10'),_class='row border-bottom')
     elif form_case==2:
         htm_1=[DIV(x,_class='row') for x in hx['app']]
         return DIV(
-            DIV(DIV(hx['stp'],_class='row'),DIV(jobs_title,_title=step['jobs'],_class='row text-warning'),_class='col-2 text-right border-left text-light bg-dark'),
-            DIV(hx['data'],_class='col-8'),
-            DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
-            _class="row border-bottom ")   
+                    DIV(DIV(hx['stp'],_class='row'),
+                        DIV(xusers['describe'],_title=xusers['inf'],_class='row text-warning'),
+                        _class='col-2 text-right border-left text-light bg-dark'),
+                    DIV(hx['data'],_class='col-8'),
+                    DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
+                    _class="row border-bottom ")   

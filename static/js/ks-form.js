@@ -288,13 +288,18 @@ function app_key(t) {
 		-- no need to fill empty field for action
 		-- اصلاح عمل باز گشت فرم با کمک برنامه جاوا 
 		- بهبود عملکرد سایر دکمه های تایید - عدم نمایش  پیغام"مطمئن هستید" در زمانی که فیلد خالی وجود دارد 
+		IR=i return = 1 person return his app
+		
 	*/
 	re=false;
-	t=t.toUpperCase();
-	if (t=="R") {
+	t=t.toLowerCase();
+	if (t=="ir") {
+		if (true==true) { re=confirm("Form self person RETURN - ARE You Sure ? \n \n" + "فرم بازگشت داده شود ؟") }
+	}	
+	else if (t=="r") {
 		if (true==true) { re=confirm("Form RETURN  - ARE You Sure ? \n \n" + "فرم بازگشت داده شود ؟") }
 	}	
-	else if (t=="X") {
+	else if (t=="x") {
 		var msg =	"آیا مطمئن هستید که می خواهید این فرم را  حذف / عدم تایید   نمایید؟ "
 		msg	+= "\n" + "ARE You Sure ? \n \n"
 		msg += "\n" + "توجه :با این کار کلیه فایلهای الحاق شده به این فرم  پاک می شود"

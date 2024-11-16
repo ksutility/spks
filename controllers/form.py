@@ -238,10 +238,21 @@ class C_FILTER():
     #return select_cols, all_cols,htm_table_filter,
 
 #===================================================================================================================
-def xform():#view 1 row
+def xform_sd():
+    return dict(htm=_xform(out_items=['body']))#_xform())
+def xform():
+    return dict(htm=_xform())#_xform())
+
+def _xform(out_items=['head','body','tools']):
+    #show all section
+    #response.show_toolbar=True #error check
     
     if request.vars['text_app']:
-        return save()
+        #print("text_app="+str(request.vars['text_app']))
+        if request.vars['text_app'] in ['ir','IR']:
+            return XML(save_app_review())
+        else:
+            return XML(save())
     session.view_page='xform'
     
     '''
@@ -250,18 +261,49 @@ def xform():#view 1 row
         show only cols/fields/task that defied in data_structur and 'hide' str not in its 'prop' attbute
         
     '''
-    def show_form(x_data_s,db1,tb_name,xid):#show 1 form 
+    #------------------------------------------
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    if not x_data_s:
+        return dict(htm=msg)
+    
+    # check access /auth
+    auth= k_user.C_AUTH_FORM(x_data_s)
+    if not auth.ok:return dict(htm=H1(auth.msg))
+    
+    #db1=DB1(db_path+db_name+'.db')
+    
+    xid=request.args[2] or 1
+    htm_form=C_FORM_HTM(x_data_s,xid).show_form()
+    htm_x=[y for x in out_items for y in htm_form[x]]
+    return DIV(FORM(*htm_x,
+        INPUT(_type='hidden',_id='text_app',_name='text_app',_value=''),_id="form1")
+        ,_dir="rtl")
+class C_FORM_HTM():
+    #:#view 1 row
+    def __init__(self,x_data_s,xid):
+        self.x_data_s=x_data_s
+        self.xid=xid
+        self.c_form=k_form.C_FORM(x_data_s,xid)
         
-        def show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode):
-            #mode='output'/'input'
-            fd=x_data_s['tasks'][field_name]#fd=field_data
-            htm_1=A(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
-            if 'hide' in fd['prop']:
-                return [htm_1,'*','']
-            x_obj=k_form.obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
-            
-            return [htm_1,x_obj[mode],x_obj['help']]
-            #------------------------------------------------- 
+        if xid=='-1':
+            f_nxt_s=0
+        #elif not rows:
+        #    return c_form,'',0,''    
+        else:
+            f_nxt_s=self.c_form.form_sabt_data['f_nxt_s']
+            f_nxt_u=self.c_form.form_sabt_data['f_nxt_u']
+            if f_nxt_s:
+                if f_nxt_u=="x":
+                    f_nxt_s=-int(f_nxt_s)
+                else:
+                    f_nxt_s=int(f_nxt_s)
+            else:
+                f_nxt_s=0
+        steps=x_data_s['steps']
+        self.f_nxt_s=f_nxt_s
+    def show_form(self):#show 1 form 
+        x_data_s=self.x_data_s
+        xid=self.xid
 
         def show_step_not_cur(x_data_s,xid,c_form,step,mode): #like=row_view
             '''
@@ -272,7 +314,7 @@ def xform():#view 1 row
                     b=befor of cur
                     a=aftre of cur
             '''
-            fsc_mode={"a":"form_step_after","b":"form_step_befor","c":"form_step_cur_unactive"}[mode] #form_step_class
+            fsc_mode={"a":"form_step_after","b":"form_step_befor","c":"form_step_cur_unactive"}[mode] #fsc_mode=form_step_class
             hx={'data':[],'stp':'','app':[]}
             
             for field_name in step['tasks'].split(','):
@@ -303,7 +345,7 @@ def xform():#view 1 row
             hx['stp']=[str(step['i']+1) +' - '+ step['title']]
             
 
-            return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid "+fsc_mode)#DIV(,_style="background-color:#555;")
+            return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid "+fsc_mode) #DIV(,_style="background-color:#555;")
         def show_step_cur(x_data_s,xid,c_form,step): #like=row_edit
             '''
                 0209012 
@@ -320,78 +362,34 @@ def xform():#view 1 row
             hx['app']=[BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{x_color[xx]}',_onclick=f"app_key('{xx}')") for xx in step['app_kt']]
             hx['stp']=[str(step['i']+1) +' - '+ step['title']]
             hx['app-color']=''
-            return FORM(DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur"),INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')
-                        ,_id="form1") #,_action=URL('save',args=request.args)
+            return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur")
+                         #,_action=URL('save',args=request.args)
         def app_review (): 
             '''
                 0209018
             '''
             htm_1=[DIV(
                     DIV('',_class='col-4'),
-                    DIV(BUTTON("بازبین مرحله آخر",_type='submit',_class='btn ',_onclick=f"app_key('r')"),_class='col-4'), 
+                    DIV(BUTTON("بازبین مرحله آخر",_type='submit',_class='btn ',_onclick=f"app_key('ir')"),_class='col-4'), 
                     DIV('',_class='col-4')
                     ,_class='row')]
             #htm_1+=[HR()]
-            htm= FORM(DIV(htm_1,_class="container form_step_cur"),INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')
-                        ,_action=URL('save_app_review',args=request.args),_id="form1") 
+            htm=DIV(htm_1)# FORM(DIV(htm_1,_class="container form_step_cur"),_action=URL('save_app_review',args=request.args),_id="form1") 
             return XML(k_htm.x_toggle_s(XML(htm),sign='اصلاح'))
         #-- def show_form:start ----------------------------------------------
-        def inf_g_old():
-            rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-            #xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'--- (xid==-1) : '+str(xid=='-1')])
-            
-            if xid=='-1':
-                form_sabt_data={x:'' for x in titles}
-                f_nxt_s=0
-            elif not rows:
-                return '',0,''    
-            else:
-                form_sabt_data=dict(zip(titles,rows[0]))
-                f_nxt_s=form_sabt_data['f_nxt_s']
-                f_nxt_u=form_sabt_data['f_nxt_u']
-                if f_nxt_s:
-                    if f_nxt_u=="x":
-                        f_nxt_s=-int(f_nxt_s)
-                    else:
-                        f_nxt_s=int(f_nxt_s)
-                else:
-                    f_nxt_s=0
-            steps=x_data_s['steps']
-            return form_sabt_data,f_nxt_s,steps
-        def inf_g():
-            c_form=k_form.C_FORM(x_data_s,xid)
-            form_sabt_data=c_form.form_sabt_data
-            #xxxprint(msg=[str(xid),'where id='+str(xid),'len rows='+str(len(rows))+'--- (xid==-1) : '+str(xid=='-1')])
-            
-            if xid=='-1':
-                
-                f_nxt_s=0
-            #elif not rows:
-            #    return c_form,'',0,''    
-            else:
-                
-                f_nxt_s=form_sabt_data['f_nxt_s']
-                f_nxt_u=form_sabt_data['f_nxt_u']
-                if f_nxt_s:
-                    if f_nxt_u=="x":
-                        f_nxt_s=-int(f_nxt_s)
-                    else:
-                        f_nxt_s=int(f_nxt_s)
-                else:
-                    f_nxt_s=0
-            steps=x_data_s['steps']
-            return c_form,form_sabt_data,f_nxt_s,steps    
-        c_form,form_sabt_data,f_nxt_s,steps=inf_g() #form_sabt_data=all field data that is in form of sabt 
+          
+        c_form,form_sabt_data,f_nxt_s=self.c_form,self.c_form.form_sabt_data,self.f_nxt_s #,steps=inf_g() #form_sabt_data=all field data that is in form of sabt 
         
         form_case_dic={'1':'عمودی','2':'افقی'}
-        htm_form=[ FORM(DIV(
+        htm_form={'body':[]}
+        htm_form['head']=[ DIV(
                         DIV(x_data_s['base']['title'],_class='col-8 bg-info text-center text-light h3 border-left'),
                         DIV(' ثبت شماره ' + xid ,_class='col-2 bg-info text-center text-light h6 '),
                         DIV('حالت نمایش',_class='col-1'),
-                        DIV(k_htm.select(_options=form_case_dic,_name='form_case',_value=request.vars['form_case'] or '2',_onchange="submit();"),
+                        DIV(k_htm.select(_options=form_case_dic,_name='form_case',_value='2',_onchange="submit();"), #request.vars['form_case'] or 
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
-                        _class='row  '))] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
+                        _class='row  ')] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
         
         if form_sabt_data:
             step_befor='' # svae name of before step
@@ -403,62 +401,52 @@ def xform():#view 1 row
                     if k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
                         #k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
                         #k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
-                        htm_form+=[show_step_cur(x_data_s,xid,c_form,step)]
+                        htm_form['body']+=[show_step_cur(x_data_s,xid,c_form,step)]
                     else :
                         # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
                         if step_befor and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i-1):
                             #step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
                             #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):
-                            htm_form+=[app_review()]
-                        htm_form+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
+                            htm_form['body']+=[app_review()]
+                        htm_form['body']+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
                         
-                        htm_form+=[DIV([show_step_not_cur(x_data_s,xid,c_form,step,'c')])]
-                        htm_form+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
+                        htm_form['body']+=[DIV([show_step_not_cur(x_data_s,xid,c_form,step,'c')])]
+                        htm_form['body']+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
                 else:
                     if 'order' in step and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
-                        htm_form+=[show_step_cur(x_data_s,xid,c_form,step)]
+                        htm_form['body']+=[show_step_cur(x_data_s,xid,c_form,step)]
                     else:
                         ab_case="b" if i < f_nxt_s else "a"
-                        htm_form+=[show_step_not_cur(x_data_s,xid,c_form,step,ab_case)]
+                        htm_form['body']+=[show_step_not_cur(x_data_s,xid,c_form,step,ab_case)]
                 step_befor=step_n
             # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
             # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
             if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=f_nxt_s-1)):
                 #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
                 # test = form(morakhsi_saat).rec(15 steps=comple) : user(mlk) =>can view (app_review but) ,other users(atl,ks,..) cannot view (app_review but)
-                htm_form+=[app_review()]
+                htm_form['body']+=[app_review()]
             # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
             elif (f_nxt_s < 0 and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
                 #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
                 # test = 
-                htm_form+=[app_review()]
+                htm_form['body']+=[app_review()]
             
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=request.args[:2]
         xid=int(xid)
         args=request.args
-        htm_form+=[XML(k_htm.x_toggle_s(DIV(
+        htm_form['tools']=[XML(k_htm.x_toggle_s(DIV(
                 A('T',_title='نمایش جدول مربوطه',_href=URL('data','xtable',args=args[:2]+['edit']+[args[2]]),_class='btn btn-primary'),'-',
                 A('تغییرات',_title='تغییرات این ثبت از فرم',_href='javascript:void(0)',_onclick=f'j_box_show("{xlink}")',_class='btn btn-primary'),'-',
                 A('+',_title='فرم بعدی',_href=URL('xform',args=x_arg+[str(xid+1)]),_class='btn btn-primary'),'-',  
                 A('-',_title='فرم قبلی',_href=URL('xform',args=x_arg+[str(xid-1)]),_class='btn btn-primary')
                 ),'ابزار',color='info')),
                 A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary')]
-        return DIV(htm_form,_dir="rtl")
+        return htm_form
+
     #-- def xform:start ------------------------------------------------------------
-    x_data_s,db_name,tb_name,msg=_get_init_data()
-    if not x_data_s:
-        return dict(htm=msg)
     
-    # check access /auth
-    auth= k_user.C_AUTH_FORM(x_data_s)
-    if not auth.ok:return dict(htm=H1(auth.msg))
-    
-    db1=DB1(db_path+db_name+'.db')
-    
-    xid=request.args[2] or 1
-    return dict(htm=show_form(x_data_s,db1,tb_name,xid))
 # ------------------------------------------------------------------------------------------ 
 def _save_out(xid,err_show=False):
     args=request.args
@@ -518,7 +506,7 @@ def save():
         text_app=request.vars['text_app'].lower()
         htm_form=[DIV('text_app= '+request.vars['text_app'],_class="row")]
         #x_r,xid,r_dic=save1(text_app,xid)
-        x_r=k_form.C_FORM(x_data_s,xid).save(new_data=request.vars)
+        x_r=k_form.C_FORM(x_data_s,xid).save(new_data=request.post_vars)
         tt,xid,r_dic=x_r['html_report'],x_r['id'],x_r['db_report']
         err_show=False#:True
         try:
@@ -538,10 +526,11 @@ def save():
 
     htm_form+=_save_out(xid)
     htm_form+=[tt]
-    try:
-        return dict(htm=DIV(htm_form)) #,x=response.toolbar())
-    except Exception as err:
-        return DIV(htm_form)
+    return DIV(htm_form)
+    #try:
+    return dict(htm=DIV(htm_form)) #,x=response.toolbar())
+    #except Exception as err:
+    #   return DIV(htm_form)
 def save_app_review():
     '''
         تغییرات لازم در زمان زدن دکمه بازبینی مرحله آخر
@@ -556,6 +545,7 @@ def save_app_review():
     
     htm_form=_save_out(xid)
     htm_form+=[tt]
+    return DIV(htm_form)
     try:
         return dict(htm=DIV(htm_form)) 
     except Exception as err:
@@ -628,7 +618,7 @@ def list_0():
     server_add=k_tools.server_python_add()
     t0=f"""<hr><div class="row">
         <div class="col">
-            <h2> گزارش عملکرد همکاران طراحی </a>
+            <h3> گزارش عملکرد همکاران طراحی </h3>
         </div>
         <div class="col">
             <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/aqc_report_daily_pivot/user_day'>نمودار های جادویی </a>
@@ -638,6 +628,9 @@ def list_0():
         </div>
         <div class="col">
             <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/test_ipgrid'>ورود اطلاعات</a> 
+        </div>
+        <div class="col">
+            <a class='btn' target='_blank' href='{URL('km','user_timesheet')}'><img src="{URL('static','icon/3d/timesheet.gif')}" title="تایم شیت" width="40" height="40"></a> 
         </div>
     </div>"""
     tt+=[XML(t0)]
@@ -655,7 +648,7 @@ def xtable():
     args=request.args
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
-    x_data_s,db_name,tb_name,msg=_get_init_data()#x_data)
+    x_data_s,db_name,tb_name,msg=_get_init_data()
     if not x_data_s: return x_dict.add({'table':msg})
     
     # check access /auth
@@ -669,7 +662,7 @@ def xtable():
     filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
     
     if auth.where:
-        filter_data=["__where__list__",filter_data,auth.where]
+        filter_data=["AND",filter_data,auth.where]#__where__list__
     order=c_filter.data_sort["value"] or x_data_s['order']
     x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
     # xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})
@@ -749,7 +742,7 @@ def xtable_i():
 
     response.title='xtable-'+'-'.join(request.args)
       
-    x_data_s,db_name,tb_name,msg=_get_init_data()#x_data)
+    x_data_s,db_name,tb_name,msg=_get_init_data()
     if not x_data_s: return x_dict.add({'table':msg})
     
     # check access /auth
@@ -766,8 +759,9 @@ def xtable_i():
                     'f_nxt_s':f_nxt_s}
     
     if auth.where or filter_data1:
-        filter_data=["__where__list__",filter_data,filter_data1,auth.where]
-    order=c_filter.data_sort["value"] or x_data_s['order']
+        filter_data=["AND",filter_data,filter_data1,auth.where]#__where__list__
+    order=c_filter.data_sort["value"] or x_data_s['order'] or 'id'
+    if order=='None':order='id'
     x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
     #print(f"filter_data={filter_data}")#x_select['sql']
     trs,new_titles,nr=_xtable_show(x_select["rows"],x_select['titles'],tasks,x_data_s,c_filter)
@@ -848,17 +842,21 @@ def _xtable_show(rows,titles,tasks,x_data_s,c_filter):
     
 
     args=request.args
-    cols_filter=c_filter.cols_filter_obj['value']
+    cols_filter=c_filter.cols_filter_obj['value'].replace('None','')
     if cols_filter:
         cf_list=cols_filter.split(',')
         if cf_list[0][0] in [0,1,2,3,4,5,6,7,8,9] :
             select_cols=[all_cols[int(x)] for x in cf_list]
         else:
-            select_cols=cf_list
-            
+            select_cols=cf_list or 'id'
+            #if select_cols=='None':select_cols='id'
+         
+        print('select_cols='+str(select_cols))
         #--table head
         new_titles=[{'name':'n','width':'30px'},{'name':'id','width':'30px'}]
-        new_titles+=[{'name':tasks[x]['title'],'title':x} for x in select_cols]
+        x_tasks=tasks.copy()
+        x_tasks.update({'id':{'title':'id'}})
+        new_titles+=[{'name':x_tasks[x]['title'],'title':x} for x in select_cols]
         #---------------        
         trs=[]
         
@@ -957,3 +955,62 @@ def _xtable_head(x_data_s,x_select,nr,new_record_link):
                 ,TD(DIV('...',_id='viewcell',_name='viewcell'))
                 ,TD(x_data_s['base']['title'],_width='10%')
             )),_style='position:sticky;top:0px')
+
+def search():
+    '''
+    030728
+    goal:
+    ------
+        URL_base search:
+            جستجو ساده مبنتی بر URL
+            ------
+            - search in 1 field or in all field
+                - search in 1 field : 4_ args => db/tb/search_text/field_name
+                - search in all field : 3_ args => db/tb/search_text
+                    عدم نوشتن نام فیلد جستجو
+                - search in n fields : vars => s_cols=field_name_1,field_name_2,...,field_name_n
+                    s_cols = search_colomns
+                    exam => db/tb/search_text?s_cols=field_name_1,field_name_2,...,field_name_n
+            - define out_colomns
+                -in url : vars => o_cols=field_name_1,field_name_2,...,field_name_n
+                    o_cols=output_colomns
+        search by form:
+            جستجو بر اساس اطلاعات پر شده در یک فرم
+            -------
+            - 2_ args => db/tb
+            
+
+    exam :
+        http://192.168.88.179/spks/data/search/paper/a/gate?s_cols=sbj&o_cols=sbj,id
+    '''
+    out=[]
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    if not x_data_s : return msg
+    if len(request.args)<2: return "len(request.args)<3"
+    args=request.args+['','','']
+    search_text=args[2] or request.vars['search_text']
+    
+    from k_sql import DB1,C_SQL
+    import k_htm
+    db1=DB1(db_path+db_name+'.db')
+    if args[2]=="":
+        val_dic={x:x for x in db1.columns_list(tb_name)}
+        out+=[FORM(DIV(
+                INPUT(_name='search_text',_value=request.vars['search_text']),
+                k_htm.select(_options=val_dic,_name='o_cols',_multiple=True),
+                INPUT(_value='جستجو',_type='submit')))]
+        #,DIV())]
+    if search_text:
+        
+        s_cols=request.vars['s_cols'].split(',') if request.vars['s_cols'] else ''
+        fields=s_cols or args[3] or db1.columns_list(tb_name) 
+        where=' OR '.join([C_SQL().where_cell(field_name,f'%{search_text}%','like') for field_name in fields])
+        rows,titles,rows_num=db1.select(tb_name,where=where,limit=0)
+        tasks=x_data_s['tasks']
+        c_filter=C_FILTER(tasks,x_data_s) 
+        rows,titles,nr=_xtable_show(rows,titles,tasks,x_data_s,c_filter)
+        table=k_htm.C_TABLE(titles,rows).creat_htm(titels=request.vars['o_cols'])
+        out+=["search_text => "+search_text]
+        out+=[table]
+        out+=[f"where={where}"]
+    return dict(x=DIV(*out))

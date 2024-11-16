@@ -87,7 +87,10 @@
 	function j_box_hide() {
 		document.getElementById('j_box_light').style.display='none';
 		document.getElementById('j_box_fade').style.display='none';
-		if (x_reload) {location.reload();}
+		if (x_reload) {
+			location.reload(true);
+			//location.href=location.href;
+			}
 	}
 	//iframe
 	function j_box_show(path,reload=false) {

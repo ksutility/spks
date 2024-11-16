@@ -12,6 +12,17 @@ shoud_login_msg=f""" <h3>برای دسترسی به این بخش </h3>
                     <h3>ابتدا باید وارد سیستم شوید</h3>
                     <a href={URL("data","index")}>ورود</a>
                 """
+"""
+job help
+--------
+job = 1 obj define by 1 form and have:
+    'title','users','base_user'
+xuser = 1 extra text for define users by:
+    job.code :
+    1 field of form :
+    1 step of form :
+    
+"""                
 class USER_LOG():
     inf={}
     def __init__(self,ip='',un='',xtime=''):
@@ -189,13 +200,61 @@ def jobs_masul(x_data_s,step_index,form_sabt_data,form_all_data ):
                 return x_un
     #except:
     #    return ''
-def jobs_title(jobs,x_data_s):
+class C_XUSER():
+    def __init__(self,xuser_code,x_data_s):
+        self.code=xuser_code
+        self.x_data_s=x_data_s
+    def describe(self):
+        '''
+        توصیح افراد عضو یک سمت
+        بر اساس سمتهای تعریف شده در یک مرحله از فرم
+        '''
+        code=self.code
+        if code =='*':
+            return 'همه همکاران'
+        elif code[0] != "#":
+            return a_jobs[code]['title']
+        elif code[0] == "#" and  len(code) > 6:
+            jx=code.split('#')
+            if jx[1]=="task":
+                return ' ' + self.x_data_s['tasks'][jx[2]]['title']
+                #xxxprint(vals=x_data_s['tasks'],launch=True)
+            elif jx[1]=="step":
+                #xxxprint(msg=['',str(jx),''],launch=True)
+                return 'تکمیل کننده بخش شماره '+str(int(jx[2])+1) + ' فرم جاری '
+    
+    def users_list(self):
+        '''
+        افراد عضو یک سمت
+        بر اساس سمتهای تعریف شده در یک مرحله از فرم
+        '''
+        code=self.code
+        if code =='*':
+            return '*'
+        elif code[0] != "#":
+            return a_jobs[code]['users']
+        elif code[0] == "#" and  len(code) > 6:
+            jx=code.split('#')
+            if jx[1]=="task":
+                return '?'
+            elif jx[1]=="step":
+                return '?'
+ 
+def xusers_inf(jobs,x_data_s):
     '''
-    عنوان هر سمت
+    توصیح افراد عضو یک سمت
     بر اساس سمتهای تعریف شده در یک مرحله از فرم
     '''
-    tt=[]
+    t_d,t_i=[],[]
     for job in jobs.split(','):
+        c_xuser=C_XUSER(job,x_data_s)
+        t_d+=[c_xuser.describe()]
+        t_i+=[c_xuser.users_list()]
+    xusers={
+    'describe':"".join(t_d),
+    'inf':"".join(t_i)}
+    
+    '''
         if job =='*':
             tt+=['همه همکاران']
             continue
@@ -213,7 +272,8 @@ def jobs_title(jobs,x_data_s):
                 tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1) + ' فرم جاری ']
                 
                 continue
-    return tt
+        '''        
+    return xusers
 def auth(auth_jobs):
     '''
         آیا کاربر جاری حق دسترسی به این بخش را دارد 
@@ -299,16 +359,16 @@ def can_user_edit_step(step,step_index,form_sabt_data,un=''):
         
     return user_in_jobs(step['jobs'],row_data=form_sabt_data)
     #return form_sabt_data[f'step_{step_index}_un']    
-def user_in_jobs(jobs,row_data={},un=''):
+def user_in_jobs(xusers,row_data={},un=''):
     '''
-        according form_inf(row_data) retun that un is in jobs ?  
+        according form_inf(row_data) retun that un is in xusers ?  
         مشخص می کند که آیا کاربر مشخص شده در شغلهای مشخص شده می باشد یا خیر 
         از اطلاعات _ ردیف برای اطلاعات تکمیلی برای کاربر های خاص بر اساس مرحله و یا فیلد استفاده می کند
     inputs:
     -------
         un:str
             username
-        jobs=list of job_code separate by ,
+        xusers=list of xuser_code separate by ,
         row_data:dict
             data of recored form for user(#task#<task_name>,#step#<n> )
     '''
@@ -318,14 +378,14 @@ def user_in_jobs(jobs,row_data={},un=''):
         un=session["username"]
     if not un:
         return False
-    #xxxprint(msg=['user_in_jobs',jobs,un],vals=row_data)
-    for job in jobs.split(','):
-        if job =='*':return True
-        if job[0] != "#":
-            if (un in a_jobs[job]['users'].split(',')) or (un == a_jobs[job]['base_user']):
+    #xxxprint(msg=['user_in_jobs',xusers,un],vals=row_data)
+    for xuser in xusers.split(','):
+        if xuser =='*':return True
+        if xuser[0] != "#":
+            if (un in a_jobs[xuser]['users'].split(',')) or (un == a_jobs[xuser]['base_user']):
                 return True
-        if job[0] == "#" and  len(job) > 6:
-            jx=job.split('#')
+        if xuser[0] == "#" and  len(xuser) > 6:
+            jx=xuser.split('#')
             if jx[1]=="task":
                 
                 x_un=row_data[jx[2]]
