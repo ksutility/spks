@@ -61,6 +61,20 @@
 	<div id="j_box_fade" class="j_box_black_overlay"></div>
 <!--/j_box -->
 <script>
+	$('#j_box_iframe_win').load(function(){
+	iframe_html = document.getElementById('j_box_iframe_win').contentWindow.document.body.innerHTML;
+	//x=$('#j_box_iframe_win').contents();
+	
+	if ((iframe_html.length<50) && (iframe_html.includes("j_box_iframe_win_close"))){
+		//alert(iframe_html);
+		iframe_html='';
+		//alert("ok");
+		j_box_hide();}
+	//.contents().find('body').on('DOMSubtreeModified', function(){
+    //alert("iframe-change-path => "+$("#j_box_iframe_win").attr('src'));
+	//alert(iframe_html.length);
+	});
+	
 	let x_reload
 	function j_box_show1(path) {
 		document.getElementById('j_box_light').style.display='block';
