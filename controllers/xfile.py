@@ -625,14 +625,10 @@ def _read_markup(mm_case):
             ?debug=1
             &debug=1
         -----------------------------------
-        print("#"*30+" data")
-        print(data)
-        print("="*30+" html_2")
-        print (html_2)
-        print("="*30+" html_1")
-        print (html_1)
-        print("="*30+"html_1 sanitize=True")
-        print (XML(html_1, sanitize=True))
+        xxxprint(vars={"data":data,
+            "html_2":html_2,
+            "html_1":html_1,
+            "html_1 sanitize=True":XML(html_1, sanitize=True))
         '''
         def tbl0(data):
             trs=[TR(TD(i),TD(A(tag,_title=html_visible(tag)))) for i,tag in enumerate(data.split('\n'))]
@@ -833,8 +829,7 @@ def diff_files():
         bak
     '''
     base_file=request.vars.file #or request.vars.file #r'D:\0-file\test\markmin.mm'#
-    #- print ('base_file')
-    #- print (base_file)
+    #- xxxprint (vars={'base_file':base_file})
     f1_select1,f1_select2='',''
     dif='-'
     #f_name2

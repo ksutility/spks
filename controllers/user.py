@@ -193,7 +193,7 @@ def login():
             ou+=" نام وارد شده در سيستم ثبت نشده است <br>" + un
         return ou
     """
-    print(str(session))
+    #print(str(session))
     un,un_inf=login_by_ip()
     isok_un_ps=False
     if un:
@@ -217,7 +217,7 @@ def login():
         un=session["username"]
         ps=session["password"]
         ou,isok_un_ps=_chek_un_ps(un,ps)
-        print(f'session-{un}-{ps}')
+        xprint(f'session-{un}-{ps}')
         #redirect(URL('index'))
         '''
         isok_un_ps=True

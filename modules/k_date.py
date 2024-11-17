@@ -35,7 +35,7 @@ def date_dif(time2,time1,in_format,out_format="DDD+hh:gg"):
     t3={}
     for x in t1:
         t3[x]=t2[x]-t1[x]
-      #difference of date in minutes
+        #difference of date in minutes
     if t3['ss']<0:t3['ss']+=60;t3['gg']-=1
     if t3['gg']<0:t3['gg']+=60;t3['hh']-=1
     if t3['hh']<0:t3['hh']+=8;t3['dd']-=1
@@ -47,13 +47,13 @@ def date_dif(time2,time1,in_format,out_format="DDD+hh:gg"):
         else:
             t3['yyyy']-=1
     t3['DDD']=(t3['yy']+t3['yyyy'])*365+t3['mm']*30+t3['dd']
-    #print(str(t3))
+
     for x in t3:
         t3[x]=f"000{t3[x]}"[-len(x):]
-    #print(str(t3))   
+  
     return out_in_format(t3,out_format)
-#print (ir_date('yy-mm-dd-hh-gg-ss'))
-#print (i_date())
+#xprint (ir_date('yy-mm-dd-hh-gg-ss'))
+#xprint (i_date())
 #------------------------------------------------------------
 def split_by_format(in_time,in_format,int_str='int'):
     #return a k_datetime obj
@@ -76,12 +76,12 @@ def change_format(in_time,in_format,out_format):
 def out_in_format(dt_obj,out_format):
     #dt =date_time dict format ['yyyy','yy','mm','dd','hh','gg','ss' + 'DDD']
     #out_format=out_format.lower()
-    #print(out_format)   
+    #xprint(out_format)   
     for x,y in dt_obj.items():
         out_format=out_format.replace(x,y)
     return out_format
 
-#print (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
+#xprint (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
 def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
     import datetime
     if type(in_time)==tuple:
@@ -100,7 +100,7 @@ def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
         return w_days[w_case][wd_f] 
     
     #x=datetime.date(2008, 6, 24).weekday()
-    #print(x1,x2)
+    #xprint(x1,x2)
     #x=datetime.date(2008, 6, 24).weekday() 0=monday,6=sunday
 def site_time():
     #=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}-

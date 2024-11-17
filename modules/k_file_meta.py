@@ -208,14 +208,11 @@ class K_FILE_META:
             make list of unused json item in meta file ="__inf.json"
         '''
         try:
-            #- print('unused')
+            
             files_list=[f['name']+f['ext'] for f in files]
             folders_list=[f['name'] for f in folders]
             files_un=[f for f in meta['files'] if not f in files_list] #files_unused
             folders_un=[f for f in meta['folders'] if not f in folders_list] #folders_unused
-            #- print(files_list)
-            #- print(folders_list)
-            #- print(files_un)
-            #- print(folders_un)
+            #xxxprint(msg=['unused','',''],vars=[files_list,folders_list),files_un,folders_un]
         except Exception as err:
             print('err in unused_json_item \n'+ str(err))
