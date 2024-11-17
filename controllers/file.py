@@ -43,9 +43,7 @@ def _folder_w_access(args=request.args,x_path=''):
     #------------------------    
     
     fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+[f';{session["my_folder"]};']
-    #print("x_path"+str(x_path))
-    #print("args"+str(args))
-    #print("fc_list"+str(fc_list))
+
     if session["admin"] or x_path[:-1] in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
         return {'ok':True}  
     else:
@@ -142,7 +140,7 @@ def upload_file():
         file_b=file.file.read() #file contents in byte format
         with open(path, 'wb') as f:f.write(file_b)
         msgs+=['File Upload Succesfully',f'filename={path}',f'args={request.args}','uploaded_time = '+ str(time.time()-session['uploaded_time']),'-'*25]
-        #- print("/n".join(msgs))
+        
         if request.vars.todo :
             msgs+=_update_todo(request.vars.todo,filefullname)
             '''
@@ -151,9 +149,9 @@ def upload_file():
             todo2=todo1.replace("$filefullname$",filefullname)
             todo= json.loads(todo2)
             
-            print('todo=' + str(todo))            
-            print('db=' + str(todo['db']))
-            if todo['do']=='sql':                 #- print('xxx')
+                     
+            
+            if todo['do']=='sql':                 
                 from k_sql import DB1
                 db_path='applications\\spks\\databases\\'
                 db_p=db_path+todo['db']+'.db'
@@ -179,9 +177,7 @@ def _update_todo(todo,filefullname):
     msgs=[]
     todo=todo.replace("$filefullname$",filefullname)
     todo= json.loads(todo)
-    print('todo=' + str(todo))            
-    print('db=' + str(todo['db']))
-    if todo['do']=='sql':                 #- print('xxx')
+    if todo['do']=='sql':                 
         from k_sql import DB1
         db_path='applications\\spks\\databases\\'
         db_p=db_path+todo['db']+'.db'
@@ -198,7 +194,7 @@ def mdir():
     args=request.args
     if args:
         path=xpath+'\\'.join(args)
-        #- print(f'mdir:{path}')
+        
         return str(k_file.dir_make(path))
 def upload():
     """ 010825
@@ -492,7 +488,7 @@ def manage():
     args=request.args
     path=os.path.join(xpath,*args)
     files,folders=_list_files(path)
-    #print(str(f_list))
+    
     return dict(a=A('upload new file',_href=URL(f='upload',args=args,vars=request.vars)),
     files=TABLE(*[TR(A(x['name'],_href=URL(f='download',args=args+[x['name']])),x['size'],x['mtime'],x['ctime']) for x in files],_class='table2'),
     folders=TABLE(*[A(x,_href=URL(args=args+[x])) for x in folders],_class='table2'))
@@ -563,8 +559,8 @@ def f_list():#file_browser=file.index
  
     x_path,path,fc_access,args=files_x_tools.set_out_val()
 
-    #- print('curren user file_change_access='+ str(fc_access)+ '  | on floder ='+x_path)
-    #print(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
+    #xxxprint('curren user file_change_access='+ str(fc_access)+ '  | on floder ='+x_path)
+    #xprint(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
     
     #add_folder_access
     def add_my_folder(x_path):
@@ -947,9 +943,7 @@ def file_meta_edit():
         import os
         f1=os.path.join(path, vars['f_name'])
         f2=os.path.join(path, vars['f_name2'])
-        #- print(xpath)
-        #- print(f1)
-        #- print(f2)
+
         os.rename(f1,f2)
         ou+=file_meta_change(vars['f_name'],vars['f_name2'])
     if ou:return ou 
