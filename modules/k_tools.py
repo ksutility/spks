@@ -136,3 +136,25 @@ def int_force(x,n):
         return int(x)
     except:
         return n
+def list_list__2__list_list(in_rows,in_titels,out_titles):
+    '''
+    inputs:
+    ------
+        in_rows=list of row =list of list
+    '''
+    out_rows=[]
+    for row in in_rows:
+        out_row=[row[in_titels.index(out_title)] for out_title in out_titles]
+        out_rows+=[out_row]
+    return out_rows        
+def list_dict__2__list_list(in_list_dict,out_titles):
+    '''
+    inputs:
+    ------
+        in_list_dict= rows = list of row =list of dict
+    '''
+    out_rows=[]
+    for x_dic in in_list_dict:
+        out_row=[x_dic[out_title] for out_title in out_titles]
+        out_rows+=[out_row]
+    return out_rows        

@@ -10,8 +10,7 @@ from datetime import datetime
 from k_sql import DB1
 import kytable,k_err
 now = datetime.now().strftime("%H:%M:%S")
-db_name=r'applications\spks\databases\user.db'
-db1=DB1(db_name)
+db1=DB1('user')
 def _set_val_inf():
     pass
 def _isok_un_ps (un,ps):
@@ -25,7 +24,7 @@ def _isok_un_ps (un,ps):
         session["username"]=un.lower()
         session["admin"]=False 
         session["file_access"]=rs["file_access"]
-        session["my_folder"]=f'{rs["eng"].strip()}-{rs["un"].strip()}'
+        session["my_folder"]=[f';{rs["eng"].strip()}-{rs["un"].strip()};',f';user;{rs["un"].strip()};']
         session["auth_prj"]=rs["auth_prj"]
         if session["username"]=='ks':
             session["admin"]=True
@@ -151,9 +150,8 @@ def _toggle_ip_login_case():
             session['login_ip']=ip_i[3]
         else:
             return "امکان فعال سازی وجود ندارد"
-    db_path='applications\\spks\\databases\\'
-    rep=DB1(db_path+'user.db').update_data('user',{'login_ip':session['login_ip']},{'un':session['username']})
-    k_user.all_users.reset()
+    rep=DB1('user').update_data('user',{'login_ip':session['login_ip']},{'un':session['username']})
+    k_user.ALL_USERS().reset()
     #print (str(rep))
 def set_ip_login_case():
     if session['login_ip']:
@@ -171,7 +169,7 @@ def login_by_ip():
     ip_i=ip_b.split(".")
     #k_err.xreport_var([ip_b,k_user.a_users.items()])
     if "192.168.88." in ip_b :
-        for user,user_inf in k_user.all_users.inf.items():
+        for user,user_inf in k_user.ALL_USERS().inf.items():
             if user_inf['login_ip']==ip_i[3]:
                 return user,user_inf #f"login_by_ip:ok =>{ip_i[3]} -- {user}"
     return '','' #f"""login_by_ip: err => {ip_b} --- {ip_i[3]} --- {"192.168.88." in ip_b}"""
@@ -196,6 +194,7 @@ def login():
     #print(str(session))
     un,un_inf=login_by_ip()
     isok_un_ps=False
+    ou=''
     if un:
         for x in un_inf:
             #print (f"ses--{x}={un_inf[x]}")
@@ -229,7 +228,7 @@ def login():
         #session("ir_weak")=x_w
         #set_inf()
         ou,isok_un_ps=_chek_un_ps(un,ps)
-    else:
+    if True: #else
         ou=f'''<div align=center>
         
         <hr>
@@ -255,7 +254,7 @@ def login():
         </Form>
         
         </div>
-        '''
+        '''+ou
         ou1=f'''<div align=center>
         <h2>لطفا براي ورود نام کاربری و پسورد خود را وارد کنيد</h2>
         {ou}
@@ -356,9 +355,9 @@ def reset_password():
         user_ab=request.vars.user_ab
         if user_ab:
             tt=[user_ab]
-            if user_ab in k_user.all_users.inf:
+            if user_ab in k_user.ALL_USERS().inf:
                 import k_user
-                tt+=[k_user.all_users.inf[user_ab]['fullname']]
+                tt+=[k_user.ALL_USERS().inf[user_ab]['fullname']]
                 xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
                 if xr['rowcount']>0:
                    tt+=["رمز با موفقیت ریست شد"]

@@ -1,5 +1,6 @@
 from gluon.custom_import import track_changes; track_changes(True)
 from gluon import URL
+from gluon import current
 from k_sql import DB1
 import k_htm
 import k_form
@@ -40,7 +41,7 @@ class USER_LOG():
         return (self.inf)
 
 def load_user_inf():
-    db1=DB1(db_path+'user.db')
+    db1=DB1('user')
     rows,titles,rows_num=db1.select('user',where={},limit=0)
     users={}
     for row in rows:
@@ -57,7 +58,9 @@ def load_user_inf():
             'login_ip':u_inf['login_ip'],
             'ps':u_inf["ps"],
             'file_access':u_inf["file_access"],
-            "my_folder":f'{u_inf["eng"].strip()}-{unx}'}
+            "my_folder":f'{u_inf["eng"].strip()}-{unx}',
+            "p_id":u_inf["p_id"]
+            }
         #users[u_inf['un']]=u_inf-
     #import k_err 
     #k_err.xreport_var(['users',users]) #,[titles],rows
@@ -68,11 +71,11 @@ class ALL_USERS():
         self.inf=load_user_inf()
     def reset(self):  
         self.inf=load_user_inf()
-a_users=load_user_inf()
-all_users=ALL_USERS()
+#a_users=load_user_inf()
+#all_users=ALL_USERS()
 
 def load_job_inf():
-    db1=DB1(db_path+'job.db')
+    db1=DB1('job')
     rows,titles,rows_num=db1.select('a',where={},limit=0)
     jobs={}
     for row in rows:
@@ -310,9 +313,13 @@ def jobs_masul_old(jobs,x_data_s):
                 tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
                 continue
     return tt
-def how_is_connect(subject):
+def how_is_connect(subject,shoud_login=True):
     import k_date,os
     from gluon import current
+    from gluon.http import redirect
+    if shoud_login:
+        if not current.session['username']:redirect(URL('spks','user','login',args=['go']))
+    
     
     xdate=k_date.ir_date('yymmdd')
     xtime=k_date.ir_date('hh:gg:ss')
@@ -428,3 +435,4 @@ class C_AUTH_FORM():
                 auth_prj_v=current.session['auth_prj']
                 return {self.x_data_s['base']['auth_prj']:auth_prj_v.split(",") if auth_prj_v else ['  ']}
         return ''
+

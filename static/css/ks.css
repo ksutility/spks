@@ -11,6 +11,12 @@ table th {
    height:550px;
    width: 100%;
 }
+.head-cell{
+   overflow-y: auto;
+   text-align: center;
+   height:30px;
+   max-height:35px
+}
 /*
 table th,table td {
 	width: auto ;

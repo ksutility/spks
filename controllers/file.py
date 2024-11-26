@@ -7,47 +7,21 @@
     نشان دادن تاریخ فارسی برای فایلها
     نشان دادن  میزان قدیمی بودن فایل به دقیقه
 '''
-share_inf={ 'share':'اشتراک فایل',
-            'paper;pre':'محل پیش نویس نامه ها'}
+
 import os,time
 from jdatetime import datetime
-import k_file
+import k_file,k_file_w2p
 from k_file_meta import K_FILE_META 
 k_file_meta=K_FILE_META()
 import k_finglish
 import k_err,k_user,k_htm
 k_user.how_is_connect('file')
-
+from k_file_w2p import FILES_X_TOOLS
 import k_set #share_value as share
 xpath=k_set.xpath()
-def _folder_w_access(args=request.args,x_path=''):
-    '''
-    old name=fca
-    بررسی امکان تغییر یک فلدر توسط یک نفر
-    folder_w_access=folder_write_access
-        بررسی می کند که آیا یک فلدر توس ط کاربر جاری قابل دسترسی نوشتن و موارد مشابه مثل حذف و جابجایی است یا خیر
-    input
-    ------
-        session["file_access"]=> set by user.py on login
-        session["my_folder"]=> set by user.py on login
-            سسشن های فایل_اکسس و مای_فلدر در داخل برنامه یوزر.پای در زمان لاگین کردن فرد تنظیم می شود
-            
-    '''
-    x_path=(x_path or (';'.join(args))) +";"
-    def list_match(pt_list,st):
-        import re
-        st=st.lower()
-        for pt in pt_list:
-            if re.findall(pt.lower(),st):
-                return True
-    #------------------------    
-    
-    fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+[f';{session["my_folder"]};']
+from k_set import K_set
+share_inf=K_set().share_inf
 
-    if session["admin"] or x_path[:-1] in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
-        return {'ok':True}  
-    else:
-        return {'ok':False,'msg':f'you can not do this action-path={x_path}'} 
 def _access_denied_msg():
     link=URL('user','login')
     r0='''
@@ -109,7 +83,7 @@ def _list_files(path,full_name=False):
 
 #-----------------------------------------------------------------      
 def upload_file():
-    fwa=_folder_w_access()
+    fwa=k_file_w2p.folder_w_access()
     if not fwa['ok']:return fwa['msg']
     
     file=request.vars.filepicker
@@ -179,16 +153,9 @@ def _update_todo(todo,filefullname):
     todo= json.loads(todo)
     if todo['do']=='sql':                 
         from k_sql import DB1
-        db_path='applications\\spks\\databases\\'
-        db_p=db_path+todo['db']+'.db'
-        if os.path.isfile(db_p):
-            msgs+=['todo file is found =>'+ db_p]   
-            db1=DB1(db_p)
-            xu=db1.update_data(table_name=todo['tb'],set_dic=todo['set_dic'],x_where=todo['where']) #tb_name=sq[1]
-            msgs+=['update db is done =>'+ str(xu)]
-
-        else:
-            msgs+=['error path:'+ str(db_p)]
+        db1=DB1(todo['db'])
+        xu=db1.update_data(table_name=todo['tb'],set_dic=todo['set_dic'],x_where=todo['where']) #tb_name=sq[1]
+        msgs+=['update db is done =>'+ str(xu)]
     return msgs
 def mdir():
     args=request.args
@@ -205,7 +172,7 @@ def upload():
             todo    = action that do after file upload
                 sql;<db_name;<table_name>;<id>;<field_name>
     """
-    fwa=_folder_w_access()
+    fwa=k_file_w2p.folder_w_access()
     if not fwa['ok']:return fwa['msg']
     
     args=request.args
@@ -269,7 +236,7 @@ def zip():
         msg=k_file.zip_folder_to(folder,r_file)
         return (msg)        
 def delete():
-    fwa=_folder_w_access(args=request.args[:-1])
+    fwa=k_file_w2p.folder_w_access(args=request.args[:-1])
     if not fwa['ok']:return fwa['msg']
     args=request.args
     def _delete(args):
@@ -320,7 +287,7 @@ def move():
         f_name=vals['f_name'] or args[-1]
     '''
     re0,re1="",""
-    fwa=_folder_w_access(args=request.args[:-1])
+    fwa=k_file_w2p.folder_w_access(args=request.args[:-1])
     if not fwa['ok']:return fwa['msg']
     path1=request.vars['path1']
     f_name=request.vars['f_name']
@@ -392,7 +359,7 @@ def move_x():
             [-1]= filename (by .ext)
     '''
     re0,re1="",""
-    fwa=_folder_w_access(args=request.args[:-1])
+    fwa=k_file_w2p.folder_w_access(args=request.args[:-1])
     if not fwa['ok']:return fwa['msg']
     if not session['move_files']:
         session['move_files']=[]
@@ -492,60 +459,13 @@ def manage():
     return dict(a=A('upload new file',_href=URL(f='upload',args=args,vars=request.vars)),
     files=TABLE(*[TR(A(x['name'],_href=URL(f='download',args=args+[x['name']])),x['size'],x['mtime'],x['ctime']) for x in files],_class='table2'),
     folders=TABLE(*[A(x,_href=URL(args=args+[x])) for x in folders],_class='table2'))
-class FILES_X_TOOLS():
-    r_vars=request.vars
-    import re,k_set
-    args=request.args
-    r_vars=request.vars
-    # chak adrees is send to form from adress input
-    if 'input_adr' in r_vars:
-        path=r_vars['input_adr']
-        del r_vars['input_adr']
-        args=path.split('\\')
-        #if path:
-        xpath=args[0]
-        r_vars['xpath']=xpath
-        #p1=path.replace(xpath,'')
-        args=args[1:]
-        #return xpath," | ",p1," | ",path
-    else:
-        xpath=k_set.xpath()
-        path=xpath+'\\'.join(args)
-    x_path=";"+path.lower().replace("\\",";")+";"
-    #file_change_access-----------------------------
-    fc_access=_folder_w_access(x_path=x_path)['ok']
-    def set_out_val(self):
-        return self.x_path,self.path,self.fc_access,self.args
-    def link_delete(self):
-        return A('Delete',_title='حذف فایل',_class='btn btn-danger',_href=URL(f='delete',args=self.args,vars=self.r_vars)) if self.fc_access else '' #_target="x_frame"
-    def link_rename(self):
-        return A('Refine File Name',_title='اصلاح نام فایل',_class='btn btn-warning',_href=URL(f='name_correct',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
-    def link_ren2(self):
-        return A('Refine ALL Files Name in Folder',_title='اصلاح نام کلیه فایلها داخل فلدر',_class='btn btn-warning',_href=URL(f='correct_files_name_in_folder',args=self.args,vars=self.r_vars),_target="x_frame") if self.fc_access  else ''     
-    def link_rename_title(self,f_title='{}',vars={}):#,case,f_name,f_title):
-        
-        #if not f_title:f_title='-'
-        #vars='f_name':f_name,'f_title':f_title,'case':case}
-        vars.update(dict(self.r_vars))
-        f_title=f_title.format(vars['f_title'])
-        return A(f_title,_href=URL(f='file_meta_edit',args=self.args,vars=vars),_target="",_class='btn') if self.fc_access else f_title
-        # k_htm.a(_target="box")
-        #return A(f_title,_href=URL(f='file_meta_edit',args=self.args,vars={'f_name':f_name,'f_title':f_title,'case':case}.update(dict(self.r_vars))),_target="x_frame") if self.fc_access else f_title 
-    def link_comp(self):
-        return A("compare",_href=URL('xfile','tools',args=self.args,vars=self.r_vars),_title="مقایسه")
-    def link_move(self):
-        #DIV(A('Move',_title='Move',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move',args=args+[fname],vars=r_vars)}",true)""")),
-        return A('Cut',_title='CUT',_class='btn btn-warning',_href=URL(f='move_x',args=['cut']+self.args,vars=self.r_vars)
-        #DIV(A('Copy',_title='COPY',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move_x',args=['copy']+args+[fname],vars=r_vars)}",true)"""))
-        ) if self.fc_access else '' #_target="x_frame"
+
 def f_list_sd():    #sd=sade
     return f_list()
 def f_list_set():
     path=request.vars['path']
     return path
 def f_list():#file_browser=file.index
-    if not session['username']:
-        return k_user.shoud_login_msg
     files_x_tools=FILES_X_TOOLS()
     r1=False #_login_check()
     if r1:return dict(address='',m_dir='',upload='',path='',a='',files=XML(r1),folders='',js='')
@@ -558,17 +478,18 @@ def f_list():#file_browser=file.index
     r_vars=request.vars
  
     x_path,path,fc_access,args=files_x_tools.set_out_val()
-
+    #print(f"x_path={x_path},args={request.args}")
     #xxxprint('curren user file_change_access='+ str(fc_access)+ '  | on floder ='+x_path)
     #xprint(f'f_list : file_access -{fc_access}-{session["file_access"]}-{x_path}')
-    
+    args=request.args
     #add_folder_access
     def add_my_folder(x_path):
         def afa():
+            
             '''
                 بررسی اینکه آیا در فلدر جاری می تواند برای شخص جاری فلدر بسازد یا خیر
             '''
-            x_match=r";prj;\w*;\w*;\B"
+            x_match=r";prj;prj;\w*;\w*;\B"
             if re.findall(x_match,x_path):
                 path=xpath+'\\'.join(args+[str(session["my_folder"])])
                 if not os.path.exists(path):
@@ -696,12 +617,12 @@ def f_list():#file_browser=file.index
         return 'file_'+ t
     def add_file():
         return DIV(
-            k_htm.a('+File',_target="box",_href =URL(f='upload',args=request.args,vars={**r_vars,'filename':'','file_ext':""}),_title='بارگزاری فایل'),
+            k_htm.a('+upload File',_target="box",_href =URL(f='upload',args=request.args,vars={**r_vars,'filename':'','file_ext':""}),_title='بارگزاری فایل'),
             "-",
             k_htm.a('+past',_target="box",_href =URL(f='move_p',args=request.args,vars={**r_vars})
                 ,_title='چسباندن فایل'+"\n"+"\n".join(str(x) for x in session['move_files'])) if session['move_files'] else '' ,
             "-",
-            k_htm.a('new',_target="box",_href =URL(f='new_file',args=request.args,vars={**r_vars}),_title='فایل جدید'),   
+            k_htm.a('+new file',_target="box",_href =URL(f='new_file',args=request.args,vars={**r_vars}),_title='فایل جدید'),   
             ) if fc_access else ''
     def files_list(list_view_mod=1):
         
@@ -864,7 +785,8 @@ def index():
         share folder
     '''
     args=request.args or ['share']
-    fwa=_folder_w_access(args=args)
+    
+    fwa=k_file_w2p.folder_w_access(args=args)
     if not fwa['ok']:return fwa['msg']
     
     path='\\'.join(args)

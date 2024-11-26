@@ -10,8 +10,8 @@ from datetime import datetime
 from k_sql import DB1
 import kytable
 now = datetime.now().strftime("%H:%M:%S")
-db_name='applications\spks\databases\example2.db'
-db1=DB1(db_name)
+
+db1=DB1('example2.db')
 style='''
         <style>
             table {
@@ -40,8 +40,7 @@ def f_cod(s1, enc_st='09377953310'):
     s2=enc_st*5
     return "".join([chr(ord(c1) ^ ord(c2)) for (c1,c2) in zip(s1,s2)])
 def set_table(db_name):
-    #from k_sql import DB1
-    #db=DB1(db_name)
+
     db1.define_table("paper1", fields_txt='''
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     lno TEXT NOT NULL,

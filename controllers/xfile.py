@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ver 1.00 1401/08/14 
 # -------------------------------------------------------------------------
+import k_user
 """
 body {
 +    padding:50px 50px 0 0px;
@@ -668,8 +669,11 @@ def edit_r():
     -------
     
     '''
-    if not session["admin"]:
-        redirect(URL('file','_access_denied_msg'))
+    import k_file_w2p
+    fwa=k_file_w2p.folder_w_access()
+    if not fwa['ok']:return fwa['msg']
+    #if not session["admin"]:
+    #    redirect(URL('file','_access_denied_msg'))
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
     file_txt=request.vars['file_txt']

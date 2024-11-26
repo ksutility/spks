@@ -266,7 +266,7 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[]):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table"):
         import gluon
         '''
             old name= htm_table
@@ -326,7 +326,7 @@ class C_TABLE:
         #import k_err    
         #k_err.xreport_var([heads,rows,thead,trs])  
         #class_table='table'+class_table if class_table else 'table2'
-        return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id),_class="div_table")
+        return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id),_class=div_class)
 def table_x_not_used(cols,rows,class_table=''):
     import gluon
     '''
@@ -471,6 +471,8 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary'):
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
     elif _target=="box":   
         return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=f"""j_box_show("{_href}",true)""") 
+    else:
+        return A(txt,_title=_title,_class=_class,_href=_href,_target="")
 def xtd(td_list):#
     rep=""
     for td_obj in td_list:
@@ -497,7 +499,7 @@ def x_toggle(txt):
                 {txt}\n
                 </div>\n
             """
-def x_toggle_s(txt,sign='+',color='warning'):#s=small
+def x_toggle_s(txt,head='+',color='warning'):#s=small
     js="""
         <script>
             $( document ).ready(function() {
@@ -507,7 +509,7 @@ def x_toggle_s(txt,sign='+',color='warning'):#s=small
     """
     return  f"""<div class="text-center">
                 <a onclick="$(this).parent().next().toggle()" class="btn btn-{color} btn-sm a_toggle_hide" 
-                    style="width:5%">{sign}</a>\n
+                    style="width:5%">{head}</a>\n
                 </div>
                 <div class="text-center">\n
                 {txt}\n
@@ -560,7 +562,7 @@ def checkbox(name):
     '''
     from gluon import current
     _value=current.request.vars[name]
-    #print(f"checkbox {name} = {vv}")
+    #xprint(f"checkbox {name} = {vv}")
     checked="checked" if _value=="1" else ""
     return XML(f"""<input name='{name}' id='{name}' value=1 type="checkbox" {checked} class='largercheckbox'
                 style='width: 50px;height: 30px;transform: scale(1.01);

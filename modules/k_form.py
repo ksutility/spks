@@ -1,7 +1,7 @@
 ﻿#from gluon.cache import Cache
 #cache=Cache()
 k_cache={}
-import k_tools
+
 from gluon import current
 session=current.session
 #from functools import lru_cache #,cache
@@ -597,7 +597,7 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
             trs.append(TR(f['title'],ix))
         elif sc=='reference':
             ref=f['ref']
-            db2=DB1(db_path+ref['db']+'.db')
+            db2=DB1(ref['db'])
             rows2,tit2,row_n=db2.select(ref['tb'],limit=0)
             val_dic={str(r[tit2.index(ref['id'])]):ref['format'].format(*[r[tit2.index(x)] for x in ref['format_args']]) for r in rows2}
             trs.append(TR(f['title'],k_htm.select(_options=val_dic,_name=fn,_value=f['value'])))
@@ -679,10 +679,10 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
         ref[x]=template_parser(ref.get(x,''),x_dic=form_data) #.format(task=task_inf,step=form['steps'],session=session)
     if debug :xxxprint(msg=['ref2',idx,''],vals=form_data)    
     #dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db']+".db"#db_path+ref['db']
-    dbn=db_path+ ref['db']+".db"
+
     if form_nexu:
         ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nexu <> 'x' "
-    rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
+    rows,tits,row_n=DB1(ref['db']).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
     if debug :
         print(f"where={ref['where']}")
         xxxprint(msg=['where',idx,ref['where']],args=rows)
@@ -783,7 +783,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     obj['help']=''
     obj['output']=_value 
     obj['output_text']=_value # output in simple text
-    obj['input']=_value  # if read im prop
+    obj['input']=obj.get('input',_value ) # if read im prop
+    '''
+        input may creat by auto_x
+    '''
     #xprint('output='+str(obj['output']))
     #cm.tik('step 3')
     def x_auto():
@@ -795,16 +798,22 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         obj['output']=DIV(_value,_class="input_auto")
         obj['help']="خود کار"
         if 'input' in need :
-            if 'auto' in obj:
-                au_txt=obj['auto']
-            elif 'ref' in obj:
-                x_dt=reference_select(obj['ref'],form_data=x_dic)
-                #xxxprint(vals=obj['ref'])
-                #xxxprint(vals=x_dic)
-                #xxxprint(msg=['x_dt','',''],vals=x_dt)
-                au_txt=x_dt['__0__'] if x_dt else ''
-            _len=60 if len(au_txt)>60 else len(au_txt)+2
-            obj['input']=XML(f"<input {_n} value='{au_txt}' size='{_len}' readonly class='input_auto' >" )
+            if 'auto-x' in obj: #input is creat in auto_x that have ref
+                au_txt=obj['auto-x']
+            else:
+                if 'auto' in obj:
+                    au_txt=obj['auto']
+                elif 'ref' in obj:
+                    x_dt=reference_select(obj['ref'],form_data=x_dic)
+                    #xxxprint(vals=obj['ref'])
+                    #xxxprint(vals=x_dic)
+                    #xxxprint(msg=['x_dt','',''],vals=x_dt)
+                    au_txt=x_dt['__0__'] if x_dt else ''
+            #_len=60 if len(au_txt)>60 else len(au_txt)+2
+            if len(au_txt)>60:
+                obj['input']=XML(f"<textarea readonly class='input_auto' {_n} rows='2' style='width:100%'>{au_txt} </textarea>")
+            else:
+                obj['input']=XML(f"<input {_n} value='{au_txt}'  readonly class='input_auto'  style='width:100%'>" )#size='{_len}'
             
             msg=""
             jcode1=""
@@ -905,19 +914,21 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         _multiple=('multiple' in i_obj['prop'])
 
         obj['key']=_value
-        if sc=='reference':
+        if sc=='user':
+            obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'}
+        if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf
             if 'select' not in obj:
-                tt_dif=time.time()
+                #tt_dif=time.time()
                 #_select=cache_ram(str(obj['ref']),reference_select(obj['ref']))#,time_expire=60)
-                ref_t1=str(obj['ref'])
+                #ref_t1=str(obj['ref'])
                 
                 #if ref_t not in cache_ram:
                 #    cache_ram[ref_t]=reference_select(obj['ref'],form_data=x_dic)
                 #_select= cache_ram[ref_t]   
                 _select= reference_select(obj['ref'],form_data=x_dic,debug=False)
-                tt_dif=(time.time()-tt_dif)*10000
+                #tt_dif=(time.time()-tt_dif)*10000
                 obj['select']=_select
             else:
                 _select=obj['select']
@@ -936,23 +947,26 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             def select_1_or_multi(_value,_multiple):
                 if not _value:return''
                 if _multiple:
-                     return ','.join([_select[x] for x in _value.split(',')])
+                    if type( _value)==list:
+                        return ' | '.join([_select[x] for x in _value])
+                    else: #type( _value)==str:
+                        return ' | '.join([_select[x] for x in _value.split(',')])
                 else:
                     if _value in _select:
                         return _select[_value]
                     else:
                         return ''
-            
-            obj['output']=XML(f'''<a  title="{select_1_or_multi(_value,_multiple)}">{_value}</a>''')
+            obj['title']=select_1_or_multi(_value,_multiple)
+            obj['output']=XML(f'''<a  title="{obj['title']}">{_value}</a>''')
         except Exception as err:
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
             xxxprint(msg=["err",'',''],err=err,vals=_select) 
         obj["value"]=_value
-        obj['output_text']=_select[_value] if (type(_value)==str and _value in _select) else ""
+        obj['output_text']=obj['title'] #_select[_value] if (type(_value)==str and _value in _select) else ""
         if 'show_full' in obj['prop']:obj['output']=obj['output_text']
         if 'input' in need:
             import k_htm
-            obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
+            obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
                 ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
                 ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first']
                 )
@@ -965,13 +979,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         import k_date
         obj['format']='yyyy/mm/dd' #obj['format']
         _value=_value or k_date.ir_date(obj['format'])
-        if "update" in obj['prop']:onact_txt=form_update_set(form_update_set_param) 
+        #if "update" in obj['prop']:onact_txt=form_update_set(form_update_set_param) 
+        onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         #x_end= " readonly >" if "readonly" in obj['prop'] else f''' onchange='date_key("{_name}","{def_val}","{x_format}");' {onact_txt} >'''
         #obj['input']="<input type='text' " + _n + " value='" + def_val + "' size='" + maxlen +"' maxlength='" + maxlen +"' dir='" + d_lan + "' class='date-picker' " + x_end  
         readonly= "readonly" if "readonly" in obj['prop'] else ''
         if 'input' in need :
-            obj['input']=INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True)
+            obj['input']=INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange)
         obj['help']=DIV(obj['format'],_dir='ltr')
+        obj['stnd6']=_value[2:4]+_value[5:7]+_value[8:10] if (_value and len(_value)>9) else "_"*6 #6 digit standard for date
         msg ,or_v,js_ff_chek="",'',''
     elif sc=='time_c':
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
@@ -997,9 +1013,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     elif sc=="auto-x":
         obj2=obj.copy()
         obj2['type']='auto'
-        if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
+        if 'ref' in obj:
+            obj2['auto-x']=x_dic['__objs__'][obj['ref']]['output_text']
+        else:
+            if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
+            elif obj['auto']=='_cur_user_id_':obj2['auto']='{{=session["username"]}}'
+            elif obj['auto']=='_cur_user_name_':obj2['auto']='{{=session["user_fullname"]}}'
         return obj_set(obj2,x_dic,x_data_s,xid, need,request)
-        #x_auto()    
+            #x_auto()    
     elif sc=="index":
         if 'input' in need:
             x_dt=reference_select(obj['ref'],form_data=x_dic)
@@ -1239,7 +1260,7 @@ class C_FORM():
             دریافت اطلاعات ثبت شده فرم از دیتابیس
             #form_sabt_data= data of 1 sabt /record of 1 form
         '''
-        db1=DB1(db_path+self.db_name +'.db')
+        db1=DB1(self.db_name )
         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
         if self.xid<1 or (not rows): #-1
             self.form_sabt_data={x:'' for x in titles}
@@ -1314,6 +1335,18 @@ class C_FORM():
         '''
         x_data_s=self.x_data_s
         steps=x_data_s['steps']
+        import k_err 
+        #k_err.xreport_var([f_nxt_s,steps])
+        #k_err.xxxprint(msg=["@@@ : ", '' ,''])
+        #ll=list(steps)
+        #print(f"@@@ len ={len(ll)} ,f_nxt_s ={f_nxt_s} ")
+        #x=ll[f_nxt_s]
+        #print("@@@ :=> "+x)
+        #import k_tools
+        #xx=k_tools.nth_item_of_dict(steps,int(f_nxt_s))
+        #print("@@@ : " + str(xx))
+        #k_err.xxxprint(msg=["@@@ : ", str(xx),''])
+        #k_err.xreport_var([f_nxt_s,step,steps])
         step=steps[list(steps.keys())[f_nxt_s]]
         step_fields=step['tasks'].split(',')
      
@@ -1342,7 +1375,7 @@ class C_FORM():
         xid=self.xid
         rr=''
         if text_app=='r': 
-            db1=DB1(db_path+self.db_name +'.db')
+            db1=DB1(self.db_name )
             result=db1.row_backup(self.tb_name,xid)
             f_nxt_s_new = str(f_nxt_s-1)
             rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
@@ -1352,7 +1385,7 @@ class C_FORM():
             f_nxt_s_new = str(f_nxt_s+1)
         vv=self.__new_db_data(f_nxt_s,f_nxt_s_new,new_data,reset=(text_app=='x'))    
         #xxx->return "vv=<br>"+str(vv),"update not done"
-        db1=DB1(db_path+self.db_name +'.db')
+        db1=DB1(self.db_name )
         xu = db1.update_data(self.tb_name,vv,{'id':xid})
          
         p1=A(f"#{xid}-update",_onclick="$(this).next().toggle()",_class='toggle')
@@ -1361,7 +1394,7 @@ class C_FORM():
     def __insert(self,new_data):# USE ONLY BY : SAVE
         vv=self.__new_db_data(0,1,new_data)
         #xreport_var([vv])
-        db1=DB1(db_path+self.db_name +'.db')
+        db1=DB1(self.db_name )
         r1=db1.insert_data(self.tb_name,vv)#.keys(),vv.values())
         #rr=f"{db1.path}<br> INSERT:result=" + "<br>".join([f'{x}:{r1[x]}' for x in r1])
         
@@ -1369,20 +1402,26 @@ class C_FORM():
         p2=DIV(XML(f"{db1.path}<br> INSERT:<hr>"))
         #rr=f"{db1.path}<br> INSERT:{k_htm.val_report(r1)}"
         return {'html_report':DIV(p1,p2,k_htm.val_report(r1)),'id':r1['id'],'db_report':r1}   
-    def save(self,new_data): #WIP 030701
+    def save(self,new_data,update_step=True): #WIP 030701
         #--------------------------------
+        #import k_err
+        #k_err.xreport_var(new_data)
         xid=self.xid
         text_app=new_data['text_app'].lower()
         if xid==-1: #xid=='-1':
             x_r=self.__insert(new_data)
         else:
-            f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '0')
+            if update_step:
+                f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '0')
+            else:
+                f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '1')-1
+            #print(f"f_nxt_s={f_nxt_s}")
             x_r=self.__update(f_nxt_s,text_app,new_data)
         return x_r #DIV(XML(r1)),xid,r_dic
         #--------------------------------     
     def save_app_review(self,request_data):
         xid=self.xid
-        db1=DB1(db_path+self.db_name+'.db')
+        db1=DB1(self.db_name)
         
 
         f_nxt_s=int(self.form_sabt_data['f_nxt_s'] )
@@ -1478,7 +1517,7 @@ def input_validate(in_data,data_inf):
         else:
             return False
 def chidman(hx,x_data_s,step,form_case=2,request=''):
-    import k_user
+    import k_user,k_tools
     form_case=k_tools.int_force((request.post_vars['form_case'] or request.get_vars['form_case']) if request else form_case,form_case)
     xusers=k_user.xusers_inf(step['jobs'],x_data_s)
     

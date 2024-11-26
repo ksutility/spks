@@ -82,10 +82,14 @@ def out_in_format(dt_obj,out_format):
     return out_format
 
 #xprint (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
-def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy-mm-dd',w_case=0):
+def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy/mm/dd',w_case=0):
     import datetime
     if type(in_time)==tuple:
         in_time=jdatetime.date(in_time)
+    elif type(in_time)==str:
+        ids=ir_date_split(in_time,in_format)
+        #print(str(ids))
+        in_time=jdatetime.date(ids['yyyy'],ids['mm'],ids['dd'])
     wd_e=in_time.togregorian().weekday()
     wd_f=(wd_e+2) % 7
     w_days=[[0,1,2,3,4,5,6],
@@ -128,4 +132,40 @@ def site_time():
                 
                 
             </div>"""
+def ir_date_split(in_time,in_format='yyyy/mm/dd'):
+    l=len(in_time)
+    r_o={}
+    for x in ['yyyy','mm','dd']:
+        n=in_format.index(x)
+        r_o[x]=int(in_time[n:n+len(x)])
+    return r_o
     
+class C_IR_DATE():
+    def from_en_strptime(self,en_strptime,strptime_format='%m/%d/%y %H:%M:%S'):
+        import datetime
+        inputDate = datetime.datetime.strptime(en_strptime,strptime_format )
+        self.from_timestomp(inputDate.timestamp())
+        return self
+    def from_timestomp(self,timestomp):
+        self.date_obj=jdatetime.datetime.fromtimestamp(timestomp)
+        return self
+    def out(self,xformat):
+        date_obj=self.date_obj.strftime('%Y-%m-%d')
+        date_txt=date_obj
+        yyyy,mm,dd=date_txt.split('-')
+        yy=yyyy[-2:]
+        now=time.strftime("%H:%M:%S", time.localtime())
+        hh,gg,ss=now.split(':')
+        w,ww,www=ir_weekday(in_time=date_obj,w_case=4)
+        ll={'yyyy':yyyy,'yy':yy,'mm':mm,'dd':dd,
+            'hh':hh,'gg':gg,'ss':ss,
+            'w':str(w),'ww':ww,'www':www}
+        if xformat:  
+            for x in ll:
+                xformat=xformat.replace(x,ll[x])
+            return xformat
+        else:
+            return ll
+
+#-----------------
+#print(C_IR_DATE().from_en_strptime("2024-03-24","%Y-%m-%d").out('yyyy-mm-dd'))

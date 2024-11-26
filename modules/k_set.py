@@ -14,6 +14,8 @@ class K_set:
                 'ext':'.htm'}
     report_html['fullname']=report_html['path']+report_html['name']+report_html['ext']
     report_html['htm_report_fullname']=report_html['path']+"htm_rep_"+report_html['name']+report_html['ext']
+    share_inf={ 'share':'اشتراک فایل',
+            'paper;pre':'محل پیش نویس نامه ها'}
     def report_err_fname_crt(self,ext="htm"):
         import k_date
         return self.report_html['path']+"err-report__"+k_date.ir_date("yy-mm-dd__hh-gg-ss")+"."+ext

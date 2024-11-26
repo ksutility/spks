@@ -38,8 +38,8 @@ def _func_inf(inspect_n=0,trace_n=0):
         sts1=sts[:inspect_n+1]
         sts2=sts[inspect_n+1:]
         # for s in st:
-            # print(str(s[1:3]))
-            # print(str(s[3:]))
+            # xprint(str(s[1:3]))
+            # xprint(str(s[3:]))
 
         #called_function_inf:func  
         st=sts[inspect_n]
@@ -95,7 +95,7 @@ def trace(func):
     return wrapper
 def _show_old():
     traceback.print_exc()
-    print('-'*25+'\n')
+    #xprint('-'*25+'\n')
     x=input('show traceback_with_variables? n=no / else=yes')
     if x and x=='n':return
     import logging
@@ -109,8 +109,8 @@ def _show_old():
     try:
         with open(f2,"w",encoding='utf8') as f:
             print_exc(file_=f)
-        xprint (f'File "{f2}", line 1')
-        print('-'*25+'\n')
+        #xprint (f'File "{f2}", line 1')
+        #xprint('-'*25+'\n')
         x=input('countinue?')
     except:
         xxprint("err"," ### error in traceback_with_variables-var2:fun(print_exc)")
@@ -123,8 +123,8 @@ def _show_old():
     try:    
         with open(f1,"w",encoding='utf8') as f:
             print_cur_tb(file_=f)
-        xprint (f'File "{f1}, line 1"')
-        print('-'*25+'\n')
+        #xprint (f'File "{f1}, line 1"')
+        #xprint('-'*25+'\n')
         x=input('countinue?')
         #print_cur_tb()
     except:
@@ -257,7 +257,7 @@ def x_ask_retry(msg):
     '''
     xxxprint(msg=["err",msg,''],trace_n=4)
     while True:
-        print("-"*50 + "\n")
+        #xprint("-"*50 + "\n")
         x=input('r=retry / c=cancel & countinu / v=show traceback vars / e=end ?')
         if x=="c":return False
         elif x=="r":return True
@@ -506,11 +506,24 @@ def xxprint_reset_html(last_file_add=''):
 def xreport_var(x_var_list,reset=False):
     import k_date
     import k_file,k_htm
+    from gluon.storage import Storage
+    def storage_to_dict(x_storage):
+        return {x:x_storage[x] for x in x_storage}
+    def dict_report(x_var):
+        ttt=f'---- dict:len={len(x_var)}'+"-"*20+br+nl
+        ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])+nl
+        ttt+="++++"+br+nl
+        ttt+=val_report(x_var)
+        return ttt
+    if type(x_var_list)==Storage:
+        x_var_list=[storage_to_dict(x_var_list)]
+        print("ok")
     br="<br>" #"\n"
     hr="<HR>"
     ttt=k_date.ir_date('yy/mm/dd-hh:gg:ss')+br
     lunch=True
     nl="\n"
+    
     for i,x_var in enumerate(x_var_list):
         ttt+="="*3+f" {i} "+"-"*50+br+nl
         
@@ -518,15 +531,16 @@ def xreport_var(x_var_list,reset=False):
             ttt+='----- emplty value'+"-"*20+br+nl
             ttt+=f"val = {x_var}"+br+nl
         elif type(x_var)== dict:
-            ttt+=f'---- dict:len={len(x_var)}'+"-"*20+br+nl
-            ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])+nl
-            ttt+="++++"+br+nl
-            ttt+=val_report(x_var)
+            ttt+=dict_report(x_var)
+        elif type(x_var)== Storage:
+            ttt+=dict_report(storage_to_dict(x_var))
         elif type(x_var)== list:
             ttt+=f'---- list:len={len(x_var)}'+"-"*20+br+nl
             ttt+=br.join([f"{x}" for x in x_var]+[''])+nl
             ttt+="++++"+br+nl
             ttt+=val_report(x_var)
+       
+            
         else:
             ttt+='---- else type'+"-"*20+br+nl
             ttt+=br+f"{x_var}"+nl

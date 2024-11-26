@@ -62,7 +62,7 @@ def test_count_row():
     #breakpoint()
     x_data_s,db_name,tb_name,msg=get_init_data()
     
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     res=db1.count(tb_name)
     trs=[[x,str(y)] for x,y in res.items()]
     from k_table import K_TABLE
@@ -70,7 +70,7 @@ def test_count_row():
                
 def test_user():
     import k_htm
-    return dict(h1=k_htm.val_report(k_user.a_users),h2=k_htm.val_report(k_user.all_users.inf))
+    return dict(h1=k_htm.val_report(k_user.ALL_USERS().inf),h2='')
 def test_parser():
     import k_form
     return k_form.template_parser("{a}+{{=b+','.join([x for x in 'abc'])}}",x_dic={'a':'1','b':'2'})
@@ -104,7 +104,7 @@ def test_uniq_old2():
     xhtm=[DIV('--')]
     if x_val and len(args)>2:
         x_data_s,db_name,tb_name,msg=get_init_data()
-        db1=DB1(db_path+db_name+'.db')
+        db1=DB1(db_name)
 
         x_field=args[2]
         is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where='',uniq_value=x_val)
@@ -219,7 +219,7 @@ def uniq_inf():
             x_field=args[2]
             uniq_value=x_dic['uniq_value'] #args[3]
             uniq_where=x_dic['uniq_where']
-            db1=DB1(db_path+db_name+'.db')
+            db1=DB1(db_name)
             n='2'
             is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where=uniq_where,uniq_value=uniq_value)
             n='3'
@@ -780,277 +780,7 @@ def test_xl_old():
             row+=[(db.ws(ws='a12').index(row=i+1, col=j+1))]
         tbl+=[row]
     return (str(tbl))
-def _aqc_report_daily_file():
-    import k_file_x,k_tools,k_xl_light
-    
-    if k_tools.server_is_test():
-        path1=r'\\192.168.88.196\share data\AQC\DES-AR\OTHER\KS\REPORT-DAILY-R03-030402_test.xlsm'
-    else:
-        path1=r'\\192.168.88.196\share data\AQC\DES-AR\REPORT-DAILY-R03-030402.xlsm'
-    #path1=r"c:\temp\test\REPORT-DAILY-R03-030402_test.xlsx"
-    return path1
-def _aqc_report_daily_read(): 
 
-    import k_file_x,k_tools,k_xl_light
-    if k_tools.server_is_python():
-        data=k_xl_light.read(wb_path =_aqc_report_daily_file(),
-                        ws_name='daily-report',
-                        row_st=2,row_en=0,col_st=1,col_en=10,empty_row='continue')
-        return {'ok':True,'data':data}
-    else:
-        return {'ok':False,'msg':"port shoud be :100"}   
-
-def _aqc_report_daily_write(new_rows): 
-    new_rows=[row[1:] for row in new_rows]
-
-    import k_file_x,k_tools,kxl,k_xl_ms
-    if k_tools.server_is_python():
-        #k_file_x.xl_write(wb_path=path1,ws_name='daily-report',new_rows=new_rows)
-        #kxl.append(wb_path=path1,sheet_name='daily-report',new_rows=new_rows)
-        k_xl_ms.append(wb_path=_aqc_report_daily_file(),sheet_name='daily-report',new_rows=new_rows)
-        return {'ok':True}
-    else:
-        return {'ok':False,'msg':"port shoud be :100"}   
-       
-def _aqc_report_daily_title(in_titels=''): #rows[0]
-    t=in_titels if in_titels else ''
-    x_titles=[  {'name':'id','width':'20px'},
-            {'name':t[0],'width':'100px'},
-            {'name':t[1],'width':'20px'},
-            {'name':t[2],'width':'10px'},
-            {'name':t[3],'width':'10px'},
-            {'name':t[4],'width':'20px'},
-            {'name':t[5],'width':'150px'},
-            {'name':t[6],'width':'150px'},
-            {'name':t[7],'width':'250px'},
-            {'name':t[8],'width':'20px'}
-            ]
-    return x_titles
-def aqc_report_daily_pivot():
-    inp=_aqc_report_daily_read()
-    if not inp['ok']:return inp['msg']
-    data=inp['data']
-    
-    import k_file_x
-    #return (str(data))
-    case=request.args[0]
-    if case=="user_day":
-        set1="""{
-            rows: ["نام و نام خانوادگی"], 
-            cols: ["روز"],
-            vals: ["زمان"],
-            aggregatorName: "Sum",
-            rendererName: "Table"}"""
-    elif case=="prj":
-        set1="""{
-            rows: ["پروژه"], 
-            vals: ["زمان"],
-            aggregatorName: "Sum",
-            rendererName: "Heatmap"}"""
-    import json
-    tb2=json.dumps(data)
-    htm0= f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
-    htm0+=f"<a class='btn btn-primary' href={URL('km','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
-    return k_file_x.pivot_make_free(tb2,set1,htm0=htm0)
-    
-    return dict(table=XML(k_file_x.pivot_make_free(tb2,set1,htm0=htm0)))
-
-
-def aqc_report_daily_kytable():
-    inp=_aqc_report_daily_read()
-    if not inp['ok']:return inp['msg']
-    rows=inp['data']
-    
-    case="0" #request.args[0]
-    import k_file_x,k_date
-    cols=_aqc_report_daily_title(rows[0])
-    
-    tm={}  
-    n_rows={}        
-    for d in range(7):
-        tm[d]=k_date.ir_date(add=-d)    
-        n_rows[d]=[]         
-    #return (str(tbl))
-    for i,row in enumerate(rows[1:]):
-        for d in range(7):
-            if (row[1]==int(tm[d]['yyyy']) and row[2]==int(tm[d]['mm']) and row[3]==int(tm[d]['dd'])):
-                n_rows[d]+=[[i+1+2]+row]
-                break
-            #n_rows=[[i]+row for i,row in enumerate(rows[1:]) if (row[1]==int(tm['yyyy']) and row[2]==int(tm['mm']) and row[3]==int(tm['dd']))]
-    dv=[]
-    for d in range(7):
-        dv+=[H2(f"{tm[d]['yyyy']}/{tm[d]['mm']}/{tm[d]['dd']} - {tm[d]['www']}",_class="text-center"),
-            k_htm.C_TABLE(cols,n_rows[d]).creat_htm(),HR()] 
-    if case=="1":
-        return k_file_x.kytable_make(rows=n_rows,titles=['id']+rows[0],widths=['3,3,20,5,2,2,7,10,10,10,4'],sum_colomn="زمان")
-    else:
-        return dict(div=DIV(dv))
-        #return dict(t=TABLE(n_rows,_class="table table-border"))
-        
-def _aqc_report_daily_updata(new_data,col_titels):      
-    
-    #read data 
-    inp=_aqc_report_daily_read()
-    if not inp['ok']:return inp['msg']
-    file_data=inp['data']
-    
-    #cut empty rows at end
-    t_r=[]
-    for row in new_data:
-        if not row[1]:
-            break
-        t_r.append(row)
-    new_data=t_r 
-    
-    #return XML("<hr>".join([str(x) for x in new_data]))
-    import k_file
-    un_list=k_file.read('text',r"C:\temp\test\un_list.txt").split('\n')
-    prj_list=k_file.read('text',r"C:\temp\test\prj_list.txt").split('\n')
-    data_inf={'1':{'type':'ref','select':un_list},
-            '2':{'type':'num'}, #sal
-            '3':{'type':'num'}, #mah
-            '4':{'type':'num'}, #ruz
-            '5':{'type':'text'}, #wd
-            '6':{'type':'ref','select':prj_list}, #prj
-            '7':{'type':'text'}, #subj
-            '8':{'type':'text'}, #act
-            '9':{'type':'num'}, #time
-            '0':{'type':'num'},
-            }
-    def report_div(res,act_help,act_help_des):
-        if res:    
-            rep_des='نتیجه : اطلاعات مورد تایید است' 
-            bg_color="#5f5"
-        else:
-            rep_des='نتیجه : در اطلاعات ورودی عدم انطباق های زیر وجود دارد'
-            bg_color="#f55"   
-        return DIV(
-                DIV(act_help[1],_class="col-3"),
-                DIV(act_help[0],_title=act_help_des,_class="col-3"),HR(),
-                DIV(rep_des,_class="col-3"),
-                _style=f"background-color:{bg_color};text-align:center;font-size:35px;",
-                _class="row"
-                )
-    
-    #return str(un_list) + str(prj_list)
-    def validate_data(data):
-        act_help=["بررسی ساختار اطلاعات ورودی  بر حسب فرمت ستون داده ها","گام 1 "]
-        act_help_des="""در این مرحله برای هر کدام از ستونهای اطلاعات ورودی یک ساختار مشخص می شود و اطلاعات ورودی با آن ساختار مطابقت داده می شود
-        انواع ساختار : متن، عدد، لیست 
-        توضیح : لیست  یعنی مقدار داخل جدول باید یکی از مقادر یک لیست باشد
-        اگر همه چیز درست باشد فقط پیقغام پاس شدن این مرحله نمایش داده می شود
-        ولی اگر اشکالی موجود باشد اطلاعات دارای اشکال در داخل یک جدول در محل خود با رنگ قرمز نشان داده می شوند و سایر اطلاعات درست در جدول مربوطه به صورت خالی نشان داده می شوند
-        """
-        import k_form,k_htm
-        rep_n=0
-
-        trs=[]
-        ok=True
-        for r,row in enumerate(data):
-            tds=[]
-            for c,cell in enumerate(row):
-                r_ok=k_form.input_validate(cell,data_inf[f'{c}'])
-                
-                if not r_ok: 
-                    ok = False
-                    rep_n+=1
-                    tds+=[{'value':cell,'style':'background-color:#f55'}]
-                    
-                else:  
-                    tds+=[{'value':'-','title':cell,'style':'background-color:#5f5' }]
-                 
-            trs+=[tds] 
-        return {'ok':ok,
-            'rep_des':report_div(ok,act_help,act_help_des),
-            'rep_err':DIV(H1(f"ERROR : {rep_n} item"),k_htm.C_TABLE(col_titels,trs).creat_htm())
-            }
-    def check_duplicate(new_data,file_data,duplicate_col_check=[1,2,3,4]):
-        act_help=["بررسی عدم  ورود دوباره اطلاعات موجود در اثر اشتباه کاربر","گام 2 "]
-        act_help_des="""هدف از این بخش این است که با کمک یک سری روشها اطلاعاتی را که ممکن است  داپلیکیت و یا کپی ناقص  شده باشند و ورود آنها مشکل دار است را به کاربر نشان دهد
-        تا کاربر پس از بررسی گزارش این مرحله در مورد ورود یا عدم ورود اطلاعات تصمیم  بگیرد
-        در حال حاضر برای این موضوع روش زیر استفاده می شود
-        یک سری ستون شاخص  کننده اطلاعات مشخص می شوند
-        سپس برا اساس آن ستونها ردیف های هر 2 جدول ( اطلاعات جدید و اطلاعات روی فایل) بررسی می شوند و فصل مشترک آنها مشخص و نمایش داده می شود
-        مثال : فرض کنید  ستونهای شاخص عبارتند از : فرد، سال، ماه و روز
-        در این صورت هر کدام از 2 جدول در دسته های فرضی  که با فرد، ،سال،ماه و روز  مشخص می شوند  دسته بندی می شوند  اگر 2 جدول  دسته با مشخصه یکسانی داشته باشند یعنی در این قسمت احتمال خطا وجود دارد  و برنامه این دسته ها را نشان می دهد
-        """
-        #creat base dictionary for manage
-        #base:base data xtract from new_data to speed check across file_data
-        base={'new_data':[],'file_data':[],'sc':[]}#sc=selected colomn
-        for row in new_data:
-            s_row=[str(row[x+1]) for x in duplicate_col_check]
-            if not s_row in base['sc']:
-                base['sc'].append(s_row)
-                base['new_data'].append([])
-                base['file_data'].append([])
-            ix=base['sc'].index(s_row)
-            base['new_data'][ix].append(row)
-
-        rep_n=0
-        for i_f,row in enumerate(file_data):
-            s_row=[str(row[x]) for x in duplicate_col_check]
-            if s_row in base['sc']:
-                ix=base['sc'].index(s_row)
-                base['file_data'][ix].append([i_f]+row) 
-                rep_n+=1
-        err_txt1="عدم انطباق بر اساس فیلدهای روبرو :"
-        rep=[]
-        rep_ok=[]
-        for i,s_row in enumerate(base['sc']):
-            if base['file_data'][i]:
-                intro=TABLE(TR(*[x for x in [err_txt1]+s_row],_style="background-color:#faa;text-align:center;font-size:30px;"),_style="direction: rtl;")
-                t1=DIV('اطلاعات جدید',_style="background-color:#afa;text-align:center;font-size:24px")
-                t2=DIV('اطلاعات ثبت شده در فایل',_style="background-color:#aaf;text-align:center;;font-size:24px")
-                rep+=[DIV(intro,
-                    DIV(t1,k_htm.C_TABLE(col_titels,base['new_data'][i]).creat_htm(),
-                        t2,k_htm.C_TABLE(col_titels,base['file_data'][i]).creat_htm(),_style='border:10px dashed red;')
-                    ,HR())]
-            else:
-                rep_ok+=[row for row in base['new_data'][i]]
-        style=XML("""<style>
-            table, td, th {  
-              border: 1px solid #ddd;
-              text-align: right;
-            }
-            table {
-              border-collapse: collapse;
-              width: 100%;
-            }
-            th, td { padding: 5px;}
-            th { background-color:#f2f2f2; }
-            </style>""")  
-        ok = (not rep) or (len(rep)<=2)    
-        return {'ok':ok,
-            'rep_des':report_div(ok,act_help,act_help_des),
-            'rep_err':DIV(style,
-                        XML(f'new_data={len(new_data)} - base={len(base)}-rep_n={rep_n}-len(rep)={len(rep)}'),
-                        *rep,HR(),
-                        DIV(
-                            DIV("اطلاعات مورد تایید در گام 2 به شرح زیر می باشند",
-                                _style=f"background-color:#CFC;text-align:center;font-size:35px;")
-                            ,k_htm.C_TABLE(col_titels,rep_ok).creat_htm()
-                            )   
-                        )
-                    }
-    vldt1=validate_data(new_data)
-    if not vldt1['ok']:
-        return DIV(vldt1['rep_des'],vldt1['rep_err'])
-    re1=vldt1['rep_des']
-    vldt2=check_duplicate(new_data,file_data,duplicate_col_check=[0,1,2,3])
-    if not vldt2['ok']:
-        return DIV(re1,HR(),vldt2['rep_des'],vldt2['rep_err'])
-    re2=vldt2['rep_des']
-    import k_tools
-    if not k_tools.server_is_test():
-        return DIV(re1,HR(),re2,HR(),H1("ادامه این فرایند در حال آماده سازی می باشد"))
-    vldt3=_aqc_report_daily_write(new_rows=new_data)
-    act_help=["ذخیره اطلاعات جدید در فایل اکسل","گام 3 "]
-    act_help_des="""
-        """
-    re3=report_div(vldt3['ok'],act_help,act_help_des)
-    if not vldt3['ok']:
-         return DIV(re1,HR(),re2,HR(),re3,vldt3['msg'])
-    return DIV(re1,HR(),re2,HR(),re3)
 def test_kytable1():
     return '''
     
@@ -1248,48 +978,8 @@ def reports():
     import k_htm #k_err
     #return k_err.htm_dict(session['reports'])
     return k_htm.val_report(session['reports'])
-def user_timesheet():
-    import k_htm,jdatetime,k_form
-    x_date=request.vars['x_date'] or '14'+jdatetime.date.today().strftime('%y/%m/%d')
-    x_un=f'{session["username"]}- {session["user_fullname"]}'
-    db_name='person_act'
-    tb_name='a'
-    x_data_s=x_data[db_name][tb_name]
-    db1=DB1(db_path+db_name+'.db')
-    rows,titles,rows_num=db1.select(tb_name,where={'date1':x_date,'frd_1':x_un},limit=0)
-    
-    
-    #tuple to list , add link
-    rows1=[]
-    for row in rows:
-        row1=list(row)
-        id_n=titles.index('id')
-        url=URL('form','xform_sd',args=['person_act','a',row[id_n]])
-        row1[id_n]=XML(A(row[id_n],_href='javascript:void(0)',
-            _onclick=f"""j_box_show("{url}",true)""",
-            _class="btn btn-primary"))#link
-        rows1+=[row1]
-    table=k_htm.C_TABLE(titles,rows1).creat_htm(titels=['time','act_des','act_cat','cp_name','id',],table_class="x")  
-    
-    return dict(
-        inp_date=FORM(INPUT(_name="x_date",_id="x_date",_class='fDATE',_value=x_date,_onchange="submit();")),
-        sum_time=_sum_times([row[titles.index('time')] for row in rows]),
-        x_un=x_un,
-        new_form=k_htm.a('+',_href=URL('form','xform_sd',args=['person_act','a','-1'],vars={'date1':x_date,'act_cat':'-','form_case':1}),_target="box",_title='فرم جدید'),
-        table=table)
-def _sum_times(time_list):
-    '''
-    time_list=list of "hh:dd"
-        sample ["10:15","14:20","02:50"]
-    '''
-    hh,mm=0,0
-    for x_time in time_list:
-        h1,m1=x_time.split(":")
-        hh+=int(h1)
-        mm+=int(m1)
-    h2,m2=divmod(mm, 60)#hh=hh+mm\60
-    return str(hh+h2).zfill(2)+":"+str(m2).zfill(2)
-    #return round((hh+mm/60),1)
+
+
 def auth_of_form():
     '''
     db_name='person_act'
@@ -1301,4 +991,5 @@ def auth_of_form():
             
         else:
     '''
-            
+    
+

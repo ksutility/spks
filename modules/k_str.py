@@ -37,16 +37,16 @@ def template_parser(x_template,x_dic={}):
         try:
             xx=x_template.strip()
             from gluon import template
-            print(xx)
-            print(x_dic)
+            #print(xx)
+            #print(x_dic)
             x1= template.render(content=xx,context=x_dic) 
-            print(x1)
+            #print(x1)
             return x1.format(**x_dic)  #remove 020926
         except Exception as err:
             from k_err import xxxprint
             xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)
             return 'error in template_parser :'+str(err)
-            print('error in template_parser')
+            #print('error in template_parser')
     else:
         return x_template
 from k_err import xxprint,xprint

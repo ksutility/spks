@@ -11,7 +11,7 @@ import datetime
 #cache=cache.Cache(current.request)
 import jdatetime #khayyam
 from k_err import xxxprint,xxprint,xprint
-debug=0 #False # True#
+debug=False # True#
 today=jdatetime.date.today().strftime('%y-%m-%d') #khayyam.JalaliDate.today().strftime('%y-%m-%d')
 def f_now():
     x=str(datetime.datetime.now())#trftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
@@ -125,7 +125,9 @@ class DB1():
     con,cur,path,dbn="","","",""
     tables_name={}
     columns={}
-    def __init__(self,path='example2.db'):
+    db_path='applications\\spks\\databases\\'
+    def __init__(self,db_name,path=db_path,ext='db'):
+        path=path+db_name+"."+ext #'example2.db'
         self.con = self.sqlite3.connect(path)
         self.cur = self.con.cursor()
         self.path=path
@@ -136,15 +138,15 @@ class DB1():
     def _exec(self,sql,val_list=[],fetch=False):
         
         result={'def':'_exec','sql':sql,'data':[]}
-        #if debug:
-        xxxprint(msg=["sql_exe",'',''],vals=result )
-        
-        self.cur.execute(sql,val_list)
-        if fetch:
-            result['data']=self.cur.fetchall()
-        self.con.commit()
-        result.update({'done':True})
-        return result
+        if debug:
+            xxxprint(msg=["sql_exe",'',''],vals=result )
+            
+            self.cur.execute(sql,val_list)
+            if fetch:
+                result['data']=self.cur.fetchall()
+            self.con.commit()
+            result.update({'done':True})
+            return result
         
         
         #xxxprint(msg=[self.dbn,"sql="+sql,self.path])
@@ -157,7 +159,7 @@ class DB1():
             if debug:
                 xxxprint(msg=[self.dbn,str(result['done'])+ " - " + sql,self.path],vals=result)
         except Exception as err:
-            result.update({'done':False,'Error':str(err)})  
+            result.update({'done':False,'Error':str(err),'val_list':val_list})  
             xxxprint(msg=['err',sql, self.path],err=err,vals=result)
         return result
     def _connect_sql(self,db_file= r"data.db"):
@@ -300,7 +302,8 @@ class DB1():
         INPUTS:
            where:C_SQL.where 
            
-        result='list/dict'
+        result='list/dict/dict_x'
+            dict_x=result all data
         '''
         
         #-------------------------------------------------------------------------------------
@@ -391,7 +394,7 @@ class DB1():
         #ui.msg(sql_t+"/n"+str(val_list))
         rep=self._exec(sql_t, val_list)
         xid=self.cur.lastrowid
-        rep.update({'id':xid,'sql':sql_t+"|"+str(val_list),'done':True})
+        rep.update({'id':xid,'ids':xid,'sql':sql_t+"|"+str(val_list),'done':True,'result':'رکورد جدید اضافه شد'})
         if debug:xxxprint (msg=["result",'',''] ,vals=rep)
         return rep
 
@@ -409,7 +412,8 @@ class DB1():
         
         # بررسی وجود حداقل 1 رکورد با شرایط تعیین شده 
         find1=self.select(table=table_name,where=x_where,result='dict_x')
-        if not find1['done']: # any record not found
+        r1="select {} from {}".format(x_where,table_name)
+        if not find1['done']:#" any record not found"
             xr['msg']=' هیچ ردیفی پیدا نشد'
             xr['msg']+=' لذا آپدیت انجام نشد '
             report_db_change(self.path,r1, [])
@@ -433,7 +437,7 @@ class DB1():
         find2=self.select(table=table_name,where=x_where,result='dict_x')
         
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
-        xr['dif']={} #different s
+        xr['dif_x']={} #different s
         if not find2:   
             rows2,titles2,row_num2=self.select(table_name,limit=0)
             id_list=[x[0] for x in rows2]
@@ -458,11 +462,12 @@ class DB1():
                 dif=['row({}),col({}):{}=>{}'.format(f1[0],tt[j],f1[j],f2[j]) for j in dif_list]
                 report_db_change(self.path,r1, dif)
                 rrp={f'dif- {i}':x for i,x in enumerate(dif)}
-                rrp.update({'updtaed':len(dif)})
+                rrp.update({'update_n':len(dif)})
                 if debug:xxxprint(msg=["result",'',''] ,vals=rrp)
                 #xxprint ('db-update','row {}:dif={}----\n####   {}'.format(f1[0],len(dif),'\n####   '.join(dif)))
-                xr['dif'][f1[0]]=[tt[j] for j in dif_list] 
-                xr['report']=rrp
+                xr['dif']=dif
+                xr['dif_x'][f1[0]]=[tt[j] for j in dif_list] 
+                xr['updtae_n']=len(dif)
         if debug:xxxprint(msg=["end",'',''] )
         return xr
         #except: #Error as e:   print(e)
@@ -515,272 +520,50 @@ class DB1():
         like_list=[row[titles.index(field_name)] for row in rows]
         is_uniq=uniq_value not in like_list
         return is_uniq,like_list
-    #======================================================================================================================
-    """
-    def make_where_role(self,name_list):
-        return " AND ".join(['{}=?'.format(n) for n in name_list])
-    def make_where(self,where_dic):
-        return " AND ".join(["`{}`='{}'".format(n,where_dic[n]) for n in where_dic])
-    def _where_set(self,q_val):
-        q_name=" where "
-        if type(q_val)==list:
-            if type(q_val[0])==dict:
-                return q_name+self._dic_2_set(q_val)
-        elif type(q_val)==dict:
-            return q_name+self.make_where(q_val)
-        elif type(q_val)==str and q_val!='':
-            return q_name+q_val
-        return ''  
-    def select_a(self,table='',sql='',where='',result='list',offset=0,page_n=1,page_len=20,limit=20,last=True,order='id',debug=False):
-        table_name=table
-        #select_data 
-        ''' 010909
-            020905 add order to func
-            ------------------------
-                  
-        result='list/dict'
+    def x_update(self,tb_name,where_dic,set_dic,report=''):
+        if report:
+            import tk_ui as ui
+        out_rep=[]
+        r_insert=self.insert_data(tb_name,where_dic)
+        if r_insert['done']:
+            if 'i' in report:#i=insert
+                msg=["ارسال اطلاعات به بانک اطلاعاتی","-"*50,str(where_dic)]
+                msg+=["ثبت رکورد جدید","-"*50,str(r_insert)]
+                ui.msg("\n".join(msg))
+            out_rep+=['insert',str(where_dic),'',str(r_insert)]
+        r_update=self.update_data('a',set_dic,where_dic)
+    
+        if r_update.get('update_n',0)>0 :#u=update
+            if 'u' in report :
+                msg=["اطلاعات به بانک اطلاعاتی ارسال شد","-"*50,"به روز رسانی رکوردها","-"*50,pp_inf['lno']]
+                msg+=['id='+r_update['id'],'dif=',str(r_update['dif']),'update_n=',r_update['update_n']]
+                ui.msg("\n".join(msg))
+            out_rep+=['update',str(where_dic),str(set_dic),str(r_insert)]
+        return out_rep  
+    def cols_2_list(self,tb_name,text_format,col_name_list):
         '''
-        def _sql_add_limit(sql,offset,page_n,page_len,limit):
-            if not limit:return sql
-            x_order = f'ORDER BY ' + order
-            x_order += ' DESC' if last else ''
-            if offset:        
-                return sql+f' {x_order} limit {offset},{limit}' if limit else sql
-            else:   #if page_n:
-                x_page=int(page_n) if page_n else 1 
-                x_page_len=int(page_len) if page_len else 20
-                x_offset=(x_page-1) * x_page_len 
-                return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
-        #-------------------------------------------------------------------------------------
-        row_num=self.count(table_name=table_name,where=where)['count']
-        if where:
-            if type(where)==str:
-                sql="SELECT * FROM {} WHERE {} ".format(table_name,where)
-                sql_x=_sql_add_limit(sql,offset,page_n,page_len,limit)
-                rows=self._exec(sql_x,fetch=True)['data']
-                if debug:xxxprint(msg=[self.dbn,sql,"len="+str(len(rows))])
-                titles = self._titles()        
-            if type(where)==dict:
-                find1=self.find_row(table_name,where)
-                
-                if find1:
-                    rows=find1['rows']
-                    titles=find1['titles']
-                else:
-                    rows=[[]]
-                    titles=[]
-                    xxxprint(msg=['err',f'sql={find1["sql"]}',''])
-            else:
-                find1=0/1
-        else:
-            #print('--'+str(type(where_dic))+'---'+str(where_dic))
-            if sql=="":
-                sql="SELECT * FROM {} ".format(table_name)
-            sql_x=_sql_add_limit(sql,offset,page_n,page_len,limit)
-     
-            x_re=self._exec(sql_x,fetch=True)
-            rows=x_re['data'] if x_re['done'] else []
-            titles = self._titles()#[description[0] for description in self.cur.description]
-        if debug:
-            xxxprint (msg=['data','tb:'+table_name,''],vals=locals(),args=titles)
-            print(f"K-sql.select:\n\t : sql={sql_x}\n\t : path={self.path}\n\t : result_nim={len(rows)}")
-    
-        
-        
-        if result=='list':
-            return rows,titles,row_num,sql
-        else: #dict
-            if rows:
-                return {t:rows[0][i] for i,t in enumerate(titles)}
-        return False
-    def find_row(self,table_name,name_list_or_nv_dict,val_list=[],):
+            1-read many columns of 1 sql table 
+            2-combine data of each row by text_format
+            3-convert rows result to 1 list 
         '''
-            input:
-                1=>find_row(table_name,name_list,val_list)
-                2=>find_row(table_name,name_value_dict)
-            return:
-                rs_id:list
-                    list of row id of find search
-                rows:list of list
+        rows,titles,rows_num=self.select(tb_name,limit=0)
+        x_o=[]
+        for row in rows:
+            xx=[row[titles.index(col_name)] for col_name in col_name_list]
+            x_o+=[text_format.format(*xx)]
+        return x_o
+    def cols_2_dict(self,tb_name,key_text_format,val_text_format,col_name_list):
         '''
-        #try:
-        import k_err
-        x=name_list_or_nv_dict
-        if type(x)==list:
-            name_list=x
-            sql_where = self.make_where_role(name_list)
-            x1=[name_list_or_nv_dict,val_list]
-        elif type(x)==dict:
-            name_list=x.keys()
-            sql_where = self.make_where_role(name_list)
-            val_list=x.values()
-            x1=x
-        elif type(x)==str:
-            sql_where=x
-            x1=x
-        else:
-            
-            k_err.xxprint('err','type of name_list_or_nv_dict shoud be list/dict but is=>'+str(type(x)))
-            k_err.quit()
-            return False
-        
-        
-        if True:
-            sql_t2="SELECT * FROM {} WHERE ".format(table_name)#rowid,
-            if debug : k_err.xxxprint(msg=['sql',sql_t2 + sql_where,''],args=val_list)
-            self.cur.execute(sql_t2 + sql_where,tuple(val_list))
-            rows=self.cur.fetchall()
-            self.con.commit()
-            titles = self._titles()
-            result={'sql':sql_t2,'sql_where':sql_where,'val_list':val_list,
-            'rows':rows,'titles':titles,
-            'items':{},'ids':[],'id':-1,'n':0,'done':True}
-            #---------------------------
-            if not rows: 
-                result['done']=False
-            else:
-                result['items']= {t:rows[0][i] for i,t in enumerate(titles)}
-                result['ids']=[x[0] for x in rows] 
-                result['id']=result['ids'][0]
-                result['n']=len(result['ids'])
-            #C_SQL.test_where(x1,result,self,table_name)   
+            1-read many columns of 1 sql table 
+            2-combine data of each row by text_format
+            3-convert rows result to 1 list 
+        '''
+        rows,titles,rows_num=self.select(tb_name,limit=0)
+        x_o={}
+        for row in rows:
+            xx=[row[titles.index(col_name)] for col_name in col_name_list]
+            x_o[key_text_format.format(*xx)]=val_text_format.format(*xx)
+        return x_o    
+#======================================================================================================================
 
-            test=self.select(table_name,'',x1,result='dict_x')
-            msg= 'find_row = ' if test['rows']==rows else  '!!! find_row != '  
-            xxxprint(out_case=3,msg=[msg,'',''],inspect_n=2,session_report=True,vals={'sql':sql_t2,'test_sql':test['sql']})
-            
-            return  result
-        """
-"""
-#============= not used =======================
-def make_select_role(self,table_name,name_list):
-        return "SELECT * FROM {} WHERE ".format(table_name) + self.make_where_role(name_list)
-
-
-D:\ks\I\web2py-test\applications\spks\controllers\data.py (12 hits)
-    Line  418:         rows,titles,rows_num=db1.select(table_name,limit=0)
-    Line  511:         rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-    Line  584:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-    Line  681:             rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
-    Line  721:         rows1,ttls1,rows_num=db1.select(tb_name)#'paper')
-    Line  754:     rows1,titles1,rows_num=db1.select(tb_name,limit=0)
-    Line  761:     rows2,titles2,rows_num=db2.select(ref['tb'],limit=0)
-    Line 1094:         rows,titles,rows_num=db1.select(table=tb_name,where={},limit=0)
-    Line 1126:         rows,titles,rows_num=db1.select(table=tb_name,where={},page_n=1,page_len=20)#limit=20)
-    Line 1213:         rows,titles,rows_num=db1.select(table=dt['tb1'],where={},limit=0)  #limit=20) 
-    Line 1315:     rows1,titles1,row_num1=db1.select('a',limit=0)
-    Line 1316:     rows2,titles2,row_num2=db2.select('a',limit=0)
-    
-user.py (3 hits)
-    Line  55:     rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
-    Line 107:         rs=db1.select(table_name='user',sql=sql,result='dict')
-    Line 333:             rs=db1.select('user',sql)
-  
-    controllers/user.py#54._user_chek_ps_get_Inf()
-
-k_sql.py (4 hits)
-    Line 448:         rows,titles,base_row_id=self.select(table_n,where={'id':xid})
-    Line 529:             rows2,titles2,row_num2=self.select(table_name,limit=0)
-    Line 577:         rows,titles,row_n=self.select('',sql,limit=0)
-    Line 603:         rows,titles,rows_num=self.select(tb_name,where=uniq_where + f'{field_name} like "%{uniq_value}%"')
-    
-    k_sql.py#457.row_backup()
-    k_sql.py#457.row_backup()   
-    k_sql.py#612.chek_uniq(
-    
-k_user.py (2 hits)-ok
-    Line  33:     rows,titles,rows_num=db1.select('user',where={},limit=0)
-    Line  65:     rows,titles,rows_num=db1.select('a',where={},limit=0)
-
-    16:10:17--k_user.py#33.load_user_inf() > - : secect = select_a,
-    16:10:17--k_user.py#65.load_job_inf() > - : secect = select_a,    
-    
-form.py (5 hits)-ok
-    Line 324:             rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-    Line 525:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-    Line 576:     rows,titles,rows_num=db1.select(tb_name,where={'id':xid})
-    Line 801:         rows,titles,rows_num=db1.select(table=tb_name,where=filter_data,page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=x_data_s['order'])
-    Line 852:     rows,titles,rows_num=db1.select(tb_name,where={'xid':str(xid)})
-
-    controllers/form.py#324.inf_g() 
-    controllers/form.py#525.save()  
-    controllers/form.py#576.save_app_review()   
-    controllers/form.py#801.xtable()
-    controllers/form.py#852._sabege()      
-    
-k_form.py (4 hits)
-    Line  593:             rows2,tit2,row_n=db2.select(ref['tb'],limit=0)
-    Line  751:     rows,tits,row_n=DB1(dbn).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
-    Line 1240:         rows,titles,rows_num=db1.select(self.tb_name,where={'id':self.xid})
-    
-    k_form.py#751.reference_select()
-    k_form.py#694.reference_select()
-    k_form.py#751.reference_select()
-    k_form.py#1240._set_form_sabt_data()
-    
-    k_form.py#1297._set_form_sabt_data()
-        
-+
-k_user.py#33.load_user_inf()    
-
-k_user.py#65.load_job_inf() 
-
-controllers/user.py#55._user_chek_ps_get_Inf()  
-
-    
-
-
-k_user.py#33.load_user_inf()    
-
-k_user.py#65.load_job_inf() 
-
-controllers/user.py#55._user_chek_ps_get_Inf()  
-    
-k_user.py#33.load_user_inf()    
-+
-    2
-k_user.py#65.load_job_inf() 
-+
-    1
-controllers/user.py#55._user_chek_ps_get_Inf()  
-+
-    1
-controllers/form.py#801.xtable()    
-+
-    4
-    
-+
-    42
-controllers/form.py#324.inf_g() 
-+
-    2
-controllers/form.py#852._sabege()   
-+
-    1
-controllers/form.py#576.save_app_review()   
-+
-    1
-        
-+
-    1
-k_sql.py#457.row_backup()   
-+
-    1
-    
-+
-    
-
-
-
-
-
-
-
-
- ----------------------------------------------------------------------------------------------------------------
- """
-    
-        #except:
-        #    return none #not found
-"""
-"""
+ 

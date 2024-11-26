@@ -23,7 +23,7 @@ k_user.how_is_connect('data')
 debug=0 #False # True: for check error
 row_view=[{'lno':'r','sbj':'r'}]
 now = datetime.now().strftime("%H:%M:%S")
-db_path='applications\\spks\\databases\\'
+
 style1='''
         <style>
             table_y {
@@ -199,7 +199,7 @@ def get_table_filter(tasks,x_data_s):
     data_filter=x_data_s['data_filter']
     data_filter1={'name':'data_filter','type':'select','select':data_filter}
     all_cols=list(tasks.keys())
-    #print(f'all_cols={all_cols}')
+    
     
     flt=request.vars['cols_filter']
     if flt:
@@ -263,7 +263,7 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'file'== tasks[fn]['type']:
             tds.append(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
             continue   
-        #print(tasks[fn]['type'])
+        
         x_obj=k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output'])
    
         #cm.tik(fn+'-1'+str(recs))    
@@ -286,18 +286,19 @@ def get_table_row_edit(xid,row_dic,titles,tasks,f_views,x_data_s,cancel_url):#,a
         """
         trs=[]
         for fn in tasks_name_list.split(','):
-            o_case=out_case
-            f=tasks[fn]
-            if prop_read_check and ('read' in f['prop']):o_case='output'
-            x_obj=k_form.obj_set(i_obj=f,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=[o_case])
-            
-            if debug :
-                xxxprint(msg=['debug','x_obj='+str(x_obj)+',i_obj='+str(tasks[fn]),'x_dic='+str(x_dic)])
-   
-            #cm.tik(fn+'-1'+str(recs))    
-            #tds.append(x_obj['input'])
-            trs.append(TR(A(f['title'],_title=fn),x_obj[o_case]))
-            #cm.tik(fn+'-2')
+            if fn:
+                o_case=out_case
+                f=tasks[fn]
+                if prop_read_check and ('read' in f['prop']):o_case='output'
+                x_obj=k_form.obj_set(i_obj=f,x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=[o_case])
+                
+                if debug :
+                    xxxprint(msg=['debug','x_obj='+str(x_obj)+',i_obj='+str(tasks[fn]),'x_dic='+str(x_dic)])
+       
+                #cm.tik(fn+'-1'+str(recs))    
+                #tds.append(x_obj['input'])
+                trs.append(TR(A(f['title'],_title=fn),x_obj[o_case]))
+                #cm.tik(fn+'-2')
         #cm.report() 
         return trs
     #------------------------------------------------ 
@@ -309,7 +310,10 @@ def get_table_row_edit(xid,row_dic,titles,tasks,f_views,x_data_s,cancel_url):#,a
         trs+=tb_rows(tasks,f_views['input'],'input')
         trs+=[tr_sbmt]
         trs2=tb_rows(tasks,f_views['view2'],'output')
-        return TABLE(TR(TD(TABLE(*trs,_style='width:100%',_class='table_x'),_style='width:70%'),TD(TABLE(*trs2,_style='width:100%',_class='table_x'),_style='width:30%;background-color:#dff')),_style='width:100%')  
+        if ('view_cols' in f_views) and (f_views['view_cols']==1):
+            return TABLE(*trs,*trs2,_style='width:100%',_class='table_x')  
+        else:
+            return TABLE(TR(TD(TABLE(*trs,_style='width:100%',_class='table_x'),_style='width:70%'),TD(TABLE(*trs2,_style='width:100%',_class='table_x'),_style='width:30%;background-color:#dff')),_style='width:100%')  
     else:
         trs+=tb_rows(tasks,tasks.keys(),'input',prop_read_check=True)
         trs+=[tr_sbmt]
@@ -331,7 +335,7 @@ def get_init_data():
         if args[0] not in x_data:
             return False,'','', f'error: >  "{args[0]}" not defined in Fieldes'
         db_name=args[0]
-        #print (db_name)
+        
         if len(args)<2:args+=['a']
         tb_name=args[1]# if len(args)>1 else 'a'
         x_data_s,msg1=k_form.get_x_data_s(db_name,tb_name)
@@ -404,7 +408,7 @@ def show_table():
         else:
             i_table=FORM(DIV(TABLE(*[TR(titles[i],INPUT(_name=titel, _value=vals[i]),*c_v[i]) for i,titel in enumerate(titles)],_class='table0'),_class='div_table'),INPUT(_type='submit'), _action='', _method='post')
             cvt=request.vars['cv'] or ''
-            #print('cvt='+cvt) 
+
             cv=INPUT(_value=cvt,_name='cv',_id='cv')
             return DIV(f'ID=:{xid}',cv,i_table,A('Cancel- goto list',_href=url_b))
 #---------------------------------------------------------------------------------------------------
@@ -413,8 +417,8 @@ def show_table():
         db_name=args[0]
         if len(args)<2:args+=['a']
         table_name=args[1] 
-        db1=DB1(db_path+db_name+'.db')
-        #- print('abc')
+        db1=DB1(db_name)
+
         rows,titles,rows_num=db1.select(table_name,limit=0)
         try:
             pass
@@ -438,7 +442,7 @@ def show_table():
             return DIV(XML(style1),t1,table) 
     return 'error: argumwnt is needed'
 #----------------------------------------------------------------------  
-#@k_tools.x_cornometer
+ 
 def xtable():
     '''
     goal:
@@ -449,9 +453,6 @@ def xtable():
             show all ref table filde or one
         
     '''
-    if not session.username:
-        return dict(htm=H1("لطفا اول وارد سیستم بشوید"))
-    #from k_sql import DB1
     #set_table()
     ref_case='one'
     def xtable_show(rows,titles,tasks,x_data_s):
@@ -615,7 +616,7 @@ def xtable():
         do_chang(x_titels)
         in0=XML("<INPUT type='hidden' size='5' id='text_app' name='text_app'>")
         table=get_table_row_edit(xid,vals_dic,titles,tasks,f_views,x_data_s,cancel_url=URL(args=(args[0],args[1])))
-        return FORM(in0,table,TABLE(TR(lk_u,lk_d),TR(t_s)), _action='', _method='post')
+        return FORM(in0,table,TABLE(TR(lk_u,lk_d),TR(t_s)),_action='',_method='post')
 #---------------------------------------------------------------------------------------------------------- 
     #tasks,f_views
     script1='''<script>
@@ -628,11 +629,13 @@ def xtable():
             });
         });
     </script>
-    '''      
+    '''     
+    from k_tools import X_DICT
+    x_dict=X_DICT({'script':'','table_filter':'','table_head':'','table':'','btm_mnu':''})
+    
     #flt=request.vars['filter']
     filter_data=k_form.template_parser(request.vars.get('data_filter'),x_dic={}) #eval(flt) if flt else ''
-    #print ('filter_data='+str(filter_data))
-    #print(str(request.vars))
+
     #exec('xx={"a":"2"}')
     #xx=eval('{"a":"2"}') #'x={'+filter_data[1:-1]+'}')
     #return filter_data['id'] #filter_data
@@ -640,9 +643,7 @@ def xtable():
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
     x_data_s,db_name,tb_name,msg=get_init_data()#x_data)
-    out_dic={'script':'','table_filter':'','table_head':'','table':'','btm_mnu':''}
-    from k_tools import X_DICT
-    x_dict=X_DICT(out_dic)
+
     if not x_data_s:
         return x_dict.add({'table':msg})
     else:
@@ -652,12 +653,10 @@ def xtable():
                 return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))})
         if not ('all' in x_data_s['views']) :
             return x_dict.add({'table':DIV(H1("برای این فرم جدول تعریف نشده است"))})
-        db1=DB1(db_path+db_name+'.db')
-        #- print(db_name)
+        db1=DB1(db_name)
         tasks=x_data_s['tasks']
         f_views=x_data_s['views']['all'] 
         
-        #db=DB1(db_name)
         if len(args)>2 and args[2] in ['view','edit','insert']:
             if len(args)>3 and args[2]=='view':
                 table=DIV(XML(style1_x),row_view(tb_name,tasks,f_views,x_data_s,int(args[3])))
@@ -713,7 +712,7 @@ def show_kxtable(x_data):
     if not x_data_s:
         return msg
     tasks=x_data_s['tasks']
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     import kytable
     def table_show(tb_name,tasks,x_data_s):
         #fieldes{name:'',type:'text' or 'reference prj' or 'select'}
@@ -747,7 +746,7 @@ def show_sptable(x_data,ref_col):
     if not x_data_s:
         return msg
     tasks=x_data_s['tasks']
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     #split data by col
     args=request.args
 
@@ -757,7 +756,7 @@ def show_sptable(x_data,ref_col):
     f=[x for xn,x in tasks1.items() if xn==ref_col][0]
     ref=f['ref']
     print ('ref='+str(ref))
-    db2=DB1(db_path+ref['db']+'.db')
+    db2=DB1(ref['db'])
     rows2,titles2,rows_num=db2.select(ref['tb'],limit=0)
     tasks2=x_data[ref['db']][ref['tb']]['tasks']
     
@@ -780,7 +779,7 @@ def index():
     ff1={'xtable':'{}','select':'-'}
     trs=[]
     lnk="""/spks/""" 
-    #print(URL())
+    
 
     links={
     "papers=>todo !=''":lnk+"""data/xtable/paper/a?data_filter=act_todo+%21%3D%22%22&cols_filter=&table_class=2&data_page_n=1&data_page_len=20""",
@@ -904,7 +903,7 @@ def select_i(x_data):
     if len(args)<2:args+=['a']
     tb_name=args[1]
     '''
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     tasks=x_data_s['tasks']#tasks[args[0]]
     ##-----
     val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
@@ -919,7 +918,7 @@ def select_i(x_data):
     #if sel1 in ["None",None]:sel1='prj'
     traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
     val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
-    #print(str(val_dic))
+
 
     ssw_select=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();")#,_value=request.vars['sel2']_onchange="set_val();
     #---------------------------------------------------------------------------
@@ -988,12 +987,12 @@ def rc():#run 1 command
     args=request.args
     if not args:
         pass
-    #- print(str(args))
+    
     
     cmd=args[0]
     if len(args)>2:
         db_name,tb_name=args[1:3]
-        db1=DB1(db_path+db_name+'.db')
+        db1=DB1(db_name)
     if cmd=='columns_add':
         #sample /spks/data/rlc/columns_add/user/user?col_add_list=app_u,app_d
         rep= db1.add_columns(tb_name,request.vars['col_add_list'])
@@ -1075,7 +1074,7 @@ def rc():#run 1 command
         #sample /spks/data/rc/update_data
         inf_1={'db_name':'eng','tb_name':'a','field name':'code','replace':{"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"}}
         inf={'db_name':'user','tb_name':'user','field name':'eng','replace':{"%OT":"GE"}}
-        db1=DB1(db_path+inf['db_name']+'.db')
+        db1=DB1(inf['db_name'])
         fldn=inf['field name']#args[3]#field name
         tb_name=inf['tb_name']
         rep1=[]
@@ -1141,7 +1140,7 @@ def rc():#run 1 command
         #sample /spks/data/rc/update_auto_filed/paper/a?select_cols=prj,man_crt
         # /spks/data/rc/update_auto_filed/off_morkhsi_saat/a/do-x?select_cols=time_en
         select_cols=request.vars['select_cols']
-        #print(select_cols)
+        
         if select_cols:
             select_cols=select_cols.split(',')
         else: 
@@ -1226,8 +1225,8 @@ def rc():#run 1 command
         dt={'db1':'off_mamurit_saat_test','tb1':'a','db2':'off_mamurit_saat','tb2':'a','cols':'*','uniq_field':'','ids':'6,7'}#True-
         if 'ids' in dt:dt['ids']=dt['ids'].split(',')
         
-        db1=DB1(db_path+dt['db1']+'.db')
-        db2=DB1(db_path+dt['db2']+'.db')
+        db1=DB1(dt['db1'])
+        db2=DB1(dt['db2'])
         
         if dt['cols']=='*':
             cols1=db1.columns_list(dt['tb1'])
@@ -1327,7 +1326,7 @@ def update():
             '1':'',
             'None':''}
     db_name='paper-test1' #args[0]
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     xx=[]#{}
     for x,y in inf.items():
         xr=db1.update_data(table_name="a",set_dic={field:y},x_where={field:x})
@@ -1335,8 +1334,8 @@ def update():
         xx.append(XML("<hr>"))
     return dict(a=DIV(*xx))
 def diff():
-    db2=DB1(db_path+'paper-test1.db')
-    db1=DB1(db_path+'paper - copy.db')
+    db2=DB1('paper-test1')
+    db1=DB1('paper-copy')
     rows1,titles1,row_num1=db1.select('a',limit=0)
     rows2,titles2,row_num2=db2.select('a',limit=0)
     dif={}
@@ -1375,7 +1374,7 @@ def search():
         http://192.168.88.179/spks/data/search/paper/a/gate?s_cols=sbj&o_cols=sbj,id
     '''
     out=[]
-    x_data_s,db_name,tb_name,msg=_get_init_data()
+    x_data_s,db_name,tb_name,msg=get_init_data()
     if not x_data_s : return msg
     if len(request.args)<2: return "len(request.args)<3"
     args=request.args+['','','']
@@ -1383,7 +1382,7 @@ def search():
     
     from k_sql import DB1,C_SQL
     import k_htm
-    db1=DB1(db_path+db_name+'.db')
+    db1=DB1(db_name)
     if args[2]=="":
         val_dic={x:x for x in db1.columns_list(tb_name)}
         out+=[FORM(DIV(

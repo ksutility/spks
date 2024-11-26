@@ -158,7 +158,7 @@
 	<div style='text-align:center;height: 40px;'>
         <table id="table_header" width="100%"><tr>
 			<td width="5%"></td>
-            <td width="10%" class="align-text-top">
+            <td width="10%" >
                 <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
                       <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -186,22 +186,24 @@
 									<a class="dropdown-item" href="{{=URL('acpe','index')}}">NASKH+KATEB-ویرایشگر اتوکد</a>
 									<a class="dropdown-item" href="{{=URL('acpe_ipt','index')}}">IPT-ویرایشگر اتوکد</a>
 								</div>
-                             </div>
+                             
                       </li>
                 </ul>
+				</div>
             </td>
  
-			<td width="15%"><div style="max-height:40px" class="overflow-hidden">
+			<td width="15%" class="head-cell"><div class="head-cell">
 				<a class="btn btn-primary" href="{{=URL('file','index')}}" title="اشتراک فایل">S</a>
 				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'))}}" title="کتابخانه">L</a>
 				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">F</a>
 				<a class="btn btn-primary" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
-			
-			</div></td>
+				</div>
+			</td>
 			{{import k_date}}
-			<td width="15%" dir='rtl' class="align-text-top" style="max-height:40px"><div class="overflow-hidden" >{{=XML(k_date.site_time())}}</div></td>
-            <td width="45%" dir='rtl' class="align-text-top">
-				
+			<td width="15%" dir='rtl' class="head-cell"> <div class="head-cell">{{=XML(k_date.site_time())}}</div></td>
+			<td width="15%" dir='rtl' class="head-cell"> <div class="head-cell"><h5>بنام خداوند دانا و توانا</h5></div></td>
+            <td width="30%" dir='rtl' class="head-cell">
+				<div class="head-cell">
 					<a title='
 					مجموعه سیستم های هوشمند و یکپارچه  مدیریت اسناد
 					با عنوان اسپکس
@@ -213,11 +215,9 @@
 					- your ip={{=str(request.client)}}'>AQC</a>
 					
 					- مهندسان مشاور آستان قدس رضوی
-				
-					
-				
+				</div>
 			</td>
-                <!-- Navbar ======================================= background-color:#aaaaff;
+                <!-- Navbar ======================================= background-color:#aaaaff; <div style="max-height:40px" class="div-head-cell">
                   <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
                    <a href="http://web2py.com" class="navbar-brand d-flex w-50 mr-auto">web2py</a>
                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -274,7 +274,7 @@
                   </div>
                 </nav>
                 -->
-            <td width="10%" class="align-text-top">
+            <td width="10%">
                 <!-- ab
                   {{if 'auth' in globals():}}
                     <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
