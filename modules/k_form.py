@@ -1234,6 +1234,16 @@ class C_FORM():
     def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
         '''
             بارگذاری اطلاعات لازم مرتبط با فرم در داخل متغیر های کلاس
+        inputs:
+        ------
+            x_data_s : dict 
+                inf of fields of form
+            xid : str
+                index of current_record_of_form
+            new_data : dict
+                new data of current_record_of_form -enter by user
+            form_sabt_data : dict
+                recorded data of current_record_of_form
         '''
         if type(x_data_s)==tuple:
             db_name,tb_name=x_data_s

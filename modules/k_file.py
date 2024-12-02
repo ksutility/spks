@@ -493,7 +493,12 @@ def file_copy(base_path_filename,dest_path_filename):
     import shutil
     rep=f'copy ({base_path_filename}) =>({dest_path_filename})'
     try:
-        shutil.copy(base_path_filename ,dest_path_filename)
+        if os.path.isfile(base_path_filename):
+            shutil.copy(base_path_filename ,dest_path_filename)
+            rep1='copy file'
+        else: #directory
+            shutil.copytree(base_path_filename ,dest_path_filename)
+            rep1='copy tree'
         return xxprint(True,rep)
     except:
          return xxprint(False,rep)

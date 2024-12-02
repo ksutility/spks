@@ -141,6 +141,8 @@ steps.jobs= list of name of jobs
 'auto':"{{=__objs__['prj']['select'][prj][5:].strip()}}-{name}"
 	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'
 	'auto':'{{import k_time}}{{=k_time.add(time_st,time_len)}}'
+
+'sp_order' =spesial order :1 step of form that shoud run in unsecoenc
 """
 x_data_cat:{
     '1':{'titel':'ex','db':'a_prj,a_sub_p,a_step'}
@@ -545,7 +547,7 @@ x_data={
                 'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'jobs':'#task#un,dccm,as1',
                 'st2':{'tasks':'p_id','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
-                'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','order':'1'},
+                'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','sp_order':1},
             },
             'views':{
                 'all':{'input':'pre_n,file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off,auth_prj','view1':'un,name,family','view2':'p_id','auth':'dccm'},

@@ -202,41 +202,76 @@ class C_TABLE:
             tds=[x for x in heads]
         trs+=[tds]
         
-        att_files=set() # set for store
         
+        att_filepaths=set() # set for store
         def _tag_pars(tag):
+            file_path=''
             c_tag=k_s_dom.C_TAG(tag)
             tag_inf=c_tag.tag_inf()
             #vv=vv+":::"+str(tag_inf['elements'])+":::"+str(tag_inf['text'])+":::"+tag_inf['onclick']
             onclick=c_tag.find('_onclick')
             if onclick and 'j_box_show' in onclick:#file link
-                #help => j_box_show("%%",false)
-                v1=onclick[12:-9].split("/")
-                file_path=v1[4:-1]
-                file_name=v1[-1]
-                file_inf=os.path.join(*file_path,file_name)
-                att_files.add(file_inf)
-                vv=file_name
+                '''
+                onclick =
+                    j_box_show("/spks/km/set_ppr.xls?lno=8478+%2F1403",false)
+                    j_box_show("/spks/file/f_list_sd.xls/pp/14030820-o-8476",false)
+                    
+                help => j_box_show("<todo>",false)
+                
+                pro
+                    regex=re.compile("j_box_show\(\"(.*)\",false\")
+                    x=onclick
+                    y=regex.match(x).groups())
+                    z=y[0].split('/')
+                pro example : x => y => z
+                    x:  j_box_show("/spks/km/set_ppr.xls?lno=8478+%2F1403",false) 
+                        y: ('/spks/km/set_ppr.xls?lno=8478+%2F1403',)
+                        z: ['', 'spks', 'km', 'set_ppr.xls?lno=8478+%2F1403']
+                    x: j_box_show("/spks/file/f_list_sd.xls/pp/14030820-o-8476",false)
+                        y: ('/spks/file/f_list_sd.xls/pp/14030820-o-8476',)
+                        z: ['', 'spks', 'file', 'f_list_sd.xls', 'pp', '14030820-o-8476']
+
+
+                '''
+                print('j_box_show ='+onclick)
+                import re
+                regex=re.compile("j_box_show\(\"(.*)\",false\)")
+                x=onclick
+                y=regex.match(x).groups()
+                z=y[0].split('/')
+                if z[2]=='file':
+                    file_path_pre=z[4:-1]
+                    file_name=z[-1]
+                    file_path=os.path.join(*file_path_pre,file_name)
+                    #att_files.add(file_inf)
+                    vv=file_name
+                elif z[2]=='km':
+                    vv=str(tag_inf['text'])
             #tag=k_s_dom.C_TAG().tag_inf(tag)
             #if tag_inf['tag']=='a' and tag_inf['onclick']:#file link
             #    vv=tag_inf['onclick']
             elif tag_inf['tag']=='a' and 'value' in tag_inf['items'][0] :
                 vv="A:"+tag_inf['items'][0]['value']+tag_inf['titele']
             else:
-               vv=tag.flatten()#tag_inf['text']
-            return vv
+               #vv=tag.flatten()#
+               vv=str(tag_inf['text'])
+            print (f'file_path={file_path}')
+            return vv ,file_path
             
-        def export_files(att_files):
-            if not att_files:return
+        def export_files(att_filepaths):
+            if not att_filepaths:return
             import k_file
             dest_folder=os.path.join("C:",os.sep,"temp","x_export",folder_name)
             k_file.dir_make(dest_folder)
-            for file_path in att_files:
+            for file_path in att_filepaths:
                 ff=k_file.file_name_split(file_path)
                 base_file=os.path.join("D:",os.sep,"ks","0-file",file_path)
                 dest_file=os.path.join(dest_folder,ff['filename'])
                 k_file.file_copy(base_file,dest_file)
-            
+                print (base_file)
+                print (dest_file)
+        import k_err
+        k_err.xxxprint(vals={'rows':rows})    
         #creat tbody of table
         for row in rows:
             tds=[]
@@ -249,20 +284,22 @@ class C_TABLE:
                 elif type(cell) in [float,int]:
                     vv=cell
                 elif type(cell) in [gluon.html.XML]:
-                    vv=_tag_pars(cell)
+                    vv,file_path =_tag_pars(cell)
+                    if file_path:att_filepaths.add(file_path)
                 else:
                     vv="error"
                 vv=str(vv)
                 tag=TAG(vv)
                 if "<" in vv or (('elements' in tag)):# and  len(tag['elements'])>1):
-                    vv=_tag_pars(tag)
- 
+                    vv,file_path =_tag_pars(cell)
+                    if file_path:att_filepaths.add(file_path)
                 tds+=[vv.replace("\n","")]    
             trs+=[tds]
         
         #preper export
         tt="\ufeff" # BOM
-        export_files(att_files)
+        k_err.xxxprint(vals={'att_filepaths':att_filepaths}) 
+        export_files(att_filepaths)
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         

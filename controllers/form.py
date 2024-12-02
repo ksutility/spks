@@ -359,7 +359,7 @@ class C_FORM_HTM():
                         htm_form['body']+=[DIV([self.show_step_not_cur(x_data_s,xid,c_form,step,'c')])]
                         htm_form['body']+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
                 else:
-                    if 'order' in step and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
+                    if 'sp_order' in step and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
                         htm_form['body']+=[self.show_step_cur(step=step)]
                     else:
                         ab_case="b" if i < f_nxt_s else "a"

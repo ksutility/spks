@@ -530,7 +530,7 @@ class DB1():
                 msg=["ارسال اطلاعات به بانک اطلاعاتی","-"*50,str(where_dic)]
                 msg+=["ثبت رکورد جدید","-"*50,str(r_insert)]
                 ui.msg("\n".join(msg))
-            out_rep+=['insert',str(where_dic),'',str(r_insert)]
+            out_rep+=[['insert',str(where_dic),'',str(r_insert)]]
         r_update=self.update_data('a',set_dic,where_dic)
     
         if r_update.get('update_n',0)>0 :#u=update
@@ -538,7 +538,7 @@ class DB1():
                 msg=["اطلاعات به بانک اطلاعاتی ارسال شد","-"*50,"به روز رسانی رکوردها","-"*50,pp_inf['lno']]
                 msg+=['id='+r_update['id'],'dif=',str(r_update['dif']),'update_n=',r_update['update_n']]
                 ui.msg("\n".join(msg))
-            out_rep+=['update',str(where_dic),str(set_dic),str(r_insert)]
+        out_rep+=[['update',str(where_dic),str(set_dic),str(r_insert)]]
         return out_rep  
     def cols_2_list(self,tb_name,text_format,col_name_list):
         '''
