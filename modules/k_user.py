@@ -122,14 +122,15 @@ def user_in_jobs_can(do,x_data_s={},form_sabt_data={},step_index=0,un='',jobs=''
 
     #xxxprint(out_case=3,msg=['user_in_jobs_can',jobs,un],vals=form_sabt_data)
     for job in jobs.split(','):
+        if do=='view':
+            return True  
         if job =='*':
             if do=='creat':
                 return True
             if do=='edit':
                 step_un=form_sabt_data.get(f'step_{step_index}_un','')
                 if ((not step_un) or (un==step_un)):return True
-            if do=='view':
-                return True
+            
             return False   
         if job[0] != "#":
             if (un in a_jobs[job]['users'].split(',')) or (un == a_jobs[job]['base_user']):

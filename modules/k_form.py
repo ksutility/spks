@@ -1220,7 +1220,7 @@ class C_FORM_B():#
         #k_err.xreport_var([self.x_data_s]) 
         rep={
         'base':[x for x in self.x_data_s['tasks'] ], #list(self.x_data_s['tasks'].keys()),
-        'step_apps':[f'step_{i}_{t}'  for i,x in enumerate(self.x_data_s['steps'].keys()) for t in ['un','dt','ap']],
+        'step_apps':[f'step_{name}_{t}'  for name in self.x_data_s['steps'] for t in ['un','dt','ap']],
         'form_need':['f_nxt_s','f_nxt_u'],
         'backup_add':['xid']
         }
@@ -1241,7 +1241,7 @@ class C_FORM():
             xid : str
                 index of current_record_of_form
             new_data : dict
-                new data of current_record_of_form -enter by user
+                new data of current_record_of_form that shoud save - enter by user
             form_sabt_data : dict
                 recorded data of current_record_of_form
         '''
@@ -1262,6 +1262,9 @@ class C_FORM():
         self.all_data=self.form_sabt_data.copy()
         self.__set_new_data(new_data)
         self.last_text_app=''
+        self.__set_f_nxt_s()
+        self.cur_step=''
+        self.cur_step_name=''
     def __set_new_data(self,new_data): 
         self.new_data=new_data.copy()
         self.all_data.update(new_data)
@@ -1276,62 +1279,91 @@ class C_FORM():
             self.form_sabt_data={x:'' for x in titles}
         else:
             self.form_sabt_data=dict(zip(titles,rows[0]))
-    def set_step_app(self,step_i,new_data,reset=False):
+    def set_step_app(self,cur_step_name,text_app,reset=False):
         '''
         input:
             با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
+            cur_step_name:str
+                name of curent step
         output:    
             به روز رسانی / ثبت اطلاعات مربوط به تایید 1 مرحله در داخل کلاس
         '''
         import k_date
         if reset:
-            x_d= {f'step_{step_i}_ap':''}
+            x_d= {f'step_{cur_step_name}_ap':''}
             """    
-                    f'step_{step_i}_un':'',
-                    f'step_{step_i}_dt':'',
+                    f'step_{cur_step_name}_un':'',
+                    f'step_{cur_step_name}_dt':'',
                     
                 }"""
         else:
-            text_app=new_data['text_app'].lower()
+            text_app=text_app.lower()
             x_d= {
-                    f'step_{step_i}_un':current.session['username'],
-                    f'step_{step_i}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
-                    f'step_{step_i}_ap':text_app
+                    f'step_{cur_step_name}_un':current.session['username'],
+                    f'step_{cur_step_name}_dt':k_date.ir_date('yy/mm/dd-hh:gg:ss'),
+                    f'step_{cur_step_name}_ap':text_app
                 }
             if text_app=="x" :x_d['f_nxt_u']="x"
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return x_d
-    def set_form_app (self,f_nxt_s_new):
+    def set_form_app(self,new_step_name=''):
         '''
         input:
             با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
         output:   
             به روز رسانی اطلاعات مدیریت فرم در داخل کلاس
         '''
-        x_d={'f_nxt_s':str(f_nxt_s_new)}
-        #import k_err k_err.xreport_var([f_nxt_s_new,re1,self.all_data,self.x_data_s])  
+        #x_d={'f_nxt_s':str(new_step_name)}
+        self.__set_f_nxt_s()
+        x_d={'f_nxt_s':self.f_nxt_s}
+        print (x_d)
+        x_d["f_nxt_u"]=self.f_nxt_u()
+        #import k_err k_err.xreport_var([new_step_name,re1,self.all_data,self.x_data_s])  
         self.new_data.update(x_d)
         self.all_data.update(x_d)
-        x_d["f_nxt_u"]=self.f_nxt_u()
         return x_d
+    def __set_f_nxt_s(self):
+        f_nxt_s=','.join([step_name for step_name in self.x_data_s['steps'] if self.step_state(step_name)=='edit'])
+        if not f_nxt_s:f_nxt_s='-'
+        #print (f'f_nxt_s={f_nxt_s}')
+        self.f_nxt_s=f_nxt_s
+        x_d={
+                'f_nxt_s':f_nxt_s
+            }
+        self.new_data.update(x_d)
+        self.all_data.update(x_d)
+        return f_nxt_s
+        if self.xid=='-1':
+            f_nxt_s=0 
+        else:
+            f_nxt_s=self.form_sabt_data['f_nxt_s']
+            f_nxt_u=self.form_sabt_data['f_nxt_u']
+            if f_nxt_s:
+                if f_nxt_u=="x":
+                    f_nxt_s=-int(f_nxt_s)
+                else:
+                    f_nxt_s=int(f_nxt_s)
+            else:
+                f_nxt_s=0
+        self.f_nxt_s=f_nxt_s
     def f_nxt_u(self):
         import k_user
-        f_nxt_s=self.all_data['f_nxt_s'] #tas
-        if not f_nxt_s: return '' 
+        f_nxt_s=self.f_nxt_s #self.all_data['f_nxt_s'] #tas
+        if not f_nxt_s or f_nxt_s=='-': return '' 
         step_x_ap=f'step_{f_nxt_s}_ap'
-        last_text_app=self.all_data[step_x_ap] if step_x_ap in self.all_data else ''
+        last_text_app=self.all_data.get(step_x_ap,'')
         self.last_text_app=last_text_app
         #import k_err 
         #k_err.xreport_var([last_text_app,self.all_data,self.form_sabt_data,self.x_data_s]) 
-        _f_nxt_u=k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data,self.all_data) if last_text_app!="x" else "x"
+        _f_nxt_u=",".join([(k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data,self.all_data) if last_text_app!="x" else "x") for f_nxt_s in f_nxt_s.split(',')])
         x_d={
                 'f_nxt_u':_f_nxt_u
             }
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return _f_nxt_u
-    def __new_db_data(self,f_nxt_s,f_nxt_s_new,new_data,reset=False):# USE ONLY BY : SAVE
+    def __new_db_data(self,f_nxt_s,new_step_name,new_data,reset=False):# USE ONLY BY : SAVE
         '''
         goal:
             تهیه یک دیکشنری از اطلاعاتی که قرار است در دیتا بیس به روز رسانی شوند
@@ -1346,18 +1378,9 @@ class C_FORM():
         x_data_s=self.x_data_s
         steps=x_data_s['steps']
         import k_err 
-        #k_err.xreport_var([f_nxt_s,steps])
-        #k_err.xxxprint(msg=["@@@ : ", '' ,''])
-        #ll=list(steps)
-        #print(f"@@@ len ={len(ll)} ,f_nxt_s ={f_nxt_s} ")
-        #x=ll[f_nxt_s]
-        #print("@@@ :=> "+x)
-        #import k_tools
-        #xx=k_tools.nth_item_of_dict(steps,int(f_nxt_s))
-        #print("@@@ : " + str(xx))
         #k_err.xxxprint(msg=["@@@ : ", str(xx),''])
         #k_err.xreport_var([f_nxt_s,step,steps])
-        step=steps[list(steps.keys())[f_nxt_s]]
+        step=steps[self.cur_step_name]
         step_fields=step['tasks'].split(',')
      
         vv={}
@@ -1376,43 +1399,48 @@ class C_FORM():
         #c_form=k_form.C_FORM(x_data_s,xid,vv)
         self.__set_new_data(vv)
         
-        dict2=self.set_step_app(f_nxt_s,new_data) 
-        dict2.update(self.set_form_app(f_nxt_s_new))
-        vv.update(dict2)
-        return vv
+        self.set_step_app(self.cur_step_name,new_data['text_app']) #dict2=
+        self.set_form_app(new_step_name) #dict2.update()
+        #vv.update(dict2)
+        #return vv
         
     def __update(self,f_nxt_s,text_app,new_data):# USE ONLY BY : SAVE
         xid=self.xid
         rr=''
+        '''
         if text_app=='r': 
             db1=DB1(self.db_name )
             result=db1.row_backup(self.tb_name,xid)
-            f_nxt_s_new = str(f_nxt_s-1)
+            new_step_name = str(f_nxt_s-1)
             rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
         elif text_app=='x':
-            f_nxt_s_new = str(f_nxt_s)#"x-"+
+            new_step_name = str(f_nxt_s)#"x-"+
         elif text_app=='y':
-            f_nxt_s_new = str(f_nxt_s+1)
-        vv=self.__new_db_data(f_nxt_s,f_nxt_s_new,new_data,reset=(text_app=='x'))    
+            new_step_name = str(f_nxt_s+1)
+        '''
+        new_step_name=1 #***
+        self.__new_db_data(self.cur_step_name,new_step_name,new_data,reset=(text_app=='x'))    
+        
         #xxx->return "vv=<br>"+str(vv),"update not done"
         db1=DB1(self.db_name )
-        xu = db1.update_data(self.tb_name,vv,{'id':xid})
-         
+        
+        xu = db1.update_data(self.tb_name,self.new_data,{'id':xid})
+        xxxprint(vals={'new_data':self.new_data,'update_result':xu})
         p1=A(f"#{xid}-update",_onclick="$(this).next().toggle()",_class='toggle')
         p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
         return  {'html_report':DIV(p1,p2,k_htm.val_report(xu)),'id':xid,'db_report':xu}
     def __insert(self,new_data):# USE ONLY BY : SAVE
-        vv=self.__new_db_data(0,1,new_data)
+        self.__new_db_data(0,1,new_data)
         #xreport_var([vv])
         db1=DB1(self.db_name )
-        r1=db1.insert_data(self.tb_name,vv)#.keys(),vv.values())
+        r1=db1.insert_data(self.tb_name,self.new_data)#.keys(),vv.values())
         #rr=f"{db1.path}<br> INSERT:result=" + "<br>".join([f'{x}:{r1[x]}' for x in r1])
         
         p1=A(f"#{r1['id']}-insert",_onclick="$(this).next().toggle()",_class='toggle')
         p2=DIV(XML(f"{db1.path}<br> INSERT:<hr>"))
         #rr=f"{db1.path}<br> INSERT:{k_htm.val_report(r1)}"
         return {'html_report':DIV(p1,p2,k_htm.val_report(r1)),'id':r1['id'],'db_report':r1}   
-    def save(self,new_data,update_step=True): #WIP 030701
+    def save(self,new_data,update_step=True,cur_step_name=''): #WIP 030701
         #--------------------------------
         #import k_err
         #k_err.xreport_var(new_data)
@@ -1420,27 +1448,36 @@ class C_FORM():
         text_app=new_data['text_app'].lower()
         if xid==-1: #xid=='-1':
             x_r=self.__insert(new_data)
+            #print('__insert')
         else:
+            '''
             if update_step:
                 f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '0')
             else:
                 f_nxt_s=int(self.form_sabt_data['f_nxt_s'] or '1')-1
-            #print(f"f_nxt_s={f_nxt_s}")
-            x_r=self.__update(f_nxt_s,text_app,new_data)
+            '''
+            #self.cur_step_name='0'
+            if not cur_step_name :
+                cur_step_name=new_data['cur_step_name'] or self.cur_step_name
+            self.cur_step_name=cur_step_name
+            x_r=self.__update(cur_step_name,text_app,new_data)
+            #print('__update')
         return x_r #DIV(XML(r1)),xid,r_dic
         #--------------------------------     
     def save_app_review(self,request_data):
         xid=self.xid
         db1=DB1(self.db_name)
         
-
+        '''
         f_nxt_s=int(self.form_sabt_data['f_nxt_s'] )
-        f_nxt_s_new=f_nxt_s-1 if self.form_sabt_data['f_nxt_u']!='x' else f_nxt_s
-
-        dict2=self.set_step_app(f_nxt_s_new,request_data,reset=True) 
-        dict2.update(self.set_form_app(f_nxt_s_new))
+        new_step_name=f_nxt_s-1 if self.form_sabt_data['f_nxt_u']!='x' else f_nxt_s
+        cur_step_name=new_step_name
+        '''
+        self.set_step_app(self.cur_step_name,request_data['text_app'],reset=True)  #dict2=
+        self.set_form_app() #dict2.update()
         result=db1.row_backup(self.tb_name,xid)
-        xu = db1.update_data(self.tb_name,dict2,{'id':xid})
+        xu = db1.update_data(self.tb_name,self.new_data,{'id':xid})
+        xxxprint(vals={'new_data':self.new_data,'update_result':xu,'cur_step':self.cur_step_name})
         htm_form=['UPDATE:'] 
         try:
             if xu['exe']['done']:
@@ -1450,14 +1487,15 @@ class C_FORM():
         htm_form+=[f"{db1.path}<br> UPDATE: "+str(xu)+"<hr> backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])]
         return htm_form
     def show_step_1_row(self,field_name,request,mode): #)x_data_s,xid,form_sabt_data,field_name,mode(
-        #mode='output'/'input'
         '''
+        input
+        ------
+            mode='output'/'input'
         output:
         ------
             titel,value,help
         '''
         import k_user
-        #print("c_form-show_step_1_row"+mode)
         x_data_s=self.x_data_s
         xid=self.xid
         #form_sabt_data=self.form_sabt_data
@@ -1475,8 +1513,43 @@ class C_FORM():
         x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
         return [htm_1,x_obj[mode],x_obj['help']]
         #------------------------------------------------- 
-    
-    
+    def un_what_can_do_4_step(self,x_step,x_un=''):
+        ''' 030907
+        goal:
+            کاربر آ چه کاری در مرحله ب می تواند انجام دهد
+        output:
+        ------
+            edit / view / ret_edit
+                edit : can edit                     می تواند تغییرات انجام دهد
+                view : can not edit only can view می تواند فقط اطلاعات را مشاهده کند 
+                ret_edit : can return 4 edit می تواند فرم را برای انجام تغییر به 1 مرحله قبل برگرداند   
+        '''    
+        import k_user        
+        #print(f' ? user_in_jobs_can-x_step:{x_step},un={x_un}')
+        if k_user.user_in_jobs_can('edit',self.x_data_s,self.form_sabt_data,step_index=x_step,un=x_un):
+            #print(f'user_in_jobs_can-x_step:{x_step},un{x_un}')
+            return self.step_state(x_step)
+        if k_user.user_in_jobs_can('view',self.x_data_s,self.form_sabt_data,step_index=x_step,un=x_un):
+            return 'view'
+        return '-'
+    def step_state(self,x_step):
+        '''
+            مشخص کردن اینکه 1 مرحله در وضعیت آماده برای ویرایش می باشد - با توجه به نتایج مراحل دیگر
+        '''
+        step=self.x_data_s['steps'][f'{x_step}']
+        start_wehre=step['start_wehre'] #"'{step_0_ap}' =='y' and not '{step_2_ap}' in ['y','x']"
+        #print(start_wehre)
+        start_wehre_prs=start_wehre.format(**self.all_data)
+        #print(start_wehre_prs)
+        start_wehre_v=eval(start_wehre_prs)
+        if start_wehre_v:# x_step == self.f_nxt_s:
+            if self.all_data[f'step_{x_step}_ap'] in ['y','x']:  #x_step == self.f_nxt_s-1:
+                #print('ret_edit {x_step}')
+                return 'ret_edit'
+            else:
+                #print(f'form_sabt_data => {x_step} => {start_wehre}'+ "---" + start_wehre_prs + " : " + str(start_wehre_v) )
+                return 'edit'    
+        return 'view'
 def get_x_data_s(db_name,tb_name):
     from x_data import x_data
     if not db_name in x_data:return False,'error : "{}" not in ( x_data )'.format(db_name)

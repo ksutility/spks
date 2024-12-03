@@ -1041,6 +1041,8 @@ def rc():#run 1 command
         x_data_s=x_data[db_name][tb_name]
         cols1=list(x_data_s['tasks'].keys())
         x_fields=k_form.C_FORM_B(x_data_s,1).get_x_fields()
+        if len(args)<4 or args[3]!='do':
+            return str(x_fields) +"<hr>"+ str(args)
         cols2=x_fields['step_apps']
         cols_add1=x_fields['form_need']
         cols2+=cols_add1

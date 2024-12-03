@@ -5,6 +5,20 @@
     x_data :# all form "extra data" that read from x_data.py file
         ساختار اطلاعات کل فرمها که از فایل مربوطه خوانده می شود
     x_data_s :# selected x_data = x_data for <select db_file><select table>    
+    
+    -----------------------------------------------------
+    
+    بخش های مهم در فایل هایپر تکست فرم
+    importat part in HTML of FORM:
+        1- text_app
+            goal : save result of app keys
+            HTML : INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')
+        2- cur_step_name
+            goal : show curren step name
+            HTML : INPUT(_type='hidden',_id='cur_step_name',_name='cur_step_name',_value=step['name'])
+        3- review_step_name
+            goal : show step name that shoud review
+            HTML : INPUT(_type='hidden',_id='review_step_name',_name='review_step_name',_value=step_name)
 '''
 from gluon.custom_import import track_changes; track_changes(True)
 from k_sql import DB1
@@ -260,12 +274,14 @@ def xform():
 def _xform(out_items=['head','body','tools'],section=-1):
     #show all section
     #response.show_toolbar=True #error check
-    
-    if request.vars['text_app']:
-        #print("text_app="+str(request.vars['text_app']))
+    print('?save')
+    if request.vars['text_app'] or request.vars['review_step_name']:
+        print("text_app="+str(request.vars['text_app']))
+        print("review_step_name="+str(request.vars['review_step_name']))
         if request.vars['text_app'] in ['ir','IR']:
             return XML(save_app_review())
         else:
+            
             return XML(save())
     #session.view_page='xform'
     
@@ -285,7 +301,7 @@ def _xform(out_items=['head','body','tools'],section=-1):
     # check access /auth
     auth= k_user.C_AUTH_FORM(x_data_s)
     if not auth.ok:return dict(htm=H1(auth.msg))
-    
+    print("test")
    
     xid=request.args[2] or 1
     
@@ -294,32 +310,14 @@ def _xform(out_items=['head','body','tools'],section=-1):
     else: #entire of form
         htm_form=C_FORM_HTM(x_data_s,xid).show_form()
         htm_x=[y for x in out_items for y in htm_form[x]]
-    return DIV(FORM(*htm_x,
-        INPUT(_type='hidden',_id='text_app',_name='text_app',_value=''),_id="form1")
-        ,_dir="rtl")
+    return DIV(FORM(*htm_x,_id="form1"),_dir="rtl")
 class C_FORM_HTM():
     #:#view 1 row
     def __init__(self,x_data_s,xid):
         self.x_data_s=x_data_s
         self.xid=xid
         self.c_form=k_form.C_FORM(x_data_s,xid)
-        
-        if xid=='-1':
-            f_nxt_s=0
-        #elif not rows:
-        #    return c_form,'',0,''    
-        else:
-            f_nxt_s=self.c_form.form_sabt_data['f_nxt_s']
-            f_nxt_u=self.c_form.form_sabt_data['f_nxt_u']
-            if f_nxt_s:
-                if f_nxt_u=="x":
-                    f_nxt_s=-int(f_nxt_s)
-                else:
-                    f_nxt_s=int(f_nxt_s)
-            else:
-                f_nxt_s=0
-        steps=x_data_s['steps']
-        self.f_nxt_s=f_nxt_s
+        self.f_nxt_s=self.c_form.f_nxt_s
     def show_form(self):#show 1 form 
         x_data_s=self.x_data_s
         xid=self.xid
@@ -338,10 +336,24 @@ class C_FORM_HTM():
                         _class='row  ')] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
         
         if form_sabt_data:
-            step_befor='' # svae name of before step
-            for i,step_n in enumerate(x_data_s['steps']):
-                step=x_data_s['steps'][step_n]
+            #step_befor='' # svae name of before step
+            for i,step_name in enumerate(x_data_s['steps']):
+                step=x_data_s['steps'][step_name]
                 step['i']=i
+                uwc=c_form.un_what_can_do_4_step(x_step=i)#,x_un
+                if uwc=='edit':
+                    if self.c_form.cur_step:
+                        htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'b')] 
+                    else:
+                        self.c_form.cur_step=step_name
+                        htm_form['body']+=[self.show_step_cur(step=step)]
+                        
+                if uwc=='ret_edit':
+                    htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'b'),
+                                        self.app_review(step_name)]
+                if uwc=='view':
+                    htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'b')]    
+                '''        
                 if i == f_nxt_s:
                     
                     if k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=i):
@@ -365,18 +377,26 @@ class C_FORM_HTM():
                         ab_case="b" if i < f_nxt_s else "a"
                         htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,ab_case)]
                 step_befor=step_n
+                '''
             # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
             # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
+            '''
             if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=f_nxt_s-1)):
                 #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
                 # test = form(morakhsi_saat).rec(15 steps=comple) : user(mlk) =>can view (app_review but) ,other users(atl,ks,..) cannot view (app_review but)
                 htm_form['body']+=[self.app_review()]
+            '''
             # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
-            elif (f_nxt_s < 0 and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
+            '''
+            if (f_nxt_s < 0 and k_user.user_in_jobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
                 #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
                 # test = 
                 htm_form['body']+=[self.app_review()]
-            
+            '''
+            htm_form['body']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
+            htm_form['body']+=['cur_step = '+self.c_form.cur_step]
+            htm_form['body']+=[' | f_nxt_u = '+self.c_form.form_sabt_data['f_nxt_u']]
+            htm_form['body']+=[' | f_nxt_s = '+self.c_form.form_sabt_data['f_nxt_s']]
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=request.args[:2]
@@ -401,6 +421,7 @@ class C_FORM_HTM():
                 b=befor of cur
                 a=aftre of cur
         '''
+        #print (step)
         fsc_mode={"a":"form_step_after","b":"form_step_befor","c":"form_step_cur_unactive"}[mode] #fsc_mode=form_step_class
         hx={'data':[],'stp':'','app':[]}
         
@@ -411,7 +432,7 @@ class C_FORM_HTM():
                 #hh=show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode='output')
                 hh=self.c_form.show_step_1_row(field_name,request,mode='output')#output_text')
                 hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
-        #breakpoint()
+        #breakpoint() f_nxt_s
         def val_in_dic(x_dict,v_name):
             '''
                 goal:extract item_val(=return) from dict(=x_dict) by its item_name(=v_name)
@@ -449,11 +470,12 @@ class C_FORM_HTM():
                 hh=self.c_form.show_step_1_row(field_name,request,mode='input')
                 hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
         hx['app']=[BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{x_color[xx]}',_onclick=f"app_key('{xx}')") for xx in step['app_kt']]
+        hx['app']+=[INPUT(_type='hidden',_id='cur_step_name',_name='cur_step_name',_value=step['name'])]
         hx['stp']=[str(step['i']+1) +' - '+ step['title']]
         hx['app-color']=''
         return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur")
                      #,_action=URL('save',args=request.args)
-    def app_review (self): 
+    def app_review (self,step_name): 
         '''
             0209018
         
@@ -467,7 +489,10 @@ class C_FORM_HTM():
         return XML(k_htm.x_toggle_s(XML(htm),head='اصلاح'))
         '''
         #return DIV(A('اصلاح',_class="btn btn-warning"))
-        return DIV(BUTTON("اصلاح",_type='submit',_class='btn btn-warning',_onclick=f"app_key('ir')"),_style="text-align:center;")
+        return DIV(
+            BUTTON("اصلاح",_type='submit',_class='btn btn-warning',_onclick=f"app_key('ir')"),
+            INPUT(_type='hidden',_id='review_step_name',_name='review_step_name',_value=step_name)
+            ,_style="text-align:center;")
     #-- def show_form:start ----------------------------------------------
           
         
@@ -484,7 +509,7 @@ def _save_out(xid,err_show=False):
         link=URL('xtable_i',args=request.args,vars={x:request.vars[x] for x in ['data_filter','data_sort','cols_filter','paper_num','table_class','data_page_n','data_page_len']})
     return _auto_redirect(link,delay=.5,err_show=err_show)+[DIV('request.args= '+str(request.args[2]),_class="row")] 
     
-def _auto_redirect(link,delay=.5,err_show=False,title="بازگشت به فرم"):
+def _auto_redirect(link,delay=.2,err_show=False,title="بازگشت به فرم"):
     sec=2500 if err_show or (debug and session["admin"]) else delay
     htm_form=[DIV(HR(),
                 DIV(
@@ -537,6 +562,7 @@ def save():
         htm_form=[DIV('text_app= '+request.vars['text_app'],_class="row")]
         #x_r,xid,r_dic=save1(text_app,xid)
         c_form=k_form.C_FORM(x_data_s,xid)
+        c_form.cur_step_name=request.vars['cur_step_name']
         #if 'section' in request.vars:
         if session.view_page=='xform_section':
             c_form.all_data['f_nxt_s']=0
@@ -573,10 +599,12 @@ def save_app_review():
     if not 'xform' in session.view_page:
         return 'refer to this page is uncorrect'
     session.view_page='save'
-    
+    print('form-save_app_review')
     x_data_s,db_name,tb_name,msg=_get_init_data()
     xid=request.args[2] or 1
-    tt=k_form.C_FORM(x_data_s,xid).save_app_review(request_data=request.vars)
+    c_form=k_form.C_FORM(x_data_s,xid)
+    c_form.cur_step_name=request.vars['review_step_name']
+    tt=c_form.save_app_review(request_data=request.vars)
     
     htm_form=_save_out(xid)
     htm_form+=[tt]

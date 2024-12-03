@@ -125,9 +125,13 @@ class DB1():
     con,cur,path,dbn="","","",""
     tables_name={}
     columns={}
-    db_path='applications\\spks\\databases\\'
-    def __init__(self,db_name,path=db_path,ext='db'):
-        path=path+db_name+"."+ext #'example2.db'
+    def __init__(self,db_name='',path='',ext='db'):
+        db_path='applications\\spks\\databases\\'
+        if (path and not db_name):  
+            path=path 
+        else: 
+            if not path:path= db_path
+            path=path+db_name+"."+ext   #'example2.db'
         self.con = self.sqlite3.connect(path)
         self.cur = self.con.cursor()
         self.path=path
@@ -533,12 +537,12 @@ class DB1():
             out_rep+=[['insert',str(where_dic),'',str(r_insert)]]
         r_update=self.update_data('a',set_dic,where_dic)
     
-        if r_update.get('update_n',0)>0 :#u=update
+        if r_insert['done']: #u=update
             if 'u' in report :
                 msg=["اطلاعات به بانک اطلاعاتی ارسال شد","-"*50,"به روز رسانی رکوردها","-"*50,pp_inf['lno']]
                 msg+=['id='+r_update['id'],'dif=',str(r_update['dif']),'update_n=',r_update['update_n']]
                 ui.msg("\n".join(msg))
-        out_rep+=[['update',str(where_dic),str(set_dic),str(r_insert)]]
+            out_rep+=[['update',str(where_dic),str(set_dic),str(r_update)]]
         return out_rep  
     def cols_2_list(self,tb_name,text_format,col_name_list):
         '''

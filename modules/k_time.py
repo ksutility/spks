@@ -91,7 +91,8 @@ def time_div(x_time,n_div):
     ggt2=min_2_time(gg2)
     ggt3=min_2_time(gg3)
     return [ggt2]*(n_div-1)+[ggt3]  
-def min_2_time(x_gg):
+def min_2_time(x_gg,z_text=''):
+    if x_gg==0 :return z_text
     h2,m2=divmod(x_gg, 60)#hh=hh+mm\60
     return str(h2).zfill(2)+":"+str(m2).zfill(2)
     

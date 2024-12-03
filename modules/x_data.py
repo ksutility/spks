@@ -544,10 +544,10 @@ x_data={
                 'file_access':{'type':'text','title':'فایل های قابل دسترس','len':'20'},
                 },
             'steps':{
-                'pre':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                'inf':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'jobs':'#task#un,dccm,as1',
-                'st2':{'tasks':'p_id','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
-                'st3':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','sp_order':1},
+                '0':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','jobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                '1':{'tasks':'file_pic_per,file_mdrk_thsl,file_shnsnm,file_ot,file_off,tel_mob,tel_wrk,date','jobs':'as1','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'jobs':'#task#un,dccm,as1',
+                '2':{'tasks':'p_id','jobs':'dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+                'b':{'tasks':'tel_wrk','jobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'','sp_order':1,'name':'b','strat_where':["{step_1_app} == 'y'"]},
             },
             'views':{
                 'all':{'input':'pre_n,file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off,auth_prj','view1':'un,name,family','view2':'p_id','auth':'dccm'},
@@ -909,7 +909,7 @@ x_data={
             },
             'cols_filter':{'':'همه',},
             'data_filter': 
-                {'step_2_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',
+                {'step_3_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',
                 },
         }
     },
@@ -1059,7 +1059,9 @@ def x_data_verify(x_data):
             tb_obj['data_filter'].update(data_filter)
             if 'steps' in tb_obj:
                 i=-1
-                for step_name,step in tb_obj['steps'].items():
+                steps=tb_obj['steps']
+                len_steps=len(steps)
+                for step_name,step in steps.items():
                     i+=1
                     if not 'app_keys' in step or not step['app_keys']:
                         step['app_keys']='y,x,r' if i>0 else 'y,x'
@@ -1069,6 +1071,21 @@ def x_data_verify(x_data):
                     #'app_kt'=app dict from keys and titels 
                     step['app_kt']=dict(zip(step['app_keys'],step['app_titls']))
                     step['i']=i
+                    if not 'start_where' in step:
+                        if i==0:
+                            if i==len_steps-1:
+                                step['start_wehre']="True"
+                            else:
+                                step['start_wehre']=" not '{step_"+ str(1) +"_ap}' in ['y','x']"
+                        elif i==len_steps-1:
+                            step['start_wehre']="'{step_"+str(i-1)+ "_ap}' =='y'"
+                        else:
+                            step['start_wehre']="'{step_"+str(i-1)+ "_ap}' =='y' and not '{step_"+ str(i+1) +"_ap}' in ['y','x']"
+                keys=list( steps.keys())
+                for k in keys:
+                    name=steps[k]['name'] if 'name' in steps[k] else str(steps[k]['i']) 
+                    steps[name]=steps.pop(k)
+                    steps[name]['name']=name
                     #{x:step['app_titls'][i] for i,x in enumerate(step['app_keys'].split(',').reverse())} 
                 #tt=','.join[step['tasks']+['step' for sn,step in tb_obj['steps'].items() ]
                 #tb_obj['cols_filter']['a']=[

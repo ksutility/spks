@@ -233,7 +233,7 @@ class C_TABLE:
 
 
                 '''
-                print('j_box_show ='+onclick)
+                #print('j_box_show ='+onclick)
                 import re
                 regex=re.compile("j_box_show\(\"(.*)\",false\)")
                 x=onclick
@@ -504,6 +504,8 @@ def select_x1(select_base_list,select_describ_list,onact_txt):
         h_code1=t1 +  "</select>" + "\n"
     return h_code1
 def a(txt,_href,_target="frame",_title='',_class='btn btn-primary'):
+    #debug
+    #return A(txt,_title=_title,_class=_class,_href=_href,_target="")
     if _target=="frame":
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
     elif _target=="box":   
