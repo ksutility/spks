@@ -59,7 +59,8 @@ def load_user_inf():
             'ps':u_inf["ps"],
             'file_access':u_inf["file_access"],
             "my_folder":f'{u_inf["eng"].strip()}-{unx}',
-            "p_id":u_inf["p_id"]
+            "p_id":u_inf["p_id"],
+            "loc":u_inf["loc"],
             }
         #users[u_inf['un']]=u_inf-
     #import k_err 

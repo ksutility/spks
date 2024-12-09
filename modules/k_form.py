@@ -1307,7 +1307,7 @@ class C_FORM():
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return x_d
-    def set_form_app(self,new_step_name=''):
+    def set_form_app(self):
         '''
         input:
             با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
@@ -1363,7 +1363,7 @@ class C_FORM():
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return _f_nxt_u
-    def __new_db_data(self,f_nxt_s,new_step_name,new_data,reset=False):# USE ONLY BY : SAVE
+    def __new_db_data(self,f_nxt_s,new_data,reset=False):# USE ONLY BY : SAVE
         '''
         goal:
             تهیه یک دیکشنری از اطلاعاتی که قرار است در دیتا بیس به روز رسانی شوند
@@ -1400,7 +1400,7 @@ class C_FORM():
         self.__set_new_data(vv)
         
         self.set_step_app(self.cur_step_name,new_data['text_app']) #dict2=
-        self.set_form_app(new_step_name) #dict2.update()
+        self.set_form_app() #dict2.update()
         #vv.update(dict2)
         #return vv
         
@@ -1414,12 +1414,12 @@ class C_FORM():
             new_step_name = str(f_nxt_s-1)
             rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
         elif text_app=='x':
-            new_step_name = str(f_nxt_s)#"x-"+
+            new_step_name = str(f_nxt_s) #"x-"+
         elif text_app=='y':
             new_step_name = str(f_nxt_s+1)
         '''
-        new_step_name=1 #***
-        self.__new_db_data(self.cur_step_name,new_step_name,new_data,reset=(text_app=='x'))    
+        
+        self.__new_db_data(self.cur_step_name,new_data,reset=(text_app=='x'))    
         
         #xxx->return "vv=<br>"+str(vv),"update not done"
         db1=DB1(self.db_name )
@@ -1430,7 +1430,7 @@ class C_FORM():
         p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
         return  {'html_report':DIV(p1,p2,k_htm.val_report(xu)),'id':xid,'db_report':xu}
     def __insert(self,new_data):# USE ONLY BY : SAVE
-        self.__new_db_data(0,1,new_data)
+        self.__new_db_data(0,new_data)
         #xreport_var([vv])
         db1=DB1(self.db_name )
         r1=db1.insert_data(self.tb_name,self.new_data)#.keys(),vv.values())

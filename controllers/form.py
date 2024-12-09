@@ -334,7 +334,7 @@ class C_FORM_HTM():
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  ')] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
-        
+        text_app_added=False
         if form_sabt_data:
             #step_befor='' # svae name of before step
             for i,step_name in enumerate(x_data_s['steps']):
@@ -347,6 +347,7 @@ class C_FORM_HTM():
                     else:
                         self.c_form.cur_step=step_name
                         htm_form['body']+=[self.show_step_cur(step=step)]
+                        text_app_added=True
                         
                 if uwc=='ret_edit':
                     htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'b'),
@@ -393,7 +394,8 @@ class C_FORM_HTM():
                 # test = 
                 htm_form['body']+=[self.app_review()]
             '''
-            htm_form['body']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
+            if not text_app_added:
+                htm_form['body']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
             htm_form['body']+=['cur_step = '+self.c_form.cur_step]
             htm_form['body']+=[' | f_nxt_u = '+self.c_form.form_sabt_data['f_nxt_u']]
             htm_form['body']+=[' | f_nxt_s = '+self.c_form.form_sabt_data['f_nxt_s']]
@@ -471,6 +473,7 @@ class C_FORM_HTM():
                 hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
         hx['app']=[BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{x_color[xx]}',_onclick=f"app_key('{xx}')") for xx in step['app_kt']]
         hx['app']+=[INPUT(_type='hidden',_id='cur_step_name',_name='cur_step_name',_value=step['name'])]
+        hx['app']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
         hx['stp']=[str(step['i']+1) +' - '+ step['title']]
         hx['app-color']=''
         return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur")
@@ -680,29 +683,8 @@ def list_0():
         tbl[cat]=XML(K_TABLE.creat_htm ( trsx[cat],titels,table_class="1")) 
     tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
     server_add=k_tools.server_python_add()
-    t0=f"""<hr><div class="row">
-        <div class="col-4">
-            <h3> گزارش عملکرد همکاران طراحی </h3>
-        </div>
-        <div class="col-2">
-            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/tmsh/aqc_report_daily_pivot/user_day'>نمودار های جادویی </a>
-        </div>
-        <div class="col-2">
-            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/tmsh/aqc_report_daily_kytable'>گزارش مدیریتی هفته جاری </a> 
-        </div>
-        <div class="col-2">
-            <a class='btn btn-primary' target='_blank' href='{server_add}/spks/km/test_ipgrid'>ورود اطلاعات</a> 
-        </div>
-        <div class="col-1">
-            <a class='btn' target='_blank' href='{URL('tmsh','mon_report')}'><img src="{URL('static','icon/3d/time-io.gif')}" title="اطلاعات ورود و خروج" width="40" height="40"></a> 
-        </div>
-        <div class="col-1">
-            <a class='btn' target='_blank' href='{URL('tmsh','user_timesheet')}'><img src="{URL('static','icon/3d/timesheet.gif')}" title="تایم شیت" width="40" height="40"></a> 
-        </div>
-        
-    </div>"""
-    tt+=[XML(t0)]
-    return dict(htm=DIV(tt,_dir='rtl'))
+    #tt+=[XML(t0)]
+    return dict(htm=DIV(tt,_dir='rtl'),server_python_add=k_tools.server_python_add())
 #@k_tools.x_cornometer
 def xtable():
     from k_tools import X_DICT
@@ -832,7 +814,7 @@ def xtable_i():
     table2=FORM(
             DIV(table1),step_cur,
             #DIV(k_form.chidman(hx,x_data_s,step),_class="container-fluid form_step_cur"),
-            INPUT(_type='hidden',_id='text_app',_name='text_app',_value=''),
+            #INPUT(_type='hidden',_id='text_app',_name='text_app',_value=''),
             _id="form1" #_action=URL('xtable_i_save',args=request.args)
             ) #,_action=URL('save',args=request.args)
     table1=k_htm.form(inner_html=table1,action=URL('xtable_i_save',args=request.args))    
