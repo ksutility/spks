@@ -293,7 +293,7 @@ function app_key(t) {
 	*/
 	re=false;
 	t=t.toLowerCase();
-	if (t=="ir") {
+	if (t.startsWith("ir")) {
 		if (true==true) { re=confirm("Form self person RETURN - ARE You Sure ? \n \n" + "فرم بازگشت داده شود ؟") }
 	}	
 	else if (t=="r") {

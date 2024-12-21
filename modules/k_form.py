@@ -315,23 +315,6 @@ def set_data_by_form_code(): # t_form_name,t_form_code,t_form_rev,t_form_index)
         do_report('err', "form code=" + t_form_code + "<br>your form code is not correct<br>" + "کد فرم وارد شده اشتباه است")
 #---------------------------------------------------------------
 
-#---------------------------------------------------------------------------------################################
-def obj_set_Form_active_parts_x(ix,form_update_set_param,xfield_titel): 
-    '''
-        not_used 020905
-    '''
-    #--out use=3(file):flist(1 hit),formshow(1 hit),formshow_admin(1 hit)
-
-    t=share.task_inf[ix]
-    h_code1,h_code2,js_chekvalid_code = obj_set(t['type'],t['field_n'],t['val'],t['inf'],t['i10'],t['i7'],t['i6'],form_update_set_param,xfield_titel) #'okey
-    #['val'] = def_val megvar avaliye
-    #['type'] = mode (num;text;get;user)
-    #['field_n'] = obj name
-    #['inf'] = base_data 
-    #['i10'] = select_describ_list
-    #['i7'] = select_base_list
-    #['i6'] = select_addition_inf
-    return h_code1,h_code2,js_chekvalid_code
 #---------------------------------------------------------------------------------################################  
 def obj_set_form_history_parts(ix,xmode):
     '''
@@ -695,9 +678,10 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@k_tools.x_cornometer
-def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''): 
+def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_form=''): 
     import k_htm
     form_update_set_param="form;form"
+   
     #cm=Cornometer(f"obj-{i_obj['type']}-{i_obj['name']}")
     '''
     use in kswt:ok 020905
@@ -779,6 +763,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     _len=int(obj['len']) if 'len' in obj else 256
     _value=(request.post_vars[_name] or request.vars[_name]) if request else ''
     _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  '')
+    #if '__val__' not in x_dic:x_dic['__val__']={}
+    #x_dic['__val__'][obj['name']]=_value
+    x_dic[obj['name']]=_value
     obj['value']=_value
     obj['help']=''
     obj['output']=_value 
@@ -795,6 +782,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             this field info is show in ["auto"] item or in ["ref"] item
         '''
         obj["value"]=obj['output_text']=_value #au_txt
+        
         obj['output']=DIV(_value,_class="input_auto")
         obj['help']="خود کار"
         if 'input' in need :
@@ -814,7 +802,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 obj['input']=XML(f"<textarea readonly class='input_auto' {_n} rows='2' style='width:100%'>{au_txt} </textarea>")
             else:
                 obj['input']=XML(f"<input {_n} value='{au_txt}'  readonly class='input_auto'  style='width:100%'>" )#size='{_len}'
-            
+            if au_txt and au_txt=='***':
+                print(au_txt)
+                #if c_form:c_form.report()
+            x_dic[obj['name']]=au_txt        
             msg=""
             jcode1=""
             form=share.form
@@ -1043,7 +1034,6 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         import k_file
         #print('file_name='+obj['file_name'])
         obj['file_name']=k_file.name_correct(template_parser(obj['file_name'],x_dic))
-        #print('file_name='+obj['file_name'])
         #obj['file_name'] = ''.join(c for c in x_file_name if c.isalnum()) # Remove non-alphanumeric characters 
         from gluon import current
         #_value=current.session['uploaded_name'] or _value
@@ -1051,6 +1041,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
         #_value=obj['file_name']#_value or 
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
         show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
+        obj['s_ext']=_value.rpartition(".")[2] #s_xt=saved_extention
         import json
         todo=json.dumps({'do':'sql','db':db_name,'tb':tb_name,'set_dic':{obj['name']:"$filefullname$"},'where':{'id':xid}})
         
@@ -1072,11 +1063,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
                 #if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}\n old name = {old_file_name}" class="bg-danger">error<h3>""" 
             return ''
         msg1=file_rename_manage(_value,obj['file_name'])#check fine is renamed ?
+        if msg1 and c_form:
+            c_form.report()
+            xxxprint(3,msg=[_value,obj['file_name'],msg1],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value})
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>'''
-        file_icon="F"
-        bt_view_mini=f'''<a class="btn btn-info" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
+        file_icon=obj['s_ext'] #"F"
+        bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
         bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
         
         obj['input']=XML(f'''
@@ -1084,14 +1078,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
             {bt_view}{msg1}{bt_del}
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
-        obj['output']=XML(f'''
-            <div >
-                {bt_view}{msg1}
-            </div> ''')    
-        obj['output-mini']=XML(f'''
-            <div >
-                {bt_view_mini}{msg1}
-            </div> ''')    
+        obj['output']=XML(f'''<div>{bt_view}{msg1}</div>''')    
+        obj['output-mini']=XML(f'''<div>{bt_view_mini}{msg1}</div>''')    
         """    
         def path_x(pre_folder,file_name,pattern):
             path1=k_file.folderpath_maker_by_filename(file_name,pattern)
@@ -1182,14 +1170,32 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     #cm.tik('link start')
     if 'link' in obj:
         r1='input' if 'input' in need else 'output'
-        #-----
+        
         x_link=obj['link']
-        p=[template_parser(x,x_dic) for x in x_link['url']]#'pro'
-        args=[template_parser(x,x_dic) for x in x_link['args']]
-        vars={x:template_parser(x_link['vars'][x],x_dic) for x in x_link['vars']}
-        #obj[r1]=XML(A(DIV(obj[r1],_href=URL(*p,args=tuple(args),vars=vars))))
-        show_link=URL(*p,args=tuple(args),vars=vars)
-        obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}",false)' ))
+        target=x_link['target'] if 'target' in x_link else 'box'
+        
+        if 'url' in x_link:         
+            p=[template_parser(x,x_dic) for x in x_link['url']]#'pro'
+            args=[template_parser(x,x_dic) for x in x_link['args']]
+            vars={x:template_parser(x_link['vars'][x],x_dic) for x in x_link['vars']}
+            #obj[r1]=XML(A(DIV(obj[r1],_href=URL(*p,args=tuple(args),vars=vars))))
+            show_link=URL(*p,args=tuple(args),vars=vars)
+        elif 'x_url' in x_link:
+            show_link=x_link['x_url']
+        elif r1=='output':
+            show_link=obj[r1]
+        else:
+            show_link=obj['value']
+        #obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}",false)' ))
+        text=''
+        _class=''
+        reset=True
+        if obj[r1]:
+            text=x_link['text'] if 'text' in x_link else obj[r1]
+            _class= x_link['class'] if 'class' in x_link else 'btn'
+            reset=x_link['reset'] if 'reset' in x_link else reset
+        x_link=k_htm.a(text,show_link,target,_class=_class,reset=reset) if show_link else ''
+        obj[r1]=x_link if r1=='output' else DIV(obj[r1],x_link)
       
     ##----------------------
     if "private" in obj['prop']:
@@ -1200,6 +1206,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request=''):
     
     if '__objs__' not in x_dic:x_dic['__objs__']={}
     x_dic['__objs__'][obj['name']]=obj
+    
     ##obj['js']=
     
     return obj #,cm.records()
@@ -1260,13 +1267,15 @@ class C_FORM():
         else:
             self.__set_form_sabt_data()
         self.all_data=self.form_sabt_data.copy()
+        self.new_data={}
         self.__set_new_data(new_data)
         self.last_text_app=''
         self.__set_f_nxt_s()
         self.cur_step=''
         self.cur_step_name=''
     def __set_new_data(self,new_data): 
-        self.new_data=new_data.copy()
+        #self.new_data=new_data.copy() if not hasattr(self, 'new_data') else 
+        self.new_data.update(new_data)
         self.all_data.update(new_data)
     def __set_form_sabt_data(self):
         '''
@@ -1317,14 +1326,14 @@ class C_FORM():
         #x_d={'f_nxt_s':str(new_step_name)}
         self.__set_f_nxt_s()
         x_d={'f_nxt_s':self.f_nxt_s}
-        print (x_d)
+        #print (x_d)
         x_d["f_nxt_u"]=self.f_nxt_u()
         #import k_err k_err.xreport_var([new_step_name,re1,self.all_data,self.x_data_s])  
         self.new_data.update(x_d)
         self.all_data.update(x_d)
         return x_d
     def __set_f_nxt_s(self):
-        f_nxt_s=','.join([step_name for step_name in self.x_data_s['steps'] if self.step_state(step_name)=='edit'])
+        f_nxt_s=','.join([step_name for step_name in self.x_data_s['steps'] if self.step_state(step_name)[1]=='edit'])
         if not f_nxt_s:f_nxt_s='-'
         #print (f'f_nxt_s={f_nxt_s}')
         self.f_nxt_s=f_nxt_s
@@ -1353,12 +1362,12 @@ class C_FORM():
         if not f_nxt_s or f_nxt_s=='-': return '' 
         step_x_ap=f'step_{f_nxt_s}_ap'
         last_text_app=self.all_data.get(step_x_ap,'')
-        self.last_text_app=last_text_app
+        self.last_text_app =last_text_app
         #import k_err 
         #k_err.xreport_var([last_text_app,self.all_data,self.form_sabt_data,self.x_data_s]) 
-        _f_nxt_u=",".join([(k_user.jobs_masul(self.x_data_s,int(f_nxt_s),self.form_sabt_data,self.all_data) if last_text_app!="x" else "x") for f_nxt_s in f_nxt_s.split(',')])
+        _f_nxt_u=",".join([(k_user.jobs_masul(self.x_data_s,f_nxt_s,c_form=self,form_all_data=self.all_data) if last_text_app!="x" else "x") for f_nxt_s in f_nxt_s.split(',')])
         x_d={
-                'f_nxt_u':_f_nxt_u
+            'f_nxt_u':_f_nxt_u
             }
         self.new_data.update(x_d)
         self.all_data.update(x_d)
@@ -1407,25 +1416,35 @@ class C_FORM():
     def __update(self,f_nxt_s,text_app,new_data):# USE ONLY BY : SAVE
         xid=self.xid
         rr=''
-        '''
+         
         if text_app=='r': 
             db1=DB1(self.db_name )
             result=db1.row_backup(self.tb_name,xid)
-            new_step_name = str(f_nxt_s-1)
+            #xx=self.x_data_s['steps'][self.cur_step_name]['start_step']
+            last_step_name = self.x_data_s['steps'][self.cur_step_name]['start_step']
+            x_d= {f'step_{last_step_name}_ap':''}
+            xxxprint(vals={'x_d':x_d})
+            self.new_data.update(x_d)
+            self.all_data.update(x_d)
+            #back_step=xx['start_step']
+            #x_data={"step_"+ back_step +"_ap" :''} if back_step else {}
+            #new_step_name = str(f_nxt_s-1)
+            x_data={}
             rr="backup<br>"+"<br>".join([f'{x}={str(y)}' for x,y in result.items()])
         elif text_app=='x':
-            new_step_name = str(f_nxt_s) #"x-"+
+            x_data={"f_nxt_u":'x','f_nxt_s':''}
+            #new_step_name = str(f_nxt_s) #"x-"+
         elif text_app=='y':
-            new_step_name = str(f_nxt_s+1)
-        '''
-        
-        self.__new_db_data(self.cur_step_name,new_data,reset=(text_app=='x'))    
-        
+            x_data={}
+            #new_step_name = str(f_nxt_s+1)
+        self.__new_db_data(self.cur_step_name,new_data,reset=(text_app=='x'))
         #xxx->return "vv=<br>"+str(vv),"update not done"
         db1=DB1(self.db_name )
-        
-        xu = db1.update_data(self.tb_name,self.new_data,{'id':xid})
-        xxxprint(vals={'new_data':self.new_data,'update_result':xu})
+        new_data=self.new_data
+
+        new_data.update(x_data)
+        xu = db1.update_data(self.tb_name,new_data,{'id':xid})
+        xxxprint(vals={'new_data1':self.new_data,'new_data2':new_data,'update_result':xu})
         p1=A(f"#{xid}-update",_onclick="$(this).next().toggle()",_class='toggle')
         p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
         return  {'html_report':DIV(p1,p2,k_htm.val_report(xu)),'id':xid,'db_report':xu}
@@ -1500,20 +1519,21 @@ class C_FORM():
         xid=self.xid
         #form_sabt_data=self.form_sabt_data
         form_sabt_data=self.all_data
-        
+
         fd=x_data_s['tasks'][field_name]#fd=field_data
         htm_1=DIV(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
         if 'hide' in fd['prop']:
             return [htm_1,'*','']
-        if 'auth' in fd and (not k_user.auth(fd['auth'])):
-            return [htm_1,'*',''] 
+        if 'auth' in fd :
+            if (not k_user.user_in_xjobs(fd['auth'],x_data_s,c_form=self)):
+                return [htm_1,'*',''] 
         if mode=='output-mini':
             if 'file'!= fd['type'] : mode='output'
             
-        x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request)
+        x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request,c_form=self)
         return [htm_1,x_obj[mode],x_obj['help']]
         #------------------------------------------------- 
-    def un_what_can_do_4_step(self,x_step,x_un=''):
+    def un_what_can_do_4_step(self,step_name,x_un=''):
         ''' 030907
         goal:
             کاربر آ چه کاری در مرحله ب می تواند انجام دهد
@@ -1525,31 +1545,55 @@ class C_FORM():
                 ret_edit : can return 4 edit می تواند فرم را برای انجام تغییر به 1 مرحله قبل برگرداند   
         '''    
         import k_user        
-        #print(f' ? user_in_jobs_can-x_step:{x_step},un={x_un}')
-        if k_user.user_in_jobs_can('edit',self.x_data_s,self.form_sabt_data,step_index=x_step,un=x_un):
-            #print(f'user_in_jobs_can-x_step:{x_step},un{x_un}')
-            return self.step_state(x_step)
-        if k_user.user_in_jobs_can('view',self.x_data_s,self.form_sabt_data,step_index=x_step,un=x_un):
+        #print(f' ? user_in_xjobs_can-step_name:{step_name},un={x_un}')
+        if k_user.user_in_xjobs_can('edit',self.x_data_s,c_form=self,step_index=step_name,un=x_un):
+            #print(f'user_in_xjobs_can-step_name:{step_name},un{x_un}')
+            return self.step_state(step_name)[1]
+        if k_user.user_in_xjobs_can('view',self.x_data_s,c_form=self,step_index=step_name,un=x_un):
             return 'view'
         return '-'
-    def step_state(self,x_step):
+    def step_state(self,step_name):
         '''
             مشخص کردن اینکه 1 مرحله در وضعیت آماده برای ویرایش می باشد - با توجه به نتایج مراحل دیگر
+            step_state= str 0 to 4
+                '0': filled and not can review - start & end (where)
+                '1': filled and     can review - start & not end (where) & filled
+                '2': curent for fill           - start & not end (where) & not filled
+                '3': empty or fill and review  - not start (where)
+                
+                
         '''
-        step=self.x_data_s['steps'][f'{x_step}']
-        start_wehre=step['start_wehre'] #"'{step_0_ap}' =='y' and not '{step_2_ap}' in ['y','x']"
-        #print(start_wehre)
-        start_wehre_prs=start_wehre.format(**self.all_data)
-        #print(start_wehre_prs)
-        start_wehre_v=eval(start_wehre_prs)
-        if start_wehre_v:# x_step == self.f_nxt_s:
-            if self.all_data[f'step_{x_step}_ap'] in ['y','x']:  #x_step == self.f_nxt_s-1:
-                #print('ret_edit {x_step}')
-                return 'ret_edit'
+        step=self.x_data_s['steps'][f'{step_name}']
+        start_where=step['start_where'] #"'{step_0_ap}' =='y' and not '{step_2_ap}' in ['y','x']"
+        end_where=step['end_where']
+        #print(start_where)
+        start_where_prs=start_where.format(**self.all_data)
+        end_where_prs=end_where.format(**self.all_data)
+        start=eval(start_where_prs)
+        end=eval(end_where_prs)
+        ss=f"start_where={start_where},end_where={end_where}"
+
+        if not start:
+            act_where=3 #befor
+        elif end:
+            act_where=0 #after
+        else:
+            act_where=1 #current
+            #print(start_where_prs)
+            #act_where_v=eval(start_where_prs) and not eval(end_where_prs)
+            #if act_where==1:# step_name == self.f_nxt_s:
+            if self.all_data[f'step_{step_name}_ap'] in ['y','x']:  #step_name == self.f_nxt_s-1:
+                #print('ret_edit {step_name}')
+                act_where=1
+                return [act_where,'ret_edit',ss]
             else:
-                #print(f'form_sabt_data => {x_step} => {start_wehre}'+ "---" + start_wehre_prs + " : " + str(start_wehre_v) )
-                return 'edit'    
-        return 'view'
+                #print(f'form_sabt_data => {step_name} => {start_where}'+ "---" + start_where_prs + " : " + str(start_where_v) )
+                act_where=2
+                return [act_where,'edit',ss]  
+        return [act_where,'view',ss]
+    def report(self):
+        import k_err
+        k_err.xreport_var([{'all_data':self.all_data,'new_data':self.new_data,'form_sabt_data':self.form_sabt_data}])
 def get_x_data_s(db_name,tb_name):
     from x_data import x_data
     if not db_name in x_data:return False,'error : "{}" not in ( x_data )'.format(db_name)
@@ -1602,13 +1646,13 @@ def input_validate(in_data,data_inf):
 def chidman(hx,x_data_s,step,form_case=2,request=''):
     import k_user,k_tools
     form_case=k_tools.int_force((request.post_vars['form_case'] or request.get_vars['form_case']) if request else form_case,form_case)
-    xusers=k_user.xusers_inf(step['jobs'],x_data_s)
+    xjobs=k_user.xjobs_inf(step['xjobs'],x_data_s)
     
     
     if form_case==1:
         return [DIV(
                     DIV(hx['stp'],_class='col text-right'),
-                    DIV(xusers['describe'],_title=xusers['inf'],_class='col text-warning',_dir='rtl'),
+                    DIV(xjobs['describe'],_title=xjobs['inf'],_class='col text-warning',_dir='rtl'),
                     _class='row text-light bg-dark' )
                 ]+hx['data']+[
                     DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
@@ -1618,7 +1662,7 @@ def chidman(hx,x_data_s,step,form_case=2,request=''):
         htm_1=[DIV(x,_class='row') for x in hx['app']]
         return DIV(
                     DIV(DIV(hx['stp'],_class='row'),
-                        DIV(xusers['describe'],_title=xusers['inf'],_class='row text-warning'),
+                        DIV(xjobs['describe'],_title=xjobs['inf'],_class='row text-warning'),
                         _class='col-2 text-right border-left text-light bg-dark'),
                     DIV(hx['data'],_class='col-8'),
                     DIV(htm_1,_class=f"col-2 {hx['app-color']}"),

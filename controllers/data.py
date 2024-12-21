@@ -257,9 +257,11 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s):#,all_cols,ref
         if 'hide' in tasks[fn]['prop']:#auth
             tds.append('*')
             continue
-        if 'auth' in tasks[fn] and (not k_user.auth(tasks[fn]['auth'])):
-            tds.append('*')
-            continue
+        if 'auth' in tasks[fn]:
+            c_form=k_form.C_FORM(x_data_s,xid)
+            if (not k_user.user_in_xjobs((tasks[fn]['auth'],x_data_s,c_form))):
+                tds.append('*')
+                continue
         if 'file'== tasks[fn]['type']:
             tds.append(k_form.obj_set(i_obj=tasks[fn],x_dic=x_dic,x_data_s=x_data_s,xid=xid, need=['output-mini'])['output-mini'])
             continue   
@@ -648,7 +650,7 @@ def xtable():
         return x_dict.add({'table':msg})
     else:
         if 'auth' in x_data_s['base']:
-            if not (session["admin"] or k_user.user_in_jobs_can('view',jobs=x_data_s['base']['auth'])):
+            if not (session["admin"] or k_user.user_in_xjobs_can('view',jobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))})
         if not ('all' in x_data_s['views']) :

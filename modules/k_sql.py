@@ -107,17 +107,18 @@ class C_SQL():
             xxxprint(msg=["error","where type not correct",''],launch=True)
     #-------------------------------------------
     def add_limit(self,sql,offset,page_n,page_len,limit,order,last):
+        x_order = f' ORDER BY ' + order if order else ''
+        x_order += ' DESC' if (last and order) else ''
+        sql = sql+x_order
         if not limit:return sql
-        x_order = f'ORDER BY ' + order
-        x_order += ' DESC' if last else ''
         if offset:        
-            return sql+f' {x_order} limit {offset},{limit}' if limit else sql
+            return sql+f' limit {offset},{limit}' if limit else sql
         else:   #if page_n:
             from k_tools import int_force
             x_page=int_force(page_n,1) 
             x_page_len=int_force(page_len,20) 
             x_offset=(x_page-1) * x_page_len 
-            return sql+f' {x_order} limit {x_offset},{x_page_len}' if limit else sql
+            return sql+f' limit {x_offset},{x_page_len}' if limit else sql
 #===================================================================================
 class DB1():
     import sqlite3
@@ -132,7 +133,10 @@ class DB1():
         else: 
             if not path:path= db_path
             path=path+db_name+"."+ext   #'example2.db'
-        self.con = self.sqlite3.connect(path)
+        try:
+            self.con = self.sqlite3.connect(path)
+        except:
+            print('error on connect to =>'+path)
         self.cur = self.con.cursor()
         self.path=path
         self.get_tables_name()#prn=True)
@@ -164,7 +168,7 @@ class DB1():
                 xxxprint(msg=[self.dbn,str(result['done'])+ " - " + sql,self.path],vals=result)
         except Exception as err:
             result.update({'done':False,'Error':str(err),'val_list':val_list})  
-            xxxprint(msg=['err',sql, self.path],err=err,vals=result)
+            xxxprint(msg=['err',err, self.path],err=err,vals={'result':result,'sql':sql})
         return result
     def _connect_sql(self,db_file= r"data.db"):
         """ create a database connection to the SQLite database specified by db_file
@@ -266,7 +270,7 @@ class DB1():
         sql='''CREATE TABLE "{}" (
                         {});'''.format(table_n,field_t)
         #sql='''CREATE TABLE IF NOT EXISTS "xx" (`id` INTEGER PRIMARY KEY AUTOINCREMENT);'''
-        xprint(sql)
+        xxxprint(3,msg=['do','define_table',self.dbn],vals={'sql':sql})
         try:
             rep=self._exec(sql)
         except:
@@ -287,7 +291,7 @@ class DB1():
         except Exception as err:
             result['count']=0
             result.update({'done':False,'Error':str(err)})  
-            xxxprint(msg=['err','count',table_name],vals=result)
+            xxxprint(msg=['err','count',f"{self.dbn}.{table_name}"],vals=result)
         return result    
     #--------------------------------------------
     def sql_set(self,_top,_fields_name,_table_name, _where , _order):
@@ -314,8 +318,7 @@ class DB1():
         rows_num=self.count(table_name=table_name,where=where)['count']
         sql_where=C_SQL().where(where)
         sql_x=sql or "SELECT * FROM {}".format(table_name)
-        sql_x+=sql_where
-               
+        sql_x+=sql_where     
         sql_x=C_SQL().add_limit(sql_x,offset,page_n,page_len,limit,order,last)
             
         x_re=self._exec(sql_x,fetch=True)
@@ -569,5 +572,9 @@ class DB1():
             x_o[key_text_format.format(*xx)]=val_text_format.format(*xx)
         return x_o    
 #======================================================================================================================
-
+    def export(tb_name,cols,data):
+        rep['table']=self.define_table(tb_name,fields_txt='id INTEGER PRIMARY KEY AUTOINCREMENT,', fields_order={"TEXT":cols}) 
+        rep['rows']=[]
+        for row in rows:
+            rep['rows']+=self.insert_data(tb_name,cols,row)
  

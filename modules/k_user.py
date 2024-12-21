@@ -18,12 +18,12 @@ job help
 --------
 job = 1 obj define by 1 form and have:
     'title','users','base_user'
-xuser = 1 extra text for define users by:
+xjob = 1 extra text for define users by:
     job.code :
     1 field of form :
     1 step of form :
     
-"""                
+"""              
 class USER_LOG():
     inf={}
     def __init__(self,ip='',un='',xtime=''):
@@ -75,18 +75,22 @@ class ALL_USERS():
 #a_users=load_user_inf()
 #all_users=ALL_USERS()
 
-def load_job_inf():
+def jobs_load_inf():
     db1=DB1('job')
     rows,titles,rows_num=db1.select('a',where={},limit=0)
     jobs={}
     for row in rows:
         j_inf=dict(zip(titles,row))
-        jobs[j_inf['code']]={x:j_inf[x] for x in ['title','users','base_user']} 
+        jobs[j_inf['code']]={x:j_inf[x] for x in ['title','base_user']} 
+        jobs[j_inf['code']]['users']=j_inf['users'].split(',')
     return jobs
-a_jobs=load_job_inf()
-def user_in_jobs_can(do,x_data_s={},form_sabt_data={},step_index=0,un='',jobs=''):
+a_jobs=jobs_load_inf()
+
+def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):###
+    step_name=step_index
+    form_sabt_data=c_form.form_sabt_data if c_form else {}
     '''
-        according form_inf(form_sabt_data) retun that user(un) can act(do) in jobs(jobs or steps[step_index]['jobs']) ?  
+        according form_inf(form_sabt_data) retun that user(un) can act(do) in xjobs(xjobs or steps[step_name]['xjobs']) ?  
         مشخص می کند که آیا کاربر مشخص شده می تواند اقدام مشخص شده را بر اساس شغل مجاز تعریف شده یا 
         مرحله مشخص شده ( و شغل مجاز آن) انجام دهد یا خیر 
 
@@ -102,14 +106,14 @@ def user_in_jobs_can(do,x_data_s={},form_sabt_data={},step_index=0,un='',jobs=''
             data of recored form for user(#task#<task_name>,#step#<n> )    
         un:str
             username
-        jobs=str list :optional_1
+        xjobs=str list :optional_1
             list of job_code separate by ,
-            '' : steps[step_index]['jobs']
-        step_index:int :optional_1
+            '' : steps[step_name]['xjobs']
+        step_index:str :optional_1
             selected step of 1 form
     optional_1:
-        1 of jobs , (x_data_s, step_index) is need
-        if jobs : ignor (x_data_s, step_index)
+        1 of xjobs , (x_data_s, step_index) is need
+        if xjobs : ignor (x_data_s, step_index)
     '''
     if not un:
         from gluon import current
@@ -117,27 +121,40 @@ def user_in_jobs_can(do,x_data_s={},form_sabt_data={},step_index=0,un='',jobs=''
         un=session["username"]
     if not un:
         return False
-    if not jobs:
+    if not xjobs:
         import k_user,k_tools
-        jobs=k_tools.nth_item_of_dict(x_data_s['steps'],step_index)['jobs']
+        xjobs=x_data_s['steps'][step_name]['xjobs'] #k_tools.nth_item_of_dict(x_data_s['steps'],step_name)['xjobs']
 
-    #xxxprint(out_case=3,msg=['user_in_jobs_can',jobs,un],vals=form_sabt_data)
-    for job in jobs.split(','):
+    #xxxprint(out_case=3,msg=['user_in_xjobs_can',xjobs,un],vals=form_sabt_data)
+    step=x_data_s['steps'][step_name]
+    for xjob in xjobs.split(','):
         if do=='view':
-            return True  
-        if job =='*':
-            if do=='creat':
+            if not 'auth' in step :
+                return True  
+            else:
+                for xjob in step['auth'].split(','):
+                    users_list=C_XJOB(xjob,x_data_s,c_form).users_list() 
+                    if un in users_list:return True
+        elif xjob =='*':
+            if do == 'creat':
                 return True
-            if do=='edit':
-                step_un=form_sabt_data.get(f'step_{step_index}_un','')
-                if ((not step_un) or (un==step_un)):return True
-            
+            elif do == 'edit':
+                step_un=form_sabt_data.get(f'step_{step_name}_un','')
+                if ((not step_un) or (un==step_un)):
+                    import k_err
+                    k_err.xxxprint(3,msg=[step_un,un])
+                    return True
             return False   
-        if job[0] != "#":
-            if (un in a_jobs[job]['users'].split(',')) or (un == a_jobs[job]['base_user']):
+        else:
+            users_list=C_XJOB(xjob,x_data_s,c_form).users_list() 
+            #xxxprint(3,msg=['users_list',users_list,''])
+            if un in users_list:return True
+        '''
+        if xjob[0] != "#":
+            if (un in a_jobs[xjob]['users']) or (un == a_jobs[xjob]['base_user']):
                 return True #for do==creat / edit /view
-        if job[0] == "#" and  len(job) > 6:
-            jx=job.split('#')
+        if xjob[0] == "#" and  len(xjob) > 6:
+            jx=xjob.split('#')
             if jx[1]=="task":
                 
                 x_un=form_sabt_data.get(jx[2],'')
@@ -148,17 +165,20 @@ def user_in_jobs_can(do,x_data_s={},form_sabt_data={},step_index=0,un='',jobs=''
                 x_un=form_sabt_data.get(f'step_{jx[2]}_un','')
                 #print('x_un=',x_un)
                 if un==x_un:return True
+        '''
     #print("user_in_jobs=>false")
     return False
 
-def _step_changer(step_index,form_sabt_data):
+def _step_changer(step_index,form_sabt_data):###
     '''
         مشخص کردن فردی که می تواند یک مرحله پر شده از یک فرم را تغییر دهد
     '''
     return form_sabt_data.get(f'step_{step_index}_un','')
 
-def jobs_masul(x_data_s,step_index,form_sabt_data,form_all_data ):
+def jobs_masul(x_data_s,step_index,c_form,form_all_data ):
     '''
+        used in x_nxt_u
+        
         according form_inf(form_sabt_data) return masul of jobs  
         مسئول یک شغل را مشخص می کند - کسی که باید جواب یک مرحله یک فرم را بدهد
         از اطلاعات _ ردیف برای اطلاعات تکمیلی برای کاربر های خاص بر اساس مرحله و یا فیلد استفاده می کند
@@ -177,21 +197,20 @@ def jobs_masul(x_data_s,step_index,form_sabt_data,form_all_data ):
         un:str
             username
     '''
+    form_sabt_data=c_form.form_sabt_data
     #breakpoint()
-    import k_tools
-    if step_index>=len(x_data_s['steps']):
-        return 'y' # y=form is fill ok 
-    #if x_data_s['steps']['jobs']=='*':   
+    #import k_tools
+    
     x_step_changer=_step_changer(step_index,form_sabt_data)
     if x_step_changer: return x_step_changer    
     if form_sabt_data['f_nxt_u'] in ['y','x']:  # y=form is fill ok ,x=form is remove / kill
-        return form_sabt_data['f_nxt_u']
-    x_step=k_tools.nth_item_of_dict(x_data_s['steps'],step_index,up_result='y')
-    
-    job=x_step['jobs']
-    #import k_err
-    #k_err.xreport_var(['!!',x_step,job])
+        return form_sabt_data['f_nxt_u']    
+
+    x_step=x_data_s['steps'][step_index]
+
     if 1>0: #try:
+        return C_XJOB(x_step['xjobs'],x_data_s,c_form).users_list()[0]
+        '''
         if job[0] != "#":
             if job[0]=='*':return ''
             return a_jobs[job]['base_user']
@@ -203,12 +222,14 @@ def jobs_masul(x_data_s,step_index,form_sabt_data,form_all_data ):
             elif jx[1]=="step":          
                 x_un=form_sabt_data[f'step_{jx[2]}_un']
                 return x_un
+        '''
     #except:
     #    return ''
-class C_XUSER():
-    def __init__(self,xuser_code,x_data_s):
-        self.code=xuser_code
+class C_XJOB():
+    def __init__(self,xjob_code,x_data_s,c_form=''):
+        self.code=xjob_code
         self.x_data_s=x_data_s
+        self.c_form=c_form
     def describe(self):
         '''
         توصیح افراد عضو یک سمت
@@ -232,89 +253,42 @@ class C_XUSER():
         '''
         افراد عضو یک سمت
         بر اساس سمتهای تعریف شده در یک مرحله از فرم
+        فرد مسئول در آیتم شماره 0 لیست بر گردانده می شود
         '''
         code=self.code
         if code =='*':
-            return '*'
+            return ['','*']
         elif code[0] != "#":
-            return a_jobs[code]['users']
+            return [a_jobs[code]['base_user']]+a_jobs[code]['users']
         elif code[0] == "#" and  len(code) > 6:
             jx=code.split('#')
             if jx[1]=="task":
-                return '?'
+                x_un=self.c_form.all_data.get(jx[2],'') if self.c_form else '?'
+                return [x_un]
             elif jx[1]=="step":
-                return '?'
+                x_un=self.c_form.all_data.get(f'step_{jx[2]}_un','') if self.c_form else '?'
+                return [x_un]
  
-def xusers_inf(jobs,x_data_s):
+def xjobs_inf(jobs,x_data_s,c_form=''):
     '''
     توصیح افراد عضو یک سمت
     بر اساس سمتهای تعریف شده در یک مرحله از فرم
     '''
     t_d,t_i=[],[]
+    t_users=set()
     for job in jobs.split(','):
-        c_xuser=C_XUSER(job,x_data_s)
-        t_d+=[c_xuser.describe()]
-        t_i+=[c_xuser.users_list()]
-    xusers={
-    'describe':"".join(t_d),
-    'inf':"".join(t_i)}
-    
-    '''
-        if job =='*':
-            tt+=['همه همکاران']
-            continue
-        elif job[0] != "#":
-            tt+=[a_jobs[job]['title']]
-            continue
-        elif job[0] == "#" and  len(job) > 6:
-            jx=job.split('#')
-            if jx[1]=="task":
-                tt+=[' ' + x_data_s['tasks'][jx[2]]['title']]
-                #xxxprint(vals=x_data_s['tasks'],launch=True)
-                continue
-            elif jx[1]=="step":
-                #xxxprint(msg=['',str(jx),''],launch=True)
-                tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1) + ' فرم جاری ']
-                
-                continue
-        '''        
-    return xusers
-def auth(auth_jobs):
-    '''
-        آیا کاربر جاری حق دسترسی به این بخش را دارد 
-    inputs:
-    ------
-        auth_jobs:str   jobs str_list separate by ,
-            jobs that can access (read) data of cur section of program
-    '''
-    from gluon import current
-    session=current.session
-    res=(session["admin"] or user_in_jobs(auth_jobs))
-    #print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
-    return res
+        c_xjob=C_XJOB(job,x_data_s,c_form)
+        t_d+=[c_xjob.describe()]
+        t_users.update(c_xjob.users_list())
+    xjobs={
+    'describe':",".join(t_d),
+    'inf':",".join(list(t_users))
+    }     
+    return xjobs
+
 #--------------------------------------------------------------- not used
 
-def jobs_masul_old(jobs,x_data_s):
-    '''
-        مسئول اصلی انجام یک سمت
-    '''
-    tt=[]
-    for job in jobs.split(','):
-        if job =='*':
-            tt+=['همه همکاران']
-            continue
-        elif job[0] != "#":
-            tt+=[a_jobs[job]['title']]
-            continue
-        elif job[0] == "#" and  len(job) > 6:
-            jx=job.split('#')
-            if jx[1]=="task":
-                tt+=[x_data_s['tasks'][jx[2]]['title']+'تکمیل کننده فیلد']
-                continue
-            elif jx[1]=="step":
-                tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
-                continue
-    return tt
+
 def how_is_connect(subject,shoud_login=True):
     import k_date,os
     from gluon import current
@@ -347,64 +321,35 @@ def user_is_login(func):
         # Do something after
         return value
     return wrapper_decorator
-#-------- unused---------------------------------------------------------
-def can_user_edit_step(step,step_index,form_sabt_data,un=''):
+
+def user_in_xjobs(xjobs,x_data_s,un='',c_form=''):
     '''
-       آیا کاربر مشخص شده می تواند مرحله مشخص شده را تغییر دهد
-       اگر کاربری مشخص نشود کاربر جاری در نظر گرفته می شود
-    '''
-    if not un:
-        from gluon import current
-        session=current.session
-        un=session["username"]
-    """
-        first chek that target_step if filled older   
-        ابتدا بررسی می کنیم که آیا بخش مورد نظر از فرم قبلا پر شده است یا خیر
-        قبلا پر شده یعنی فرم برگشت خورده است
-    """
-    x_step_changer=_step_changer(step_index,form_sabt_data)
-    if x_step_changer: 
-        return x_step_changer==un # if user is editor of x_step
-        
-    return user_in_jobs(step['jobs'],row_data=form_sabt_data)
-    #return form_sabt_data[f'step_{step_index}_un']    
-def user_in_jobs(xusers,row_data={},un=''):
-    '''
-        according form_inf(row_data) retun that un is in xusers ?  
+        old name = user_in_jobs
+        row_data={} : old = > c_form.all_data
+        according form_inf(row_data) retun that un is in xjobs ?  
         مشخص می کند که آیا کاربر مشخص شده در شغلهای مشخص شده می باشد یا خیر 
         از اطلاعات _ ردیف برای اطلاعات تکمیلی برای کاربر های خاص بر اساس مرحله و یا فیلد استفاده می کند
     inputs:
     -------
         un:str
             username
-        xusers=list of xuser_code separate by ,
+        xjobs=list of xjob_code separate by ,
         row_data:dict
             data of recored form for user(#task#<task_name>,#step#<n> )
     '''
-    if not un:
-        from gluon import current
-        session=current.session
-        un=session["username"]
-    if not un:
-        return False
-    #xxxprint(msg=['user_in_jobs',xusers,un],vals=row_data)
-    for xuser in xusers.split(','):
-        if xuser =='*':return True
-        if xuser[0] != "#":
-            if (un in a_jobs[xuser]['users'].split(',')) or (un == a_jobs[xuser]['base_user']):
-                return True
-        if xuser[0] == "#" and  len(xuser) > 6:
-            jx=xuser.split('#')
-            if jx[1]=="task":
-                
-                x_un=row_data[jx[2]]
-                #print('x_un=',x_un)
-                if un==x_un:return True
-            elif jx[1]=="step":
-                
-                x_un=row_data[f'step_{jx[2]}_un']
-                #print('x_un=',x_un)
-                if un==x_un:return True
+    from gluon import current
+    session=current.session
+    
+    if session["admin"]:return True
+    
+    if not un: un=session["username"]
+    
+    if not un:  return False
+    #xxxprint(msg=['user_in_jobs',xjobs,un],vals=row_data)
+    for xjob in xjobs.split(','):
+        users_list=C_XJOB(xjob,x_data_s,c_form).users_list()   
+        #xxxprint(3,msg=[xjob,users_list,('t' if c_form else 'f')])
+        if '*' in users_list or un in users_list:return True
     #print("user_in_jobs=>false")
     return False
 
@@ -424,7 +369,7 @@ class C_AUTH_FORM():
         '''
         from gluon import current
         if not 'auth' in self.x_data_s['base']:return {'auth':True}
-        if current.session["admin"] or user_in_jobs_can('view',jobs=self.x_data_s['base']['auth']):return {'auth':True}
+        if current.session["admin"] or user_in_xjobs_can('view',x_data_s=self.x_data_s,jobs=self.x_data_s['base']['auth']):return {'auth':True}
         return {'auth':False,'msg':"شما اجازه دسترسی به این فرم را ندارید"}
     def auth_where(self):
         '''
@@ -437,4 +382,73 @@ class C_AUTH_FORM():
                 auth_prj_v=current.session['auth_prj']
                 return {self.x_data_s['base']['auth_prj']:auth_prj_v.split(",") if auth_prj_v else ['  ']}
         return ''
+#-------- unused---------------------------------------------------------
+def can_user_edit_step(step,step_index,x_data_s,form_sabt_data,un=''):
+    '''
+       آیا کاربر مشخص شده می تواند مرحله مشخص شده را تغییر دهد
+       اگر کاربری مشخص نشود کاربر جاری در نظر گرفته می شود
+    '''
+    if not un:
+        from gluon import current
+        session=current.session
+        un=session["username"]
+    """
+        first chek that target_step if filled older   
+        ابتدا بررسی می کنیم که آیا بخش مورد نظر از فرم قبلا پر شده است یا خیر
+        قبلا پر شده یعنی فرم برگشت خورده است
+    """
+    x_step_changer=_step_changer(step_index,form_sabt_data)
+    if x_step_changer: 
+        return x_step_changer==un # if user is editor of x_step
+        
+    return user_in_jobs(step['xjobs'],x_data_s,c_form=c_form)
+    #return form_sabt_data[f'step_{step_index}_un']    
 
+def jobs_masul_old(jobs,x_data_s):
+    '''
+        مسئول اصلی انجام یک سمت
+    '''
+    tt=[]
+    for job in jobs.split(','):
+        if job =='*':
+            tt+=['همه همکاران']
+            continue
+        elif job[0] != "#":
+            tt+=[a_jobs[job]['title']]
+            continue
+        elif job[0] == "#" and  len(job) > 6:
+            jx=job.split('#')
+            if jx[1]=="task":
+                tt+=[x_data_s['tasks'][jx[2]]['title']+'تکمیل کننده فیلد']
+                continue
+            elif jx[1]=="step":
+                tt+=['تکمیل کننده بخش شماره '+str(int(jx[2])+1)]
+                continue
+    return tt
+def auth(auth_jobs,x_data_s,c_form):
+    '''
+        آیا کاربر جاری حق دسترسی به این بخش را دارد 
+    inputs:
+    ------
+        auth_jobs:str   jobs str_list separate by ,
+            jobs that can access (read) data of cur section of program
+    '''
+    from gluon import current
+    session=current.session
+    res=(session["admin"] or user_in_xjobs(auth_jobs,x_data_s,c_form=c_form))
+    #print (f'un={session["username"]},session["admin"]={session["admin"]},auth_jobs={auth_jobs},res={res}')
+    return res
+def creat_scr_pass():
+    at='!@#$%^&*'
+    bt='abcdefghijklmnopqrstuvwxyz'
+    ct='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    dt='0123456789'
+    def sel(tt):
+        import random
+        mylist = list(tt)
+        return random.choice(mylist)
+    s1= sel(at)
+    #s2=    
+    return sel(at)+sel(ct)+"_"+sel(bt)+sel(bt)+sel(bt)+"-"+sel(dt)+sel(dt)+sel(dt)+sel(dt)+"-"+sel(bt)+sel(bt)+sel(bt)
+
+    

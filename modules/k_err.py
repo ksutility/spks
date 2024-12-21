@@ -503,7 +503,7 @@ def xxprint_reset_html(last_file_add=''):
 
 #---- test:
 #print (1)
-def xreport_var(x_var_list,reset=False):
+def xreport_var(x_var_list):#,reset=False
     import k_date
     import k_file,k_htm
     from gluon.storage import Storage

@@ -89,6 +89,9 @@ background: #ddd;
 		background: #aaa;
 		box-shadow: 0 0 50px #aaa;
 	}
+	
+	'{{=server_python_add}}/spks/tmsh/aqc_report_daily_pivot/user_day'>
+	'{{=server_python_add}}/spks/tmsh/aqc_report_daily_kytable'>
 	-->
 <div class="container-fluid main-container">
 <div class="row">
@@ -101,7 +104,7 @@ background: #ddd;
 		<h6> گزارش عملکرد همکاران طراحی </h6>
 		<br>
 		<div class="div_row">
-			<a class='btn' target='_blank' href='{{=server_python_add}}/spks/tmsh/aqc_report_daily_pivot/user_day'>
+			<a class='btn' target='_blank' href="{{=URL('tmsh','aqc_report_daily_pivot',args=['user_day'])}}" >
 				<img Class="GFG" src="{{=URL('static','icon/3d/wizard-report.gif')}}">
 			</a>
 			<div>
@@ -109,7 +112,7 @@ background: #ddd;
 			</div>
         </div>
         <div class="div_row">
-			<a class='btn' target='_blank' href='{{=server_python_add}}/spks/tmsh/aqc_report_daily_kytable'>
+			<a class='btn' target='_blank' href="{{=URL('tmsh','aqc_report_daily_kytable')}}" >
 				<img Class="GFG" src="{{=URL('static','icon/3d/man-report.gif')}}">
 			</a>
 			<div>

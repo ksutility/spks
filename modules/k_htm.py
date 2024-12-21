@@ -503,15 +503,16 @@ def select_x1(select_base_list,select_describ_list,onact_txt):
     else:
         h_code1=t1 +  "</select>" + "\n"
     return h_code1
-def a(txt,_href,_target="frame",_title='',_class='btn btn-primary'):
+def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True):
     #debug
     #return A(txt,_title=_title,_class=_class,_href=_href,_target="")
+    reset='true' if reset else 'false'
     if _target=="frame":
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
     elif _target=="box":   
-        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=f"""j_box_show("{_href}",true)""") 
+        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=f"""j_box_show("{_href}",{reset})""") 
     else:
-        return A(txt,_title=_title,_class=_class,_href=_href,_target="")
+        return A(txt,_title=_title,_class=_class,_href=_href,_target=_target)
 def xtd(td_list):#
     rep=""
     for td_obj in td_list:

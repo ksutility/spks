@@ -335,14 +335,17 @@ table th a{
 .a-active {
 	background-color: #f2ccff;
 }
-/* --------highlight cur item clicked in 1 list ------------------------------------------------------------	*/
-.form_step_befor{
+/* --------highlight cur item clicked in 1 list c2=cur------------------------------------------------------------	*/
+.form_step_c0{
 	background-color: #f5fff5
 }
-.form_step_cur{
-	background-color: #81dbe3;
+.form_step_c1{
+	background-color: #def;
 }
-.form_step_after{
+.form_step_c2,.form_step_cur{
+	background-color: #8de;
+}
+.form_step_c3{
 	background-color: #566;
 	color:#fff;
 }
@@ -404,4 +407,17 @@ div{
 }
 
 
-
+.file-pdf {
+	background-color: hsl(48,60%,80%);
+	border: 1px solid #111;
+	border-radius: 10px;
+	padding:10px;
+	color: white;
+	text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;
+	}
+.file-pdf:hover{
+	background-color: hsl(48,60%,60%);
+	border: 1px solid #fff;
+	text-shadow: 3px 3px 6px #fff;
+	box-shadow: 2px 2px;
+	}	

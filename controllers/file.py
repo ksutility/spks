@@ -194,7 +194,8 @@ def download():#ownload
     xpath=k_set.xpath(args[-1]) # check for access to files with "share_for_all"
     if args:
         path=xpath+'\\'.join(args)
-        if not os.path.exists(path):return f'file not exist => {path}'
+        if not os.path.exists(path):
+            return DIV(H2('فایل مورد نظر وجود ندارد'),DIV(path))
         #fn=args[0] if len(args)>0 else 'per.xlsx'
         #path=xpath+fn
         return response.stream(open(path,'rb'),chunk_size=4096)
