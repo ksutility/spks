@@ -19,8 +19,8 @@ k_user.how_is_connect('file')
 from k_file_w2p import FILES_X_TOOLS
 import k_set #share_value as share
 xpath=k_set.xpath()
-from k_set import K_set
-share_inf=K_set().share_inf
+from k_set import C_SET
+share_inf=C_SET().share_inf
 
 def _access_denied_msg():
     link=URL('user','login')
@@ -241,10 +241,10 @@ def delete():
     if not fwa['ok']:return fwa['msg']
     args=request.args
     def _delete(args):
-        from k_set import K_set
+        from k_set import C_SET
         xp=os.path.join(xpath,*args)
         k_file.file_delete_rcl(xp,recycle_sub_folder=args[0])
-        msgs=['Delete  Done Successfully','move to recycle:',f'===>   {K_set.recycle})','fome:',f'<=== {xp}']
+        msgs=['Delete  Done Successfully','move to recycle:',f'===>   {C_SET().recycle})','fome:',f'<=== {xp}']
         if request.vars.todo :
             msgs+=_update_todo(request.vars.todo,'')
         return "<br><h2>فایل /  فلدر با موفقیت پاک شد</h2><hr>"+'<br>'.join(msgs)

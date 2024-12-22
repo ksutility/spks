@@ -57,6 +57,9 @@ def compare_2_str(str1,str2):
     '''
     compare 2 str and make 1 brif report
     '''
+    str1=str1.strip().replace(" ",".")
+    str2=str2.strip().replace(" ",".")
+    #res={'dif_n':0}
     if str1!=str2:
         l1=len(str1)
         l2=len(str2)
@@ -73,13 +76,13 @@ def compare_2_str(str1,str2):
                 cm1+=str1[i]
                 cm2+=str2[i]
         if l1==l2:
-            return (f'(dif={dif_n} : "{cm1}" != "{cm2}")')
+            return (f'(dif={dif_n}, len={l1},{l2} : {cm1} != {cm2})')
         elif l==l1:
-            return (f'(dif={dif_n}+ : "{cm1}" != "{cm2}" + "{str2[l:]}")')
+            return (f'(dif={dif_n}+, len={l1},{l2} ,ex = {str2[l:]} : {cm1} != {cm2}{str2[l:]})')
         else:
-            return (f'(dif={dif_n}+ :  "{cm1}" + "{str1[l:]}" != "{cm2}" )')
+            return (f'(dif={dif_n}+, len={l1},{l2} ,ex = {str1[l:]}:  {cm1}{str1[l:]} != {cm2} )')
     else:
-        return True
+        return '='
 def do_compare_2_str():
     while True:
         x=ui.input([['str1',''],['str2','']])

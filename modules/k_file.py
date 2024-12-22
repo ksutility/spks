@@ -259,8 +259,8 @@ def file_delete_rcl(file_path,path='',delete_empty_folder=False,recycle_sub_fold
             1 folder name in recycle folder 
             for split each sum files in 1 folder
     '''
-    from k_set import K_set
-    rc=K_set.recycle
+    from k_set import C_SET
+    rc=C_SET().recycle
     if recycle_sub_folder: rc=os.path.join(rc,recycle_sub_folder)
     if path !='':
         file_path=os.path.join(path,file_path)

@@ -718,7 +718,7 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'name,user_crt,units,code','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'file_inc_v,file_inc_r,file_1cr_v,file_1cr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_code,file_inc_v,file_inc_r,file_1cr_v,file_1cr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'file_2fr_v,file_2fr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{

@@ -817,12 +817,56 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     jcode1="alert('" + msg + "');re=false;"
                     obj['input']+="<h1 style='color:#ff5555;' >" + msg + "</h1>"
             if _value!=au_txt:
-                obj["value"]=au_txt
-                msg1=_alert_not_match_value("AUTO Field (Computed) ",new_val=au_txt,old_val=_value)
-                obj['output_text']=obj['output']=XML(f'''
-                    <div >
-                    {au_txt}{msg1}
-                    ''')
+                import k_str
+                ddif=k_str.compare_2_str(au_txt,_value)
+                if ddif != '=':
+                    obj["value"]=au_txt
+                    
+                    #alert_not_match_value
+                    msg1=""" new = {new_val}\n old = {old_val} \n ------------- \n {ddif}""".format(new_val=au_txt,old_val=_value,ddif=ddif) if _value else ''
+                    msg2=update_1_obj_in_table({obj['name']:au_txt})
+                    msg3="""<h4 title="{des} \n {msg1} \n ============== \n {msg2}" class={_class}>{alert}</h4>""".format(
+                        msg1=msg1,msg2=msg2,des='تغییرات به شرح زیر می باشد',_class="bg-warning",alert="گزارش تغییر") if (msg1 or msg2) else ''
+                    
+                    obj['output_text']=obj['output']=XML(f'''<div >{msg3}{au_txt}</div>''')
+                    #obj['input']=XML(f'''<div >{obj['input']}{msg1}</div>''')
+                    #obj['help']=XML(f'''<div >{msg3}</div>''')
+                    obj['help']=DIV(XML(msg3))
+    #------------------------------------------------------------------------------------------------------------------
+    def update_1_obj_in_table(set_dic,x_where=''):
+        #saved_file_fullname,new_file_fullname)
+        '''
+        inputs:
+        ------
+            set_dic : dict
+                exam = {obj['name']:new_file_fullname},
+            x_where : none / dict / str /list 
+                exam = {obj['name']:saved_file_fullname}
+                none => update cur id = {'id':<cur_id>}
+        '''
+        if c_form:
+            if hasattr(c_form, 'db1'):
+                db1=c_form.db1 
+            else:
+                #from k_sql import DB1
+                db1=DB1(c_form.db_name)
+            tb_name=c_form.tb_name
+            xid=c_form.xid
+        else:
+            db1=DB1(obj['db_name'])
+            tb_name=obj['tb_name'] 
+        #obj_name=obj['name']
+        if not x_where:
+            if xid:
+                if xid>0:
+                    x_where={'id':xid}
+                else:
+                    return '--'
+            else:
+                return 'error : not find id - c_form is not present'
+        res1=db1.update_data(tb_name,set_dic,x_where)
+        return XML(res1['msg'])
+    #------------------------------------------------------------------------------------------------------------------        
     if sc=='text':
         def htm_correct(x):
             if x:
@@ -1010,7 +1054,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
             elif obj['auto']=='_cur_user_id_':obj2['auto']='{{=session["username"]}}'
             elif obj['auto']=='_cur_user_name_':obj2['auto']='{{=session["user_fullname"]}}'
-        return obj_set(obj2,x_dic,x_data_s,xid, need,request)
+        return obj_set(obj2,x_dic,x_data_s,xid, need,request,c_form)
             #x_auto()    
     elif sc=="index":
         if 'input' in need:
@@ -1042,6 +1086,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
         show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
         obj['s_ext']=_value.rpartition(".")[2] #s_xt=saved_extention
+        
+        import k_set,os 
+        obj['true_path']=os.path.join(*[x for x in [k_set.C_SET().base_folder,'auto']+obj['path'].split(',') if x])
+        
         import json
         todo=json.dumps({'do':'sql','db':db_name,'tb':tb_name,'set_dic':{obj['name']:"$filefullname$"},'where':{'id':xid}})
         
@@ -1059,57 +1107,111 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             '''
             if old_file_full_name and new_file_name:
                 old_file_name=old_file_full_name.rpartition(".")[0]
-                return _alert_not_match_value("File Name (Computed) ",new_file_name,old_file_name)
+                
+                #alert_not_match_value
+                msg="""<div title="{alert} \n --------- \n{des} \n new = {new_val}\n old = {old_val}" class={_class}><a href={href}><h4>R</h4></a></div>""".format(
+                    new_val=new_file_name,old_val=old_file_name,
+                    des='نام فایل باید به شرح زیر تغییر پیدا کند',_class="bg-warning",
+                    href=URL(args=current.request.args,vars={'rename_file':1}),
+                    alert="نیاز به تغییر نام") if (new_file_name !=old_file_name) else ''
+                
+                return msg
                 #if old_file_name !=new_file_name :return f"""<h3 title="file name is not match \n new computed name = {new_file_name}\n old name = {old_file_name}" class="bg-danger">error<h3>""" 
             return ''
-        msg1=file_rename_manage(_value,obj['file_name'])#check fine is renamed ?
+        #----------------------------------------------------------------
+        
+        # alert_not_match_value : check file is exist - بررسی وجود فایل
+        file_path=os.path.join(obj['true_path'],_value)
+        file_exist=os.path.exists(file_path)
+        des="فایل پیدا نشد"
+        alert="عدم دسترسی به فایل"
+        if not file_exist:
+            msg1=[f"""<h4 title="{alert}\n -------- \n {des} \n path : \n {file_path}\n " class="btn-danger">?</h4>"""]
+        else:
+            msg1=[file_rename_manage(_value,obj['file_name'])]#check fine is renamed ?
+            
         if msg1 and c_form:
-            c_form.report()
-            xxxprint(3,msg=[_value,obj['file_name'],msg1],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value})
+            #c_form.report()
+            xxxprint(3,msg=[_value,obj['file_name'],''],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value,'msg1':msg1})
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>'''
         file_icon=obj['s_ext'] #"F"
         bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
         bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
-        
+        bt_del=''
+        msg2=DIV(*[XML(x) for x in msg1]) if msg1 else ''
+        #msg2=msg1 #if msg1 else ''
         obj['input']=XML(f'''
             <div >
-            {bt_view}{msg1}{bt_del}
+            {bt_view}{bt_del}
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
-        obj['output']=XML(f'''<div>{bt_view}{msg1}</div>''')    
-        obj['output-mini']=XML(f'''<div>{bt_view_mini}{msg1}</div>''')    
-        """    
+        obj['output']=XML(f'''<div>{bt_view}{msg2}</div>''')    
+        obj['output-mini']=XML(f'''<div>{bt_view_mini}{msg2}</div>''') 
+        obj['help']=msg2
+        
+        #os.path.join(
+        
+        """
         def path_x(pre_folder,file_name,pattern):
             path1=k_file.folderpath_maker_by_filename(file_name,pattern)
-            return "\\".join(x for x in [share.ksf["path_upload"],pre_folder,path1] if x)
-        def rename_file_in_form  (saved_file_fullname,new_filename,pre_folder,path_full_patern,path,obj_name):
+            return os.path.join([x for x in [share.ksf["path_upload"],pre_folder,path1] if x])
+        """    
+       
+        #---------------------------------
+        
+        def rename_file_in_form  ():
             '''
+            goal:
                 baresi mikonad ke agar name file avaz shode ast:
                     1-name file roy server ra avaz konad
                     2-name file dar database ra avaz konad 
                 compare saved_file_fullname ,new_filename
+            inputs:
+                saved_file_fullname
+                    =obj['value']
+                new_filename    
+            -------   
+                saved_file_fullname =str
+                    filename.ext
             '''
+            saved_file_fullname=obj['value']
+            new_filename=obj['file_name']
+            
             saved_file_name=saved_file_fullname.split(".")[0]
+            saved_file_ext=saved_file_fullname.split(".")[1]
+            new_file_fullname=new_filename + "." + saved_file_ext
             #saved_file_name="-" : for when file is optional
+            msg=''
             if saved_file_name.lower()!= new_filename.lower() and (saved_file_name!="-") and (saved_file_name!="") :
-                saved_file_ext=saved_file_fullname.split(".")[1]
-                old_path=path_x(pre_folder=pre_folder,file_name=saved_file_fullname,pattern=path_full_patern)
-                new_file_fullname=new_filename + "." + saved_file_ext
-                k_file.file_move(old_path,saved_file_fullname,path,new_file_fullname,true)
-                update_1_obj_in_table(new_file_fullname,obj_name)
-                ou1=["با توجه به تغییر مشخصات فایل نام فایل تغییر یافت" + "<br>",
-                    "old file name = " + saved_file_fullname + "<br>",
-                    "new file name = " + new_file_fullname + "<br>"]
-                return new_file_fullname
+              
+                #old_path=path_x(pre_folder=pre_folder,file_name=saved_file_fullname,pattern=path_full_patern)
+                path=obj['true_path']
+ 
+                res1=k_file.file_move((path,saved_file_fullname),(path,new_file_fullname))
+                
+                res2=update_1_obj_in_table(set_dic={obj['name']:new_file_fullname},x_where={obj['name']:saved_file_fullname})
+ 
+                msg=DIV("نام فایل تغییر یافت"
+                    ,_title="با توجه به تغییر مشخصات فایل نام فایل تغییر یافت"+f"""\n
+                    old file name = {saved_file_fullname} \n
+                    new file name = {new_file_fullname}\n -------- \n {res1}\n -------- \n {res2}""")
+            return new_file_fullname,msg
             #/compare
+        if 'rename_file' in request.vars:
+            new_file_fullname,msg=rename_file_in_form()
+            obj['help']=msg
+        else:
+            obj['help']=''
+        """   
         #---------------------------------------------------------------------------------################################
         saved_file_fullname= def_val
         #obj1={x:template_parser(obj[x]) for x in ['file_name','ext','path','pre_folder']}
 
         path=path_x(pre_folder=obj['pre_folder'],file_name=obj['name'],pattern=obj['path'])
         x_file.dir_make (path)
+        
         new_file_fullname=rename_file_in_form  (saved_file_fullname,obj['file_name'],obj['pre_folder'],obj['path_pattern'],path,obj_name)
         
         if "optional" in obj['prop'] :    
@@ -1144,7 +1246,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             
             or_v,js_ff_chek="",""   # msg is define correct in top of select
         """   
-        obj['help']=''
+        
+        #if c_form:c_form.report()
     elif sc=="do":
         do_name,do_param=base_data.split(share.st_splite_chr2)
         
@@ -1288,6 +1391,7 @@ class C_FORM():
             self.form_sabt_data={x:'' for x in titles}
         else:
             self.form_sabt_data=dict(zip(titles,rows[0]))
+        self.db1=db1 
     def set_step_app(self,cur_step_name,text_app,reset=False):
         '''
         input:
@@ -1602,9 +1706,9 @@ def get_x_data_s(db_name,tb_name):
     if not tb_name in x_data_s1:return False,'error : "{}" not in ( x_data["{}"] )'.format(tb_name,db_name)
     x_data_s=x_data_s1[tb_name]
     return x_data_s,'ok'
-def _alert_not_match_value(val_title,old_val,new_val):
+def _alert_not_match_value(old_val,new_val,_class="bg-danger",alert="error",des='تغییرات به شرح زیر می باشد'):
     if old_val !=new_val :
-        return f"""<h3 title="{val_title} is not match \n new = {new_val}\n old = {old_val}" class="bg-danger">error<h3>""" 
+        return f"""<h4 title="{des} \n new = {new_val}\n old = {old_val}" class={_class}>{alert}<h4>""" 
     return ''
 def input_validate(in_data,data_inf):
     '''

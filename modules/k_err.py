@@ -8,9 +8,9 @@ update 1400/11/19
 import sys
 import traceback
 from functools import wraps
-from k_set import K_set
-k_set=K_set()
-report_html=k_set.report_html
+from k_set import C_SET
+c_set=C_SET()
+report_html=c_set.report_html
 #from k_ui import input
 #import eel_ ui as ui
 def _func_inf(inspect_n=0,trace_n=0):
@@ -159,7 +159,7 @@ def _show(msg=['']):
         return(f'''</pre></div><div class="bg-primary w-100 text-light" onclick="$('#{n}').toggle();">{n}</div><div id="{n}" class"contents"><pre>''')
     from traceback_with_variables import print_cur_tb,print_exc
     traceback.print_exc()
-    fname=k_set.report_err_fname_crt()
+    fname=c_set.report_err_fname_crt()
     func=_func_inf()
     with open(fname,'a',encoding='UTF8') as file:
         file.write(hh)
@@ -510,9 +510,10 @@ def xreport_var(x_var_list):#,reset=False
     def storage_to_dict(x_storage):
         return {x:x_storage[x] for x in x_storage}
     def dict_report(x_var):
-        ttt=f'---- dict:len={len(x_var)}'+"-"*20+br+nl
-        ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])+nl
-        ttt+="++++"+br+nl
+        ttt=''
+        #ttt+=f'---- dict:len={len(x_var)}'+"-"*20+br+nl
+        #ttt+=br.join([f"{x} : { x_var[x]}" for x in x_var]+[''])+nl
+        #ttt+="++++"+br+nl
         ttt+=val_report(x_var)
         return ttt
     if type(x_var_list)==Storage:
@@ -526,7 +527,6 @@ def xreport_var(x_var_list):#,reset=False
     
     for i,x_var in enumerate(x_var_list):
         ttt+="="*3+f" {i} "+"-"*50+br+nl
-        
         if not x_var:
             ttt+='----- emplty value'+"-"*20+br+nl
             ttt+=f"val = {x_var}"+br+nl
@@ -535,9 +535,9 @@ def xreport_var(x_var_list):#,reset=False
         elif type(x_var)== Storage:
             ttt+=dict_report(storage_to_dict(x_var))
         elif type(x_var)== list:
-            ttt+=f'---- list:len={len(x_var)}'+"-"*20+br+nl
-            ttt+=br.join([f"{x}" for x in x_var]+[''])+nl
-            ttt+="++++"+br+nl
+            #ttt+=f'---- list:len={len(x_var)}'+"-"*20+br+nl
+            #ttt+=br.join([f"{x}" for x in x_var]+[''])+nl
+            #ttt+="++++"+br+nl
             ttt+=val_report(x_var)
        
             

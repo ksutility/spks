@@ -413,14 +413,16 @@ class DB1():
                 
         '''
         #try:
-        xr={}
+        
         if debug:xxxprint(msg=["start",'',''])
         sql_where=C_SQL().where(x_where)
+        xr={'where':sql_where}
         
         # بررسی وجود حداقل 1 رکورد با شرایط تعیین شده 
         find1=self.select(table=table_name,where=x_where,result='dict_x')
         r1="select {} from {}".format(x_where,table_name)
         if not find1['done']:#" any record not found"
+            xr['done']='0'
             xr['msg']=' هیچ ردیفی پیدا نشد'
             xr['msg']+=' لذا آپدیت انجام نشد '
             report_db_change(self.path,r1, [])
@@ -431,12 +433,12 @@ class DB1():
         s_set=self._dic_2_set(set_dic)
         
         xr['sql']='UPDATE {} SET {}' .format(table_name,s_set)+ sql_where
-        xr['where']=sql_where
         xr['exe']=self._exec(xr['sql'])
         xr['rowcount']=self.cur.rowcount
         r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
         if debug:xxxprint(msg=["data",'rowcount = updated',''] ,vals=xr)
         if xr['rowcount']==0:# any record not found
+            xr['done']='1'
             xr['msg']=' رکورد پیدا شد ولی تغییر توسط برنامه نتوانست اعمال شود'
             report_db_change(self.path,r1, [])
             return xr
@@ -445,14 +447,16 @@ class DB1():
         
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
         xr['dif_x']={} #different s
-        if not find2:   
+        xr['dif']={}
+        if (not find2) or (not find2['rows']):   
             rows2,titles2,row_num2=self.select(table_name,limit=0)
             id_list=[x[0] for x in rows2]
             for i,row in enumerate(find1['rows']):
+                id_1=row[0]
                 row=row[1:]
-                if not row[0] in id_list:
-                    xxprint('err_x',f'{row[0]} not in {str(id_list)}')
-                row_x= id_list.index(row[0])   
+                if not id_1 in id_list:
+                    xxprint('err_x',f'{id_1} not in {str(id_list)}')
+                row_x= id_list.index(id_1)   
                 row2=rows2[row_x]
                 dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
                 dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
@@ -475,6 +479,7 @@ class DB1():
                 xr['dif']=dif
                 xr['dif_x'][f1[0]]=[tt[j] for j in dif_list] 
                 xr['updtae_n']=len(dif)
+        xr['msg']=','.join(xr['dif'])       
         if debug:xxxprint(msg=["end",'',''] )
         return xr
         #except: #Error as e:   print(e)

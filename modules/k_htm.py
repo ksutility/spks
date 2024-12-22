@@ -251,11 +251,11 @@ class C_TABLE:
             #if tag_inf['tag']=='a' and tag_inf['onclick']:#file link
             #    vv=tag_inf['onclick']
             elif tag_inf['tag']=='a' and 'value' in tag_inf['items'][0] :
-                vv="A:"+tag_inf['items'][0]['value']+tag_inf['titele']
+                vv="A:"+tag_inf['items'][0]['value']+tag_inf['title']
             else:
                #vv=tag.flatten()#
                vv=str(tag_inf['text'])
-            print (f'file_path={file_path}')
+            #vv=tag.flatten()   
             return vv ,file_path
             
         def export_files(att_filepaths):
@@ -270,8 +270,6 @@ class C_TABLE:
                 k_file.file_copy(base_file,dest_file)
                 print (base_file)
                 print (dest_file)
-        import k_err
-        k_err.xxxprint(vals={'rows':rows})    
         #creat tbody of table
         for row in rows:
             tds=[]
@@ -298,8 +296,11 @@ class C_TABLE:
         
         #preper export
         tt="\ufeff" # BOM
-        k_err.xxxprint(vals={'att_filepaths':att_filepaths}) 
         export_files(att_filepaths)
+        
+        import k_err 
+        k_err.xreport_var ([{'trs':trs,'file_path':file_path,'rows':rows,'heads':heads,'att_filepaths':att_filepaths}])
+        
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
