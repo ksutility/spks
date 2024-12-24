@@ -253,10 +253,16 @@ class C_TABLE:
             elif tag_inf['tag']=='a' and 'value' in tag_inf['items'][0] :
                 vv="A:"+tag_inf['items'][0]['value']+tag_inf['title']
             else:
-               #vv=tag.flatten()#
-               vv=str(tag_inf['text'])
+                #vv=tag.flatten()#
+                #vv=str(tag_inf['text'])
+                tag2=c_tag.tag
+                try:
+                    vv=XML(tag)+"--" #tag2.flatten()
+                    #vv=str(eval(tag_inf['txt']).get('value'))
+                except Exception as err:
+                    vv="err:"+str(err)+ " : " +str(tag2) #str(tag_inf['txt'])
             #vv=tag.flatten()   
-            return vv ,file_path
+            return vv ,file_path,tag_inf
             
         def export_files(att_filepaths):
             if not att_filepaths:return
@@ -271,7 +277,10 @@ class C_TABLE:
                 print (base_file)
                 print (dest_file)
         #creat tbody of table
+        tag_infs=[]
+        
         for row in rows:
+            tag_inf_row=[]
             tds=[]
             for i,cell in enumerate(row):
                 
@@ -282,24 +291,26 @@ class C_TABLE:
                 elif type(cell) in [float,int]:
                     vv=cell
                 elif type(cell) in [gluon.html.XML]:
-                    vv,file_path =_tag_pars(cell)
+                    vv,file_path,tag_inf =_tag_pars(cell)
+                    tag_inf_row+=[tag_inf]
                     if file_path:att_filepaths.add(file_path)
                 else:
                     vv="error"
                 vv=str(vv)
                 tag=TAG(vv)
                 if "<" in vv or (('elements' in tag)):# and  len(tag['elements'])>1):
-                    vv,file_path =_tag_pars(cell)
+                    vv,file_path,tag_inf =_tag_pars(cell)
+                    tag_inf_row+=[tag_inf]
                     if file_path:att_filepaths.add(file_path)
-                tds+=[vv.replace("\n","")]    
+                tds+=[str(vv).replace("\n","")]    
             trs+=[tds]
-        
+            tag_infs+=[tag_inf_row]
         #preper export
         tt="\ufeff" # BOM
         export_files(att_filepaths)
         
         import k_err 
-        k_err.xreport_var ([{'trs':trs,'file_path':file_path,'rows':rows,'heads':heads,'att_filepaths':att_filepaths}])
+        k_err.xreport_var ([{'trs':trs,'file_path':file_path,'rows':rows,'heads':heads,'att_filepaths':att_filepaths,'tag_infs':tag_infs}])
         
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
@@ -438,7 +449,7 @@ def table_x_not_used(cols,rows,class_table=''):
     class_table='table'+class_table if class_table else 'table2'
     return TABLE(thead,TBODY(*trs),_class=class_table,_dir="rtl")
  #---------------------------------------
-def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):#k_htm.select
+def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):#k_htm.select ,readonly=''
     ''' (_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
         make 1 select html object
         update 01/08/09 ks
@@ -468,7 +479,8 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
         op=OPTION(value,_value=v)
         if vs and v in vs:op['_selected']='selected'
         opts+=[op]
-    sel=TAG.SELECT(*opts,_id=_name,_name=_name,_style="width:100%;",_onchange=XML(_onchange))
+
+    sel=TAG.SELECT(*opts,_id=_name,_name=_name,_style="width:100%;",_onchange=XML(_onchange),)
     ##import k_err
     ##k_err.xreport_var([vs,_dict,opts,sel])
     if _multiple:

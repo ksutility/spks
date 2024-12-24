@@ -139,21 +139,28 @@ class C_TAG():
         inf['text']=[]
         inf['el_tree']=[] #elements tree
         inf['elements']=str([x.tag for x in tag.elements()])
+        inf['txt']=tag.flatten()#eval().get('value')#','.join([x[0].decode() for x in tag.elements()])
         items=[]
         for x_part in tag:
             if type(x_part) in [gluon.html.__tag_div__]:
                 tip=self.tag_inf(x_part)
                 items+=[tip]
-                inf['text']+=[tip['text']]
+                inf['text']+=[str(tip['text'])]
                 inf['el_tree']+=[[tip['tag'],tip['el_tree']]]
+                
             else:
                 items+=[{'value':x_part,'type':'str'}]#str(type(x_part))}]
                 inf['text']+=[str(x_part)]
                 inf['el_tree']+=['str']
         inf['items']=items
-        inf['text']=",".join([str(x) for x in inf['text']])
+        inf['text']=",".join([str(x) for x in inf['text'] if x])
         inf['el_tree_x']=str(inf['el_tree'])
+        inf['title']=tag['_title'] if tag['_title'] else ''
+        inf['str']=str(tag['value'])
         return inf
+    def txt_inf(tag):
+        for x in tag.elements():
+            x=','.join([x[0].decode() for x in tag.elements()])
     def _find(self ,attr,tag):
         import gluon
         if attr in tag.attributes:return tag

@@ -255,19 +255,45 @@ def xform_section():
         return 'j_box_iframe_win_close'
     session.view_page='xform_section'
     session['update_step']=False
-    return dict(htm=_xform(section=0))
+    htm=_xform(section=0)['htm']
+    #xreport_var([{'htm':htm}])
+    return dict(htm=htm)
 def xform_sd():
     if session.view_page=='save':
         session.view_page=''
         return 'j_box_iframe_win_close'
     session.view_page='xform_sd'
     session['update_step']=True
-    return dict(htm=_xform(out_items=['body']))#_xform())
+    htm=_xform(out_items=['body'])['htm'] 
+    #xreport_var([{'htm':htm}])
+    return dict(htm=htm)#_xform())
 def xform():
     session.view_page='xform'
     session['update_step']=True
-    return dict(htm=_xform())#_xform())
-
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    
+    link=A('نمایش فرم با فرمت استاندارد',_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
+        ,_class='btn btn-primary') if 'xform_cg_file' in x_data_s['base'] else ''
+    htm=_xform()['htm']    
+    return dict(htm=htm,link=link)#_xform())
+def xform_cg():
+    import k_file,json
+    session.view_page='xform_cg'
+    session['update_step']=True
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    x_file=k_file.read('text',r"D:\ks\I\web2py-test\applications\spks\static\xform_cg"+"\\"+ x_data_s['base']['xform_cg_file'])
+    json_data=_xform()['json']
+    
+    json_data1={x:y['value']for x,y in json_data.items()}#str(XML(y['value']
+    json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
+    #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])
+    #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
+    x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link')))
+    url1=str(URL('xform',args=request.args,vars=request.vars))
+    print(url1)
+    x_file1=x_file1.replace('link_server',url1) 
+    x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
+    return XML(x_file2)
 def _xform(out_items=['head','body','tools'],section=-1):
     #show all section
     #response.show_toolbar=True #error check
@@ -276,10 +302,10 @@ def _xform(out_items=['head','body','tools'],section=-1):
         #print("text_app="+str(request.vars['text_app']))
         text_app=request.vars['text_app'].lower()
         if 'ir' in text_app:
-            return XML(save_app_review())
+            return {'htm':XML(save_app_review()),'json':''}
         else:
             
-            return XML(save())
+            return {'htm':XML(save()),'json':''}
     #session.view_page='xform'
     
     '''
@@ -293,21 +319,26 @@ def _xform(out_items=['head','body','tools'],section=-1):
     #------------------------------------------
     x_data_s,db_name,tb_name,msg=_get_init_data()
     if not x_data_s:
-        return dict(htm=msg)
+        return {'htm':msg,'json':''}
     
     # check access /auth
     auth= k_user.C_AUTH_FORM(x_data_s)
-    if not auth.ok:return dict(htm=H1(auth.msg))
+    if not auth.ok:return {'htm':H1(auth.msg),'json':''}
     #print("test")
    
     xid=request.args[2] or 1
     
     if section>-1:
-        htm_x=[C_FORM_HTM(x_data_s,xid).show_step_cur(step_n=section)]
+        
+        json_data,htm_x=C_FORM_HTM(x_data_s,xid).show_step_cur(step_n=section)
     else: #entire of form
         htm_form=C_FORM_HTM(x_data_s,xid).show_form()
+        #xreport_var([{'htm_form':htm_form}])
         htm_x=[y for x in out_items for y in htm_form[x]]
-    return DIV(FORM(*htm_x,_id="form1"),_dir="rtl")
+        json_data=htm_form['body_json']
+    htm=DIV(FORM(*htm_x,_id="form1"),_dir="rtl")
+    #xreport_var([{'htm':htm}])
+    return {'htm':htm,'json':json_data}
 class C_FORM_HTM():
     #:#view 1 row
     def __init__(self,x_data_s,xid):
@@ -331,78 +362,11 @@ class C_FORM_HTM():
                             #BUTTON('',_type='submit',_style="display:hidden"),
                             _class='col-1'),
                         _class='row  ')] #align-items-center ,_style="height:50px;  margin: auto;align-items: center;" align-middle vh-100
-        text_app_added=False
+        
+        
         if form_sabt_data:
-            #step_befor='' # svae name of before step
-            #xxxprint(3,msg=['form_sabt_data','',''])
-            for i,step_name in enumerate(x_data_s['steps']):
-                step=x_data_s['steps'][step_name]
-                step['i']=i
-                uwc=c_form.un_what_can_do_4_step(step_name=step_name)#,x_un
-                #xxxprint(3,msg=[uwc,i,step_name])
-                mode=self.c_form.step_state(step_name)[0]#['b','c','c','a'][
-                #htm_form['body']+=[self.c_form.step_state(step_name)[2]]
-                if uwc=='edit':
-                    
-                    #xxxprint(3,msg=['edit',i,step_name])
-                    if self.c_form.cur_step:
-                        htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'2')] 
-                    else:
-                        self.c_form.cur_step=step_name
-                        htm_form['body']+=[self.show_step_cur(step=step)]
-                        text_app_added=True
-                        
-                if uwc=='ret_edit':
-                    htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,'1'),
-                                        self.app_review(step_name)]
-                if uwc=='view':
-                    htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step, mode )]    
-                htm_form['body']+=[DIV('',_class="text-center",_style="height:5px;background-color:#888")]
-                '''        
-                if i == f_nxt_s:
-                    
-                    if k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i):
-                        #k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
-                        #k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
-                        htm_form['body']+=[self.show_step_cur(step=step)]
-                    else :
-                        # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
-                        if step_befor and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i-1):
-                            #step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
-                            #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):
-                            htm_form['body']+=[self.app_review()]
-                        htm_form['body']+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
-                        
-                        htm_form['body']+=[DIV([self.show_step_not_cur(x_data_s,xid,c_form,step,'c')])]
-                        htm_form['body']+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
-                else:
-                    if 'sp_order' in step and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i):
-                        htm_form['body']+=[self.show_step_cur(step=step)]
-                    else:
-                        ab_case="b" if i < f_nxt_s else "a"
-                        htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,ab_case)]
-                step_befor=step_n
-                '''
-            # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
-            # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
-            '''
-            if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=f_nxt_s-1)):
-                #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
-                # test = form(morakhsi_saat).rec(15 steps=comple) : user(mlk) =>can view (app_review but) ,other users(atl,ks,..) cannot view (app_review but)
-                htm_form['body']+=[self.app_review()]
-            '''
-            # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
-            '''
-            if (f_nxt_s < 0 and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
-                #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
-                # test = 
-                htm_form['body']+=[self.app_review()]
-            '''
-            if not text_app_added:
-                htm_form['body']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
-            htm_form['body']+=['cur_step = '+str(self.c_form.cur_step)]
-            htm_form['body']+=[' | f_nxt_u = '+str(self.c_form.form_sabt_data['f_nxt_u'])]
-            htm_form['body']+=[' | f_nxt_s = '+str(self.c_form.form_sabt_data['f_nxt_s'])]
+            htm_form.update(self.show_form_body(x_data_s,c_form,xid))
+            
         bx=x_data_s['base']
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=request.args[:2]
@@ -417,28 +381,110 @@ class C_FORM_HTM():
                 A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary')]
         return htm_form
 
-        
-    def show_step_not_cur(self,x_data_s,xid,c_form,step,mode): #like=row_view
+    def show_form_body(self,x_data_s,c_form,xid):   
+        #out_mode='json'
+        htm_form={'body':[],'body_json':{}}
+        text_app_added=False
+        #step_befor='' # svae name of before step
+        #xxxprint(3,msg=['form_sabt_data','',''])
+        for i,step_name in enumerate(x_data_s['steps']):
+            step=x_data_s['steps'][step_name]
+            step['i']=i
+            uwc=c_form.un_what_can_do_4_step(step_name=step_name)#,x_un
+            #xxxprint(3,msg=[uwc,i,step_name])
+            fsc_mode=self.c_form.step_state(step_name)[0]#['b','c','c','a'][
+            #htm_form['body']+=[self.c_form.step_state(step_name)[2]]
+            if uwc=='edit':
+                
+                #xxxprint(3,msg=['edit',i,step_name])
+                if self.c_form.cur_step:
+                    json,body=self.show_step_not_cur(x_data_s,xid,c_form,step,'2')
+                    htm_form['body']+=[body] 
+                    htm_form['body_json'].update(json)
+                else:
+                    self.c_form.cur_step=step_name
+                    json,body=self.show_step_cur(step=step)
+                    htm_form['body']+=[body]
+                    htm_form['body_json'].update(json)
+                    text_app_added=True
+                    
+            if uwc=='ret_edit':
+                json,body=self.show_step_not_cur(x_data_s,xid,c_form,step,'1')
+                htm_form['body']+=[body,self.app_review(step_name)]
+                htm_form['body_json'].update(json)
+            if uwc=='view':
+                json,body=self.show_step_not_cur(x_data_s,xid,c_form,step, fsc_mode )
+                htm_form['body']+=[body]
+                htm_form['body_json'].update(json)                
+            htm_form['body']+=[DIV('',_class="text-center",_style="height:5px;background-color:#888")]
+            '''        
+            if i == f_nxt_s:
+                
+                if k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i):
+                    #k_user.can_user_edit_step(step=step,step_index=i,form_sabt_data=form_sabt_data):
+                    #k_user.user_in_jobs(step['jobs'],row_data=form_sabt_data):
+                    htm_form['body']+=[self.show_step_cur(step=step)]
+                else :
+                    # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+                    if step_befor and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i-1):
+                        #step_befor and k_user.step_changer(i-1,form_sabt_data)==session['username'] :
+                        #k_user.user_in_jobs(x_data_s['steps'][step_befor]['jobs'],row_data=form_sabt_data):
+                        htm_form['body']+=[self.app_review()]
+                    htm_form['body']+=[DIV(HR(),'   /\   '+'شما اجازه تکمیل این بخش را ندارید'+'   /\   ',_class='form_step_cur_unactive text-center text-light')]
+                    
+                    htm_form['body']+=[DIV([self.show_step_not_cur(x_data_s,xid,c_form,step,'c')])]
+                    htm_form['body']+=[DIV('   \/   '+'شما اجازه تکمیل این بخش را ندارید'+'   \/   ',HR(),_class='form_step_cur_unactive text-center text-light')]
+            else:
+                if 'sp_order' in step and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=i):
+                    htm_form['body']+=[self.show_step_cur(step=step)]
+                else:
+                    ab_case="b" if i < f_nxt_s else "a"
+                    htm_form['body']+=[self.show_step_not_cur(x_data_s,xid,c_form,step,ab_case)]
+            step_befor=step_n
+            '''
+        # show revize buttom نشان دادن دکمه بازبینی مرحله آخر
+        # if "end_step is field(form is compelete)" and "cur_user is end_step owner"
+        '''
+        if (f_nxt_s >=len(x_data_s['steps']) and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=f_nxt_s-1)):
+            #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],f_nxt_s-1)['jobs'],row_data=form_sabt_data)):
+            # test = form(morakhsi_saat).rec(15 steps=comple) : user(mlk) =>can view (app_review but) ,other users(atl,ks,..) cannot view (app_review but)
+            htm_form['body']+=[self.app_review()]
+        '''
+        # if "previus_step result = x (form is omit)" and "cur_user is previus_step owner"
+        '''
+        if (f_nxt_s < 0 and k_user.user_in_xjobs_can('edit',x_data_s,form_sabt_data,step_index=-f_nxt_s)):
+            #k_user.user_in_jobs(k_tools.nth_item_of_dict(x_data_s['steps'],-f_nxt_s)['jobs'],row_data=form_sabt_data):
+            # test = 
+            htm_form['body']+=[self.app_review()]
+        '''
+        if not text_app_added:
+            htm_form['body']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
+        htm_form['body']+=['cur_step = '+str(self.c_form.cur_step)]
+        htm_form['body']+=[' | f_nxt_u = '+str(self.c_form.form_sabt_data['f_nxt_u'])]
+        htm_form['body']+=[' | f_nxt_s = '+str(self.c_form.form_sabt_data['f_nxt_s'])]
+        return htm_form #['body']
+    def show_step_not_cur(self,x_data_s,xid,c_form,step,fsc_mode,out_mode=''): #like=row_view
         '''
             0209012
         INPUT:
         ------
-            mode:str ('b'/'a')
+            fsc_mode:str ('b'/'a')
                 1,2=cur
                 0=befor of cur - approved
                 3=aftre of cur - empty or review
         '''
         #print (step)
-        fsc_mode=f"form_step_c{mode}" #fsc_mode=form_step_class
-        hx={'data':[],'stp':'','app':[]}#mode
+        fsc_class=f"form_step_c{fsc_mode}" #fsc_mode=form_step_class
+        hx={'data':[],'stp':'','app':[],'data_json':{}}#fsc_mode
         
         for field_name in step['tasks'].split(','):
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
-                #hh=show_step_1_row(x_data_s,xid,form_sabt_data,field_name,mode='output')
                 hh=self.c_form.show_step_1_row(field_name,request,mode='output')#output_text')
                 hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
+                hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
+                #hx['data_json'][field_name]={'name':str(hh[4]),'value':str(hh[1]),'help':str(hh[2]),'title':str(hh[3])}
         #breakpoint() f_nxt_s
         def val_in_dic(x_dict,v_name):
             '''
@@ -460,9 +506,11 @@ class C_FORM_HTM():
         hx['app-color']="bg-"+val_in_dic(x_color,form_sabt_data[f'step_{step["name"]}_ap'])
         hx['stp']=[str(step['i']+1) +' - '+ step['title']]
         
-
-        return DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid "+fsc_mode) #DIV(,_style="background-color:#555;")
-    def show_step_cur(self,step={},step_n=0,info=False): #like=row_edit
+        #if out_mode=='json'
+        #   return hx['data_json']
+        #else:
+        return hx['data_json'],DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid "+fsc_class) #DIV(,_style="background-color:#555;")
+    def show_step_cur(self,step={},step_n=0,info=False,out_mode=''): #like=row_edit
         '''
             0209012 
             step=x_data_s['steps'][step_n]
@@ -470,20 +518,24 @@ class C_FORM_HTM():
         x_data_s=self.x_data_s
         if not step:
             step=k_tools.nth_item_of_dict(x_data_s['steps'],int(step_n))
-        hx={'data':[],'stp':'','app':[]}
+        hx={'data':[],'stp':'','app':[],'data_json':{}}
         for field_name in step['tasks'].split(','):
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,request,mode='input')
                 hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
+                hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
         hx['app1']=[DIV(BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{x_color[xx]}',_onclick=f"app_key('{xx}')") if xx in step['app_kt'] else '' ,_class='col-'+{'y':'8','r':'2','x':'2'}[xx]) for xx in ['x','y','r']]
         hx['app']=['نتیجه','-'*10,'اقدام:','توسط:','مورخ :'] if info else []
         hx['app']+=[INPUT(_type='hidden',_id='cur_step_name',_name='cur_step_name',_value=step['name'])]
         hx['app']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
         hx['stp']=[str(step['i']+1) +' - '+ step['title']]
         hx['app-color']=''
-        return DIV(
+        #if out_mode=='json'
+        #   return hx['data_json']
+        #else:
+        return hx['data_json'],DIV(
                 DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur")
                 ,DIV(*hx['app1'],_class="row p-2"))
                      #,_action=URL('save',args=request.args)

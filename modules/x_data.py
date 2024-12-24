@@ -399,38 +399,38 @@ x_data={
                 'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
                 'prj1':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{prj}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
                 'prj2':{'type':'auto','ref':{'db':'a_sub_p','tb':'a','key':'__0__','val':'{code2}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد کامل زیر پروژه'},
-                'man_crt':{'type':'reference','width':'5','title':'تهیه کننده','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{family}'},'prop':['read']},#,'prop':['read']
-                'man_ar_mng':{'type':'reference','width':'5','title':'مسئول طرح معماری','ref':{'db':'user','tb':'user','key':'{id}','val':'{un}-{family}'}},#,'prop':['read']
+                'man_crt':{'type':'reference','width':'5','title':'تهیه کننده','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{family}'},'prop':['readonly']},#,'prop':['readonly']
+                'man_ar_mng':{'type':'reference','width':'5','title':'مسئول طرح معماری','ref':{'db':'user','tb':'user','key':'{id}','val':'{un}-{family}'}},#,'prop':['readonly']
                 
                 
-                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'},'reset':False},'prop':['read']},
+                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'},'reset':False},'prop':['readonly']},
                 'lno_p':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
                 
                 'date_s':{'type':'fdate','width':'10','title':'تاریخ اولین ارجاع','prop':[]},
-                'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['read']},
+                'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['readonly']},
                 
                 
-                'cdate':{'type':'fdate','width':'10','title':'تاریخ ثبت','prop':['read']},#'prop':['hide']
-                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['read']},
-                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['read']},
+                'cdate':{'type':'fdate','width':'10','title':'تاریخ ثبت','prop':['readonly']},#'prop':['hide']
+                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['readonly']},
+                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['readonly']},
                 'attach':{'type':'text','width':'10','title':'ضمایم','prop':['hide']},
-                'io_t':{'type':'text','width':'5','title':'نوع','prop':['read']},
-                'lv_archiv':{'type':'text','width':'50','title':'کلاس آرشیو','prop':['read']},
-                'lv_per_archiv':{'type':'text','width':'50','title':'آرشیو شخصی','prop':['read']},
-                'lv_onvan':{'type':'text','width':'250','title':'به- عنوان','prop':['read']},
+                'io_t':{'type':'text','width':'5','title':'نوع','prop':['readonly']},
+                'lv_archiv':{'type':'text','width':'50','title':'کلاس آرشیو','prop':['readonly']},
+                'lv_per_archiv':{'type':'text','width':'50','title':'آرشیو شخصی','prop':['readonly']},
+                'lv_onvan':{'type':'text','width':'250','title':'به- عنوان','prop':['readonly']},
                 'paper_num':{'type':'text','width':'6','title':'شماره کوچک','prop':[]},
                 'num_x':{'type':'text','width':'10','title':'num_x','prop':[]},
                 'num_link':{'type':'text','width':'10','title':'num_link','prop':[]},
                 'folder':{'type':'text','width':'20','title':'محل فایلها','link':{'url':['spks','file','f_list_sd'],'args':['pp','{folder}'],'vars':{}},'prop':[],'reset':False},#'hide']},
                 'pr_err':{'type':'text','width':'250','title':'خطا','prop':[],'help':'خطا در دریافت خودکار اطلاعات نامه توسط playwright'},
                 
-                'outbox':{'type':'text','width':'5','title':'ارسالی','prop':['read']},
-                'x_des':{'type':'text','width':'30','title':'مفهوم*','title_add':'توضیح دستی'},#,'prop':['read']
-                'x_num':{'type':'text','width':'30','title':'کد*','title_add':'جهت انتخاب و یا مرتب سازی راحتتر نامه ها و موضوعات خاص'},#,'prop':['read']
+                'outbox':{'type':'text','width':'5','title':'ارسالی','prop':['readonly']},
+                'x_des':{'type':'text','width':'30','title':'مفهوم*','title_add':'توضیح دستی'},#,'prop':['readonly']
+                'x_num':{'type':'text','width':'30','title':'کد*','title_add':'جهت انتخاب و یا مرتب سازی راحتتر نامه ها و موضوعات خاص'},#,'prop':['readonly']
                 'x_inf':{'type':'text','width':'30','title':'اطلاعات*','title_add':'اطلاعات اضافی'},
                 'x_to_grup':{'type':'reference','width':'5','title':'گروه گیرنده*','ref':{'db':'a_contact_grup','tb':'a','key':'{grup_code}','val':'{grup_name}',
-                     'where':'''prj = "{prj1}" and sub_p = "{{=prj2[-3:] if prj2 and len(prj2)>3 else ''}}"'''},'prop':['read']},#,'prop':['read']
-                #    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['read']},#,'prop':['read']
+                     'where':'''prj = "{prj1}" and sub_p = "{{=prj2[-3:] if prj2 and len(prj2)>3 else ''}}"'''},'prop':['readonly']},#,'prop':['readonly']
+                #    'where':'''prj = "{{=__objs__['prj1']['value']}}" and sub_p = "{{=__objs__['prj2']['value'][-3:]}}"'''},'prop':['readonly']},#,'prop':['readonly']
                 
                 
                 'act_todo':{'type':'text','width':'150','title':'ارجاع نامه','prop':[]},
@@ -490,15 +490,15 @@ x_data={
             'base':{'mode':'form','title':'نامه های پیش نویس','auth':'dccm','code':'9011'
             },
             'tasks':{
-                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['read']},
+                'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['readonly']},
                 'lno_p':{'type':'num','width':'10','title':'شماره پیشنویس','prop':[]},
                 
                 'date_s':{'type':'fdate','width':'10','title':'تاریخ اولین ارجاع','prop':[]},
-                'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['read']},
-                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['read']},
-                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['read']},
+                'date_e':{'type':'fdate','width':'10','title':'تاریخ آخرین ارجاع','prop':['readonly']},
+                'sbj':{'type':'text','width':'50','title':'موضوع نامه','prop':['readonly']},
+                'comment':{'type':'text','width':'30','title':'خلاصه','prop':['readonly']},
                 'attach':{'type':'text','width':'10','title':'ضمایم','prop':['hide']},
-                'io_t':{'type':'text','width':'5','title':'نوع','prop':['read']},
+                'io_t':{'type':'text','width':'5','title':'نوع','prop':['readonly']},
             },
             'steps':{
                 'pre':{'tasks':'lno','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -760,6 +760,82 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
+    'doc_mm2':{ #db
+        'a':{
+            'base':{'mode':'form','title':'صورت جلسه هوشمند - نسخه بتا','help':'meeting minute','code':'903','xform_cg_file':'doc_mm2.html'
+            },
+            'tasks':{
+                'name':{'type':'text','width':'60','title':'عنوان جلسه'},
+                'date':{'type':'fdate','title':'تاریخ جلسه','prop':['update']},
+                'time_st':{'type':'time_c','title':'ساعت شروع جلسه','def_value':'07:00'},
+                'user_crt':{'type':'user','title':'تهیه و تنظیم','prop':{'multiple'}},
+                'units':{'type':'select','title':'معاونت مرتبط','select':{'D':'design-طراحی','S':'supervition-نظارت','P':'plan - برنامه ریزی و توسعه','M':'Management - مدیریت','-':'نا مشخص'},'prop':['multiple']},
+                'mm_type':{'type':'select','title':'نوع جلسه','select':{'I':'Interior-داخلی','C':'Client-کارفرما','O':'OutSource - با برون سپارها'},'prop':['update']},
+                'c_prj_id':{'type':'reference','width':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
+                'c_prj_txt':{'type':'auto-x','width':'70','ref':'c_prj_id'},
+                'code':{'type':'auto','len':'8','auto':'aqrc-_mm-{{=date[:4]+date[5:7]+date[8:10] if date else "000000"}}-{{=str(id).zfill(4)}}-{mm_type}','title':'کد فایل'},
+                'file_v':{'type':'file','len':'40','file_name':'{{=code}}-vec','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc__mm','title':'فایل اصلی'},
+                'file_r':{'type':'file','len':'40','file_name':'{{=code}}-ras','file_ext':"pdf",'path':'form,doc__mm','title':'pdf'},
+                'des_1':{'type':'text','width':'60','title':'توضیحات'},
+                'pos':{'type':'f2f','width':'60','title':'محل جلسه','ref':{'db':'doc_mm2','tb':'pos','show_cols':['name','per']},},
+                'todo':{'type':'f2f','width':'60','title':'اقدامات','ref':{'db':'doc_mm2','tb':'todo','show_cols':['p_sy','des','p_do','p_ch','dur']},},
+                'note':{'type':'f2f','width':'60','title':'مذاکرات','ref':{'db':'doc_mm2','tb':'note','show_cols':['p_sy','des']},},
+            },
+            'steps':{
+                'pre':{'tasks':'date,time_st,user_crt,units,mm_type,c_prj_id,c_prj_txt,name','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'code,pos,todo,note,file_v,file_r','xjobs':'#step#0','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'des_1','xjobs':'dccm','title':'مدیریت سوابق','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'des_1','view1':'name,date,time_st,user_crt,units,mm_type,c_prj_id,c_prj_txt','view2':'code,file_v,file_r'}
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        },
+        'pos':{
+            'base':{'mode':'form','title':'محل جلسه','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_mm2','tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
+                'name':{'type':'text','width':'60','title':'نام محل'},
+                'per':{'type':'text','width':'80','title':'افراد حاضر'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,name,per','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            
+        },
+        'todo':{
+            'base':{'mode':'form','title':'اقدامات جلسه','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_mm2','tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
+                'p_sy':{'type':'text','width':'60','title':'اعلام'},
+                'des':{'type':'text','width':'80','title':'شرح اقدام'},
+                'p_do':{'type':'text','width':'60','title':'انجام'},
+                'p_ch':{'type':'text','width':'60','title':'پیگیری'},
+                'dur':{'type':'text','width':'60','title':'زمان'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,p_sy,des,p_do,p_ch,dur','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            
+        },
+        'note':{
+            'base':{'mode':'form','title':'مذاکرات جلسه','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_mm2','tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
+                'p_sy':{'type':'text','width':'60','title':'اعلام'},
+                'des':{'type':'text','width':'80','title':'شرح'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,p_sy,des','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            
+        }
+    },
+    #--------------------------------------------------------------------
     'person_act':{ #db
         'a':{
             'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'410'
@@ -1002,7 +1078,7 @@ x_data={
                 'time_len':{'type':'time_t','title':'مدت ماموریت','time_inf':{'maxTime':"20:00"},'prop':['update'],'def_value':'0:30'},
                 'time_en':{'type':'auto','title':'تا ساعت','auto':'''{{import k_time}}{{=k_time.add(__objs__['time_st']['value'],__objs__['time_len']['value'])}}'''},
                 'frd_modir':{'type':'reference','width':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
-                'des_0':{'type':'text','len':150,'lang':'fa','title':'شرح ماموریت'},
+                'des_0':{'type':'text','len':700,'lang':'fa','title':'شرح ماموریت'},
                 'des_modir':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
                 'des_2':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
                 'des_off':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
@@ -1169,8 +1245,8 @@ def x_data_verify(x_data):
             tb_obj['base']['db_name']=db_name
             #--------------------
             if not 'order' in tb_obj:tb_obj['order']='id'    
-            if not 'cols_filter' in tb_obj:tb_obj['cols_filter']:{'':'همه',}
-            if not 'data_filter' in tb_obj:tb_obj['data_filter']:{}  
+            if not 'cols_filter' in tb_obj:tb_obj['cols_filter']={'':'همه',}
+            if not 'data_filter' in tb_obj:tb_obj['data_filter']={}  
             tb_obj['data_filter'].update(data_filter)
             if 'steps' in tb_obj:
                 i=-1

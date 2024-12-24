@@ -569,7 +569,7 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
     trs=[TR('id',xid)]
     for fn,f in fildes.items():
         if 'hide' in f['prop']:continue
-        if 'read' in f['prop']: #readonly
+        if 'readonly' in f['prop']: #readonly
             trs.append(TR(f['title'],f['value']))
             continue
         sc=f['type']
@@ -771,6 +771,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     obj['output']=_value 
     obj['output_text']=_value # output in simple text
     obj['input']=obj.get('input',_value ) # if read im prop
+    obj['help_txt']=''
+    obj['data_json']=_value
     '''
         input may creat by auto_x
     '''
@@ -784,6 +786,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         obj["value"]=obj['output_text']=_value #au_txt
         
         obj['output']=DIV(_value,_class="input_auto")
+        obj['data_json']=_value
         obj['help']="خود کار"
         if 'input' in need :
             if 'auto-x' in obj: #input is creat in auto_x that have ref
@@ -832,6 +835,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     #obj['input']=XML(f'''<div >{obj['input']}{msg1}</div>''')
                     #obj['help']=XML(f'''<div >{msg3}</div>''')
                     obj['help']=DIV(XML(msg3))
+                    obj['help_txt']='change' if msg3 else ''
+             
     #------------------------------------------------------------------------------------------------------------------
     def update_1_obj_in_table(set_dic,x_where=''):
         #saved_file_fullname,new_file_fullname)
@@ -866,8 +871,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 return 'error : not find id - c_form is not present'
         res1=db1.update_data(tb_name,set_dic,x_where)
         return XML(res1['msg'])
-    #------------------------------------------------------------------------------------------------------------------        
-    if sc=='text':
+    #------------------------------------------------------------------------------------------------------------------ 
+    readonly='readonly' if 'readonly' in obj['prop'] else '' #:obj['input']=obj['output']    
+    if sc=='text':#sc
         def htm_correct(x):
             if x:
                 t= x.replace('"','|')
@@ -898,11 +904,11 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             t_val= f' value="{_value}"' #'' if 'placeholder' in obj else
             if _len<60 :
                 obj['input']=XML(f'''
-                    <input type="text" {_n} {x_class} {_dir} {tt} {t_val} size="{_len}" maxlength="{_len}" style='width:100%' onkeyup="txt_key('{_name}',{_len});" {onact_txt} required>''')
+                    <input type="text" {_n} {x_class} {_dir} {tt} {t_val} size="{_len}" maxlength="{_len}" style='width:100%' onkeyup="txt_key('{_name}',{_len});" {onact_txt} required {readonly}>''')
                 #if 'disabled' in obj:ix=XML(f"<INPUT name={obj['name']} id={obj['name']} value={obj['value']} style='width:100%' disabled>")
             else:   
                 obj['input']=XML(f'''
-                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} > {_value} </textarea>''' )
+                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} > {_value} </textarea>''' )
                 #style='width:100%'
             
             ##--------  
@@ -910,7 +916,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             js_ff_chek="" #msg is define correct in top of select
             js_ff_act=f'fa_coreect_obj("{_name}");'
         obj['help']=XML(f"<a title='تعداد کاراکتر باقی مانده ، قابل اضافه کردن به متن' href = 'javascript:void(0)'> x * <b id='label{_name}'>{_len-len(_value)}</b></a> ")
-    elif sc== "num": #ok 010808
+    elif sc== "num": #sc #ok 010808
         x_min=f"{obj['min']} " if 'min' in obj else "*"
         x_max=f"{obj['max']}" if 'max' in obj else "*"
         obj['help']=x_min + " - "+ x_max #f"{obj['min']} تا {obj['max']}"
@@ -923,26 +929,27 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             x_max=f" max={obj['max']}" if 'max' in obj else ""
             x_step=f" step={obj['step']}" if 'step' in obj else ""
             obj['input']=XML(f'''
-                <input type="number" {_n}{x_min}{x_max}{x_step} value="{_value}" {onact_txt} required>''')
+                <input type="number" {_n}{x_min}{x_max}{x_step} value="{_value}" {onact_txt} required {readonly}>''')
                 #onchange='num_key("{_name}",{obj["min"]},{obj["max"]});' 
             
             ##--
             or_v=""
             js_ff_chek="" #msg is define correct in top of select
-    elif sc=="check": 
+    elif sc=="check": #sc
         checked="checked" if _value=="1" else ""
         val_x="1" if _value=="1" else "0"
         #- print ("checked value="+ _value)
         if "update" in obj['prop']:onact_txt= " onchange='" + form_update_set(form_update_set_param) + "'"
         o_txt="style='width: 50px;height: 30px;transform: scale(1.01);margin: 0px;color:#hca;background color:#a00;' class='largercheckbox' type='checkbox' value='1'" 
         if 'output' in need:
-            obj['output']=XML(f'''<input {_n} {o_txt} {checked} onclick="return false;"/>''') #disabled="disabled"
+            obj['output']=XML(f'''<input {_n} {o_txt} {checked} {readonly} onclick="return false;"/>''') #disabled="disabled"
         elif 'input' in need:
-            obj['input']=XML(f'''<input {_n} type="hidden" value={val_x} ><input {o_txt} {checked} required onchange="this.previousSibling.value=this.checked ?'1':'0' ">''')
+            obj['input']=XML(f'''<input {_n} type="hidden" value={val_x} ><input {o_txt} {checked} {readonly} required onchange="this.previousSibling.value=this.checked ?'1':'0' ">''')
             #f''<input {_n} type='hidden' value='0'>
             #                    <input {_n} {o_txt} {checked} {onact_txt}>   ''')
+        obj['data_json']=1 if checked else 0
         obj['help'],or_v,js_ff_chek="","",""  #msg is define correct in top of select
-    elif sc in ["select","user","reference"]:
+    elif sc in ["select","user","reference"]: #sc
         onact_txt=obj['onchange']
         if "update" in obj['prop'] : onact_txt+= form_update_set(form_update_set_param) 
         # onact_txt= " onchange='" + form_update_set(form_update_set_param) + "'" 
@@ -993,6 +1000,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                         return ''
             obj['title']=select_1_or_multi(_value,_multiple)
             obj['output']=XML(f'''<a  title="{obj['title']}">{_value}</a>''')
+            obj['data_json']=_value
         except Exception as err:
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
             xxxprint(msg=["err",'',''],err=err,vals=_select) 
@@ -1003,14 +1011,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             import k_htm
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
                 ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
-                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first']
+                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first'],
                 )
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
-        obj['help']=''
+        obj['help']=obj['title']
+        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" readonly style="background-color:#aaa">''')
     #elif sc =='fdate':
         
-    elif sc=='fdate':
+    elif sc=='fdate': #sc
         import k_date
         obj['format']='yyyy/mm/dd' #obj['format']
         _value=_value or k_date.ir_date(obj['format'])
@@ -1024,13 +1033,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         obj['help']=DIV(obj['format'],_dir='ltr')
         obj['stnd6']=_value[2:4]+_value[5:7]+_value[8:10] if (_value and len(_value)>9) else "_"*6 #6 digit standard for date
         msg ,or_v,js_ff_chek="",'',''
-    elif sc=='time_c':
+    elif sc=='time_c': #sc
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         if 'input' in need :
             obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_c",_required=True,_dir="ltr",_onchange=onchange)#_type="time"
         obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
-    elif sc=='time_t':
+    elif sc=='time_t': #sc
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         update="update" if "update" in obj['prop'] else ""
         if 'input' in need :
@@ -1043,9 +1052,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     
     
         #xxxprint(msg=['auto',obj["value"],''],vals=obj)
-    elif sc=="auto":
+    elif sc=="auto": #sc
         x_auto()
-    elif sc=="auto-x":
+    elif sc=="auto-x": #sc
         obj2=obj.copy()
         obj2['type']='auto'
         if 'ref' in obj:
@@ -1056,7 +1065,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             elif obj['auto']=='_cur_user_name_':obj2['auto']='{{=session["user_fullname"]}}'
         return obj_set(obj2,x_dic,x_data_s,xid, need,request,c_form)
             #x_auto()    
-    elif sc=="index":
+    elif sc=="index": #sc
         if 'input' in need:
             x_dt=reference_select(obj['ref'],form_data=x_dic)
             x_list=[x_dt[x] for x in x_dt if x_dt[x]]
@@ -1074,7 +1083,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             obj['help']=XML(f"""<a href = 'javascript:void(0)' title='{index_hlp}' >لیست اعداد استفاده شده</a>""")
         msg=""  
 
-    elif sc=="file":
+    elif sc=="file": #sc
         import k_file
         #print('file_name='+obj['file_name'])
         obj['file_name']=k_file.name_correct(template_parser(obj['file_name'],x_dic))
@@ -1112,7 +1121,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 msg="""<div title="{alert} \n --------- \n{des} \n new = {new_val}\n old = {old_val}" class={_class}><a href={href}><h4>R</h4></a></div>""".format(
                     new_val=new_file_name,old_val=old_file_name,
                     des='نام فایل باید به شرح زیر تغییر پیدا کند',_class="bg-warning",
-                    href=URL(args=current.request.args,vars={'rename_file':1}),
+                    href=URL(args=current.request.args,vars={'rename_file':1}) if session["admin"]  else '',
                     alert="نیاز به تغییر نام") if (new_file_name !=old_file_name) else ''
                 
                 return msg
@@ -1148,6 +1157,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
             ''')
         obj['output']=XML(f'''<div>{bt_view}{msg2}</div>''')    
+        obj['data_json']=obj['file_name']
         obj['output-mini']=XML(f'''<div>{bt_view_mini}{msg2}</div>''') 
         obj['help']=msg2
         
@@ -1248,7 +1258,38 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         """   
         
         #if c_form:c_form.report()
-    elif sc=="do":
+    elif sc=="f2f": #sc 
+        db2,tb2=obj['ref']['db'],obj['ref']['tb']
+        new_form_link=k_htm.a('+',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars={'f2f_id':x_dic['id'],'form_case':1}),_target="box",_title='فرم جدید') #box
+        
+        #table of record data - جدول اصلاعات ثبت شده
+        res=DB1(db2).select(tb2,where={'f2f_id':x_dic['id']},limit=0,result='dict_x',order='id',last=False)
+        #xreport_var([{'res':res}])
+        x_r_input,x_r_output,show_cols,titles=[],[],obj['ref']['show_cols'],res['titles']
+        from x_data import x_data
+        show_cols_tit=[x_data[db2][tb2]['tasks'][x]['title'] for x in show_cols]
+        for i,row in enumerate(res['rows']):#.reverse():          
+            xid=row[titles.index('id')]
+            url=URL('form','xform_section',args=[db2,tb2,xid])
+            link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
+            x_r_input+=[[link , *[row[titles.index(x)] for x in show_cols]]]
+            x_r_output+=[[row[titles.index(x)] for x in show_cols]]
+        rec_table_input=k_htm.C_TABLE(['']+show_cols_tit,x_r_input).creat_htm(div_class='div2')
+        rec_table_output=k_htm.C_TABLE(show_cols_tit,x_r_output).creat_htm(div_class='div2')
+
+        
+        #json
+        json_list=[]
+        for row in res['rows']:
+            xd=dict(zip(titles,row))
+            xd2={x:xd[x] for x in show_cols}
+            json_list+=[xd2]
+        obj['data_json']=json_list
+        
+        
+        obj['output']=DIV(rec_table_output)
+        obj['input']=DIV(rec_table_input,new_form_link)
+    elif sc=="do": #sc
         do_name,do_param=base_data.split(share.st_splite_chr2)
         
         path = "do_act.asp?do=" + do_name + "&param=" + do_param 
@@ -1271,7 +1312,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     """
     ##----------------------------
     #cm.tik('link start')
-    if 'link' in obj:
+    if 'link' in obj: #sc end 
         r1='input' if 'input' in need else 'output'
         
         x_link=obj['link']
@@ -1311,7 +1352,6 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     x_dic['__objs__'][obj['name']]=obj
     
     ##obj['js']=
-    
     return obj #,cm.records()
     
 class C_FORM_B():#
@@ -1635,7 +1675,7 @@ class C_FORM():
             if 'file'!= fd['type'] : mode='output'
             
         x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request,c_form=self)
-        return [htm_1,x_obj[mode],x_obj['help']]
+        return [htm_1,x_obj[mode],x_obj['help'],fd['title'],field_name,x_obj['data_json']]
         #------------------------------------------------- 
     def un_what_can_do_4_step(self,step_name,x_un=''):
         ''' 030907
