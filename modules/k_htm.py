@@ -315,7 +315,7 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table"):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table",thead=True,cover_div=True):
         import gluon
         '''
             old name= htm_table
@@ -329,22 +329,24 @@ class C_TABLE:
         else:
             heads=self.heads
         #heads=self.heads
-        
-        #creat thead of table
-        if type(heads)==list:
-            tds=[]
-            for col in self.heads:
-                if not col in heads:continue
-                if type(col)==dict:
-                    tds+=[TH(col['name'],_title=col.get('title',''),_width=col.get('width',''))]
-                elif type(col)==str:
-                    tds+=[TH(col)]
-                else:
-                    print('k_form.C_table =err=> type(cell)='+str(type(cell)))
-        
-            thead=THEAD(TR(*tds))#,_style="top:0;position: sticky;")
-        elif type(heads)==dict:
-            thead=THEAD(TR(*[TH(x,_width=y.get('width'),_title=y.get('title')) for x,y in heads.items()]))
+        if thead:
+            #creat thead of table
+            if type(heads)==list:
+                tds=[]
+                for col in self.heads:
+                    if not col in heads:continue
+                    if type(col)==dict:
+                        tds+=[TH(col['name'],_title=col.get('title',''),_width=col.get('width',''))]
+                    elif type(col)==str:
+                        tds+=[TH(col)]
+                    else:
+                        print('k_form.C_table =err=> type(cell)='+str(type(cell)))
+            
+                thead=THEAD(TR(*tds))#,_style="top:0;position: sticky;")
+            elif type(heads)==dict:
+                thead=THEAD(TR(*[TH(x,_width=y.get('width'),_title=y.get('title')) for x,y in heads.items()]))
+        else:
+            thead=''
         
         
         #creat tbody of table
@@ -375,7 +377,12 @@ class C_TABLE:
         #import k_err    
         #k_err.xreport_var([heads,rows,thead,trs])  
         #class_table='table'+class_table if class_table else 'table2'
-        return DIV(TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id),_class=div_class)
+        tbl=TABLE(thead,TBODY(*trs),_class="w-auto "+class_table,_dir="rtl",_id=_id,_name=_id)
+        if cover_div:
+            return DIV(tbl,_class=div_class)
+        else:
+            return tbl
+        
 def table_x_not_used(cols,rows,class_table=''):
     import gluon
     '''
@@ -522,8 +529,18 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True):
     reset='true' if reset else 'false'
     if _target=="frame":
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
-    elif _target=="box":   
-        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=f"""j_box_show("{_href}",{reset})""") 
+    elif _target=="box":
+        #function selectMe()
+        js_func="""
+        {  
+            if (window.event.ctrlKey) {
+                window.open( "%s" , '_blank');
+            } else { 
+                j_box_show("%s", %s);
+            }
+        }
+        """ % (_href,_href,reset)
+        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func ) #f"""j_box_show("{_href}",{reset})""") 
     else:
         return A(txt,_title=_title,_class=_class,_href=_href,_target=_target)
 def xtd(td_list):#

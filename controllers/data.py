@@ -496,7 +496,7 @@ def xtable():
             id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
             tds=[n,id_l]
             
-            tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,select_cols,x_data_s,request=request)#, all_cols,ref_i)
+            tds_i=k_form.get_table_row_view(row[0],row,titles,select_cols,x_data_s,request=request)#, all_cols,ref_i)
             tds+=[x for x in tds_i]
             #n=str(i+1)
             #n=A(n,_title='edit',_href=URL(args=(args[0],args[1],'edit',row[0]))) if session["admin"] else n

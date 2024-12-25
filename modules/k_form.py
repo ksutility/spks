@@ -594,7 +594,7 @@ def get_table_row(i,row,titles,fildes,select_cols,all_cols,ref_i):
     return TABLE(*trs,_style='width:100%')
 #-----------------------------------------------
 #@k_tools.x_cornometer
-def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,request={}):#,all_cols,ref_i):
+def get_table_row_view(xid,row,titles,select_cols,x_data_s,id_cols=False,request={}):#,all_cols,ref_i):
     #use in:2(show_xtable,show_kxtable)
     #cm=Cornometer(i)
     '''
@@ -602,7 +602,9 @@ def get_table_row_view(xid,row,titles,tasks,select_cols,x_data_s,id_cols=False,r
     ------
         xid:int
             id of 
-            
+        x_data_s:dict
+            - selected dict from x_data 
+            - dict of x_data[db][tb] 
     '''
     tds=[]
     if id_cols:
@@ -678,7 +680,8 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@k_tools.x_cornometer
-def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_form=''): 
+def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_form=''): #sc
+    
     import k_htm
     form_update_set_param="form;form"
    
@@ -1080,7 +1083,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
-            obj['help']=XML(f"""<a href = 'javascript:void(0)' title='{index_hlp}' >لیست اعداد استفاده شده</a>""")
+            obj['help']=XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")
         msg=""  
 
     elif sc=="file": #sc
@@ -1140,8 +1143,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             msg1=[file_rename_manage(_value,obj['file_name'])]#check fine is renamed ?
             
         if msg1 and c_form:
+            pass
             #c_form.report()
-            xxxprint(3,msg=[_value,obj['file_name'],''],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value,'msg1':msg1})
+            #xxxprint(3,msg=[_value,obj['file_name'],''],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value,'msg1':msg1})
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
         bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>'''
@@ -1260,7 +1264,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #if c_form:c_form.report()
     elif sc=="f2f": #sc 
         db2,tb2=obj['ref']['db'],obj['ref']['tb']
-        new_form_link=k_htm.a('+',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars={'f2f_id':x_dic['id'],'form_case':1}),_target="box",_title='فرم جدید') #box
+        var_set={x:x_dic[y] for x,y in obj['var_set'].items()} if 'var_set' in obj else {}
+        var_set.update({'f2f_id':x_dic['id'],'form_case':1})
+        new_form_link=k_htm.a('+',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars=var_set),_target="box",_title='فرم جدید') #box
         
         #table of record data - جدول اصلاعات ثبت شده
         res=DB1(db2).select(tb2,where={'f2f_id':x_dic['id']},limit=0,result='dict_x',order='id',last=False)
@@ -1268,16 +1274,20 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         x_r_input,x_r_output,show_cols,titles=[],[],obj['ref']['show_cols'],res['titles']
         from x_data import x_data
         show_cols_tit=[x_data[db2][tb2]['tasks'][x]['title'] for x in show_cols]
-        for i,row in enumerate(res['rows']):#.reverse():          
-            xid=row[titles.index('id')]
-            url=URL('form','xform_section',args=[db2,tb2,xid])
-            link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
-            x_r_input+=[[link , *[row[titles.index(x)] for x in show_cols]]]
-            x_r_output+=[[row[titles.index(x)] for x in show_cols]]
+        show_rows=obj['ref']['show_rows'] if 'show_rows' in obj['ref'] else "all"
+        if show_rows=='all':
+            for i,row in enumerate(res['rows']):#.reverse():          
+                xid=row[titles.index('id')]
+                url=URL('form','xform_section',args=[db2,tb2,xid])
+                link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
+                row_o=get_table_row_view(xid,row,titles,show_cols,x_data[db2][tb2],request=request) #row objects
+                x_r_input+=[[link , *row_o]]
+                x_r_output+=[row_o]
+        if show_rows=='last':
+            pass
         rec_table_input=k_htm.C_TABLE(['']+show_cols_tit,x_r_input).creat_htm(div_class='div2')
-        rec_table_output=k_htm.C_TABLE(show_cols_tit,x_r_output).creat_htm(div_class='div2')
+        rec_table_output=k_htm.C_TABLE(['']+show_cols_tit,x_r_input).creat_htm(thead=False,cover_div=False)
 
-        
         #json
         json_list=[]
         for row in res['rows']:
@@ -1667,10 +1677,10 @@ class C_FORM():
         fd=x_data_s['tasks'][field_name]#fd=field_data
         htm_1=DIV(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
         if 'hide' in fd['prop']:
-            return [htm_1,'*','']
+            return [htm_1,'*','','','','']
         if 'auth' in fd :
             if (not k_user.user_in_xjobs(fd['auth'],x_data_s,c_form=self)):
-                return [htm_1,'*',''] 
+                return [htm_1,'*','','','','',''] 
         if mode=='output-mini':
             if 'file'!= fd['type'] : mode='output'
             

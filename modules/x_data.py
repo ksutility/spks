@@ -571,12 +571,12 @@ x_data={
                 'idc_serial': {'type':'text','title':'شماره سریال پشت کارت ملی','len':'10'},	
                 },
             'steps':{
-                '0':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','xjobs':'dccm','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                '0':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc','xjobs':'dccm,edu','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 '1':{'tasks':'file_ot,file_off','xjobs':'off_ens','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'xjobs':'#task#un,dccm',
                 '2':{'tasks':'p_id','xjobs':'off_ens','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':'',
                         'start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False",'auth':'dccm,#task#un,off_ens',},
-                'b':{'tasks':'tel_wrk','xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد','app_keys':'y','app_titls':'','oncomplete_act':'',
-                        'name':'b','auth':'dccm,#task#un,off_ens','start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False"},
+                'b':{'tasks':'Idc_num','xjobs':'edu','title':'ثبت اطلاعات ویژه','app_keys':'y','app_titls':'','oncomplete_act':'',
+                        'name':'b','auth':'dccm,#task#un,edu,off_ens','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
                 'c1':{'tasks':'tel_mob,date,rlgn,mltr,Idc_num,shnsnme_num,father,brt_pos,mrg_case,mrg_date,n_suprt,n_child,lable_1,edu_l_cert_grade,edu_l_cert_date,edu_l_cert_pos,edu_l_cert_univ,edu_l_cert_dcpln,start_date,home_adrs,tel_home,mrf_name',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد- بخش 1','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'c1','auth':'dccm,#task#un,off_ens','start_step':'','start_where':"True",'end_where':"'{step_c2_ap}' == 'y'"},
@@ -709,6 +709,7 @@ x_data={
                 'units':{'type':'select','title':'معاونت مرتبط','select':{'D':'design-طراحی','S':'supervition-نظارت','P':'plan - برنامه ریزی و توسعه','M':'Management - مدیریت','-':'نا مشخص'},'prop':['multiple']},
                 'code':{'type':'text','width':'40','title':'کد مدرک'},
                 'f_code':{'type':'auto','len':'8','auto':'aqrc-tqm-{{=str(id).zfill(3)}}','title':'کد فایل'},
+                'files':{'type':'f2f','width':'60','title':'فایلها','ref':{'db':'doc_tqm','tb':'files','show_cols':['rev','file_1cr_r','file_2fr_r']},'var_set':{'f_code':'f_code'}},
                 'file_inc_v':{'type':'file','len':'40','file_name':'{{=f_code}}-inc-v','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'فایل ورودی'},
                 'file_inc_r':{'type':'file','len':'40','file_name':'{{=f_code}}-inc-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf - فایل ورودی'},
                 'file_1cr_v':{'type':'file','len':'40','file_name':'{{=f_code}}-1cr-v','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'سند اولیه'},
@@ -719,14 +720,34 @@ x_data={
             'steps':{
                 'pre':{'tasks':'name,user_crt,units,code','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'f_code,file_inc_v,file_inc_r,file_1cr_v,file_1cr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'file_2fr_v,file_2fr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'files,file_2fr_v,file_2fr_r','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
                 'all':{'input':'units','view1':'name,user_crt,code','view2':'code'}
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
-        }
+        },
+        'files':{
+            'base':{'mode':'form','title':'فایلهای اسناد مدیریت کیفیت','code':'900'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
+                'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
+                'rev':{'type':'index','len':'2','ref':{'db':'doc_tqm','tb':'files','key':'{id}','val':'{rev}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
+                'f_code_r':{'type':'auto','len':'8','auto':'{f_code}-{rev}','title':'کد 2'},
+                'file_inc_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-inc-v','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'فایل ورودی'},
+                'file_inc_r':{'type':'file','len':'40','file_name':'{{=f_code_r}}-inc-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf - فایل ورودی'},
+                'file_1cr_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-1cr-v','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'سند اولیه'},
+                'file_1cr_r':{'type':'file','len':'40','file_name':'{{=f_code_r}}-1cr-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf - سند اولیه'},
+                'file_2fr_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-2fr-v','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'فرمت شده'},
+                'file_2fr_r':{'type':'file','len':'40','file_name':'{{=f_code_r}}-2fr-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf فرمت شده'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,f_code,rev,f_code_r,file_inc_v,file_inc_r,file_1cr_v,file_1cr_r,file_2fr_v,file_2fr_r','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'rev','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+        }   
     },
     #--------------------------------------------------------------------
     'doc_mm':{ #db

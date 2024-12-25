@@ -259,7 +259,10 @@ class C_XJOB():
         if code =='*':
             return ['','*']
         elif code[0] != "#":
-            return [a_jobs[code]['base_user']]+a_jobs[code]['users']
+            x_users=[]
+            for x_code in code.split(","):
+                x_users+=[a_jobs[x_code]['base_user']]+a_jobs[x_code]['users']
+            return x_users
         elif code[0] == "#" and  len(code) > 6:
             jx=code.split('#')
             if jx[1]=="task":

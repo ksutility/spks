@@ -261,21 +261,19 @@ def xform_section():
 def xform_sd():
     if session.view_page=='save':
         session.view_page=''
-        return 'j_box_iframe_win_close'
+        if 'auto_hide' in request.args:
+            return 'j_box_iframe_win_close'
     session.view_page='xform_sd'
     session['update_step']=True
-    htm=_xform(out_items=['body'])['htm'] 
+    res=_xform(out_items=['body'])
     #xreport_var([{'htm':htm}])
-    return dict(htm=htm)#_xform())
+    return dict(htm=res['htm'],link=res['link'])#_xform())
 def xform():
     session.view_page='xform'
     session['update_step']=True
     x_data_s,db_name,tb_name,msg=_get_init_data()
-    
-    link=A('نمایش فرم با فرمت استاندارد',_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
-        ,_class='btn btn-primary') if 'xform_cg_file' in x_data_s['base'] else ''
-    htm=_xform()['htm']    
-    return dict(htm=htm,link=link)#_xform())
+    res=_xform() 
+    return dict(htm=res['htm'],link=res['link'])#_xform())
 def xform_cg():
     import k_file,json
     session.view_page='xform_cg'
@@ -290,7 +288,7 @@ def xform_cg():
     #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
     x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link')))
     url1=str(URL('xform',args=request.args,vars=request.vars))
-    print(url1)
+    #print(url1)
     x_file1=x_file1.replace('link_server',url1) 
     x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
     return XML(x_file2)
@@ -302,10 +300,10 @@ def _xform(out_items=['head','body','tools'],section=-1):
         #print("text_app="+str(request.vars['text_app']))
         text_app=request.vars['text_app'].lower()
         if 'ir' in text_app:
-            return {'htm':XML(save_app_review()),'json':''}
+            return {'htm':XML(save_app_review()),'json':'','link':''}
         else:
             
-            return {'htm':XML(save()),'json':''}
+            return {'htm':XML(save()),'json':'','link':''}
     #session.view_page='xform'
     
     '''
@@ -337,8 +335,10 @@ def _xform(out_items=['head','body','tools'],section=-1):
         htm_x=[y for x in out_items for y in htm_form[x]]
         json_data=htm_form['body_json']
     htm=DIV(FORM(*htm_x,_id="form1"),_dir="rtl")
+    link=A('نمایش فرم با فرمت استاندارد',_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
+        ,_class='btn btn-primary') if 'xform_cg_file' in x_data_s['base'] else ''
     #xreport_var([{'htm':htm}])
-    return {'htm':htm,'json':json_data}
+    return {'htm':htm,'json':json_data,'link':link}
 class C_FORM_HTM():
     #:#view 1 row
     def __init__(self,x_data_s,xid):
@@ -662,8 +662,8 @@ def save_app_review():
     '''
     if not 'xform' in session.view_page:
         return 'refer to this page is uncorrect'
-    session.view_page='save'
-    print('form-save_app_review')
+    session.view_page='save_app_review'
+    #print('form-save_app_review')
     x_data_s,db_name,tb_name,msg=_get_init_data()
     xid=request.args[2] or 1
     c_form=k_form.C_FORM(x_data_s,xid)
@@ -795,7 +795,7 @@ def xtable():
         if session["admin"] or k_user.user_in_xjobs_can('creat',x_data_s,step_index='0'):
             #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
             #k_user.user_in_jobs(jobs):
-            new_record_link=A('+',_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform',args=(args[0],args[1],"-1"))) 
+            new_record_link=k_htm.a('+',_target="box",_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform_sd',args=(args[0],args[1],"-1"))) 
         else:
             new_record_link='-'
         import k_date,k_icon
@@ -869,7 +869,7 @@ def xtable_i():
     #import k_err
     #k_err.xreport_var([f_nxt_s,x_data_s])
 
-    step_cur=C_FORM_HTM(x_data_s,-1).show_step_cur(step_n=f_nxt_s)
+    json_data_cur,step_cur=C_FORM_HTM(x_data_s,-1).show_step_cur(step_n=f_nxt_s)
     
     table2=FORM(
             DIV(table1),step_cur,
@@ -961,14 +961,15 @@ def _xtable_show(rows,titles,tasks,x_data_s,c_filter):
             n=str(i+1)
             idx=f"{x_dic['id']}"
             jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['xjobs']
-            form_url=URL('xform',args=(args[0],args[1],idx))
-            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
+            form_url=URL('xform_sd',args=(args[0],args[1],idx))
+            #id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
+            id_l=k_htm.a(idx,_title='open form 1'+idx,_href=form_url,_class="btn btn-primary",_target="box")
             cls1='app_'+x_dic["f_nxt_u"] if x_dic["f_nxt_u"] else ''
             tds=[{'value':n,'class':cls1},{'value':id_l}]
             
             #---------------
             x_select_cols=[fn for fn in select_cols]
-            tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)
+            tds_i=k_form.get_table_row_view(row[0],row,titles,x_select_cols,x_data_s,request=request)
             tds+=[{'value':x} for x in tds_i]           
             trs+=[tds]
         return trs,new_titles,len(rows)  
@@ -1001,15 +1002,16 @@ def _xtable_show(rows,titles,tasks,x_data_s,c_filter):
             n=str(i+1)
             idx=f"{x_dic['id']}"
             jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['xjobs']
-            form_url=URL('xform',args=(args[0],args[1],idx))
-            id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
+            form_url=URL('xform_sd',args=(args[0],args[1],idx))
+            #id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
+            id_l=k_htm.a(idx,_title='open form 1'+idx,_href=form_url,_class="btn btn-primary",_target="box")
             cls1='app_'+x_dic["f_nxt_u"] if x_dic["f_nxt_u"] else ''
             tds=[{'value':n,'class':cls1},{'value':id_l}]
             
             for st_n,step in x_data_s['steps'].items():
                 if step['tasks']:
                     x_select_cols=[fn for fn in step['tasks'].split(',') if fn not in x_data_s['labels']]
-                    tds_i=k_form.get_table_row_view(row[0],row,titles,tasks,x_select_cols,x_data_s,request=request)
+                    tds_i=k_form.get_table_row_view(row[0],row,titles,x_select_cols,x_data_s,request=request)
                     tds+=[{'value':x} for x in tds_i]           
 
                 if select_cols=='form_view_cols_full':
