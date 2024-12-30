@@ -1076,15 +1076,18 @@ def rc():#run 1 command
         rep['table-2-add']=db1.columns_add(tb_name+"_backup",cols1,"TEXT")    
     elif cmd=='update_data':  
         #sample /spks/data/rc/update_data
-        inf_1={'db_name':'eng','tb_name':'a','field name':'code','replace':{"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"}}
-        inf={'db_name':'user','tb_name':'user','field name':'eng','replace':{"%OT":"GE"}}
+        inf_1={'db_name':'eng','tb_name':'a','field name':['code'],'replace':{"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"},'oprate':' LIKE '}
+        inf_2={'db_name':'user','tb_name':'user','field name':['eng'],'replace':{"%OT":"GE"},'oprate':' LIKE '}
+        inf={'db_name':'user','tb_name':'user','field name':['step_0_ap','step_1_ap','step_2_ap'],'replace':{"Y":"y","X":"x","R":"r"},'oprate':' = '}
         db1=DB1(inf['db_name'])
-        fldn=inf['field name']#args[3]#field name
         tb_name=inf['tb_name']
         rep1=[]
-        for x,y in  inf['replace'].items():
-            rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn} LIKE '{x}'")#{fldn:x})
-            rep1+=[k_htm.val_report(rep)]
+        oprate=inf['oprate']
+        k_file.backup(db1.path,"*,bak")
+        for fldn in inf['field name']:#args[3]#field name
+            for x,y in  inf['replace'].items():
+                rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn}{oprate}'{x}'")#{fldn:x})
+                rep1+=[k_htm.val_report(rep)]
         return DIV(rep1)
     elif cmd=='update_f_nxt_u':   
         '''

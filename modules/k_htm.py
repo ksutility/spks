@@ -204,6 +204,7 @@ class C_TABLE:
         
         
         att_filepaths=set() # set for store
+        file_path=''
         def _tag_pars(tag):
             file_path=''
             c_tag=k_s_dom.C_TAG(tag)
@@ -283,25 +284,29 @@ class C_TABLE:
             tag_inf_row=[]
             tds=[]
             for i,cell in enumerate(row):
-                
-                if type(cell)==dict:
+                if not cell:
+                     vv=""
+                elif type(cell)==dict:
                     vv=cell['value']
                 elif type(cell) == str:
                     vv=cell
                 elif type(cell) in [float,int]:
-                    vv=cell
+                    vv=str(cell)
                 elif type(cell) in [gluon.html.XML]:
                     vv,file_path,tag_inf =_tag_pars(cell)
                     tag_inf_row+=[tag_inf]
                     if file_path:att_filepaths.add(file_path)
+                    vv='XML'
                 else:
                     vv="error"
                 vv=str(vv)
                 tag=TAG(vv)
+                
                 if "<" in vv or (('elements' in tag)):# and  len(tag['elements'])>1):
                     vv,file_path,tag_inf =_tag_pars(cell)
                     tag_inf_row+=[tag_inf]
                     if file_path:att_filepaths.add(file_path)
+   
                 tds+=[str(vv).replace("\n","")]    
             trs+=[tds]
             tag_infs+=[tag_inf_row]
@@ -311,6 +316,10 @@ class C_TABLE:
         
         import k_err 
         k_err.xreport_var ([{'trs':trs,'file_path':file_path,'rows':rows,'heads':heads,'att_filepaths':att_filepaths,'tag_infs':tag_infs}])
+        
+        import k_xl_light
+        k_xl_light.write(r'C:\temp\x\2.xlsx','a',trs)
+        print('xls')
         
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
@@ -529,7 +538,7 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True):
     reset='true' if reset else 'false'
     if _target=="frame":
         return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
-    elif _target=="box":
+    elif "box" in _target:
         #function selectMe()
         js_func="""
         {  

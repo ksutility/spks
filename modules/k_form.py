@@ -621,7 +621,8 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
     #debug=False
     #ceck cach
     
-    idx="-".join([ref_0[x] for x in ref_0])+"|"+str(form_data)
+    idx="-".join([ref_0[x] for x in ref_0])
+    idx+="|"+str(form_data)
     #if debug: print(f"idx={idx}")
     if idx in k_cache:
         if k_cache[idx]['time']-time.time()<5:
@@ -662,21 +663,24 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
     
     for x in ['db','tb','where']:
         ref[x]=template_parser(ref.get(x,''),x_dic=form_data) #.format(task=task_inf,step=form['steps'],session=session)
-    if debug :xxxprint(msg=['ref2',idx,''],vals=form_data)    
+    #if debug :xxxprint(msg=['ref2','idx',''],vals={'form_data':form_data,'ref':ref,'idx':idx})    
     #dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db']+".db"#db_path+ref['db']
 
     if form_nexu:
         ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nexu <> 'x' "
     rows,tits,row_n=DB1(ref['db']).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
-    if debug :
-        print(f"where={ref['where']}")
-        xxxprint(msg=['where',idx,ref['where']],args=rows)
+    
     if rows :
         output_data={ref['key'].format(**dict(zip(tits,row))):ref['val'].format(**dict(zip(tits,row))) for row in rows}
         #if debug :xxxprint(msg=['output_data',idx,''],vals=output_data) 
         k_cache[idx]={'val':output_data,'time':time.time()}
-        return output_data
-    return {}#'msg':ref['where']}
+    else:    
+        output_data=''
+    if debug :
+        print(f"where={ref['where']}")
+        xxxprint(msg=['where','idx',ref['where']],args=rows,vals={'form_data':form_data,'ref':ref,'output_data':output_data,'idx':idx})    
+    return output_data
+    #return {}#'msg':ref['where']}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@k_tools.x_cornometer
@@ -1070,20 +1074,31 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #x_auto()    
     elif sc=="index": #sc
         if 'input' in need:
-            x_dt=reference_select(obj['ref'],form_data=x_dic)
-            x_list=[x_dt[x] for x in x_dt if x_dt[x]]
-            from k_num import SMART_NUM_LIST
-            smart_num_list=SMART_NUM_LIST(x_list)
-                
-            #if def_val=="" : 
-            index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val
-            index_hlp=str(smart_num_list)
+            x_dt=reference_select(obj['ref'],form_data=x_dic,debug=True)
+            if not x_dt and 'def_value' in obj and obj['def_value']:
+                index_new=obj['def_value']
+                index_hlp=obj['def_value']
+            else:     
+                x_list=[x_dt[x] for x in x_dt if x_dt[x]]
+                from k_num import SMART_NUM_LIST
+                smart_num_list=SMART_NUM_LIST(x_list)
+                    
+                #if def_val=="" : 
+
+                index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val  #_value or
+                index_hlp=str(smart_num_list)
             
-            #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
-            #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
+                #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
+                #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
+
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
             obj['help']=XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")
+            obj['value']=index_new
+            #xreport_var([{'obj':obj}])
+        #else:
+        #    pass
+        #    #xxxprint(3,msg['index'])
         msg=""  
 
     elif sc=="file": #sc
@@ -1148,17 +1163,18 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #xxxprint(3,msg=[_value,obj['file_name'],''],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value,'msg1':msg1})
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
-        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>'''
+        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>''' if _value else ''
         file_icon=obj['s_ext'] #"F"
         bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
         bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
         bt_del=''
+        bt_upload=f'''<a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a>'''
         msg2=DIV(*[XML(x) for x in msg1]) if msg1 else ''
         #msg2=msg1 #if msg1 else ''
         obj['input']=XML(f'''
             <div >
-            {bt_view}{bt_del}
-            <a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a></div>
+            {bt_view}{bt_del}{bt_upload}
+            </div>
             ''')
         obj['output']=XML(f'''<div>{bt_view}{msg2}</div>''')    
         obj['data_json']=obj['file_name']
@@ -1216,8 +1232,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if 'rename_file' in request.vars:
             new_file_fullname,msg=rename_file_in_form()
             obj['help']=msg
-        else:
-            obj['help']=''
+        #else:
+        #    obj['help']=''
         """   
         #---------------------------------------------------------------------------------################################
         saved_file_fullname= def_val
@@ -1266,7 +1282,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         db2,tb2=obj['ref']['db'],obj['ref']['tb']
         var_set={x:x_dic[y] for x,y in obj['var_set'].items()} if 'var_set' in obj else {}
         var_set.update({'f2f_id':x_dic['id'],'form_case':1})
-        new_form_link=k_htm.a('+',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars=var_set),_target="box",_title='فرم جدید') #box
+        new_form_link=k_htm.a('ردیف جدید',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars=var_set),_target="box",_title='فرم جدید') #box
         
         #table of record data - جدول اصلاعات ثبت شده
         res=DB1(db2).select(tb2,where={'f2f_id':x_dic['id']},limit=0,result='dict_x',order='id',last=False)
@@ -1278,7 +1294,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if show_rows=='all':
             for i,row in enumerate(res['rows']):#.reverse():          
                 xid=row[titles.index('id')]
-                url=URL('form','xform_section',args=[db2,tb2,xid])
+                url=URL('form','xform_sd',args=[db2,tb2,xid])
                 link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
                 row_o=get_table_row_view(xid,row,titles,show_cols,x_data[db2][tb2],request=request) #row objects
                 x_r_input+=[[link , *row_o]]
@@ -1298,6 +1314,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         
         
         obj['output']=DIV(rec_table_output)
+        obj['output-mini']=len(res['rows'])
         obj['input']=DIV(rec_table_input,new_form_link)
     elif sc=="do": #sc
         do_name,do_param=base_data.split(share.st_splite_chr2)
@@ -1682,7 +1699,7 @@ class C_FORM():
             if (not k_user.user_in_xjobs(fd['auth'],x_data_s,c_form=self)):
                 return [htm_1,'*','','','','',''] 
         if mode=='output-mini':
-            if 'file'!= fd['type'] : mode='output'
+            if not fd['type'] in ['file','f2f'] : mode='output'
             
         x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request,c_form=self)
         return [htm_1,x_obj[mode],x_obj['help'],fd['title'],field_name,x_obj['data_json']]

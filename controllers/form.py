@@ -188,7 +188,7 @@ class C_FILTER():
             name=obj['name']
             name2=name+'-x'
             obj['onchange']=f"document.getElementById('{name}').value=document.getElementById('{name2}').value;"
-            x_data.x_data_verify_task(name2,obj)
+            x_data.x_data_verify_task(name2,obj,'','')
             obj['def_value']=request.vars.get(name2,obj['def_value'])
             val=request.vars.get(name,_val) or obj['def_value']
             if width:obj['width']=width
@@ -268,6 +268,22 @@ def xform_sd():
     res=_xform(out_items=['body'])
     #xreport_var([{'htm':htm}])
     return dict(htm=res['htm'],link=res['link'])#_xform())
+def xform_info():
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    style="""
+    <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    th:nth-child(even),td:nth-child(even) {
+      background-color: #D6EEEE;
+    }
+    </style>
+    """
+    return style+str(BEAUTIFY(x_data_s))
+    return dict(htm=DIV(style,BEAUTIFY(x_data_s)))
 def xform():
     session.view_page='xform'
     session['update_step']=True
@@ -711,12 +727,12 @@ def list_0():
                 if session["admin"]:
                     _class="btn btn-primary btn-sm"
                     tools=DIV(
-                        A("T",_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),"-",
-                        A("M",_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
-                        A("U",_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),"-",
-                        A("D",_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),"-",
-                        A("S",_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""])),"-",
-                        A("A",_class=_class,_title="به روز رسانی فیلدهای اتوماتیک",
+                        k_htm.a("T",_target="box",reset=False,_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),"-",
+                        k_htm.a("M",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
+                        k_htm.a("U",_target="box",reset=False,_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),"-",
+                        k_htm.a("D",_target="box",reset=False,_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),"-",
+                        k_htm.a("S",_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""])),"-",
+                        k_htm.a("A",_target="box",reset=False,_class=_class,_title="به روز رسانی فیلدهای اتوماتیک",
                             _href=URL("data","rc",args=["update_auto_filed",db_name,tb_name,"do-x"]
                                     ,vars={'select_cols':XML(','.join([x for x in tb_obj['tasks'] if tb_obj['tasks'][x]['type']=='auto']))}
                                     ))
@@ -746,6 +762,36 @@ def list_0():
     server_add=k_tools.server_python_add()
     #tt+=[XML(t0)]
     return dict(htm=DIV(tt,_dir='rtl'),server_python_add=k_tools.server_python_add())
+#----------------------------------------------------------------------------------------------------- 
+def list_0_mr(): #mr=manage report
+    import k_icon,k_htm
+    from x_data import x_data_cat
+    #x_data_cat=x_data.x_data_cat
+    trsx={x:[] for x in x_data_cat}
+    n=0
+    titels=['n','نام فرم','فیلد های هوشمند','سامان دهی و مدیریت و اعتبار دهی','تعداد ثبت','تعدا د فراداده']
+    x_sum=0
+    rows=[]
+    for db_name,db_obj in x_data.items():
+        for tb_name,tb_obj in db_obj.items():
+            if tb_obj['base']['mode']=='form':
+                n+=1
+                db1=DB1(db_name)
+                total_n=db1.count(tb_name)['count']
+                n_task=len(tb_obj['tasks'])
+                n_step=3*len(tb_obj['steps'])+2
+                n_all=(n_task+n_step)*total_n
+                row=[n,tb_obj['base']['title'],
+                    n_task,n_step,
+                    total_n,
+                    n_all,
+                    ]
+                x_sum+=n_all
+                rows+=[row]
+    from k_htm import C_TABLE
+    table1=C_TABLE(titels,rows).creat_htm()           
+    return dict(table=table1,x_sum=x_sum)
+#-----------------------------------------------------------------------------------------------------   
 #@k_tools.x_cornometer
 def xtable():
     from k_tools import X_DICT
@@ -785,7 +831,8 @@ def xtable():
     c_url=C_URL()
     from k_htm import C_TABLE
     c_table=C_TABLE(new_titles,trs)
-    
+    if 'xx' in request.vars:
+        pass
     if c_url.ext=='': #html
 
         table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
@@ -808,7 +855,8 @@ def xtable():
     elif c_url.ext=='xls':
         tt="\ufeff" # BOM
         #return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
-        return c_table.export_csv(request.args[-1])
+        #return c_table.export_csv(request.args[-1])
+        return C_TABLE(x_select['titles'],x_select["rows"]).export_csv(request.args[-1])
         #return dict(data=rows)
     elif c_url.ext=='csv':
         return dict(x=c_table.creat_htm())

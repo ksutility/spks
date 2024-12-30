@@ -3,13 +3,14 @@
 /* -----------------------------------------------------------------------------	
 	<j_box>	
 	for 2 div in each page */
+	.j_box_white_content  => overflow: auto;
 -->		
     .j_box_black_overlay{
         display: none;
         position: fixed;
         top: 0%;
         left: 0%;
-        width: 100%;
+        width: 98%;
         height: 100%;
         background-color: #555555;
         z-index:1001;
@@ -20,15 +21,12 @@
     .j_box_white_content {
         display: none;
         position: fixed;
-        top: 25%;
-        left: 25%;
-        width: 50%;
-        height: 50%;
-        padding: 16px;
-        border: 16px solid orange;
+        padding: 3px;
+        border: 5px solid orange;
         background-color: white;
         z-index:1002;
-        overflow: auto;
+		overflow: auto;
+        
 	.j_box_white_content_1 {
         display: none;
         position: fixed;
@@ -42,17 +40,32 @@
         z-index:1002;
         overflow: auto;	
     }
+.header {
+	position: sticky;
+	width: 100%;
+	z-index: 1005;
+	top: 0;
+	left: 0;
+	background-color: white;
+}
+.hh1:{
+	height:20px;
+	}
 <!--	
 /* </j_box > ###################################################################*/	
-/* -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------resizable
 -->
 </style>
 <!--j_box -->	
-	<div id="j_box_light" class="j_box_white_content resizable" onkeydown="key_x(event);"> 
-		<a href = "javascript:void(0)" title = "Close" class = "btn btn-danger" onclick = "j_box_hide()" >X</a> - 
-		<a href = "javascript:void(0)" title = "set win size to 50%" class = "btn btn-primary" onclick = "win_set_size50()">50%</a>
-		<a href = "javascript:void(0)" title = "set win size to 75%" class = "btn btn-primary" onclick = "win_set_size75()">75%</a>
-		<a href = "javascript:void(0)" title = "set win size to 100%" class = "btn btn-primary" onclick = "win_set_size100()">100%</a>
+	<div id="j_box_light" class="j_box_white_content " onkeydown="key_x(event);"> 
+		<div class="header">
+			<a href = "javascript:void(0)" title = "Close" class = "btn btn-danger" onclick = "j_box_hide()" >X</a> - 
+			<a href = "javascript:void(0)" title = "set win size to 50%" class = "btn btn-primary" onclick = "win_set_size50()">50%</a>
+			<a href = "javascript:void(0)" title = "set win size to 75%" class = "btn btn-primary hh1" onclick = "win_set_size75()">75%</a>
+			<a href = "javascript:void(0)" title = "set win size to 90%" class = "btn btn-xs btn-primary" onclick = "win_set_size('90')">90%</a>
+			<a href = "javascript:void(0)" title = "set win size to 100%" class = "btn btn-primary" onclick = "win_set_size100()">100%</a>
+		</div>
+		
 		<div id="j_box_subwin1_body" style="height:100%;">
 		<!-- subwin1_body --> 
 			<iframe id="j_box_iframe_win" src="" width="100%" height="100%">	<p>Your browser does not support iframes.</p></iframe> 
@@ -128,7 +141,33 @@
 		if ( $iframe.length ) {
 			$iframe.attr('src',path);
 		}
-		win_set_size75();
+		win_set_size('90');
+	}
+	function win_set_size(prsent) {
+		xs=document.getElementById('j_box_light').style
+		if (prsent=='100'){
+			xs.width='100%';
+			xs.height='100%';
+			xs.left='0%';
+			xs.top='0%';
+		} else if (prsent=="90") {
+			xs.width='90%';
+			xs.height='90%';
+			xs.left='5%';
+			xs.top='5%';
+		} else if (prsent=="75") {
+			xs.width='75%';
+			xs.height='75%';
+			xs.left='12%';
+			xs.top='12%';
+		} else if (prsent=="50") {
+			xs.width='50%';
+			xs.height='50%';
+			xs.left='25%';
+			xs.top='25%';
+		}
+		document.getElementById('j_box_light').focus();
+		document.getElementById('j_box_light').click();
 	}
 	function win_set_size100() {
 		xs=document.getElementById('j_box_light').style
