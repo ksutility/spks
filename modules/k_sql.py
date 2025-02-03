@@ -93,18 +93,22 @@ class C_SQL():
         q_name= " WHERE " if add_where_text else " "
         if not q_where:return ''
         if type(q_where)==str:
-            return q_name+q_where
+            res= q_name+q_where
         elif type(q_where)==list:
             if len(q_where)==2 and type(q_where[0])==list and type(q_where[1]) in [list,tuple]:
-                return q_name + " AND ".join([self.where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
+                res= q_name + " AND ".join([self.where_cell(w_n,q_where[1][i]) for i,w_n in enumerate(q_where[0])])
             elif q_where[0]=="AND": #__where__list__":
-                return q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])
+                res= q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])
             elif q_where[0]=="OR": #__where__list__":
-                return q_name + " OR ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])    
+                res= q_name + " OR ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])    
+            else:
+                res= q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where if q_w])
         elif type(q_where)==dict:
-            return q_name + " AND ".join([self.where_cell(name,q_where[name]) for name in q_where]) 
+            res=q_name + " AND ".join([self.where_cell(name,q_where[name]) for name in q_where]) 
         else:
             xxxprint(msg=["error","where type not correct",''],launch=True)
+        #xxxprint(msg=["result",str(type(q_where)),''],vals={'q_where':q_where,'res':res})
+        return res
     #-------------------------------------------
     def add_limit(self,sql,offset,page_n,page_len,limit,order,last):
         x_order = f' ORDER BY ' + order if order else ''

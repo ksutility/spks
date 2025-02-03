@@ -348,7 +348,19 @@ def test():
     return dict(x=response.toolbar(),y=str(request.cookies))#,z=request.cookies["username"].value=="abc")
 def test1():
     response.cookies["username"]="abc"
+def test_password():
+    if not session["admin"]: return '@@@###@@@'
+    import k_htm
+    rows,titles,row_num=db1.select("user",limit=0)
+    tt=[]
+    for row in rows:
+        dd=dict(zip(titles,row))
+        if dd['un'] not in ['aha','ase','my','rms','akr','fms','hal','hdr','mmn']: continue
+        ps=dd['ps'] or ''
+        tt+=[[dd['family'],dd['un'],dd['Idc_num'] or '',dd['tel_mob'] or '',ps]]
+    return dict(table=k_htm.C_TABLE(['-','-','-','-','-'],tt).creat_htm())
 def reset_password():
+    if not session["admin"]: return '@@@###@@@'
     import k_user
     # sample use : spks/user/reset_password 
     if request:
@@ -358,7 +370,13 @@ def reset_password():
             if user_ab in k_user.ALL_USERS().inf:
                 import k_user
                 tt+=[k_user.ALL_USERS().inf[user_ab]['fullname']]
-                xr=db1.update_data(table_name="user",set_dic={'ps':'1'},x_where={'un':user_ab})
+                
+                #ldc_num=[k_user.ALL_USERS().inf[user_ab]['Idc_num']]
+                dd=db1.select("user",where={'un':user_ab},result='dict')
+                ldc_num=dd['Idc_num']
+                tt+=[str(ldc_num)]
+                
+                xr=db1.update_data(table_name="user",set_dic={'ps':ldc_num},x_where={'un':user_ab})
                 if xr['rowcount']>0:
                    tt+=["رمز با موفقیت ریست شد"]
                 else:
@@ -370,7 +388,13 @@ def reset_password():
     import k_form
     from x_data import x_data_verify_task
     obj_inf={'type':'reference','width':'5','title':' همکار','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]}
-    x_data_verify_task('user_ab',obj_inf)
+    x_data_verify_task('user_ab',obj_inf,'user','user')
     h_obj=XML(k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])['input'])
     tt=FORM(h_obj,INPUT(_type='submit'))
     return dict(tt=tt)
+def msg_access_form_internet():
+    u_ip=str(request.client)
+    return dict(msg='err = yor ip is'+u_ip)
+def scr_pass():
+    import k_user
+    return k_user.creat_scr_pass()

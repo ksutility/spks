@@ -992,4 +992,72 @@ def auth_of_form():
         else:
     '''
     
-
+def need_links():
+    links=['']
+    #AND end IS NULL
+    #loc = 100
+    prm={"_class":"btn btn-outline-primary text-center text-wrap rounded"}
+    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc = 100','cols_filter':'name,family,tel_wrk,tel_mob',
+        'table_class':2,'data_page_n':1,'data_page_len':40})
+    links+=[k_htm.a("تلفن همکاران دفتر مرکزی",_href=url,_target="",**prm)]
+    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
+        'table_class':2,'data_page_n':1,'data_page_len':40})
+    links+=[k_htm.a("همکاران قدیمی",_href=url,_target="",**prm)]
+    url=URL('form','list_0_mr')
+    links+=[k_htm.a("آمار فراداده ها",_href=url,_target="",**prm)]
+    links+=['']
+    rows=[links]
+    if session["admin"]:
+        url=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
+        'table_class':2,'data_page_n':1,'data_page_len':40})
+        links=[k_htm.a("papers=>todo !=''",_href=url,_target="",**prm,_dir="ltr")]
+        rows+=[links+["","","",""]]
+    lnk,trs,f_l='','',''
+    xx00={    
+    "papers=>todo !=''":lnk+"""data/xtable/paper/a?data_filter=act_todo+%21%3D%22%22&cols_filter=&table_class=2&data_page_n=1&data_page_len=20""",
+    "papers=>نامه ها- پیگیری":lnk+"""data/xtable/paper/a?data_filter=act_pey+%21%3D%22%22&cols_filter=&table_class=2&data_page_n=1&data_page_len=20""",
+    "papers=>ALL":lnk+"""data/xtable/paper/a""",
+    "papers=>GGA-Layouts":lnk+"""data/xtable/paper?data_filter=%22prj%22%3D%2229%22+AND+%22des%22+like+%22%25L-%25%22&cols_filter=&table_class=1""",
+    "papers=>standard":lnk+"""data/xtable/paper?data_filter=%22prj%22%3D%2248%22""",
+    "-----------":"", 
+    "spks help":lnk+"""file/f_list?xpath=D:\ks\I\web2py\Applications\spks\help""",
+    "km":lnk+"""file/f_list/ks/i/dropbox/01-KM/1-ACT?xpath=d%3A """,
+    "TimeSHeet":lnk+"""xfile/read/ks/i/dropbox/01-KM/1-ACT/11-KS/Timesheet/TMST-NNNN-AQC.mm?xpath=d%3A""",
+    "------------":"",
+    "form":lnk+"""form/xform/test/b/1""",
+    "form-table":lnk+"""data/table/test/b"""
+    }
+    rem={
+    "home":lnk+"""data/index""",
+    "spks-file-index":lnk+"""file/index""",
+    }
+    
+    if session["admin"]:
+        """
+        trs+=[TR(*[TH(f_l+x) for x in ['0','x','kx','sp','select']])]#[TR(TH(f_l+'0'),TH(f_l+'X'),TH(f_l+'KX'),TH(f_l+'SP'),TH('update'))]
+        for arg in [['a_sub_p','a'],['paper','a'],['a_dspln','a'],['user','user'],['job','a']]:#,'a'),('eng','a'),('user','user')]:
+            trs+=[TR(*[A(ff[arg[0]],_href=URL(xtbl,args=(arg)))   for xtbl in ['table','xtable','kxtable','sptable','select']])]
+        t1=DIV(DIV(A('admin',_href=URL('spks','default','admin'))),
+              DIV(A('xxprint_reset_html',_href=URL('spks','data','_xxprint_reset_html'),_target="x_frame"))
+              )
+        
+        t2="<hr>"      
+        t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
+        t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
+        t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
+        t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
+        """
+        t2=f"""<br><div class="row">
+            <div class="col">
+                <a class='btn btn-primary' href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>
+            </div>
+            <div class="col">
+                <a class='btn btn-primary' href={URL('km','test_ipgrid')}>test_ipgrid</a>
+            </div>
+        </div>
+            """
+   
+    return dict(htm=TABLE(['']+rows+[''],_id="table_A1"))
+def test_xdata():
+    import x_data_test as xx
+    return xx.main_test()

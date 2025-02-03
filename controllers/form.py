@@ -33,7 +33,7 @@ now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
 
-debug=False #False # True: for check error
+debug=False # True: for check error
 db_path='applications\\spks\\databases\\'
 x_color={'x':'danger','y':'success','r':'warning','':''}
 scripts={'table cell display':
@@ -135,7 +135,8 @@ class C_FILTER():
         
 
         cols_filter=x_data_s['cols_filter']
-        self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter,'add_empty_first':False}#,$hlp='prop':["can_add"],}
+        self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter,'def_value':x_data_s['base'].get('cols_filter','')
+            ,'add_empty_first':False}#,$hlp='prop':["can_add"],}
         
         data_filter=x_data_s['data_filter'] 
         data_filter={k_form.template_parser(x):y for x,y in data_filter.items()}
@@ -296,17 +297,26 @@ def xform_cg():
     session['update_step']=True
     x_data_s,db_name,tb_name,msg=_get_init_data()
     x_file=k_file.read('text',r"D:\ks\I\web2py-test\applications\spks\static\xform_cg"+"\\"+ x_data_s['base']['xform_cg_file'])
+    #return x_file
     json_data=_xform()['json']
-    
-    json_data1={x:y['value']for x,y in json_data.items()}#str(XML(y['value']
+    json_data1={x:y['value'] for x,y in json_data.items() if 'value' in y}#str(XML(y['value']
+    json_data1['__inf__']={x:y for x,y in json_data.items()}#str(XML(y['value']
+    json_data1['__labels__']={x:y for x,y in x_data_s['labels'].items()}
     json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
     #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])
     #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
-    x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link')))
+    x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
+    #return x_file1
     url1=str(URL('xform',args=request.args,vars=request.vars))
     #print(url1)
     x_file1=x_file1.replace('link_server',url1) 
     x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
+    script2=""" 
+	document.getElementById('help_div').style.display = "none"
+	document.getElementById('bt_writetext').style.display = "none"
+    """
+    x_file2=x_file2.replace("//script2_inject",script2)
+    #return x_file2
     return XML(x_file2)
 def _xform(out_items=['head','body','tools'],section=-1):
     #show all section
@@ -424,14 +434,15 @@ class C_FORM_HTM():
                     htm_form['body_json'].update(json)
                     text_app_added=True
                     
-            if uwc=='ret_edit':
+            elif uwc=='ret_edit':
                 json,body=self.show_step_not_cur(x_data_s,xid,c_form,step,'1')
                 htm_form['body']+=[body,self.app_review(step_name)]
                 htm_form['body_json'].update(json)
-            if uwc=='view':
+            elif uwc=='view':
                 json,body=self.show_step_not_cur(x_data_s,xid,c_form,step, fsc_mode )
                 htm_form['body']+=[body]
-                htm_form['body_json'].update(json)                
+                htm_form['body_json'].update(json) 
+            #htm_form['body_json'].update({})   
             htm_form['body']+=[DIV('',_class="text-center",_style="height:5px;background-color:#888")]
             '''        
             if i == f_nxt_s:
@@ -498,7 +509,8 @@ class C_FORM_HTM():
                 hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,request,mode='output')#output_text')
-                hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
+                hx['data']+=[self._show_row(hh,step)]
+                #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
                 #hx['data_json'][field_name]={'name':str(hh[4]),'value':str(hh[1]),'help':str(hh[2]),'title':str(hh[3])}
         #breakpoint() f_nxt_s
@@ -513,11 +525,20 @@ class C_FORM_HTM():
         #print("==>"+str(form_sabt_data[f'step_{step["i"]}_un']))
         form_sabt_data=self.c_form.form_sabt_data
         un=form_sabt_data[f'step_{step["name"]}_un']
-        hx['app']=[ 
-                    ("نتیجه : " +val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["name"]}_ap'])),
-                    ("توسط : "+(val_in_dic(k_user.ALL_USERS().inf,un).get('fullname','') if un else '')),
-                    ("مورخ : "+(form_sabt_data[f'step_{step["name"]}_dt'] or '')),
-                    ]
+        
+        xap={'ap':{'value':val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["name"]}_ap']),'title':"نتیجه : "},
+            'un':{'value':(val_in_dic(k_user.ALL_USERS().inf,un).get('fullname','') if un else ''),'title':"توسط : "},
+            'dt':{'value':form_sabt_data[f'step_{step["name"]}_dt'] or '','title':"مورخ : "}}
+        hx['app']=[xap[x]['title']+xap[x]['value'] for x in ['ap','un','dt']]
+        """
+                    (xap['ap']['title']+xap['ap']['value']), #val_in_dic(step['app_kt'],form_sabt_data[f'step_{step["name"]}_ap'])),
+                    ("توسط : "+hx['app_un']), #(val_in_dic(k_user.ALL_USERS().inf,un).get('fullname','') if un else '')),
+                    ("مورخ : "+hx['app_dt']) #(form_sabt_data[f'step_{step["name"]}_dt'] or '')),
+                    ]"""
+        hx['data_json'].update({f'step_{step["name"]}_ap':xap['ap'],
+                                f'step_{step["name"]}_un':xap['un'],
+                                f'step_{step["name"]}_dt':xap['dt']
+                                })            
         # breakpoint()
         hx['app-color']="bg-"+val_in_dic(x_color,form_sabt_data[f'step_{step["name"]}_ap'])
         hx['stp']=[str(step['i']+1) +' - '+ step['title']]
@@ -540,7 +561,8 @@ class C_FORM_HTM():
                 hx['data']+=[DIV(DIV(x_data_s['labels'][field_name],_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,request,mode='input')
-                hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
+                hx['data']+=[self._show_row(hh,step)]
+                #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
         hx['app1']=[DIV(BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{x_color[xx]}',_onclick=f"app_key('{xx}')") if xx in step['app_kt'] else '' ,_class='col-'+{'y':'8','r':'2','x':'2'}[xx]) for xx in ['x','y','r']]
         hx['app']=['نتیجه','-'*10,'اقدام:','توسط:','مورخ :'] if info else []
@@ -555,6 +577,11 @@ class C_FORM_HTM():
                 DIV(k_form.chidman(hx,x_data_s,step,request=request),_class="container-fluid form_step_cur")
                 ,DIV(*hx['app1'],_class="row p-2"))
                      #,_action=URL('save',args=request.args)
+    def _show_row(self,hh,step):
+        task_cols_width=step.get('task_cols_width','3,6,3')
+        tcw=task_cols_width.split(',')
+        return DIV(*[DIV(hh[i],_class=f'col-{tcw[i]} text-right') for i in range(0,3) if tcw[i]!='0'],_class='row border')
+        #hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
     def app_review (self,step_name): 
         '''
             0209018
@@ -695,16 +722,17 @@ def save_app_review():
         return DIV("*****",htm_form) #,x=response.toolbar())
 #------------------------------------------------------------------------------------------------------------
 def list_0():
-    import k_icon,k_htm
+    import k_icon,k_htm,k_tools
     from x_data import x_data_cat
     #x_data_cat=x_data.x_data_cat
     trsx={x:[] for x in x_data_cat}
     n=0
     titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل',""]
-  
+    afi=k_tools.access_from_internet()
+    
     for db_name,db_obj in x_data.items():
         for tb_name,tb_obj in db_obj.items():
-            if tb_obj['base']['mode']=='form':
+            if tb_obj['base']['mode']=='form' and ((not afi) or ('internet' in tb_obj['base'])):
                 n+=1
                 db1=DB1(db_name)
                 total_n=db1.count(tb_name)['count']
@@ -728,7 +756,8 @@ def list_0():
                     _class="btn btn-primary btn-sm"
                     tools=DIV(
                         k_htm.a("T",_target="box",reset=False,_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),"-",
-                        k_htm.a("M",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
+                        k_htm.a("M0",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
+                        k_htm.a("M1",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name,"do"])) ,"-",
                         k_htm.a("U",_target="box",reset=False,_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),"-",
                         k_htm.a("D",_target="box",reset=False,_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),"-",
                         k_htm.a("S",_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""])),"-",
@@ -761,7 +790,7 @@ def list_0():
     tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
     server_add=k_tools.server_python_add()
     #tt+=[XML(t0)]
-    return dict(htm=DIV(tt,_dir='rtl'),server_python_add=k_tools.server_python_add())
+    return dict(htm=DIV(tt,_dir='rtl'),server_python_add=k_tools.server_python_add(),access_from_internet=k_tools.access_from_internet())
 #----------------------------------------------------------------------------------------------------- 
 def list_0_mr(): #mr=manage report
     import k_icon,k_htm
@@ -770,7 +799,7 @@ def list_0_mr(): #mr=manage report
     trsx={x:[] for x in x_data_cat}
     n=0
     titels=['n','نام فرم','فیلد های هوشمند','سامان دهی و مدیریت و اعتبار دهی','تعداد ثبت','تعدا د فراداده']
-    x_sum=0
+    x_sum=[0,0,0,0]
     rows=[]
     for db_name,db_obj in x_data.items():
         for tb_name,tb_obj in db_obj.items():
@@ -786,11 +815,15 @@ def list_0_mr(): #mr=manage report
                     total_n,
                     n_all,
                     ]
-                x_sum+=n_all
+                x_sum[0]+=n_task
+                x_sum[1]+=n_step
+                x_sum[2]+=total_n
+                x_sum[3]+=n_all
                 rows+=[row]
+    rows+=[['-','SUM']+x_sum]
     from k_htm import C_TABLE
     table1=C_TABLE(titels,rows).creat_htm()           
-    return dict(table=table1,x_sum=x_sum)
+    return dict(table=table1,x_sum=x_sum[3])
 #-----------------------------------------------------------------------------------------------------   
 #@k_tools.x_cornometer
 def xtable():
@@ -822,7 +855,7 @@ def xtable():
         filter_data=["AND",filter_data,auth.where]#__where__list__
     order=c_filter.data_sort["value"] or x_data_s['order']
     x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
-    # xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})
+    #xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})
     #if rows:rows.reverse()
     trs,new_titles,nr=_xtable_show(x_select["rows"],x_select['titles'],tasks,x_data_s,c_filter)
     #import k_err
@@ -842,7 +875,8 @@ def xtable():
         if session["admin"] or k_user.user_in_xjobs_can('creat',x_data_s,step_index='0'):
             #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
             #k_user.user_in_jobs(jobs):
-            new_record_link=k_htm.a('+',_target="box",_class='btn btn-primary',_title='NEW RECORD',_href=URL('xform_sd',args=(args[0],args[1],"-1"))) 
+            new_record_link=k_htm.a('+',_target="box",_class='btn btn-primary',_title='NEW RECORD',
+                _href=URL('xform_sd',args=(args[0],args[1],"-1"),vars={'form_case':x_data_s['base'].get('form_case',1)})) 
         else:
             new_record_link='-'
         import k_date,k_icon
@@ -855,8 +889,8 @@ def xtable():
     elif c_url.ext=='xls':
         tt="\ufeff" # BOM
         #return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
-        #return c_table.export_csv(request.args[-1])
-        return C_TABLE(x_select['titles'],x_select["rows"]).export_csv(request.args[-1])
+        return c_table.export_csv(request.args[-1])
+        #return C_TABLE(x_select['titles'],x_select["rows"]).export_csv(request.args[-1])
         #return dict(data=rows)
     elif c_url.ext=='csv':
         return dict(x=c_table.creat_htm())
@@ -953,7 +987,16 @@ def xtable_i_save():
     #{'des_modir':'','text_app':'y'}
     htm_form=_save_out(xid=0)
     htm_form+=[tt]
-    htm_form+=[k_form.C_FORM(x_data_s,xid).save(new_data=request.vars)['html_report'] for xid in xid_list]
+    
+    #chek for user error
+    # جلوگیری از پاک شدن اطلاعات فیلدهای تکرار  شده با خالی گذاشتن آنها
+    new_req={}
+    for x,x_val in request.vars.items():
+        n=0
+        for step,step_v in x_data_s['steps'].items():
+            if x in step_v['tasks']:n+=1
+        if n==1 or x_val:new_req[x]=x_val
+    htm_form+=[k_form.C_FORM(x_data_s,xid).save(new_data=new_req)['html_report'] for xid in xid_list]
     
     
     try:
@@ -1050,7 +1093,7 @@ def _xtable_show(rows,titles,tasks,x_data_s,c_filter):
             n=str(i+1)
             idx=f"{x_dic['id']}"
             jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['xjobs']
-            form_url=URL('xform_sd',args=(args[0],args[1],idx))
+            form_url=URL('xform_sd',args=(args[0],args[1],idx),vars={'form_case':x_data_s['base'].get('form_case',1)})
             #id_l=A(idx,_title='open form '+idx,_href=form_url,_class="btn btn-primary") #if session["admin"] or k_user.user_in_jobs(jobs) else n
             id_l=k_htm.a(idx,_title='open form 1'+idx,_href=form_url,_class="btn btn-primary",_target="box")
             cls1='app_'+x_dic["f_nxt_u"] if x_dic["f_nxt_u"] else ''

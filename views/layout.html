@@ -109,8 +109,8 @@
 					readOnly: false,       // determines if input is readonly
 					hourPadding: false,
 					theme: 'blue',
-					okLabel: 'تائید',
-					cancelLabel: 'انصراف',
+					okLabel: 'ok تائید',
+					cancelLabel: 'x انصراف',
 				});
 				$('.timepicker_t').timepicker({ //t=text input base-$(this).maxtime
 					timeFormat: 'HH:mm',
@@ -165,8 +165,8 @@
                               سیستم
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" href="{{=URL('file','index')}}">اشتراک فایل</a>
-                                <a class="dropdown-item" href="{{=URL('file','f_list',args=('lib'))}}">کتابخانه</a>
+                                <a class="dropdown-item" href="{{=URL('file','index',port=80)}}">اشتراک فایل</a>
+                                <a class="dropdown-item" href="{{=URL('file','f_list',args=('lib'),port=80)}}">کتابخانه</a>
 								<a class="dropdown-item" href="{{=URL('file','f_list',args=('prj'))}}">پروژه ها</a>
 								<a class="dropdown-item" href="{{=URL('form','list_0')}}">مدیریت فرمها</a>
 								<!-- 
@@ -193,8 +193,8 @@
             </td>
  
 			<td width="15%" class="head-cell"><div class="head-cell">
-				<a class="btn btn-primary" href="{{=URL('file','index')}}" title="اشتراک فایل">S</a>
-				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'))}}" title="کتابخانه">L</a>
+				<a class="btn btn-primary" href="{{=URL('file','index',port=80)}}" title="اشتراک فایل">S</a>
+				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'),port=80)}}" title="کتابخانه">L</a>
 				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">F</a>
 				<a class="btn btn-primary" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
 				</div>
@@ -205,14 +205,42 @@
             <td width="30%" dir='rtl' class="head-cell">
 				<div class="head-cell">
 					<a title='
-					مجموعه سیستم های هوشمند و یکپارچه  مدیریت اسناد
-					با عنوان اسپکس
-										
+				اسپکس : 
+					اهداف گام 1 :
+						استقرار سامانه پویای کنترل سوابق
+						-----------------------------
+						استقرار :
+							- ایجاد 
+							-  ایمن‌سازی
+							- پایدار سازی 
+							- قابل اعتماد سازی
+							- بارگذاری
+							- ایجاد ارتباطات مناسب
+							- منعطف سازی
+							- به‌روزرسانی و اصلاح
+							- پشتیبانی
+							- توسعه
+						سامانه  : 
+							مجموعه سیستم های هوشمند و یکپارچه 
+						پویا : 
+							هماهنگ با هدف بهبود کیفیت
+							به عنوان نشانه اصلی سیستم مدیریت کیفیت
+						کنترل سوابق :
+							هدف اصلی واحد DCC
+					----------------------------------
+					شعار :
+						امنیت، سرعت، پیشرفت، کیفیت، سادگی
+					----------------------------------
+					چشم انداز :
 					SPKS = Super Progress for Knowledge Science 
+					----------------------------------
+					مفهوم مستتر : 
+						رقابت با الگوی توسعه دانش در SPACE X
+					---------------------------------- 
 					
-					- Last Version 2.01 = 1402/09/25
+					- Last Version 3.01 = 1403/10/15
 					- Programmer = Kurosh Saadati - 09377953310 - ksutility@gmail.com 
-					- your ip={{=str(request.client)}}'>AQC</a>
+					- your ip={{=str(request.client)}}'>AQR Consultant</a>
 					
 					- مهندسان مشاور آستان قدس رضوی
 				</div>

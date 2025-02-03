@@ -211,6 +211,7 @@ class C_TABLE:
             tag_inf=c_tag.tag_inf()
             #vv=vv+":::"+str(tag_inf['elements'])+":::"+str(tag_inf['text'])+":::"+tag_inf['onclick']
             onclick=c_tag.find('_onclick')
+            vv=""
             if onclick and 'j_box_show' in onclick:#file link
                 '''
                 onclick =
@@ -220,7 +221,8 @@ class C_TABLE:
                 help => j_box_show("<todo>",false)
                 
                 pro
-                    regex=re.compile("j_box_show\(\"(.*)\",false\")
+                    regex=re.compile("j_box_show\(\"(.*)\",.*\)")
+                        old=re.compile("j_box_show\(\"(.*)\",false\"))
                     x=onclick
                     y=regex.match(x).groups())
                     z=y[0].split('/')
@@ -228,26 +230,57 @@ class C_TABLE:
                     x:  j_box_show("/spks/km/set_ppr.xls?lno=8478+%2F1403",false) 
                         y: ('/spks/km/set_ppr.xls?lno=8478+%2F1403',)
                         z: ['', 'spks', 'km', 'set_ppr.xls?lno=8478+%2F1403']
-                    x: j_box_show("/spks/file/f_list_sd.xls/pp/14030820-o-8476",false)
+                    x: j_box_show("/spks/file/f_list_sd.xls/pp/14030820-o-8476", false)
+                    or : ******************************************************, true)
                         y: ('/spks/file/f_list_sd.xls/pp/14030820-o-8476',)
                         z: ['', 'spks', 'file', 'f_list_sd.xls', 'pp', '14030820-o-8476']
-
-
+                error:
+                    err1:
+                        where:
+                            x=onclick="{
+                                    if (window.event.ctrlKey) {
+                                        window.open( "/spks/km/set_ppr.xls?lno=167281" , '_blank');
+                                    } else {
+                                        j_box_show("/spks/km/set_ppr.xls?lno=167281", false);
+                                    }
+                                }"
+                        repair:
+                            select line of "j_box_show"
                 '''
-                #print('j_box_show ='+onclick)
-                import re
-                regex=re.compile("j_box_show\(\"(.*)\",false\)")
-                x=onclick
-                y=regex.match(x).groups()
-                z=y[0].split('/')
-                if z[2]=='file':
-                    file_path_pre=z[4:-1]
-                    file_name=z[-1]
-                    file_path=os.path.join(*file_path_pre,file_name)
-                    #att_files.add(file_inf)
-                    vv=file_name
-                elif z[2]=='km':
-                    vv=str(tag_inf['text'])
+                
+                # error -repair
+                x=""
+                for xx in onclick.split("\n"):
+                    if 'j_box_show' in xx:
+                        x=xx.strip()
+                if not x:
+                    print("_tag_pars - err : not found j_box_show in 2th sub")
+                else: 
+                    print("_tag_pars:x="+x)
+                    #print('j_box_show ='+onclick)
+                    import re
+                    regex=re.compile("j_box_show\(\"(.*)\",.*\)")
+                    #regex=re.compile("(j_box_show)")
+                    #x=onclick
+                    #for t in ["{","}"]:
+                    #    x=x.replace(t,"_")
+                    y=regex.match(x).groups()
+                    #print("y="+str(y))
+                    try:       
+                        z=y[0].split('/')
+                        if z[2]=='file':
+                            #print("file---:")
+                            file_path_pre=z[4:-1]
+                            file_name=z[-1]
+                            file_path=os.path.join(*file_path_pre,file_name)
+                            #att_files.add(file_inf)
+                            vv=file_name
+                        elif z[2]=='km':
+                            vv=str(tag_inf['text'])
+                            #print("_tag_pars - err1="+x)
+                    except:
+                        vv=""
+                        print("_tag_pars - err2="+x)
             #tag=k_s_dom.C_TAG().tag_inf(tag)
             #if tag_inf['tag']=='a' and tag_inf['onclick']:#file link
             #    vv=tag_inf['onclick']
@@ -275,8 +308,8 @@ class C_TABLE:
                 base_file=os.path.join("D:",os.sep,"ks","0-file",file_path)
                 dest_file=os.path.join(dest_folder,ff['filename'])
                 k_file.file_copy(base_file,dest_file)
-                print (base_file)
-                print (dest_file)
+                #print (base_file)
+                #print (dest_file)
         #creat tbody of table
         tag_infs=[]
         
@@ -284,21 +317,27 @@ class C_TABLE:
             tag_inf_row=[]
             tds=[]
             for i,cell in enumerate(row):
+                if type(cell)==dict:
+                    cell=cell['value']
                 if not cell:
                      vv=""
                 elif type(cell)==dict:
                     vv=cell['value']
+                    #print("#dict")
                 elif type(cell) == str:
                     vv=cell
+                    #print("#str")
                 elif type(cell) in [float,int]:
                     vv=str(cell)
-                elif type(cell) in [gluon.html.XML]:
+                elif type(cell) in [gluon.html.XML,gluon.html.A,gluon.html.DIV]:
                     vv,file_path,tag_inf =_tag_pars(cell)
+                    #print("#gluon.html.XML,file_path="+file_path)
                     tag_inf_row+=[tag_inf]
                     if file_path:att_filepaths.add(file_path)
                     vv='XML'
                 else:
                     vv="error"
+                    #print("#"+str(type(cell)))
                 vv=str(vv)
                 tag=TAG(vv)
                 
@@ -316,11 +355,13 @@ class C_TABLE:
         
         import k_err 
         k_err.xreport_var ([{'trs':trs,'file_path':file_path,'rows':rows,'heads':heads,'att_filepaths':att_filepaths,'tag_infs':tag_infs}])
-        
-        import k_xl_light
-        k_xl_light.write(r'C:\temp\x\2.xlsx','a',trs)
-        print('xls')
-        
+        try:
+            f_name=r'C:\temp\x\2.xlsx'
+            import k_xl_light
+            k_xl_light.write(r'C:\temp\x\2.xlsx','a',trs)
+            print('ok: export xls')
+        except:
+            print('error: in export xls - you shoud do this on port:100')
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
@@ -532,12 +573,12 @@ def select_x1(select_base_list,select_describ_list,onact_txt):
     else:
         h_code1=t1 +  "</select>" + "\n"
     return h_code1
-def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True):
+def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_dir=""):
     #debug
     #return A(txt,_title=_title,_class=_class,_href=_href,_target="")
     reset='true' if reset else 'false'
     if _target=="frame":
-        return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame") 
+        return A(txt,_title=_title,_class=_class,_href=_href,_target="x_frame",_dir=_dir) 
     elif "box" in _target:
         #function selectMe()
         js_func="""
@@ -549,9 +590,9 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True):
             }
         }
         """ % (_href,_href,reset)
-        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func ) #f"""j_box_show("{_href}",{reset})""") 
+        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func,_dir=_dir ) #f"""j_box_show("{_href}",{reset})""") 
     else:
-        return A(txt,_title=_title,_class=_class,_href=_href,_target=_target)
+        return A(txt,_title=_title,_class=_class,_href=_href,_target=_target,_dir=_dir)
 def xtd(td_list):#
     rep=""
     for td_obj in td_list:

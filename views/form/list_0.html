@@ -98,7 +98,7 @@ background: #ddd;
 	<div class="col-10">
 	{{=htm}}
 	</div>
-	
+	{{if access_from_internet!=True:}}
 	<div class="col-2"><div id="div_vertical_menu" >
 		<br>
 		<h6> گزارش عملکرد همکاران طراحی </h6>
@@ -129,9 +129,7 @@ background: #ddd;
             <a class='btn' target='_blank' href="{{=URL('tmsh','user_timesheet')}}">
 				<img Class="GFG" src="{{=URL('static','icon/3d/timesheet.gif')}}" >
 			</a>
-			<div>
-			گزارش عملکرد
-			</div>
+			<div> گزارش عملکرد 	</div>
         </div>
 		<hr>
 		<br>
@@ -141,18 +139,15 @@ background: #ddd;
 			<a class='btn' target='_blank' href="{{=URL('tmsh','mon_report')}}">
 				<img Class="GFG" src="{{=URL('static','icon/3d/time-io.gif')}}">
 			</a>
-			<div>
-			تایم شیت
-			</div>
+			<div> تایم شیت </div>
         </div> 
 		<div class="div_row">
-			<a class='btn' target='_blank' href="{{=URL('form','list_0_mr')}}">
+			<a class='btn' target='_blank' href="{{=URL('km','need_links')}}">
 				<img Class="GFG" src="{{=URL('static','icon/3d/goal.gif')}}">
 			</a>
-			<div>
-			آمار ساماندهی اطلاعات
-			</div>
+			<div> اطلاعات مفید </div>
         </div> 
+		{{pass}}
     </div></div>
 	
 </div>

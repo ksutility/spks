@@ -617,7 +617,7 @@ def get_table_row_view(xid,row,titles,select_cols,x_data_s,id_cols=False,request
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
 #@k_tools.x_cornometer
-def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
+def reference_select (ref_0,form_nexu=False,form_data={},debug=False,x_where=''):
     #debug=False
     #ceck cach
     
@@ -627,7 +627,7 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
     if idx in k_cache:
         if k_cache[idx]['time']-time.time()<5:
             #print (f'k-cache = ok {time.time()}|'+idx)
-            return k_cache[idx]['val']
+            return k_cache[idx]['val'],k_cache[idx]['ref']
     #print (f'k-cache = -- {time.time()}|'+idx)
     '''
     use in kswt:ok 020905
@@ -663,23 +663,25 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False):
     
     for x in ['db','tb','where']:
         ref[x]=template_parser(ref.get(x,''),x_dic=form_data) #.format(task=task_inf,step=form['steps'],session=session)
+        #ref_0['pars']=ref
     #if debug :xxxprint(msg=['ref2','idx',''],vals={'form_data':form_data,'ref':ref,'idx':idx})    
     #dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db']+".db"#db_path+ref['db']
 
-    if form_nexu:
-        ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nexu <> 'x' "
-    rows,tits,row_n=DB1(ref['db']).select(table=ref['tb'],where=ref['where'],limit=0,debug=debug)
-    
+    x_w1="f_nxt_u != 'x'" if form_nexu else ""
+        #ref['where']=((ref['where'] + " and ") if ref['where'] else "") + "f_nxt_u != 'x' "
+        #x_where
+    rows,tits,row_n=DB1(ref['db']).select(table=ref['tb'],where=[ref['where'],"f_nxt_u != 'x' ",x_where]
+        ,limit=0,debug=debug)
     if rows :
         output_data={ref['key'].format(**dict(zip(tits,row))):ref['val'].format(**dict(zip(tits,row))) for row in rows}
         #if debug :xxxprint(msg=['output_data',idx,''],vals=output_data) 
-        k_cache[idx]={'val':output_data,'time':time.time()}
+        k_cache[idx]={'val':output_data,'time':time.time(),'ref':ref}
     else:    
         output_data=''
     if debug :
         print(f"where={ref['where']}")
         xxxprint(msg=['where','idx',ref['where']],args=rows,vals={'form_data':form_data,'ref':ref,'output_data':output_data,'idx':idx})    
-    return output_data
+    return output_data,ref
     #return {}#'msg':ref['where']}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -802,7 +804,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 if 'auto' in obj:
                     au_txt=obj['auto']
                 elif 'ref' in obj:
-                    x_dt=reference_select(obj['ref'],form_data=x_dic)
+                    x_dt=reference_select(obj['ref'],form_data=x_dic)[0]
                     #xxxprint(vals=obj['ref'])
                     #xxxprint(vals=x_dic)
                     #xxxprint(msg=['x_dt','',''],vals=x_dt)
@@ -915,7 +917,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 #if 'disabled' in obj:ix=XML(f"<INPUT name={obj['name']} id={obj['name']} value={obj['value']} style='width:100%' disabled>")
             else:   
                 obj['input']=XML(f'''
-                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} > {_value} </textarea>''' )
+                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%;height:25px;' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} > {_value} </textarea>''' )
                 #style='width:100%'
             
             ##--------  
@@ -964,7 +966,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
 
         obj['key']=_value
         if sc=='user':
-            obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'}
+            if 'p_id' in obj['prop']:
+                obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{p_id}-{m_w} {pre_n} {name} {family}'}
+            else:
+                obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'}
+        if sc=='user_1':
+            
+            sc='user'
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf
@@ -976,13 +984,19 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 #if ref_t not in cache_ram:
                 #    cache_ram[ref_t]=reference_select(obj['ref'],form_data=x_dic)
                 #_select= cache_ram[ref_t]   
-                _select= reference_select(obj['ref'],form_data=x_dic,debug=False)
+                _select= reference_select(obj['ref'],form_data=x_dic,debug=False)[0]
                 #tt_dif=(time.time()-tt_dif)*10000
                 obj['select']=_select
             else:
                 _select=obj['select']
-        elif sc=='user':
-            pass
+        if sc=='user':
+            from k_user import C_XJOB
+            if 'xjobs' in obj:
+                users_list=[]
+                for xjob in obj['xjobs'].split(','):
+                    users_list+=C_XJOB(xjob,x_data_s,c_form).users_list() 
+                users_list=set(users_list)   
+                obj['select']={x:_select[x] for x in users_list}
             #select_base_list,select_describ_list=x_user.users_of_task(base_data,select_addition_inf)
         _select=obj['select']
         _select={x:x for x in _select} if type(_select)==list else _select
@@ -1005,12 +1019,12 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                         return _select[_value]
                     else:
                         return ''
-            obj['title']=select_1_or_multi(_value,_multiple)
-            obj['output']=XML(f'''<a  title="{obj['title']}">{_value}</a>''')
+            obj['title']=select_1_or_multi(_value,_multiple)  
+            obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
             obj['data_json']=_value
         except Exception as err:
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
-            xxxprint(msg=["err",'',''],err=err,vals=_select) 
+            xxxprint(msg=["err",'',''],err=err,vals={'select':_select}) 
         obj["value"]=_value
         obj['output_text']=obj['title'] #_select[_value] if (type(_value)==str and _value in _select) else ""
         if 'show_full' in obj['prop']:obj['output']=obj['output_text']
@@ -1036,7 +1050,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #obj['input']="<input type='text' " + _n + " value='" + def_val + "' size='" + maxlen +"' maxlength='" + maxlen +"' dir='" + d_lan + "' class='date-picker' " + x_end  
         readonly= "readonly" if "readonly" in obj['prop'] else ''
         if 'input' in need :
-            obj['input']=INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange)
+            obj['input']=DIV(INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange),
+                A('X',_title="حذف تاریخ",_id="fdate_reset",_onclick="this.previousSibling.value='0';",_class="btn btn-warning"))
         obj['help']=DIV(obj['format'],_dir='ltr')
         obj['stnd6']=_value[2:4]+_value[5:7]+_value[8:10] if (_value and len(_value)>9) else "_"*6 #6 digit standard for date
         msg ,or_v,js_ff_chek="",'',''
@@ -1074,7 +1089,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #x_auto()    
     elif sc=="index": #sc
         if 'input' in need:
-            x_dt=reference_select(obj['ref'],form_data=x_dic,debug=True)
+            # start - 031107 - حذف اطلاعات فرم جاری از داخل لیست جستجو شده
+            ref=obj['ref']
+            xid=str(c_form.xid)
+            #ref['where']=ref['where'] + " AND id !=" +xid if 'where' in ref else "id !="+xid
+            # end
+            
+            x_dt,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
             if not x_dt and 'def_value' in obj and obj['def_value']:
                 index_new=obj['def_value']
                 index_hlp=obj['def_value']
@@ -1084,16 +1105,25 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 smart_num_list=SMART_NUM_LIST(x_list)
                     
                 #if def_val=="" : 
-
-                index_new=str(smart_num_list.max()+1).zfill(_len)# index_ar[0] #else =def_val  #_value or
+                start=obj.get('start',0)
                 index_hlp=str(smart_num_list)
+                #snm=smart_num_list.copy()
+                index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
+                
             
                 #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
                 #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
 
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
+            
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
-            obj['help']=XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")
+            
+            
+            import k_sql
+            x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
+            obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=request.args,vars={'data_filter':x_where}))
+            #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
+            #,_href,_target="frame",_title='',_class
             obj['value']=index_new
             #xreport_var([{'obj':obj}])
         #else:
@@ -1815,26 +1845,52 @@ def input_validate(in_data,data_inf):
         else:
             return False
 def chidman(hx,x_data_s,step,form_case=2,request=''):
+    def rows_2_table(in_rows,step_cols_width):
+        '''
+            in_rows:list of div
+                input rows
+            step_cols_width:list
+                output table cols number
+        '''
+        if step_cols_width==[1]:
+            return in_rows
+        n=0
+        r=[]
+        o_rs=[]
+        for xx in in_rows:
+            #نشان دادن بخش اصلی 1 فیلد
+            #if len(xx)==3:
+            #    xx=xx[1]
+            n+=1
+            r+=[DIV(xx,_class=f"col-{step_cols_width[n-1]}")]
+            if n==len(step_cols_width):
+                o_rs+=[DIV(_class="row",*r)]
+                n=0
+                r=[]
+        return o_rs
+    #-------------------------------
+    step_cols_width=step['step_cols_width'].split(',') if 'step_cols_width' in step else [1]
+    hx['data_r']=rows_2_table(hx['data'],step_cols_width)
     import k_user,k_tools
     form_case=k_tools.int_force((request.post_vars['form_case'] or request.get_vars['form_case']) if request else form_case,form_case)
     xjobs=k_user.xjobs_inf(step['xjobs'],x_data_s)
     
     
-    if form_case==1:
+    if form_case==1:#vertical
         return [DIV(
                     DIV(hx['stp'],_class='col text-right'),
                     DIV(xjobs['describe'],_title=xjobs['inf'],_class='col text-warning',_dir='rtl'),
                     _class='row text-light bg-dark' )
-                ]+hx['data']+[
+                ]+hx['data_r']+[
                     DIV(DIV(_class="col"),*[DIV(x,_class=f"col {hx['app-color']}") for x in hx['app']],_class=f"row")
                 ]
         #return DIV(DIV(hx['stp'],_class='col-2 text-right border-left'),DIV(htm_1,_class='col-10'),_class='row border-bottom')
-    elif form_case==2:
+    elif form_case==2:#horizon
         htm_1=[DIV(x,_class='row') for x in hx['app']]
         return DIV(
                     DIV(DIV(hx['stp'],_class='row'),
                         DIV(xjobs['describe'],_title=xjobs['inf'],_class='row text-warning'),
                         _class='col-2 text-right border-left text-light bg-dark'),
-                    DIV(hx['data'],_class='col-8'),
+                    DIV(hx['data_r'],_class='col-8'),
                     DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
                     _class="row border-bottom ")   

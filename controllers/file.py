@@ -16,7 +16,7 @@ k_file_meta=K_FILE_META()
 import k_finglish
 import k_err,k_user,k_htm
 k_user.how_is_connect('file')
-from k_file_w2p import FILES_X_TOOLS
+from k_file_w2p import FILES_X_TOOLS1
 import k_set #share_value as share
 xpath=k_set.xpath()
 from k_set import C_SET
@@ -414,7 +414,7 @@ def new_file():
             <div class="well">{b_s}</div>
         </div></form>''')
 def file_tools(): 
-    files_x_tools=FILES_X_TOOLS()
+    files_x_tools=FILES_X_TOOLS1()
     return DIV(
         DIV("args="+str(files_x_tools.args)),
         DIV(files_x_tools.link_comp()),
@@ -422,12 +422,12 @@ def file_tools():
         HR(),
         DIV(files_x_tools.link_rename()),
         HR(),
-        DIV(files_x_tools.link_rename_title(f_title="rename {} =>")), #'files',x_file['filename'],x_file['title'])),
+        DIV(files_x_tools.link_rename_title2(f_title="rename {} =>")), #'files',x_file['filename'],x_file['title'])),
         HR(),
         DIV(files_x_tools.link_delete()),
         )
 def folder_tools(): 
-    files_x_tools=FILES_X_TOOLS()
+    files_x_tools=FILES_X_TOOLS1()
     return DIV(
         DIV("args="+str(files_x_tools.args)),
         DIV(files_x_tools.link_move()),
@@ -435,7 +435,9 @@ def folder_tools():
         DIV(files_x_tools.link_rename()),
         HR(),
         DIV(files_x_tools.link_ren2()),
-        HR(),        
+        HR(),  
+        DIV(files_x_tools.link_rename_title2(f_title="rename {} =>")), #'files',x_file['filename'],x_file['title'])),
+        HR(),
         DIV(files_x_tools.link_delete()),
         )        
 def name_correct():
@@ -467,7 +469,7 @@ def f_list_set():
     path=request.vars['path']
     return path
 def f_list():#file_browser=file.index
-    files_x_tools=FILES_X_TOOLS()
+    files_x_tools=FILES_X_TOOLS1()
     r1=False #_login_check()
     if r1:return dict(address='',m_dir='',upload='',path='',a='',files=XML(r1),folders='',js='')
     '''
@@ -630,11 +632,12 @@ def f_list():#file_browser=file.index
         if list_view_mod==1:
             return TABLE(THEAD(TR(*[TH(x) for x in ['n','Title','Name','E_1','E_2','Size','Date','-','-','-']])),
                         TBODY(  *[TR((i+1),
-                                    files_x_tools.link_rename_title(vars={'f_name':x_dir['name'],'f_title':x_dir['title'],'case':'folders'}),#'folders',x_dir['name'],x_dir['title']),
+                                    A(f"<{x_dir['title']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
                                     A(f"<{x_dir['name']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
                                     '<>',
-                                    link_folder_tools(x_dir,'folder'),
-                                    '',#files_x_tools.link_rename(),#x_dir['name']),
+                                    link_folder_tools(x_dir,'_F'),
+                                    files_x_tools.link_rename_title2(vals={'f_name':x_dir['name'],'f_title':x_dir['title'],'case':'folders'}),#'folders',x_dir['name'],x_dir['title']),
+                                    #'',#files_x_tools.link_rename(),#x_dir['name']),
                                     '',#files_x_tools.link_ren2(),#x_dir['name']),
                                     '',#files_x_tools.link_delete(),#x_dir['name']),
                                     '',
@@ -642,11 +645,15 @@ def f_list():#file_browser=file.index
                                     _class=x_class('folder')
                                     ) for i,x_dir in enumerate(folders)],
                                 *[TR((i+1),
-                                    files_x_tools.link_rename_title(vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),#'files',x_file['filename'],x_file['title']),
+                                    link_view(x_file,x_file['title'],link_title=x_file['fname']+'\n'+x_file['ext']),
                                     link_view(x_file,x_file['name'],link_title=x_file['fname']+'\n'+x_file['ext']),
                                     #A(x_file['name'],_href=URL(f='download',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=x_file['fname']+'\n'+x_file['ext']),
                                     x_file['ext'][1:],
-                                    DIV(link_download(x_file,'d'),"|",link_file_tools(x_file,'*',vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),"|",link_edit(x_file,'e')),
+                                    DIV(link_download(x_file,'d'),"|",
+                                        link_file_tools(x_file,'*',vars={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),"|",
+                                        link_edit(x_file,'e'),"|",
+                                        files_x_tools.link_rename_title2(vals={'f_name':x_file['filename'],'f_title':x_file['title'],'case':'files'}),#'files',x_file['filename'],x_file['title']),),
+                                        ),
                                     x_file['size'],
                                     x_file['mtime'],
                                     x_ext(x_file),
@@ -660,8 +667,8 @@ def f_list():#file_browser=file.index
             return TABLE(THEAD(TR(*[TH(x) for x in ['n','عنوان',A('T',_title='نوع فایل + ابزارها'),A('S',_title='حجم فایل بر اساس لگاریتم 10'),A('D',_title='زمام فایل')]])),
                         TBODY(  *[TR((i+1),
                                     A(f"<{x_dir['title'] or x_dir['name']}>",_href=URL(args=args+[x_dir['name']],vars=r_vars),_title=x_dir['fname']),
-                                    '',
-                                    '',
+                                    link_folder_tools(x_dir,'_F'),
+                                    files_x_tools.link_rename_title2(vals={'f_name':x_dir['name'],'f_title':x_dir['title'],'case':'folders','tit':'r'},tit='r'),
                                     '',
                                     ) for i,x_dir in enumerate(folders)],
                                 *[TR((i+1),

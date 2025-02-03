@@ -293,18 +293,20 @@ def xjobs_inf(jobs,x_data_s,c_form=''):
 
 
 def how_is_connect(subject,shoud_login=True):
-    import k_date,os
+    import k_date,os,k_tools
     from gluon import current
     from gluon.http import redirect
     if shoud_login:
         if not current.session['username']:redirect(URL('spks','user','login',args=['go']))
-    
-    
+    u_ip=str(current.request.client)
+    if k_tools.access_from_internet():#u_ip[:11]!='192.168.88.':
+        if not current.session['username'] in ['ks','aha','ase','my','rms','akr','fms','hal','hdr','mmn'] or (not subject in 'form'):
+            redirect(URL('spks','user','msg_access_form_internet')) 
     xdate=k_date.ir_date('yymmdd')
     xtime=k_date.ir_date('hh:gg:ss')
     file_n=os.path.join("c:\\","temp",'user_log',f'{xdate}-{subject}-user_log.txt')
-    u_log=USER_LOG(ip=current.request.client,un=current.session["username"],xtime=xtime)
-    log=f'{xtime} , {current.request.client} , {current.session["username"]} , {current.request.url}'
+    u_log=USER_LOG(ip=u_ip,un=current.session["username"],xtime=xtime)
+    log=f'{xtime} , {u_ip} , {current.session["username"]} , {current.request.url}'
     with open(file_n,"a",encoding='utf8') as f:
         f.writelines('\n'+log)
     return file_n + " | " +log , u_log.report()
@@ -372,7 +374,7 @@ class C_AUTH_FORM():
         '''
         from gluon import current
         if not 'auth' in self.x_data_s['base']:return {'auth':True}
-        if current.session["admin"] or user_in_xjobs_can('view',x_data_s=self.x_data_s,jobs=self.x_data_s['base']['auth']):return {'auth':True}
+        if current.session["admin"] or user_in_xjobs_can('view',x_data_s=self.x_data_s,xjobs=self.x_data_s['base']['auth']):return {'auth':True}
         return {'auth':False,'msg':"شما اجازه دسترسی به این فرم را ندارید"}
     def auth_where(self):
         '''
@@ -382,8 +384,12 @@ class C_AUTH_FORM():
         from gluon import current
         if 'auth_prj' in self.x_data_s['base']: # در صورت تعریف متغیر دسترسی بر حسب پروژه در قسمت مبنای دیکشنری اطلاعات فرم
             if not current.session['auth_prj']=="*": # در صورتی که فرد ادمین نباشد
-                auth_prj_v=current.session['auth_prj']
-                return {self.x_data_s['base']['auth_prj']:auth_prj_v.split(",") if auth_prj_v else ['  ']}
+                auth_prj_n=self.x_data_s['base']['auth_prj'] #auth_prj_name
+                if auth_prj_n[0]=="#":
+                    return auth_prj_n[1:]
+                else:
+                    auth_prj_v=current.session['auth_prj']
+                    return {auth_prj_n:auth_prj_v.split(",") if auth_prj_v else ['  ']}
         return ''
 #-------- unused---------------------------------------------------------
 def can_user_edit_step(step,step_index,x_data_s,form_sabt_data,un=''):

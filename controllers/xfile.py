@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 # ver 1.00 1401/08/14 
 # -------------------------------------------------------------------------
+"""
+#523e6b
+#edebc5
+h1=#fbb;
+h2=#eef;
+h3=#ddc;
+h4=ccc;
+"""
+
 import k_user
 """
 body {
@@ -53,22 +62,25 @@ def htm_head(print_mode=1):
     }
     h1 {
         counter-reset: c_h2;
-        background-color: #fbb;
-        margin:10px 0 0 0;
+        background-color: #26495c;
+        color: #fff;
+        margin:10px 0 2px 0;
+        padding:40px 20px 10px 0px;
         font-family: BTitrBold,Tahoma, sans-serif;
         font-size: 24px;
-        padding:50px 20px 0px 0px;
+        
     }
     h2:before {
         content: counter(c_h1)"." counter(c_h2)") ";
         counter-increment: c_h2;
     }
     h2 {
-        text-indent: 40px;
-        background-color: #eef;
+        
+        background-color: #c4a35a;
         counter-reset: c_h3;
-        margin:2px;
-        font-family: BTitrBold,Tahoma, sans-serif;
+        margin:2px 15px 2px 0;
+        padding:10px 20px 10px 0px;
+        font-family: BTitr,Tahoma, sans-serif;
         font-size: 20px;
     }
     h3:before {
@@ -76,20 +88,22 @@ def htm_head(print_mode=1):
         counter-increment: c_h3;
     }
     h3 {
-        text-indent: 60px;
-        background-color: #eed;
-        margin:2px;
-        font-family: BTitrBold,Tahoma, sans-serif;
+        background-color: #c66b3d;
+        color: #fff;
+        margin:2px 30px 2px 0;
+        padding:5px 20px 5px 0;
+        font-family: BYekan,Tahoma, sans-serif;
         font-size: 16px;
     }
     h4 {
-        text-indent: 80px;
-        background-color: #ccc;
-        margin:2px;
-        font-family: BTitrBold,Tahoma, sans-serif;
+        background-color: #e5e5dc;
+        margin:2px 45px 2px 0;
+        padding:0 20px 0 0;
+        font-family: BYekan,Tahoma, sans-serif;
         font-size: 18px;
     }
-    /* ---------------------------------------------------------- */
+    
+    /* ----text-indent: 40px;------------------------------------------------------ */
     table {
       font-family: Arial, Helvetica, sans-serif;
       border-collapse: collapse;
@@ -102,8 +116,8 @@ def htm_head(print_mode=1):
       padding: 8px;
     }
     .title1 {
-        background-color: #523e6b;
-        color: #edebc5; 
+        background-color:#26495c ;
+        color: #fff; 
         text-align: center;
         font-size: 40px;
         font-family: BTitrBold,Tahoma, sans-serif;
@@ -111,7 +125,7 @@ def htm_head(print_mode=1):
     }
     .title2 {
 
-        color: #523e6b; 
+        color: #26495c; 
         text-align: center;
         font-size: 20px;
         font-family: BTitrBold,Tahoma, sans-serif;
@@ -133,6 +147,10 @@ def htm_head(print_mode=1):
       background-color: hsl(220, 90%, 85%);
     }
     table td {text-align: center;}
+    
+    table.fa_en td:nth-child(2){direction:ltr;}
+    div.fa_en_table + table td:nth-child(2){direction:ltr;}
+    div.fa_en_table{display:none;}    
     /* ----------------------------------------------------------blockquote =>  */
     blockquote {
        
@@ -191,6 +209,7 @@ def htm_head(print_mode=1):
       padding: 2px;
       font-size: 14px;
     }
+    
     </style>
     <script>
     $(document).ready(function(){
@@ -517,6 +536,7 @@ def _read_markup(mm_case):
                 return f'ERROR<br>خطا در محتوای داخل فایل <br> در قسمت دیکشنری تعریف متغرها در بالای فایل قبل از 3 دش<hr>file={f_name}<hr>{tb}'
             #return (str(xdic))
             xlines=lines[n+1:]
+            xdic['__cpath__']=k_file.file_name_split(f_name)['path']+"\\"
             xlines=[template.render(content=x,context=xdic) for x in xlines]
             #return (str(xlines))
         else :
@@ -525,6 +545,9 @@ def _read_markup(mm_case):
         line_sum=''
         for line in xlines:
             if len(line)>6 and line[:6]=='%%read':
+                if line_sum: # output lasrt read content of cur file 
+                    d2+=str(file_2_htm(line_sum,ml_mode))
+                    line_sum=''
                 f_name=line[7:].rstrip()
                 f_name1=k_file.find (f_name)
                 if not f_name1:
@@ -533,12 +556,12 @@ def _read_markup(mm_case):
                 if ext in ['mm','md']:
                     with open(f_name1,'r',encoding='utf8') as f:
                         d1=f.read()
-                    d2+=file_2_htm(d1,ext)
+                    d2+=str(file_2_htm(d1,ext))
                 elif ext=='csv':
-                    d2+=_read_csv(f_name1)
+                    d2+=str(_read_csv(f_name1))
             elif len(line)>3 and line[:2]=='%%':
                 if line_sum:
-                    d2+=file_2_htm(line_sum,ml_mode)
+                    d2+=str(file_2_htm(line_sum,ml_mode))
                     line_sum=''
                 x_act=line[2:].strip().lower()
                 if x_act in ['md','mm','htm']:
@@ -550,7 +573,7 @@ def _read_markup(mm_case):
                 line_sum+=line
                 #d1=file_2_htm(line,ml_mode)
             #d2+=d1 #XML(d1) #<br>+f_name    
-        d2+=file_2_htm(line_sum,ml_mode)
+        d2+=str(file_2_htm(line_sum,ml_mode))
         return d2 #_r_mm(d2) #d2    #
             
     def html_visible(html):
@@ -592,7 +615,9 @@ def _read_markup(mm_case):
                 if m[2]:ou=ou+f"<{tag_name}>{m[2]}</{tag_name}>"   
                 return ou
         # /def - 2 ---------------------------------
-        h_o=TAG(html)
+        #import k_err
+        #k_err.xreport_var([{'htm':html}])
+        h_o=html #TAG(html)
         
         fnd=k_s_dom.find_item(h_o,'$$')
         for x in fnd:
@@ -700,7 +725,8 @@ def edit_r():
 
     on='file_txt'
     lines_num=len(data.split('\n'))
-    vars={'xpath':request.vars['xpath']}
+    xpath=request.vars['xpath'] or r"D:\ks\0-file"
+    vars={'xpath':xpath}
     file_name=f"<a title={f_name}> {file_inf['name']}.{file_inf['ext']} </a>"
     o1=XML(f"""
                 <a id='view_but' href={URL('read',args=request.args,vars=vars) }>view</a> | {file_name} |  

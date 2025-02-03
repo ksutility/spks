@@ -650,7 +650,7 @@ def xtable():
         return x_dict.add({'table':msg})
     else:
         if 'auth' in x_data_s['base']:
-            if not (session["admin"] or k_user.user_in_xjobs_can('view',jobs=x_data_s['base']['auth'])):
+            if not (session["admin"] or k_user.user_in_xjobs_can('view',xjobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))})
         if not ('all' in x_data_s['views']) :
@@ -918,7 +918,7 @@ def select_i(x_data):
     #if request.vars['sel1']:
     sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[0] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
     #if sel1 in ["None",None]:sel1='prj'
-    traslate_dict = k_form.reference_select(tasks[sel1]['ref']) if tasks[sel1]['type']=='reference' else {}
+    traslate_dict = k_form.reference_select(tasks[sel1]['ref'])[0] if tasks[sel1]['type']=='reference' else {}
     val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
 
 
