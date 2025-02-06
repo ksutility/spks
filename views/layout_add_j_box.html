@@ -57,6 +57,7 @@
 -->
 </style>
 <!--j_box -->	
+<div id="output">
 	<div id="j_box_light" class="j_box_white_content " onkeydown="key_x(event);"> 
 		<div class="header">
 			<a href = "javascript:void(0)" title = "Close" class = "btn btn-danger" onclick = "j_box_hide()" >X</a> - 
@@ -72,6 +73,7 @@
 		</div>
 	</div>
 	<div id="j_box_fade" class="j_box_black_overlay"></div>
+</div>
 <!--/j_box -->
 <script>
 	$('#j_box_iframe_win').load(function(){
@@ -196,14 +198,33 @@
 		document.getElementById('j_box_light').focus();
 		document.getElementById('j_box_light').click();
 	}
-	function key_x(event) {
+	function key_x(event) {a=1; }
+	/*
+		alert("key_x");
 		var x = event.keyCode;
 		if (x == 27) { j_box_hide();} //esc
 		if (x == 119) { win_set_size50();} //f8
 		if (x == 120) { win_set_size75();} //f9
 		if (x == 121) { win_set_size100();} //f10
 	}
-	
+	*/
+	// افزودن رویداد keydown به document
+	document.addEventListener('keydown', function(event) {
+		// دریافت کلید فشرده شده
+		//const key = event.key;
+		var x = event.keyCode;
+		if (x == 27) { j_box_hide();} //esc
+		if (event.ctrlKey){ //altKey) {
+			if (x == 49) { win_set_size50();} //1
+			if (x == 50) { win_set_size75();} //2
+			if (x == 51) { win_set_size('90');} //3
+			if (x == 52) { win_set_size100();} //4
+		} 
+		// تغییر رنگ متن بر اساس کلید فشرده شده (اختیاری)
+		//if (key === 'Enter') { output.style.color = 'green'; }
+		//if (key === 'Escape') { j_box_hide(); }
+		
+	});
 	//
 	//document.addEventListener('keydown', (event) => {alert("27");})
 </script>

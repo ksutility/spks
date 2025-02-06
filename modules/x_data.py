@@ -976,7 +976,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_get':{ #db
         'a':{
-            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'920'
+            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'920','xform_cg_file':'doc_mm2.html'#'hr_arzyabi_amalkard.html'
             },
             'tasks':{
                 'name_f':{'type':'text','len':'20','title':'نام'},
@@ -1233,16 +1233,16 @@ x_data={
                 'c_prj_id':{'type':'reference','len':'30','value_show_case':True,
                     'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
                 'cp_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'''id = "{{=__objs__['c_prj_id']['value']}}"'''},'title':'--'},
-                'loc':{'type':'reference','title':'محل کار','ref':{'db':'a_loc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
-                'loc_name':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{{=__objs__['loc']['value']}}"'''},'title':'نام پروژه'},
+                'loc':{'type':'reference','title':'کد محل کار','ref':{'db':'a_loc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
+                'loc_name':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{{=__objs__['loc']['value']}}"'''},'title':'نام پروژه و محل کار'},
                 #'frd_modir':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{mdr}','where':'''code = "{{=__objs__['loc']['value']}}"'''},'title':'مدیر','prop':['show_full']},
                 'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full'],},
                 'frd_mvn':{'type':'user','title':'معاون','xjobs':'mvn_ha','prop':['show_full'],},
                 'sal':{'type':'select','title':'تمدید قرارداد برای سال','select':['1404','1405','1406'],'add_empty_first':False,},
                 'dur_1':{'type':'select','title':'میزان تمدید قرارداد','select':{'12':'1 سال','6':'6 ماه','3':'3 ماه','0':'عدم تمدید'},'add_empty_first':False,},
-                'des_1':{'type':'text','len':150,'lang':'fa','title':'توضیح 1'},
-                'des_2':{'type':'text','len':150,'lang':'fa','title':'توضیح 2'},
-                'des_3':{'type':'text','len':150,'lang':'fa','title':'توضیح 3'},
+                'des_1':{'type':'text','len':150,'lang':'fa','title':'نظر معاون'},
+                'des_2':{'type':'text','len':150,'lang':'fa','title':'نظر مدیر عامل'},
+                'des_3':{'type':'text','len':150,'lang':'fa','title':'نظر حراست'},
                 'an1':{'type':'select','title':'امتیاز - دانش','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad1':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
@@ -1271,10 +1271,10 @@ x_data={
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad8':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an9':{'type':'select','title':'امتیاز - مهارت','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an9':{'type':'select','title':'امتیاز - استاندارد فنی','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad9':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an10':{'type':'select','title':'امتیاز - استانداردها','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an10':{'type':'select','title':'امتیاز - مقررات','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad10':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 'an_sum':{'type':'auto','auto':'{{=sum([int(x) for x in [an1,an2,an3,an4,an5,an6,an7,an8,an9,an10]])}}','title':'کد کامل زیر پروژه'},
@@ -1289,10 +1289,14 @@ x_data={
                     'step_cols_width':'5,3,4','task_cols_width':'0,12,0','auth':'#task#frd_modir,off_ens,mdr_aml,hrst_adm,#task#frd_mvn',},
                 's2':{'tasks':'dur_1','xjobs':'#task#frd_modir','title':'تکمیل اطلاعات توسط مدیر','app_keys':'y,r',
                     'oncomplete_act':'','auth':'#task#frd_modir,off_ens,dccm'},
-                's3':{'tasks':'frd_mvn','xjobs':'off_ens','title':'بررسی کفایت و ارسال برای معاونت','app_keys':'y,r'},
+                's3':{'tasks':'loc,loc_name,frd_mvn','xjobs':'off_ens','title':'بررسی کفایت و ارسال برای معاونت','app_keys':'y,r,x'},
                 's4':{'tasks':'des_1','xjobs':'#task#frd_mvn','title':'بررسی توسط معاونت','app_keys':'y,r'},
                 's5':{'tasks':'des_2','xjobs':'mdr_aml','title':'بررسی توسط مدیر عامل','app_keys':'y,r'},
-                's6':{'tasks':'des_3','xjobs':'hrst_adm','title':'بررسی توسط حراست','app_keys':'y,r'}
+                's6':{'tasks':'des_3','xjobs':'hrst_adm','title':'بررسی توسط حراست','app_keys':'y,r',
+                      'start_step':'5','start_where':"'{step_5_ap}' == 'y'",'end_where':"False",},
+                'b':{'tasks':'job','xjobs':'dccm','title':'-','app_keys':'y,x','app_titls':'','oncomplete_act':'',
+                        'name':'b','auth':'dccm','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
+                
             },
             'views':{
                 'all':{'input':'frd_1','view1':'job','view2':'job'}
@@ -1316,10 +1320,10 @@ x_data={
             },
             'cols_filter':{
                 '':'همه',
-                'frd_1,job,c_prj_id':'منتخب',
+                'frd_1,loc,frd_modir,an1,an2,an3,an4,an5,an6,an7,an8,an9,an10,an_sum':'منتخب',
             },
             'data_filter': 
-                {'step_3_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',
+                {
                 },
         }
     },

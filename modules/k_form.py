@@ -970,9 +970,6 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{p_id}-{m_w} {pre_n} {name} {family}'}
             else:
                 obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'}
-        if sc=='user_1':
-            
-            sc='user'
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf
