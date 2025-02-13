@@ -814,6 +814,7 @@ def index():
         t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
         t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
         t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
+        t2+=f"<br><a href={URL('user','test_password')}> بررسی امنیت پسوردها </a> "
         t2+=f"""<br><div class="row">
             <div class="col">
                 <a class='btn btn-primary' href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>
@@ -908,21 +909,25 @@ def select_i(x_data):
     db1=DB1(db_name)
     tasks=x_data_s['tasks']#tasks[args[0]]
     ##-----
-    val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
-    s1=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();")#$('#res1').text($(this).val())")
-    #,_value=request.vars['sel1']
-    ##-----
-    #ssw_select => ssw = sql select where , ssw_select = ssw selector obj in html
     ssw_select,ssl_table='',''
     #--------------------------------------------------------------------------------------------------------------------------------------
-    #if request.vars['sel1']:
+    val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
+    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();")#$('#res1').text($(this).val())")s1
+
     sel1=request.vars['sel1'] if request.vars['sel1'] else list(tasks.keys())[0] #('prj' if 'prj' in tasks else list(tasks.keys())[0])
     #if sel1 in ["None",None]:sel1='prj'
     traslate_dict = k_form.reference_select(tasks[sel1]['ref'])[0] if tasks[sel1]['type']=='reference' else {}
     val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
-
+    
+    #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
+    i1=k_htm.select(_options=[" = "," != "," > "," < "," like "],_name='sign',_onchange="submit();")#,_value=request.vars['sign']
 
     ssw_select=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();")#,_value=request.vars['sel2']_onchange="set_val();
+    
+    result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
+    result_htm=XML(f'<div name="result" id="result">{result}</div>')
+    
+    sss=DIV(DIV(sel1_o,_class="col-4"),DIV(i1,_class="col-2"),DIV(ssw_select,_class="col-4"),DIV(result_htm,_class="col-2"),_class="row")
     #---------------------------------------------------------------------------
     #ssl_table=sql select linked table : a table split category of a field and liked to each
     def remove(base_str,chars):
@@ -943,14 +948,12 @@ def select_i(x_data):
                 #TBODY(*[TR(i+1,*remove(val_dic[v],"()").split(':')) for i,v in enumerate(val_dic)]))
     #----
     ##------------------------------------------------------------------------------------------------------------------------------------------
-    #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
-    i1=k_htm.select(_options=[" = "," != "," > "," < "," like "],_name='sign',_onchange="submit();")#,_value=request.vars['sign']
+    
     v=request.vars
-    result='"{}"{}"{}"'.format(request.vars["sel1"],request.vars["sign"],request.vars["sel2"])
-    result_htm=XML(f'<div name="result" id="result">{result}</div>')
+
     return XML(f'''<form id="form5"><label>data_filter(dict)</label>
                 {A('جستجو',_href=URL('form','search',args=args[:2]),_class="btn btn-primary")}
-                {DIV(DIV(s1,_class="col-4"),DIV(i1,_class="col-2"),DIV(ssw_select,_class="col-4"),DIV(result_htm,_class="col-2"),_class="row")}
+                {sss}
                 <input type="submit">
                 {A('Open Selected List-باز کردن لیست انتخاب شده',_href=URL('xtable',args=args,vars={'data_filter':result}))}
                 </form>

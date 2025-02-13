@@ -61,6 +61,7 @@ def load_user_inf():
             "my_folder":f'{u_inf["eng"].strip()}-{unx}',
             "p_id":u_inf["p_id"],
             "loc":u_inf["loc"],
+            'pass_is_safe':pass_is_safe(u_inf["ps"])
             }
         #users[u_inf['un']]=u_inf-
     #import k_err 
@@ -300,7 +301,7 @@ def how_is_connect(subject,shoud_login=True):
         if not current.session['username']:redirect(URL('spks','user','login',args=['go']))
     u_ip=str(current.request.client)
     if k_tools.access_from_internet():#u_ip[:11]!='192.168.88.':
-        if not current.session['username'] in ['ks','aha','ase','my','rms','akr','fms','hal','hdr','mmn'] or (not subject in 'form'):
+        if (not user_can_access_from_internet()) or (not subject in 'form'):
             redirect(URL('spks','user','msg_access_form_internet')) 
     xdate=k_date.ir_date('yymmdd')
     xtime=k_date.ir_date('hh:gg:ss')
@@ -315,6 +316,11 @@ def how_is_connect(subject,shoud_login=True):
 import functools
 #decorator
 # not work 
+def user_can_access_from_internet():
+    if current.session['username'] in ['ks','aha','ase','my','rms','akr','fms','hal','hdr','mmn'] : return True
+    if current.session['pass_is_safe'] : return True
+    return False
+    #pass_is_safe
 def user_is_login(func):
     from gluon import current
     if not current.session["username"]:
@@ -459,5 +465,45 @@ def creat_scr_pass():
     s1= sel(at)
     #s2=    
     return sel(at)+sel(ct)+"_"+sel(bt)+sel(bt)+sel(bt)+"-"+sel(dt)+sel(dt)+sel(dt)+sel(dt)+"-"+sel(bt)+sel(bt)+sel(bt)
-
+def pass_is_safe(x_pass):
+    if not x_pass: return False
+    if len(x_pass)<8: return False
     
+    def eshterak(txt1,txt2):
+        res=''
+        for t in txt1:
+            if t in txt2:
+                res+=t
+        return res
+    #--------------------------
+    x_txts=[
+        '!@#$%^&*',
+        'abcdefghijklmnopqrstuvwxyz',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        '0123456789']
+    for txt2 in x_txts:
+        if len(eshterak(x_pass,txt2))==0: return False
+    return True       
+def pre_timesheet(x_un,x_mon):
+    """
+    x_mon=mmdd
+    """
+    import k_time
+    rows,titles,rows_num=DB1('person_act').select('a',where=["AND","`date1` LIKE '{}%' ".format(x_mon,),"`frd_1` LIKE '{}%'".format(x_un[:3])],limit=0)#,result='dict_x')
+    #print(str(xxx))
+    res={}
+    
+    rows,titles,rows_num
+    for row in rows:
+        time=row[titles.index('time')]
+        date=row[titles.index('date1')]
+        if not date in res:
+            res[date]=[]
+        res[date]+=[time]
+    res2={}
+    for date,times in res.items():
+        res2[date]=k_time.sum_times(times)#  ','.join(times)
+    '''
+    '''
+    return res2
+  

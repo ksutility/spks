@@ -966,10 +966,12 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
 
         obj['key']=_value
         if sc=='user':
+            x_val='{m_w} {pre_n} {name} {family}'
             if 'p_id' in obj['prop']:
-                obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{p_id}-{m_w} {pre_n} {name} {family}'}
-            else:
-                obj['ref']={'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'}
+                x_val='{p_id}-'+x_val
+            if not 'un_free' in obj['prop']:
+                x_val='{un}-'+x_val
+            obj['ref']={'db':'user','tb':'user','key':'{un}','val':x_val}
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf

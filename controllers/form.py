@@ -1183,10 +1183,20 @@ def search():
     if args[2]=="":
         val_dic={x:x for x in db1.columns_list(tb_name)}
         out+=[FORM(DIV(
-                INPUT(_name='search_text',_value=request.vars['search_text']),
-                k_htm.select(_options=val_dic,_name='o_cols',_multiple=True),
-                INPUT(_value='جستجو',_type='submit')))]
+                    DIV('متن جستجو :',_class='col-1'),
+                    DIV(INPUT(_name='search_text',_value=request.vars['search_text'],_style='width:100%'),_class='col-2'),
+                    DIV('ردیف های جستجو :',_class='col-1'),
+                    DIV(k_htm.select(_options=val_dic,_name='s_cols',_multiple=True),_class='col-7'),
+                    DIV(INPUT(_value='جستجو',_type='submit',_style='width:100%')),
+                    _class='row'),
+                 )]
         #,DIV())]
+        """
+                DIV(
+                    DIV('ردیف های  نتیجه :',_class='col-2'),
+                    DIV(k_htm.select(_options=val_dic,_name='o_cols',_multiple=True),_class='col-10'),
+                    _class='row'),
+                """
     if search_text:
         
         s_cols=request.vars['s_cols'].split(',') if request.vars['s_cols'] else ''
@@ -1195,9 +1205,85 @@ def search():
         rows,titles,rows_num=db1.select(tb_name,where=where,limit=0)
         tasks=x_data_s['tasks']
         c_filter=C_FILTER(tasks,x_data_s) 
-        rows,titles,nr=_xtable_show(rows,titles,tasks,x_data_s,c_filter)
-        table=k_htm.C_TABLE(titles,rows).creat_htm(titels=request.vars['o_cols'])
-        out+=["search_text => "+search_text]
+        rows,titles_2,nr=_xtable_show(rows,titles,tasks,x_data_s,c_filter)
+        o_cols=request.vars['o_cols']#or ''
+        table=k_htm.C_TABLE(titles_2,rows).creat_htm(titels=o_cols) #[])# .split(',')
         out+=[table]
+        out+=["search_text => "+search_text]
+        #out+=["o_cols => "+str(o_cols)]
         out+=[f"where={where}"]
-    return dict(x=DIV(*out))
+    return dict(x=DIV(*[DIV(x) for x in out]))
+def ss_set():
+    '''
+        goal 1=creat sql by pick category then pick data
+        هدف = ساختن دستور اسکیوال با انتخاب دسته و یک  مقدار
+        steps:
+            1:select category (select_cat)
+            2:select 1 data from select_cat
+        input:
+            url args:
+                1:db (database name)
+                2:tb (table name)
+                3:session name for save out_text
+        output:
+            sql: for selecting data that select_cat=data
+            save result in sesstion
+    '''
+    args=request.args
+    response.title='S*S:'+'-'.join(args)
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+    if not x_data_s: return msg
+    text_app=request.vars['text_app']
+    if text_app:
+        session[args[2]]=text_app
+        return 'j_box_iframe_win_close | '+text_app
+ 
+    db1=DB1(db_name)
+    tasks=x_data_s['tasks']
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
+    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();",add_empty_first=False)
+    
+
+    sel1=request.vars['sel1'] or list(val_dic)[0]
+    sign,sign_o,sel2,sel2_o='','','',''
+    #if sel1 in ["None",None]:sel1='prj'
+    if sel1:
+        traslate_dict = k_form.reference_select(tasks[sel1]['ref'])[0] if tasks[sel1]['type']=='reference' else {}
+        val_dic = db1.grupList_of_colomn(tb_name,sel1,traslate_dict=traslate_dict)
+        
+        #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
+        signs=[" = "," != "," > "," < "," like "]
+        sign_o=k_htm.select(_options=signs,_name='sign',_onchange="submit();",add_empty_first=False)#,_value=request.vars['sign']
+        sign=request.vars['sign'] or signs[0]
+        if sign:
+            sel2_o=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();",add_empty_first=False)#,_value=request.vars['sel2']_onchange="set_val();
+            sel2=request.vars['sel2'] or list(val_dic)[0]
+    result='"{}"{}"{}"'.format(sel1,sign,sel2)
+    result_htm=XML(f'<div name="result" id="result">{result}</div>')
+
+    return FORM(
+                DIV(
+                    DIV(sel1_o,_class="col-4"),
+                    DIV(sign_o,_class="col-2"),
+                    DIV(sel2_o,_class="col-4"),
+                    DIV(result_htm,_id='result',_class="col-2"),
+                    BUTTON('ok',_class="btn btn-primary",_style='width:100%',_onclick='fill_text_app()'),
+                    INPUT(_id='text_app',_name='text_app',_value='',_type='hidden',), 
+                    _class="row"),
+                SCRIPT("""
+                    function fill_text_app(){
+                        document.getElementById('text_app').value=document.getElementById('result').innerText
+                    }
+                """)    
+                ,_id="form5")
+    #<input type="submit">
+def get_session():
+    if not request.args: return "not request.args"
+    
+    x=request.args[0]
+    return session[x]
+def test_ajax_set():
+    return dict(d=DIV(INPUT(_id='xx1'),
+        A("*",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('ss_set',args=['user','user','xx1'])}",false,'','xx1,xx1')""",_target="box")
+        ))

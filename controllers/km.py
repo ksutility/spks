@@ -1061,3 +1061,10 @@ def need_links():
 def test_xdata():
     import x_data_test as xx
     return xx.main_test()
+def test_pass():
+    import k_user
+    pss=['abcd@12A','ab','123456789','abcd!12B']
+    res=''
+    for ps in pss:
+        res+=ps+ " = " +str(k_user.pass_is_safe(ps)) + "<br>"
+    return res

@@ -365,7 +365,7 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table",thead=True,cover_div=True):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table",thead=True,cover_div=True,row_colors=[]):
         import gluon
         '''
             old name= htm_table
@@ -401,7 +401,7 @@ class C_TABLE:
         
         #creat tbody of table
         trs=[]
-        for row in rows:
+        for i_r,row in enumerate(rows):
             tds=[]
             for i,cell in enumerate(row):
                 if not self.heads[i] in heads:continue
@@ -420,7 +420,10 @@ class C_TABLE:
                     tds+=[TD(cell,_class=_class)]
                 else:
                     print('type(cell)='+str(type(cell)))
-            trs.append(TR(*tds))
+            if row_colors and len(row_colors) > i_r:
+                trs.append(TR(*tds,_style='background-color:'+row_colors[i_r]))
+            else:
+                trs.append(TR(*tds))
 
         #creat table
         class_table='table'+ table_class if (table_class !="-1") else 'table table-sm table-hover table-responsive'

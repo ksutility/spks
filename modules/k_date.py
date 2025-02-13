@@ -111,13 +111,13 @@ def site_time():
     ird=ir_date() #irdate
     t0,t1,t2=ir_weekday(w_case=4)
     xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
-    xs1="style='background-color:#444;color:#fff'"
-    return f"""<div dir="lrt">
+    xs1="style='background-color:#444;color:#fff;margin:3px'"
+    return f"""<h5 dir="lrt">
                 <a title='{t2}'><i {xs1}>{t1}</i></a> 
                  
                 {ird["hh"]}:{ird["gg"]}
                 {ird["yy"]}/{ird["mm"]}/<b {xs1}>{ird["dd"]}</b> 
-                <div>
+                <h5>
                 """
     return f"""
                 <a title='{t2}' {xcs}>{t1}</a>
@@ -132,12 +132,13 @@ def site_time():
                 
                 
             </div>"""
-def ir_date_split(in_time,in_format='yyyy/mm/dd'):
+def ir_date_split(in_time,in_format='yyyy/mm/dd',x_mode='int'):
     l=len(in_time)
     r_o={}
     for x in ['yyyy','mm','dd']:
         n=in_format.index(x)
-        r_o[x]=int(in_time[n:n+len(x)])
+        xx=in_time[n:n+len(x)]
+        r_o[x]=int(xx) if x_mode=='int' else xx
     return r_o
     
 class C_IR_DATE():
@@ -169,3 +170,26 @@ class C_IR_DATE():
 
 #-----------------
 #print(C_IR_DATE().from_en_strptime("2024-03-24","%Y-%m-%d").out('yyyy-mm-dd'))
+def tatil_mode(x_date):
+    iw=ir_weekday(x_date)
+    ids=ir_date_split(x_date,x_mode='str')
+    a_tatil={
+        'all':'0101,0102,0103,0104,0112,0113,0314,0315,1122,1229,1230',
+        '1403':'0122,0123,0215,0328,0405,0425,0426,0604,0612,0614,0622,0631,0915,1025,1109,1126',
+    }
+    b_tatil={
+        '1403':'0302,0303,0507,0518,0925,0926,0927,1022,1120,1121,1123'
+        #.split(','),
+    }
+    xx=ids['mm']+ids['dd']
+    #print(str(ids) +" ---- " + xx )
+    rr=0
+    if iw==6:
+        rr= 1
+    elif (xx in a_tatil['all']) or (xx in a_tatil['1403']):
+        rr= 2
+    elif (xx in b_tatil['1403']):
+        rr= 3
+    #print(str(ids) +" ---- " + xx + " *** " + str(rr) )
+    return rr
+    #yy,mm,dd

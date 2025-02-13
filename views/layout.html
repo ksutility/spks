@@ -339,14 +339,15 @@
 							</a>
 							<div class="dropdown-menu dropdown-menu-right">
 								<form class="px-4 py-3">
-									<div id="xxab" onclick='if (window.event.ctrlKey) {
+									<div id="xxab" onclick=' if (window.event.ctrlKey) {
 									$.get("{{=URL('user','_toggle_ip_login_case')}}", function(data){ });
-									$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});}'>
+									$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});} '>
 									تنظیم ورود اتوماتیک
 									</div>
 									<script>
 									$( document ).ready(function() {
-									$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});});
+										$.get("{{=URL('user','set_ip_login_case')}}", function(data){ $("#xxab").html(data);});
+										});
 									</script>
 									
 								</form>
@@ -360,8 +361,9 @@
 								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','profile')}}",true);'>{{=T('Profile')}}</a>
 								
 								-->
-								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','change_password')}}",true);' >تغییر رمز</a>
-								<a class="dropdown-item" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','logout')}}",true);'>خروج</a>
+								<a class="dropdown-item btn btn-primary" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','pass_is_safe')}}",true);' > اینترنت ؟</a>
+								<a class="dropdown-item btn btn-primary" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','change_password')}}",true);' >تغییر رمز</a>
+								<a class="dropdown-item btn btn-primary" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','logout')}}",true);'>خروج</a>
 							</div>
 						{{else:}}
 							<a class="nav-link" href="javascript:void(0)" onclick='j_box_show("{{=URL('user','login')}}",true);'>ورود</a>

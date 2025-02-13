@@ -91,6 +91,8 @@
 	});
 	
 	let x_reload
+	let x_ajax_do
+	let x_ajax_val_set
 	function j_box_show1(path) {
 		document.getElementById('j_box_light').style.display='block';
 		document.getElementById('j_box_fade').style.display='block'; 
@@ -119,13 +121,37 @@
 		if (x_reload) {
 			location.reload(true);
 			//location.href=location.href;
+		}
+		if (x_ajax_do!='') {
+			let x = x_ajax_do;
+			ajax(x['url'], x['names'], x['target'], x['options'])
+		}
+		console.log('x_ajax_val_set= ::'+x_ajax_val_set);
+		if (x_ajax_val_set!=''){
+			console.log('x_ajax_val_set='+x_ajax_val_set);
+			const x_sets = x_ajax_val_set.split(";");
+			console.log('x_sets='+x_sets);
+			for (let i_set in x_sets) {
+				x_set=x_sets[i_set]
+				console.log('x_set='+x_set);
+				const ov=x_set.split(",");
+				url="{{=URL('form','get_session')}}"+"/"+ov[1]
+				ajax(url, [], ov[0]);
+				console.log('url='+url);
 			}
+			
+		}
 	}
 	//iframe
-	function j_box_show(path,reload=false) {
+	function j_box_show(path,reload=false,ajax_do='',ajax_val_set='') {
 		let f_loc=window.location.href;
 		
 		x_reload=reload  //reload page when hide jbox
+		x_ajax_do=ajax_do //
+		x_ajax_val_set=ajax_val_set // set html.objs.value by session value : text_list  of obj_id,value_name seperat by ; tehn by ,
+		// sample = 'obj_id1,value_name1;obj_id2,value_name2;...'
+		//alert('x_ajax_val_set='+x_ajax_val_set);
+		//alert('path='+path);
 		document.getElementById('j_box_light').style.display='block';
 		document.getElementById('j_box_fade').style.display='block'; 
 		var $iframe = $('#j_box_iframe_win');

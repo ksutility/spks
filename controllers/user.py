@@ -26,6 +26,9 @@ def _isok_un_ps (un,ps):
         session["file_access"]=rs["file_access"]
         session["my_folder"]=[f';{rs["eng"].strip()}-{rs["un"].strip()};',f';user;{rs["un"].strip()};']
         session["auth_prj"]=rs["auth_prj"]
+        import k_user
+        session["pass_is_safe"]=k_user.pass_is_safe(ps)
+        session["pass_is_safe"]=ps
         if session["username"]=='ks':
             session["admin"]=True
             session["auth_prj"]="*"
@@ -304,6 +307,18 @@ def change_password():
                 <td>تایید:</td>
                 <td><input type="submit" value="تغيير رمز"  style="width:200px;" id=submit1 name=submit1></td>
             </tr>
+            <h4>
+                نکات مهم در انتخاب پسورد جدید :
+            </h4>
+            <h5>
+                حداقل 8 کاراکتر باشد
+            </h5>
+            <h5>
+                حداقل شامل 1 کاراکتر کوچک،1 کاراکتر بزرگ،1 عدد و 1 کاراکتر خاص باشد
+            </h5>
+            <h5>
+                کاراکتر های خاص : ! @ # $ % ^ & *
+            </h5>
         </table>
     </Form>'''
     t1+='''
@@ -323,7 +338,7 @@ def change_password():
     </script>
     ''' #.format(uf)
     if request.vars:
-        t1='''
+        t2='''
            <div align=center>
             <h2>{}</h2><hr>
             <h1>{}</h1>'''.format(session["user_fullname"],'{}')
@@ -332,17 +347,23 @@ def change_password():
         ps=f_cod(request.vars["ps0"])
         ps1=f_cod(request.vars["ps1"])
         if ps1!="":
-            sql=db1.sql_set("","*","user",{'un':un,'ps':ps} ,"")
-            rs=db1.select('user',sql)
-            if rs:
-                xr=db1.update_data(table_name="user",set_dic={'ps':ps1},x_where={'un':un})
-                if xr['rowcount']>0:
-                   r1="رمز شما با موفقیت عوض شد"
+            import k_user
+            if k_user.pass_is_safe(ps1):
+                sql=db1.sql_set("","*","user",{'un':un,'ps':ps} ,"")
+                rs=db1.select('user',sql)
+                if rs:
+                    xr=db1.update_data(table_name="user",set_dic={'ps':ps1},x_where={'un':un})
+                    if xr['rowcount']>0:
+                       r1="رمز شما با موفقیت عوض شد"
+                    else:
+                       r1="برنامه با مشکل مواجه شد لطفا به مسئول مربوطه اطلاع دهید"
+                    return dict(ou=XML(t2.format(r1)))
                 else:
-                   r1="برنامه با مشکل مواجه شد لطفا به مسئول مربوطه اطلاع دهید"
+                    r1="رمز اول را اشتباه وارد کرده ايد"
+                    return dict(ou=XML(t1+t2.format(r1)))
             else:
-                r1="رمز اول را اشتباه وارد کرده ايد"
-            return dict(ou=XML(t1.format(r1)))
+                r1=DIV(H2("پسورد جدید امن نیست"),H3("لطفا 1 پسورد امن انتخاب کنید"))
+                return dict(ou=DIV(XML(t1),r1))
     return dict(ou=XML(t1))
 def test():
     return dict(x=response.toolbar(),y=str(request.cookies))#,z=request.cookies["username"].value=="abc")
@@ -355,7 +376,7 @@ def test_password():
     tt=[]
     for row in rows:
         dd=dict(zip(titles,row))
-        if dd['un'] not in ['aha','ase','my','rms','akr','fms','hal','hdr','mmn']: continue
+        #if dd['un'] not in ['aha','ase','my','rms','akr','fms','hal','hdr','mmn']: continue
         ps=dd['ps'] or ''
         tt+=[[dd['family'],dd['un'],dd['Idc_num'] or '',dd['tel_mob'] or '',ps]]
     return dict(table=k_htm.C_TABLE(['-','-','-','-','-'],tt).creat_htm())
@@ -398,3 +419,14 @@ def msg_access_form_internet():
 def scr_pass():
     import k_user
     return k_user.creat_scr_pass()
+def pass_is_safe():
+    res=[]
+    if session["pass_is_safe"]:
+        res+=['امکان ورورد از طریق اینترنت برای شما وجود دارد']
+        res+=['برای ورود آدرس زیر را در مرورگر وارد کنید']
+        res+=['31.25.94.48']
+    else:
+        res+=['امکان ورورد از طریق اینترنت برای شما وجود ندارد']
+        res+=['چون پسوردتان امن نیست']
+        res+=[A("تغییر رمز", _class="dropdown-item btn btn-primary",_href=URL('user','change_password'))]
+    return DIV(*[H2(x) for x in res])
