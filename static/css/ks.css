@@ -36,22 +36,23 @@ table th,table td {
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
-#table_filter{
+.table_filter{
 	width:100%;
 	background-color: #17a2b8;
 }
-#table_filter td{
+
+.table_filter td{
 	border: 1px solid #fff;
 	padding:0px;
 	border-spacing: 0px;
 	color: #fff;
 }
-#table_filter tr:hover {
+.table_filter tr:hover {
     background-color:  #17a2b8;
     }
-#table_filter td:hover {
+.table_filter td:hover {
     background-color: #ffccaa;
-    }
+    } /* */
 table th{
 	background-color: #0077B6;
 	color: #fff;
@@ -62,6 +63,8 @@ table th a{
 	color: #fff;
 	font-family: BBadr;
 }	
+.table_filter_in td{
+	border: 0px;}
 /* ---------------------------------------------------------------------------------------------------------------- */
 .table0{
 	width: 100%;   
@@ -421,3 +424,5 @@ div{
 	text-shadow: 3px 3px 6px #fff;
 	box-shadow: 2px 2px;
 	}	
+	
+

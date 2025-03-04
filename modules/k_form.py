@@ -1,7 +1,9 @@
 ﻿#from gluon.cache import Cache
 #cache=Cache()
 k_cache={}
-
+def session_x():
+    from gluon import current
+    return current.session
 from gluon import current
 session=current.session
 #from functools import lru_cache #,cache
@@ -298,12 +300,12 @@ def set_data_by_form_code(): # t_form_name,t_form_code,t_form_rev,t_form_index)
             ff['form_code'],ff['form_rev']=formname_to_formcode(t_form_name)
     #----------------
     for x in form_inf: 
-        if ff[x]=='':ff[x]=session[x]
+        if ff[x]=='':ff[x]=session_x()[x]
     #----------------
     f_file=share.base_path_data_read + share.dbc_form_prefix + ff['form_code'] + "-" + ff['form_rev'] +".txt"
     if find_path(f_file):
         ff['form_name']=ff['form_code'] + "-"  + ff['form_rev']
-        for x in form_inf: session[x]=ff[x]
+        for x in form_inf: session_x[x]=ff[x]
         #if f_new : 'sakhtan form jadid
         #   response.redirect("formshow.asp?newform=ok")
         #else
@@ -500,8 +502,7 @@ def template_parser(x_template,x_dic={},rep=''):
         xx=x_template.strip()
         from gluon import template
         x_dic1=x_dic.copy()
-        from gluon import current
-        session=current.session
+        session=session_x()
         x_dic1.update({'session':session,'_i_':session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
         #xxxprint(msg=['inf','template_parser',xx],vals=x_dic)
         
@@ -690,7 +691,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     
     import k_htm
     form_update_set_param="form;form"
-   
+    session=session_x()
     #cm=Cornometer(f"obj-{i_obj['type']}-{i_obj['name']}")
     '''
     use in kswt:ok 020905
@@ -748,6 +749,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     
     
     def form_update_set(form_update_set_param):
+        session=session_x()
         xmode,xname=form_update_set_param.lower().split(";")
         if xmode== "form": #updae form
             #form_update_set_param="form;frm1"
@@ -858,6 +860,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 exam = {obj['name']:saved_file_fullname}
                 none => update cur id = {'id':<cur_id>}
         '''
+        db1,xid='',''
         if c_form:
             if hasattr(c_form, 'db1'):
                 db1=c_form.db1 
@@ -866,9 +869,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 db1=DB1(c_form.db_name)
             tb_name=c_form.tb_name
             xid=c_form.xid
-        else:
+        elif 'db_name' in obj:
             db1=DB1(obj['db_name'])
-            tb_name=obj['tb_name'] 
+            tb_name=obj['tb_name']
+
         #obj_name=obj['name']
         if not x_where:
             if xid:
@@ -878,7 +882,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     return '--'
             else:
                 return 'error : not find id - c_form is not present'
-        res1=db1.update_data(tb_name,set_dic,x_where)
+        if db1:
+            res1=db1.update_data(tb_name,set_dic,x_where)
         return XML(res1['msg'])
     #------------------------------------------------------------------------------------------------------------------ 
     readonly='readonly' if 'readonly' in obj['prop'] else '' #:obj['input']=obj['output']    
@@ -965,6 +970,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         _multiple=('multiple' in i_obj['prop'])
 
         obj['key']=_value
+        #print("***"+str(type(_value)))
         if sc=='user':
             x_val='{m_w} {pre_n} {name} {family}'
             if 'p_id' in obj['prop']:
@@ -972,6 +978,20 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             if not 'un_free' in obj['prop']:
                 x_val='{un}-'+x_val
             obj['ref']={'db':'user','tb':'user','key':'{un}','val':x_val}
+            if 'input' in need and (not _value) and ('nesbat' in obj) and (obj['nesbat']=='modir'):
+                un=session['username']
+                un_inf=DB1('user').select('user',where={'un':un},result='dict')
+                loc_id=un_inf['loc']
+                loc_inf=DB1('a_loc').select('a',where={'code':loc_id},result='dict')
+                if loc_inf:
+                    _value=loc_inf['mdr']
+                #xxxprint(3,msg=['modir_un=',_value,''])
+                '''
+                ##+str(loc_inf))
+                pass
+                modir_un='rms'
+                '''
+            #obj['add_empty_first']=False
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf

@@ -147,6 +147,7 @@ class C_FILTER():
         data_sort_items.update({x:y['title'] for x,y in x_data_s['tasks'].items()})
         self.data_sort={'name':'data_sort','type':'select','select':data_sort_items,'add_empty_first':False}
         
+        self.data_page_len={'name':'data_page_len','type':'select','select':['20','50','100','200','500'],'add_empty_first':False}
         #import k_err
         #k_err.xreport_var([data_filter,self.data_filter_obj])
         
@@ -168,7 +169,7 @@ class C_FILTER():
         self.select_cols=select_cols
         self.all_cols=all_cols
         self.htm=self._htm()
-    def set_htm_var(self,caption,obj,width='15vw',_help='',_val='',_meta=''):
+    def set_htm_var(self,caption,obj,width='15%',_help='',_val='',_meta=''):
         '''
         inputs:
         ------
@@ -196,17 +197,17 @@ class C_FILTER():
             tt=XML(k_form.obj_set(i_obj=obj,x_dic={},x_data_s=self.x_data_s, need=['input'],request=request)['input'])
             ##import k_err
             ##k_err.xreport_var([tt,XML(tt),obj,self.x_data_s])
-            tt+=f'''<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter' >'''
-            tjs=k_js.toggle(clicking_name=name+"_label",hiding_name=name)
+            tt+=f'''<input {_meta} name='{name}' id='{name}' value='{val}' class='input-filter filter_menu' >'''
+            #tjs=k_js.j_toggle(clicking_name=name+"_label",hiding_css_selector="#"+name)
             obj['value']=val #===> output
         xcap=f"""<label id='{name}_label'><a title='{_help}'>{caption}</a></label>"""
-        tt1=k_htm.xtd([[xcap,4],[tt,8]])
+        tt1=k_htm.xtd([[xcap,3],[tt,9]],_calss="table_filter_in")
         
         
         return  f'''<td style='width:{width};'>
                             {tt1}
                         </td>
-                    ''' +tjs       
+                    ''' #+tjs       
     def _htm(self):
         hlp={'cols_filter':'''
                     text    => result
@@ -228,15 +229,39 @@ class C_FILTER():
                 
             '''
             }
-        return XML('<form><table id="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
+        import k_js
+        """
+                    + str(TR(
+                        TD(ss_input_htm(dbn,tbn,'data_filter_1')),
+                        TD(ss_input_htm(dbn,tbn,'data_filter_2')),
+                        _class="filter_menu"))
+        """
+        tjs=k_js.j_toggle(clicking_name="filter_menu_label",hiding_css_selector=".filter_menu")
+        dbn,tbn=self.x_data_s['base']['db_name'],self.x_data_s['base']['tb_name']
+        obj_name_x=f'{dbn}_{tbn}_data_filter_'
+        self.data_filter_x=[session[obj_name_x+'1_val'],session[obj_name_x+'2_val']]
+        #print("self.data_filter_x="+str(self.data_filter_x))
+        #print(obj_name_x)
+        import k_icon
+        icon_house=k_icon.chevron_down(24)
+        return XML('<form><table class="table_filter"><tr style="height:10px;padding:0px;margin:0px">'
                     #+set_htm_var(caption='prj',width='20vw',obj=data_filter1,_help=hlp['data_filter'])
-                    +self.set_htm_var(caption='فیلتر اطلاعات',width='30vw',obj=self.data_filter_obj,_help=hlp['data_filter'])
-                    +self.set_htm_var(caption='روش مرتب سازی',width='15vw',obj=self.data_sort,_help=hlp['data_sort'])
-                    +self.set_htm_var(caption='فیلتر ستونها',width='30vw',obj=self.cols_filter_obj,_help=hlp['cols_filter'])
-                    +self.set_htm_var(caption='حالت نمایش',obj='table_class',width='10vw',_val=2,_meta="type='number' min=-1 max=6",_help='1 to 6')
-                    +self.set_htm_var(caption='صفحه',obj='data_page_n',width='10vw',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
-                    +self.set_htm_var(caption='تعداد',obj='data_page_len',width='10vw',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
-                    +'<td><input type="submit" value="انجام"></td></tr></table></form>'
+                    +f'''<td style='width:2%;'><a id='filter_menu_label' class='btn' title='جزئیات'>{icon_house}</a></td>'''
+
+                    +self.set_htm_var(caption='d',width='15%',obj=self.data_filter_obj,_help='فیلتر اطلاعات' + hlp['data_filter'])
+                    + str(TD(ss_input_htm(dbn,tbn,'data_filter_1'),_style='width:15%;'))
+                    + str(TD(ss_input_htm(dbn,tbn,'data_filter_2'),_style='width:15%;'))
+                    +self.set_htm_var(caption='s',width='10%',obj=self.data_sort,_help='ترتیب' + hlp['data_sort'])
+                    +self.set_htm_var(caption='c',width='15%',obj=self.cols_filter_obj,_help='فیلتر ستونها' + hlp['cols_filter'])
+                    +self.set_htm_var(caption='f',obj='table_class',width='8%',_val=2,_meta="type='number' min=-1 max=6",_help='حالت نمایش - 0 تا 6')
+                    +self.set_htm_var(caption='p',obj='data_page_n',width='8%',_val=1,_meta="type='number' min=1" ,_help='صفحه شماره')
+                    #+self.set_htm_var(caption='n',obj='data_page_len',width='8%',_val=20,_meta="type='number'" ,_help='تعداد ردیف در هر صفحه')
+                    +self.set_htm_var(caption='n',width='8%',obj=self.data_page_len,_help='تعداد ردیف در هر صفحه')
+                    +'<td style="width:4%"><input type="submit" value="انجام"></td></tr></table>'
+                    +'<table class="table_filter">'
+                    +'</table>'
+                    +'</table></form>'
+                    +tjs
                     +"""
                         <script>
                             $(document).ready(function() {
@@ -296,28 +321,40 @@ def xform_cg():
     session.view_page='xform_cg'
     session['update_step']=True
     x_data_s,db_name,tb_name,msg=_get_init_data()
-    x_file=k_file.read('text',r"D:\ks\I\web2py-test\applications\spks\static\xform_cg"+"\\"+ x_data_s['base']['xform_cg_file'])
+    tmplt_fname=x_data_s['base']['xform_cg_file']
+    x_file=k_file.read('text',r"D:\ks\I\web2py-test\applications\spks\static\xform_cg"+"\\"+ tmplt_fname)
+    
     #return x_file
     json_data=_xform()['json']
     json_data1={x:y['value'] for x,y in json_data.items() if 'value' in y}#str(XML(y['value']
-    json_data1['__inf__']={x:y for x,y in json_data.items()}#str(XML(y['value']
-    json_data1['__labels__']={x:y for x,y in x_data_s['labels'].items()}
-    json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
-    #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])
-    #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
+    json_data1['_']={x:y for x,y in json_data.items()} #__inf__
+    json_data1['_labels']={x:y for x,y in x_data_s['labels'].items()}
     x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
-    #return x_file1
-    url1=str(URL('xform',args=request.args,vars=request.vars))
-    #print(url1)
-    x_file1=x_file1.replace('link_server',url1) 
-    x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
-    script2=""" 
-	document.getElementById('help_div').style.display = "none"
-	document.getElementById('bt_writetext').style.display = "none"
-    """
-    x_file2=x_file2.replace("//script2_inject",script2)
-    #return x_file2
-    return XML(x_file2)
+    if tmplt_fname[-8:]!='-st.html':
+        json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
+    
+        #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])
+        #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
+        
+        #return x_file1
+        url1=str(URL('xform',args=request.args,vars=request.vars))
+        #print(url1)
+        x_file1=x_file1.replace('link_server',url1) 
+        x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
+        script2=""" 
+        document.getElementById('help_div').style.display = "none"
+        document.getElementById('bt_writetext').style.display = "none"
+        """
+        x_file2=x_file2.replace("//script2_inject",script2)
+        #return x_file2
+        return XML(x_file2)
+    else:
+        import k_tools,k_str
+        #--------------------
+        x_dic=k_tools.dict2obj(json_data1)
+        #return json.dumps(x_dic,indent=4,ensure_ascii=False)
+        x_file1=k_str.template_parser(x_file1,x_dic,do_format=False)
+        return XML(x_file1)
 def _xform(out_items=['head','body','tools'],section=-1):
     #show all section
     #response.show_toolbar=True #error check
@@ -747,27 +784,30 @@ def list_0():
                         if session['username'] in m_a_users:
                             multi_app+=[A(XML(k_icon.auto_app(24)),_href=URL('xtable_i',args=[db_name,tb_name,m_a_step]))]
                 if multi_app:
-                    for_me_n_link=XML(k_htm.xtd(multi_app+[for_me_n_link]))    
+                    for_me_n_link=XML(k_htm.xtd_div(multi_app+[for_me_n_link]))    
                     
                 code=tb_obj['base']['code'] if 'code' in tb_obj['base'] else '900'
                 xcat=code[0] 
                 n1=len(trsx[xcat])+1
+                
+                _class="btn btn-primary btn-sm"
+                tools=[]
                 if session["admin"]:
-                    _class="btn btn-primary btn-sm"
-                    tools=DIV(
-                        k_htm.a("T",_target="box",reset=False,_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),"-",
-                        k_htm.a("M0",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,"-",
-                        k_htm.a("M1",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name,"do"])) ,"-",
-                        k_htm.a("U",_target="box",reset=False,_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),"-",
-                        k_htm.a("D",_target="box",reset=False,_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),"-",
-                        k_htm.a("S",_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""])),"-",
+                    tools=[
+                        k_htm.a("T",_target="box",reset=False,_class=_class,_title="جدول",_href=URL('data','xtable',args=[db_name,tb_name])),
+                        k_htm.a("M0",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name])) ,
+                        k_htm.a("M1",_target="box",reset=False,_class=_class,_title="ساخت فیلدهاو جدول",_href=URL("data","rc",args=["creat_table_4_form",db_name,tb_name,"do"])) ,
+                        k_htm.a("U",_target="box",reset=False,_class=_class,_title="بروز رسانی نتیجه فرم",_href=URL("data","rc",args=["update_f_nxt_u",db_name,tb_name,"do-x"])),
+                        k_htm.a("D",_target="box",reset=False,_class=_class,_title="نمایش ستونهای اضافه در جدول",_href=URL("data","rc",args=["columns_dif",db_name,tb_name,"do-x"])),
+                        k_htm.a("P",_target="box",reset=False,_class=_class,_title="pivot table",_href=URL("pivot",args=[db_name,tb_name])),
                         k_htm.a("A",_target="box",reset=False,_class=_class,_title="به روز رسانی فیلدهای اتوماتیک",
                             _href=URL("data","rc",args=["update_auto_filed",db_name,tb_name,"do-x"]
                                     ,vars={'select_cols':XML(','.join([x for x in tb_obj['tasks'] if tb_obj['tasks'][x]['type']=='auto']))}
                                     ))
-                    )
-                else:
-                    tools=''
+                    ]
+                tools+=[k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))]
+                tools=TABLE(TR([TD(x,_class="m-0 p-0 border-0") for x in tools]),_class="table m-0 p-0 ")
+                    
                 tx=[A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
                     for_me_n_link,
                     total_n,
@@ -849,10 +889,11 @@ def xtable():
     tasks=x_data_s['tasks']
     
     c_filter=C_FILTER(tasks,x_data_s) 
-    filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
+    #filter_data=c_filter.data_filter_obj["value"]#k_form.template_parser(request.vars.get('data_filter'),x_dic={})#eval(flt) if flt else ''
     
-    if auth.where:
-        filter_data=["AND",filter_data,auth.where]#__where__list__
+    
+    filter_data=["AND",c_filter.data_filter_obj["value"]]+c_filter.data_filter_x
+    if auth.where:filter_data+=[auth.where]#__where__list__
     order=c_filter.data_sort["value"] or x_data_s['order']
     x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
     #xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})
@@ -1181,7 +1222,8 @@ def search():
     import k_htm
     db1=DB1(db_name)
     if args[2]=="":
-        val_dic={x:x for x in db1.columns_list(tb_name)}
+        tasks=x_data_s['tasks']
+        val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
         out+=[FORM(DIV(
                     DIV('متن جستجو :',_class='col-1'),
                     DIV(INPUT(_name='search_text',_value=request.vars['search_text'],_style='width:100%'),_class='col-2'),
@@ -1233,19 +1275,27 @@ def ss_set():
     response.title='S*S:'+'-'.join(args)
     x_data_s,db_name,tb_name,msg=_get_init_data()
     if not x_data_s: return msg
-    text_app=request.vars['text_app']
-    if text_app:
-        session[args[2]]=text_app
-        return 'j_box_iframe_win_close | '+text_app
+    text_app_val=request.vars['text_app_val']
+    obj_name_x=args[2] #f'{db_name}|{tb_name}|{args[2]}'
+    if text_app_val:
+        
+        if text_app_val=='#clear#':
+            session[obj_name_x+'_val'],session[obj_name_x+'_ttl'],text_app_val='','',''
+        else:
+            session[obj_name_x+'_val']=text_app_val
+            session[obj_name_x+'_ttl']=request.vars['text_app_ttl']
+        return 'j_box_iframe_win_close | '+text_app_val
  
     db1=DB1(db_name)
     tasks=x_data_s['tasks']
     #--------------------------------------------------------------------------------------------------------------------------------------
     val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
-    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();",add_empty_first=False)
+    sel1=request.vars['sel1'] or session[obj_name_x+'_sel1'] or list(val_dic)[0]
+    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();",add_empty_first=False,_value=sel1)
     
-
-    sel1=request.vars['sel1'] or list(val_dic)[0]
+    
+    session[obj_name_x+'_sel1']=sel1
+    sel1_ttl=val_dic[sel1]
     sign,sign_o,sel2,sel2_o='','','',''
     #if sel1 in ["None",None]:sel1='prj'
     if sel1:
@@ -1254,26 +1304,40 @@ def ss_set():
         
         #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
         signs=[" = "," != "," > "," < "," like "]
-        sign_o=k_htm.select(_options=signs,_name='sign',_onchange="submit();",add_empty_first=False)#,_value=request.vars['sign']
-        sign=request.vars['sign'] or signs[0]
+        sign=request.vars['sign'] or session[obj_name_x+'_sign'] or signs[0]
+        sign_o=k_htm.select(_options=signs,_name='sign',_onchange="submit();",add_empty_first=False,_value=sign)#,_value=request.vars['sign']
+        session[obj_name_x+'_sign']=sign
         if sign:
-            sel2_o=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();",add_empty_first=False)#,_value=request.vars['sel2']_onchange="set_val();
-            sel2=request.vars['sel2'] or list(val_dic)[0]
-    result='"{}"{}"{}"'.format(sel1,sign,sel2)
-    result_htm=XML(f'<div name="result" id="result">{result}</div>')
+            sel2=request.vars['sel2'] or session[obj_name_x+'_sel2'] or list(val_dic)[0]
+            if not sel2 in val_dic:sel2 =list(val_dic)[0]
+            sel2_o=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();",add_empty_first=False,_value=sel2)#,_value=request.vars['sel2']_onchange="set_val();
+            session[obj_name_x+'_sel2']=sel2
+            sel2_ttl=val_dic[sel2]['title']
+    result_val='"{}"{}"{}"'.format(sel1,sign,sel2)
+    result_ttl='"{}"{}"{}"'.format(sel1_ttl,sign,sel2_ttl)
+    #result_val_htm=XML(f'<div name="result" id="result">{result}</div>')
 
     return FORM(
                 DIV(
-                    DIV(sel1_o,_class="col-4"),
+                    DIV(sel1_o,_class="col-3"),
                     DIV(sign_o,_class="col-2"),
-                    DIV(sel2_o,_class="col-4"),
-                    DIV(result_htm,_id='result',_class="col-2"),
-                    BUTTON('ok',_class="btn btn-primary",_style='width:100%',_onclick='fill_text_app()'),
-                    INPUT(_id='text_app',_name='text_app',_value='',_type='hidden',), 
-                    _class="row"),
+                    DIV(sel2_o,_class="col-3"),
+                    BUTTON('ok',_class="btn btn-primary",_style='width:100%;height:30px;background-color:#5f5;',_onclick='fill_text_app()'),
+                    DIV(result_val,_id='result_val',_class="col-2"),
+                    DIV(result_ttl,_id='result_ttl',_class="col-2"),
+                    HR(),
+                    BUTTON('حذف فیلتر',_class="btn btn-primary",_style='width:100%;height:30px;background-color:#ff5;',_onclick='clear_text_app()'),
+                    INPUT(_id='text_app_ttl',_name='text_app_ttl',_value='',_type='hidden',), 
+                    INPUT(_id='text_app_val',_name='text_app_val',_value='',_type='hidden',),
+                    _class="row",_style='width:100%;height:90%'),
                 SCRIPT("""
                     function fill_text_app(){
-                        document.getElementById('text_app').value=document.getElementById('result').innerText
+                        document.getElementById('text_app_val').value=document.getElementById('result_val').innerText;
+                        document.getElementById('text_app_ttl').value=document.getElementById('result_ttl').innerText;
+                    }
+                    function clear_text_app(){
+                        document.getElementById('text_app_val').value='#clear#';
+                        document.getElementById('text_app_ttl').value='#clear#';
                     }
                 """)    
                 ,_id="form5")
@@ -1283,7 +1347,54 @@ def get_session():
     
     x=request.args[0]
     return session[x]
+def ss_input_htm(db_name,tb_name,obj_name):
+    '''
+    o1=INPUT(_id=obj_name+'_val',_value=session[obj_name+'_val'])
+    o2=[INPUT(_id=obj_name+'_ttl',_readonly='readonly',_value=session[obj_name+'_ttl']),
+        k_htm.a("*",_target="box",reset=False,_href=URL('ss_set',args=[db_name,tb_name,obj_name]),j_box_params=f"'','{obj_name}_val,{obj_name}_val;{obj_name}_ttl,{obj_name}_ttl'")
+        ]
+    return XML(k_htm.x_toggle_s(o1,'-',add_objs=o2))
+    '''
+    obj_name_x=db_name+"_"+tb_name+"_"+obj_name
+    ss_ttl_val=session[obj_name_x+'_ttl'] if session[obj_name_x+'_ttl'] else ''
+    ss_val_val=session[obj_name_x+'_val'] if session[obj_name_x+'_val'] else ''
+    return TABLE(
+    TR(
+        TD(INPUT(_id=obj_name+'_ttl',_readonly='readonly',_value=ss_ttl_val,_style='width:100%;',_title=ss_ttl_val),_style="width:90%"),
+        TD(k_htm.a("*",_target="box",reset=False,_href=URL('ss_set',args=[db_name,tb_name,obj_name_x])
+            ,j_box_params=f"'','{obj_name}_val,{obj_name_x}_val;{obj_name}_ttl,{obj_name_x}_ttl'"),_style="width:10%"),
+        ),
+    TR(TD(INPUT(_id=obj_name+'_val',_value=ss_val_val,_class="filter_menu",_style='width:100%;'),_colspan="2",_style='width:100%;')),
+    #TR(TD(obj_name_x)),
+    _style="width:100%;",_class="table_filter_in")
 def test_ajax_set():
-    return dict(d=DIV(INPUT(_id='xx1'),
-        A("*",_href='javascript:void(0)',_onclick=f"""j_box_show("{URL('ss_set',args=['user','user','xx1'])}",false,'','xx1,xx1')""",_target="box")
-        ))
+    return dict(d=DIV(ss_input_htm('user','user','xx1') , ss_input_htm('user','user','xx2')))
+def report_sessions():
+    return TABLE(*[TR(TD(x),TD(session[x])) for x in session])
+#astan.spks@gmail  hsjhk$hs\;s1403
+#======================================================================================
+def pivot():
+    x_data_s,db_name,tb_name,msg=_get_init_data()
+        
+    data2_rows,data2_titles,data2_rows_num=DB1(db_name).select(tb_name,limit=0)
+    data=[data2_titles]+data2_rows
+    
+    import k_file_x,json
+    x_rows="[]" #"['frd_modir','f_nxt_u']"
+    x_cols=""
+    x_vlas=""
+    x_agrg="Count" #Sum
+    x_rndr="Heatmap"#Table
+    set1=f'''
+            rows: {x_rows}, 
+            cols: ["{x_cols}"],
+            vals: ["{x_vlas}"],
+            aggregatorName: "{x_agrg}",
+            rendererName: "{x_rndr}"'''
+    set2="{"+set1+"}"
+    tb2=json.dumps(data)
+    htm0="" # f"<a class='btn btn-primary' href={URL('tmsh','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
+    #htm0+=f"<a class='btn btn-primary' href={URL('tmsh','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
+    table=XML(k_file_x.pivot_make_free(tb2,set2,htm0=htm0))
+    return table
+    #return dict(table=)

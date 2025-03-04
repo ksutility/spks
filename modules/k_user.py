@@ -128,6 +128,7 @@ def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):##
 
     #xxxprint(out_case=3,msg=['user_in_xjobs_can',xjobs,un],vals=form_sabt_data)
     step=x_data_s['steps'][step_name]
+
     for xjob in xjobs.split(','):
         if do=='view':
             if not 'auth' in step :
@@ -142,10 +143,10 @@ def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):##
             elif do == 'edit':
                 step_un=form_sabt_data.get(f'step_{step_name}_un','')
                 if ((not step_un) or (un==step_un)):
-                    import k_err
-                    k_err.xxxprint(3,msg=[step_un,un])
+                    #import k_err
+                    #k_err.xxxprint(3,msg=[step_un,un])
                     return True
-            return False   
+            #return False   
         else:
             users_list=C_XJOB(xjob,x_data_s,c_form).users_list() 
             #xxxprint(3,msg=['users_list',users_list,''])

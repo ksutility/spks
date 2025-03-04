@@ -162,3 +162,13 @@ def list_dict__2__list_list(in_list_dict,out_titles):
         out_row=[x_dic[out_title] for out_title in out_titles]
         out_rows+=[out_row]
     return out_rows        
+from gluon.storage import Storage
+def dict2obj(in_dict):
+    o_d={}
+    for x in in_dict:
+        y=in_dict[x]
+        if type(y)==dict:
+            y=dict2obj(y)
+        o_d[x]=y
+        
+    return Storage(o_d)#{x:y json_data1)

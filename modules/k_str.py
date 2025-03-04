@@ -5,7 +5,7 @@ Created on 1402/12/17
     last update 1402/12/17
 """
 #k_form
-def template_parser(x_template,x_dic={}):
+def template_parser(x_template,x_dic={},do_format=True):
     '''
     use in kswt:ok 020905
     rename:021126 - old name=format_parser
@@ -41,7 +41,10 @@ def template_parser(x_template,x_dic={}):
             #print(x_dic)
             x1= template.render(content=xx,context=x_dic) 
             #print(x1)
-            return x1.format(**x_dic)  #remove 020926
+            if do_format:
+                return x1.format(**x_dic)  #remove 020926
+            else:
+                return x1
         except Exception as err:
             from k_err import xxxprint
             xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)

@@ -31,6 +31,14 @@
 		position:absolute;
 		left:20px;
 	}
+	.div_c1{
+		float: right;
+		width: 80%; 
+	}
+	.div_c2{
+		float: right;
+		width: 20%; 
+	}
 	#div_vertical_menu {
 		position:absolute;
 		background-color:#555;
@@ -41,6 +49,19 @@
 		width:200px;
 	}
 	h6 { text-align: center;
+	}
+	@media screen and (max-width: 800px) {
+		.div_c1,.div_c2,tab-content {
+			width: 100%; 
+		}
+		#div_vertical_menu	{
+			position:relative;
+			background-color:#555;
+			color:#fff;
+			height:500px;
+			left:0px;
+			width:100%;
+		}
 	}
 </style>
 <!--
@@ -94,12 +115,12 @@ background: #ddd;
 	'{{=server_python_add}}/spks/tmsh/aqc_report_daily_kytable'>
 	-->
 <div class="container-fluid main-container">
-<div class="row">
-	<div class="col-10">
+<div >
+	<div class="div_c1">
 	{{=htm}}
 	</div>
 	{{if access_from_internet!=True:}}
-	<div class="col-2"><div id="div_vertical_menu" >
+	<div class="div_c2"><div id="div_vertical_menu" >
 		<br>
 		<h6> گزارش عملکرد همکاران طراحی </h6>
 		<br>

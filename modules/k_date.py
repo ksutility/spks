@@ -111,12 +111,12 @@ def site_time():
     ird=ir_date() #irdate
     t0,t1,t2=ir_weekday(w_case=4)
     xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
-    xs1="style='background-color:#444;color:#fff;margin:3px'"
+    xs1="style='color:#f55;'"#margin:3px
     return f"""<h5 dir="lrt">
-                <a title='{t2}'><i {xs1}>{t1}</i></a> 
+                <i title='{t2}' {xs1}>{t1}</i>
                  
                 {ird["hh"]}:{ird["gg"]}
-                {ird["yy"]}/{ird["mm"]}/<b {xs1}>{ird["dd"]}</b> 
+                {ird["yy"]}/{ird["mm"]}/<i {xs1}>{ird["dd"]}</i> 
                 <h5>
                 """
     return f"""
@@ -170,7 +170,7 @@ class C_IR_DATE():
 
 #-----------------
 #print(C_IR_DATE().from_en_strptime("2024-03-24","%Y-%m-%d").out('yyyy-mm-dd'))
-def tatil_mode(x_date):
+def tatil_mode(x_date,out_case='num'):
     iw=ir_weekday(x_date)
     ids=ir_date_split(x_date,x_mode='str')
     a_tatil={
@@ -191,5 +191,18 @@ def tatil_mode(x_date):
     elif (xx in b_tatil['1403']):
         rr= 3
     #print(str(ids) +" ---- " + xx + " *** " + str(rr) )
-    return rr
+    if out_case=='color':
+        return ['#efe','#f00','#fa5','#f5a'][rr]
+    else:
+        return rr
     #yy,mm,dd
+def ir_mon_len(yy_n,mm_n):
+    if mm_n < 7:
+        return 31 
+    if mm_n < 12 :
+        return 30
+    if yy_n in [1403]:
+        return 30
+    return 29
+def st_date(yyyy,mm,dd):
+    return str(yyyy)+"/"+("0"+str(mm))[-2:]+"/"+("0"+str(dd))[-2:]

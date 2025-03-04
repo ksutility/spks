@@ -997,7 +997,7 @@ def need_links():
     #AND end IS NULL
     #loc = 100
     prm={"_class":"btn btn-outline-primary text-center text-wrap rounded"}
-    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc = 100','cols_filter':'name,family,tel_wrk,tel_mob',
+    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc LIKE "01%"','cols_filter':'name,family,tel_wrk,tel_mob',
         'table_class':2,'data_page_n':1,'data_page_len':40})
     links+=[k_htm.a("تلفن همکاران دفتر مرکزی",_href=url,_target="",**prm)]
     url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
@@ -1008,9 +1008,13 @@ def need_links():
     links+=['']
     rows=[links]
     if session["admin"]:
-        url=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
-        'table_class':2,'data_page_n':1,'data_page_len':40})
-        links=[k_htm.a("papers=>todo !=''",_href=url,_target="",**prm,_dir="ltr")]
+        links=[k_htm.a("papers=>todo !=''",_target="",**prm,_dir="ltr",
+                    _href=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
+                        'table_class':2,'data_page_n':1,'data_page_len':40})),
+                k_htm.a("p date",_target="",**prm,_dir="ltr",
+                    _href=URL('tmsh','date_picker')),
+        
+            ]
         rows+=[links+["","","",""]]
     lnk,trs,f_l='','',''
     xx00={    
@@ -1068,3 +1072,84 @@ def test_pass():
     for ps in pss:
         res+=ps+ " = " +str(k_user.pass_is_safe(ps)) + "<br>"
     return res
+def test_mob():
+    url=URL('static','jq_mob')
+    return f"""
+    <!DOCTYPE html>
+<html class="ui-mobile"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><!-- base href="http://demos.jquerymobile.com/1.4.5/pages-single-page/index.html" -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Single page</title>
+	<link rel="stylesheet" href="{url}/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="{url}/jqm-demos.css">
+	<link rel="shortcut icon" href="http://demos.jquerymobile.com/1.4.5/favicon.ico">
+	<script src="{url}/jquery.js"></script>
+	<script src="{url}/index.js"></script>
+	<script src="{url}/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body style="" class="ui-mobile-viewport ui-overlay-a">
+
+<div data-role="page" data-url="/1.4.5/pages-single-page/index.html" tabindex="0" class="ui-page ui-page-theme-a ui-page-active" style="min-height: 775px;">
+
+	<div data-role="header" role="banner" class="ui-header ui-bar-inherit">
+		<h1 class="ui-title" role="heading" aria-level="1">Single page</h1>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content">
+		<p>This is a single page boilerplate template that you can copy to 
+build your first jQuery Mobile page. Each link or form from here will 
+pull a new page in via Ajax to support the animated page transitions.</p>
+		<p>Just view the source and copy the code to get started. All the CSS 
+and JS is linked to the jQuery CDN versions so this is super easy to set
+ up. Remember to include a meta viewport tag in the head to set the zoom
+ level.</p>
+		<p>This template is standard HTML document with a single "page" container inside, unlike a <a href="http://demos.jquerymobile.com/1.4.5/pages-multi-page/" data-ajax="false" class="ui-link">multi-page template</a>
+ that has multiple pages within it. We strongly recommend building your 
+site or app as a series of separate pages like this because it's 
+cleaner, more lightweight and works better without JavaScript.</p>
+<a href=http://demos.jquerymobile.com/1.4.5/> ***</a>
+	</div><!-- /content -->
+
+	<div data-role="footer" role="contentinfo" class="ui-footer ui-bar-inherit">
+		<h4 class="ui-title" role="heading" aria-level="1">Footer content</h4>
+	</div><!-- /footer -->
+
+</div><!-- /page -->
+
+
+
+<div class="ui-loader ui-corner-all ui-body-a ui-loader-default"><span class="ui-icon-loading"></span><h1>loading</h1></div></body></html>
+    """
+    return """
+    <!doctype html>
+    <html>
+    <head>
+        <title>My Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css">
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://code.jquery.com/mobile/1.4.0-rc.1/jquery.mobile-1.4.0-rc.1.min.js" ></script>
+    </head>
+    <body>
+        <div data-role="page">
+     
+            <div data-role="header">
+                <h1>My Title</h1>
+            </div><!-- /header -->
+     
+            <div role="main" class="ui-content">
+                <p>Hello world</p>
+            </div><!-- /content -->
+     
+            <div data-role="footer">
+                <h4>My Footer</h4>
+            </div><!-- /footer -->
+     
+        </div><!-- /page -->
+    </body>
+    </html>
+    """

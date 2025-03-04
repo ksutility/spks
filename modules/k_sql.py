@@ -103,6 +103,7 @@ class C_SQL():
                 res= q_name + " OR ".join([self.where(q_w,add_where_text=False) for q_w in q_where[1:] if q_w])    
             else:
                 res= q_name + " AND ".join([self.where(q_w,add_where_text=False) for q_w in q_where if q_w])
+            if res== q_name:res=''
         elif type(q_where)==dict:
             res=q_name + " AND ".join([self.where_cell(name,q_where[name]) for name in q_where]) 
         else:
@@ -423,7 +424,7 @@ class DB1():
         xr={'where':sql_where}
         
         # بررسی وجود حداقل 1 رکورد با شرایط تعیین شده 
-        find1=self.select(table=table_name,where=x_where,result='dict_x')
+        find1=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
         r1="select {} from {}".format(x_where,table_name)
         if not find1['done']:#" any record not found"
             xr['done']='0'
@@ -447,7 +448,7 @@ class DB1():
             report_db_change(self.path,r1, [])
             return xr
         # بررسی تغییرات  
-        find2=self.select(table=table_name,where=x_where,result='dict_x')
+        find2=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
         
         if debug:xxxprint(msg=["find2",'',''],vals=find2 )
         xr['dif_x']={} #different s
@@ -461,7 +462,7 @@ class DB1():
                 if not id_1 in id_list:
                     xxprint('err_x',f'{id_1} not in {str(id_list)}')
                 row_x= id_list.index(id_1)   
-                row2=rows2[row_x]
+                row2=rows2[row_x][1:]
                 dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
                 dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
                 report_db_change(self.path,r1, dif,idx=i+1)

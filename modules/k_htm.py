@@ -419,7 +419,8 @@ class C_TABLE:
                         _class=''
                     tds+=[TD(cell,_class=_class)]
                 else:
-                    print('type(cell)='+str(type(cell)))
+                    tds+=[TD('')]
+                    #print('type(cell)='+str(type(cell)))
             if row_colors and len(row_colors) > i_r:
                 trs.append(TR(*tds,_style='background-color:'+row_colors[i_r]))
             else:
@@ -523,6 +524,7 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     _dict={x:x for x in _options} if type(_options)==list else _options
     vs=''
     #if not _value:
+    #print('-----------_value='+_value)
     if remember:
         from gluon import current
         _value=current.request.post_vars[_name] or current.request.vars[_name] or _value
@@ -576,7 +578,7 @@ def select_x1(select_base_list,select_describ_list,onact_txt):
     else:
         h_code1=t1 +  "</select>" + "\n"
     return h_code1
-def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_dir=""):
+def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_dir="",j_box_params='""'):
     #debug
     #return A(txt,_title=_title,_class=_class,_href=_href,_target="")
     reset='true' if reset else 'false'
@@ -589,14 +591,14 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_d
             if (window.event.ctrlKey) {
                 window.open( "%s" , '_blank');
             } else { 
-                j_box_show("%s", %s);
+                j_box_show("%s", %s , %s);
             }
         }
-        """ % (_href,_href,reset)
+        """ % (_href,_href,reset,j_box_params)
         return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func,_dir=_dir ) #f"""j_box_show("{_href}",{reset})""") 
     else:
         return A(txt,_title=_title,_class=_class,_href=_href,_target=_target,_dir=_dir)
-def xtd(td_list):#
+def xtd_div(td_list):#
     rep=""
     for td_obj in td_list:
         if type(td_obj)==list: 
@@ -616,13 +618,36 @@ def xtd(td_list):#
             {rep}
         </div>
     """
+def xtd(td_list,_calss):#
+    rep=""
+    for td_obj in td_list:
+        if type(td_obj)==list: 
+            rep+=f"""
+                <td style="width:{str(int(td_obj[1])*8)}%;">
+                    {td_obj[0]}
+                </td> 
+            """
+        else:
+            rep+=f"""
+                <td>
+                    {td_obj}
+                </td> 
+            """
+    return f"""
+        <table class="{_calss}"><tr>
+            {rep}
+        </tr></table>
+    """ 
 def x_toggle(txt):
     return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary " >+</a></div>\n
                 <div style='border:2px outset red;margin:0 0 0 10px;'>\n
                 {txt}\n
                 </div>\n
             """
-def x_toggle_s(txt,head='+',color='warning'):#s=small
+def x_toggle_s(txt,head='+',add_objs=[],color='warning'):#s=small
+    '''
+        add_objs=obj that is placed in line of head object
+    '''
     js="""
         <script>
             $( document ).ready(function() {
@@ -632,7 +657,7 @@ def x_toggle_s(txt,head='+',color='warning'):#s=small
     """
     return  f"""<div class="text-center">
                 <a onclick="$(this).parent().next().toggle()" class="btn btn-{color} btn-sm a_toggle_hide" 
-                    style="width:5%">{head}</a>\n
+                    style="width:5%">{head}</a>{''.join([str(x) for x in add_objs])}
                 </div>
                 <div class="text-center">\n
                 {txt}\n

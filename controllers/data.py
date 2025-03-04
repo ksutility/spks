@@ -815,6 +815,10 @@ def index():
         t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
         t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
         t2+=f"<br><a href={URL('user','test_password')}> بررسی امنیت پسوردها </a> "
+        t2+=f"<br><a href={URL('form','test_ajax_set')}> تست فیلتر اکسترنال اطلاعات </a> "
+        t2+=f"<br><a href={URL('form','report_sessions')}> session </a> "
+        
+        
         t2+=f"""<br><div class="row">
             <div class="col">
                 <a class='btn btn-primary' href={URL('rc',args=('copy_table_inf','do-x'))}>edit (data.py) def(rc) line 1048 : کپی اطلاعات 1 جدول به جدول دیگر </a>
@@ -1077,20 +1081,38 @@ def rc():#run 1 command
         rep['table-1-add']=db1.columns_add(tb_name,cols1,"TEXT")
         rep['table-2']=db1.define_table(tb_name+"_backup",fields_txt='id INTEGER PRIMARY KEY AUTOINCREMENT,', fields_order={"TEXT":['xid']+cols1}) 
         rep['table-2-add']=db1.columns_add(tb_name+"_backup",cols1,"TEXT")    
-    elif cmd=='update_data':  
+    elif cmd=='update_data': 
         #sample /spks/data/rc/update_data
+        import k_file
+
         inf_1={'db_name':'eng','tb_name':'a','field name':['code'],'replace':{"%AR":"AR","%ST":"ST","%CV":"CV","%EL":"EL","%ME":"ME","%PM":"PM","%OT":"OT"},'oprate':' LIKE '}
         inf_2={'db_name':'user','tb_name':'user','field name':['eng'],'replace':{"%OT":"GE"},'oprate':' LIKE '}
-        inf={'db_name':'user','tb_name':'user','field name':['step_0_ap','step_1_ap','step_2_ap'],'replace':{"Y":"y","X":"x","R":"r"},'oprate':' = '}
+        inf_3={'db_name':'user','tb_name':'user','field name':['step_0_ap','step_1_ap','step_2_ap'],'replace':{"Y":"y","X":"x","R":"r"},'oprate':' = '}
+        inf_4={'db_name':'user','tb_name':'user','field name':['loc'],'replace':{"100":"011"},'oprate':' = '}
+        inf_5={'db_name':'off_morkhsi_saat','tb_name':'a','field name':['loc'],'replace':{"100":"011"},'oprate':' = '}
+        
+        #031207
+        # - آپدیت اتوماتیک فیلدهای نامه ها - فیلد پروژه جاری
+        inf_a1 ={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'53'},'where':{"prj1":"HRG1"}}
+        #--  130 نامه  گیتها 
+        inf_a2={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'4'},'where':{"prj_id":"112"}}
+        #-- 312 نامه  صحن 
+        inf_a3={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'36'},'where':{"prj2":"AQC0-PMO"}}
+        #-- 26 نامه کنترل پروژه
+        
         db1=DB1(inf['db_name'])
         tb_name=inf['tb_name']
         rep1=[]
-        oprate=inf['oprate']
         k_file.backup(db1.path,"*,bak")
-        for fldn in inf['field name']:#args[3]#field name
-            for x,y in  inf['replace'].items():
-                rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn}{oprate}'{x}'")#{fldn:x})
-                rep1+=[k_htm.val_report(rep)]
+        if 'field name' in inf :
+            oprate=inf['oprate']
+            for fldn in inf['field name']:#args[3]#field name
+                for x,y in  inf['replace'].items():
+                    rep=db1.update_data(tb_name,set_dic={fldn:y},x_where=f" {fldn}{oprate}'{x}'")#{fldn:x})
+                    rep1+=[k_htm.val_report(rep)]
+        else:
+            rep=db1.update_data(tb_name,set_dic=inf['set_dic'],x_where=inf['where'])
+            rep1+=[k_htm.val_report(rep)]
         return DIV(rep1)
     elif cmd=='update_f_nxt_u':   
         '''

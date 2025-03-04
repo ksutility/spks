@@ -191,12 +191,14 @@
                 </ul>
 				</div>
             </td>
- 
+			{{import k_icon}}
 			<td width="15%" class="head-cell"><div class="head-cell">
+				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">{{=XML(k_icon.house_fill(24))}}</a>
 				<a class="btn btn-primary" href="{{=URL('file','index',port=80)}}" title="اشتراک فایل">S</a>
 				<a class="btn btn-primary" href="{{=URL('file','f_list',args=('lib'),port=80)}}" title="کتابخانه">L</a>
 				<a class="btn btn-primary" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">F</a>
 				<a class="btn btn-primary" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
+				
 				</div>
 			</td>
 			{{import k_date}}
