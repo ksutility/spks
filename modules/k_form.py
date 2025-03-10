@@ -742,8 +742,10 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if debug:
             xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)    
         return obj
-    if x_data_s:db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
-    
+    if x_data_s:
+        db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
+    else:
+        db_name,tb_name='',''
     obj=obj_pars(i_obj,obj_type=sc)
     
     
@@ -1064,14 +1066,27 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         obj['format']='yyyy/mm/dd' #obj['format']
         _value=_value or k_date.ir_date(obj['format'])
         #if "update" in obj['prop']:onact_txt=form_update_set(form_update_set_param) 
-        onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
+        onchange= "submit();" if "update" in obj['prop'] else ""  #form_update_set(form_update_set_param)
         #x_end= " readonly >" if "readonly" in obj['prop'] else f''' onchange='date_key("{_name}","{def_val}","{x_format}");' {onact_txt} >'''
         #obj['input']="<input type='text' " + _n + " value='" + def_val + "' size='" + maxlen +"' maxlength='" + maxlen +"' dir='" + d_lan + "' class='date-picker' " + x_end  
         readonly= "readonly" if "readonly" in obj['prop'] else ''
         if 'input' in need :
+            obj_name=_name
+            obj_name_x=db_name+"_"+tb_name+"_"+str(xid)+"_"+obj_name
+            if session[obj_name_x]:
+                _value=session[obj_name_x]  
+                session[obj_name_x]  =''
+            inp=INPUT(_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange,_class="text-center")#_class='fDATE',
+            obj['input']=DIV(k_htm.a(inp,_target="box",reset=False,_href=URL('form','date_picker',args=[obj_name_x]),_class=""
+                    ,j_box_params=f"ajax_do='',ajax_val_set='{obj_name},{obj_name_x};{obj_name}_wd,{obj_name_x}_wd;',x_size='10cm;10cm',x_submit='form1'")#,hide_menu=true
+                    ,)
+            
+            '''
             obj['input']=DIV(INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange),
                 A('X',_title="حذف تاریخ",_id="fdate_reset",_onclick="this.previousSibling.value='0';",_class="btn btn-warning"))
-        obj['help']=DIV(obj['format'],_dir='ltr')
+            '''
+        wd=k_date.ir_weekday(_value,w_case=2)
+        obj['help']=INPUT(_name=_name+'_wd',_id=_name+'_wd',_value=wd,_readonly=readonly,_class="text-center",_style="background-color:#ccc;border:0px;width:100%;") #DIV() #obj['format'],_dir='ltr')
         obj['stnd6']=_value[2:4]+_value[5:7]+_value[8:10] if (_value and len(_value)>9) else "_"*6 #6 digit standard for date
         msg ,or_v,js_ff_chek="",'',''
     elif sc=='time_c': #sc
@@ -1110,7 +1125,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if 'input' in need:
             # start - 031107 - حذف اطلاعات فرم جاری از داخل لیست جستجو شده
             ref=obj['ref']
-            xid=str(c_form.xid)
+            if not xid and c_form:
+                xid=str(c_form.xid)
             #ref['where']=ref['where'] + " AND id !=" +xid if 'where' in ref else "id !="+xid
             # end
             
@@ -1140,7 +1156,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             
             import k_sql
             x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
-            obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=request.args,vars={'data_filter':x_where}))
+            args=request.args if request else []
+            obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=[],vars={'data_filter':x_where}))
             #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
             #,_href,_target="frame",_title='',_class
             obj['value']=index_new
@@ -1278,7 +1295,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     new file name = {new_file_fullname}\n -------- \n {res1}\n -------- \n {res2}""")
             return new_file_fullname,msg
             #/compare
-        if 'rename_file' in request.vars:
+        if request and 'rename_file' in request.vars:
             new_file_fullname,msg=rename_file_in_form()
             obj['help']=msg
         #else:

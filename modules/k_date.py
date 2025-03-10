@@ -108,25 +108,32 @@ def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy/mm/dd',w_case=0):
     #x=datetime.date(2008, 6, 24).weekday() 0=monday,6=sunday
 def site_time():
     #=k_date.ir_date('yy/mm/dd-hh:gg:ss')}}-
+    import k_htm
+    from gluon.html import XML,URL,DIV
     ird=ir_date() #irdate
-    t0,t1,t2=ir_weekday(w_case=4)
+    wd_0,wd_1,wd_2=ir_weekday(w_case=4)
     xcs="class='btn btn-light mx-n1 px-2' style='background-color:#429bca;color:#fff'"
     xs1="style='color:#f55;'"#margin:3px
-    return f"""<h5 dir="lrt">
-                <i title='{t2}' {xs1}>{t1}</i>
-                 
+    
+    
+    """ """
+    inp_d=XML(f"""{ird["yy"]}/{ird["mm"]}/{ird["dd"]}""") #<i {xs1}></i>
+    dd=k_htm.a(inp_d,_target="box",reset=False,_href=URL('form','date_picker',),_class="" #,_style="font-family: BYekan;font-size:1.2em;hight=25px;"
+                    ,j_box_params="ajax_do='',ajax_val_set='',x_size='10cm;10cm'")
+    inp= f"""<h5>
+                <i title='{wd_2}' {xs1}>{wd_1}</i>
                 {ird["hh"]}:{ird["gg"]}
-                {ird["yy"]}/{ird["mm"]}/<i {xs1}>{ird["dd"]}</i> 
-                <h5>
+                {XML(dd)}</h5>
                 """
+    return (inp) #<i {xs1}>{dd}</i> {XML(dd)}ird["dd"] <div style="font-family: BYekan;font-size:15px;"  dir="lrt"> <div>
     return f"""
-                <a title='{t2}' {xcs}>{t1}</a>
+                <a title='{wd_2}' {xcs}>{wd_1}</a>
                 <a title='{ird["hh"]}:{ird["gg"]}:{ird["hh"]}' {xcs}>{ird["hh"]}:{ird["gg"]}</a>
                 <a title='{ird["yyyy"]}/{ird["mm"]}/{ird["dd"]}' {xcs}>{ird["dd"]}</a>
                 
                 """
     return f"""<div dir="rtl" class="row ">
-                <div title='{t2}' class='col  btn btn-light mx-auto p-1'>{t1}</div>
+                <div title='{wd_2}' class='col  btn btn-light mx-auto p-1'>{wd_1}</div>
                 <div title='{ird["hh"]}:{ird["gg"]}:{ird["hh"]}' class='col  btn btn-light mx-0 p-1'>{ird["hh"]}:{ird["gg"]}</div>
                 <div title='{ird["yyyy"]}/{ird["mm"]}/{ird["dd"]}' class='col  btn btn-light mx-0 p-1'>{ird["dd"]}</div>
                 
@@ -175,24 +182,26 @@ def tatil_mode(x_date,out_case='num'):
     ids=ir_date_split(x_date,x_mode='str')
     a_tatil={
         'all':'0101,0102,0103,0104,0112,0113,0314,0315,1122,1229,1230',
-        '1403':'0122,0123,0215,0328,0405,0425,0426,0604,0612,0614,0622,0631,0915,1025,1109,1126',
+        '1403':'0113,0122,0123,0215,0328,0405,0425,0426,0604,0612,0614,0622,0631,0915,1025,1109,1126',
+        '1404':'0102,0111,0112,0204,0316,0324,0414,0415,0523,0531,0602,0610,0619,0903,1013,1027,1115,1220',
     }
     b_tatil={
         '1403':'0302,0303,0507,0518,0925,0926,0927,1022,1120,1121,1123'
         #.split(','),
     }
     xx=ids['mm']+ids['dd']
+    yy=ids['yyyy']
     #print(str(ids) +" ---- " + xx )
     rr=0
     if iw==6:
         rr= 1
-    elif (xx in a_tatil['all']) or (xx in a_tatil['1403']):
+    elif (xx in a_tatil['all']) or ((yy in a_tatil) and (xx in a_tatil[yy])):
         rr= 2
-    elif (xx in b_tatil['1403']):
+    elif ((yy in b_tatil) and (xx in b_tatil[yy])):
         rr= 3
     #print(str(ids) +" ---- " + xx + " *** " + str(rr) )
     if out_case=='color':
-        return ['#efe','#f00','#fa5','#f5a'][rr]
+        return ['#efe','#f00','#a22','#faa'][rr]
     else:
         return rr
     #yy,mm,dd

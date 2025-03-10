@@ -59,12 +59,12 @@
 <!--j_box -->	
 <div id="output">
 	<div id="j_box_light" class="j_box_white_content " onkeydown="key_x(event);"> 
-		<div class="header">
+		<div id="j_box_light_header" class="header">
 			<a href = "javascript:void(0)" title = "Close" class = "btn btn-danger" onclick = "j_box_hide()" >X</a> - 
-			<a href = "javascript:void(0)" title = "set win size to 50%" class = "btn btn-primary" onclick = "win_set_size50()">50%</a>
-			<a href = "javascript:void(0)" title = "set win size to 75%" class = "btn btn-primary hh1" onclick = "win_set_size75()">75%</a>
-			<a href = "javascript:void(0)" title = "set win size to 90%" class = "btn btn-xs btn-primary" onclick = "win_set_size('90')">90%</a>
-			<a href = "javascript:void(0)" title = "set win size to 100%" class = "btn btn-primary" onclick = "win_set_size100()">100%</a>
+			<a href = "javascript:void(0)" title = "set win size to 50%" class = "btn btn-primary btnsize" onclick = "win_set_size50()">50%</a>
+			<a href = "javascript:void(0)" title = "set win size to 75%" class = "btn btn-primary btnsize" onclick = "win_set_size75()">75%</a>
+			<a href = "javascript:void(0)" title = "set win size to 90%" class = "btn btn-primary btnsize" onclick = "win_set_size('90')">90%</a>
+			<a href = "javascript:void(0)" title = "set win size to 100%" class = "btn btn-primary btnsize" onclick = "win_set_size100()">100%</a>
 		</div>
 
 		<div id="j_box_subwin1_body" style="height:90%">
@@ -93,6 +93,7 @@
 	let x_reload
 	let x_ajax_do
 	let x_ajax_val_set
+	let x_submit
 	function j_box_show1(path) {
 		document.getElementById('j_box_light').style.display='block';
 		document.getElementById('j_box_fade').style.display='block'; 
@@ -129,26 +130,49 @@
 		console.log('x_ajax_val_set= ::'+x_ajax_val_set);
 		if (x_ajax_val_set!=''){
 			const x_sets = x_ajax_val_set.split(";");
+			let n_act=0
+			let n_len=x_sets.length;
+			
+			if (x_sets[n_len-1].trim()=='') {
+				//alert(x_sets[1]);
+				n_len-=1}
 			for (let i_set in x_sets) {
-				x_set=x_sets[i_set]
+				x_set = x_sets[i_set]
 				//console.log('x_set='+x_set);
+				// set 1 field value in base page by session
+				
 				const ov=x_set.split(",");
 				$.ajax({
 				  url: "{{=URL('form','get_session')}}"+"/"+ov[1],
 				  context: document.body
 				}).done(function(result) {
-					$('#'+ov[0]).val(result); 
+					if (result && result!='None'){
+						
+						$('#'+ov[0]).val(result); 
+						n_act+=1
+						if (n_act == n_len){
+							//alert("submit")
+							if (x_submit!=''){
+								document.getElementById(x_submit).submit();
+								}
+						} //else {alert(""+ n_len + " --- " + n_act +"--"+x_submit);						}
+					}
 				});
 			}
 			
 		}
+		/*if (x_submit!=''){
+			//alert(x_submit);
+			document.getElementById(x_submit).submit();
+		}*/
 	}
 	//iframe
-	function j_box_show(path,reload=false,ajax_do='',ajax_val_set='') {
+	function j_box_show(path,reload=false,ajax_do='',ajax_val_set='',x_size='',hide_menu=false,x_submit='') {
 		let f_loc=window.location.href;
 		
 		x_reload=reload  //reload page when hide jbox
 		x_ajax_do=ajax_do //
+		x_submit=x_submit
 		x_ajax_val_set=ajax_val_set // set html.objs.value by session value : text_list  of obj_id,value_name seperat by ; tehn by ,
 		// sample = 'obj_id1,value_name1;obj_id2,value_name2;...'
 		//alert('x_ajax_val_set='+x_ajax_val_set);
@@ -170,7 +194,14 @@
 		if ( $iframe.length ) {
 			$iframe.attr('src',path);
 		}
-		win_set_size('90');
+		if (x_size==''){
+			win_set_size('90');
+		} else {
+			win_set_size_x(x_size)
+		}
+		if (hide_menu==true){
+			document.getElementById('j_box_light_header').style.display = "none";
+		}
 	}
 	function win_set_size(prsent) {
 		xs=document.getElementById('j_box_light').style
@@ -195,6 +226,18 @@
 			xs.left='25%';
 			xs.top='25%';
 		}
+		document.getElementById('j_box_light').focus();
+		document.getElementById('j_box_light').click();
+	}
+	function win_set_size_x(x_size) {
+		xs=document.getElementById('j_box_light').style
+		const x_sizes = x_size.split(";");
+		
+		xs.width=x_sizes[0];
+		xs.height=x_sizes[1];
+		xs.top='0px';
+		xs.right='0px';
+		//alert(xs.width);
 		document.getElementById('j_box_light').focus();
 		document.getElementById('j_box_light').click();
 	}

@@ -545,16 +545,17 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     sel=TAG.SELECT(*opts,_id=_name,_name=_name,_style="width:100%;",_onchange=XML(_onchange),)
     ##import k_err
     ##k_err.xreport_var([vs,_dict,opts,sel])
+    div_style="float: left;width:100%"
     if _multiple:
         sel['_multiple']='multiple'#_multiple
         #print ("multiple"+str(_multiple))
     if can_add:sel['_class']="can_add"
     if not _title:
-        return DIV(sel)#,str(vs),type(vs),str("2" in vs))
+        return DIV(sel,_style=div_style)#,str(vs),type(vs),str("2" in vs))
     else:
         if _title=='#':_title=_name
         sel['_style']="width:90%;"
-        return DIV(LABEL(_title,_style="width:10%;"),sel)
+        return DIV(LABEL(_title,_style="width:10%;"),sel,_style=div_style)
 #----------------------------------------------------------------------------- 
 def select_x1(select_base_list,select_describ_list,onact_txt):
     '''
@@ -578,7 +579,7 @@ def select_x1(select_base_list,select_describ_list,onact_txt):
     else:
         h_code1=t1 +  "</select>" + "\n"
     return h_code1
-def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_dir="",j_box_params='""'):
+def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_dir="",j_box_params='""',_style=''):
     #debug
     #return A(txt,_title=_title,_class=_class,_href=_href,_target="")
     reset='true' if reset else 'false'
@@ -595,9 +596,9 @@ def a(txt,_href,_target="frame",_title='',_class='btn btn-primary',reset=True,_d
             }
         }
         """ % (_href,_href,reset,j_box_params)
-        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func,_dir=_dir ) #f"""j_box_show("{_href}",{reset})""") 
+        return A(txt,_title=_title,_class=_class,_href='javascript:void(0)',_onclick=js_func,_dir=_dir,_style=_style ) #f"""j_box_show("{_href}",{reset})""") 
     else:
-        return A(txt,_title=_title,_class=_class,_href=_href,_target=_target,_dir=_dir)
+        return A(txt,_title=_title,_class=_class,_href=_href,_target=_target,_dir=_dir,_style=_style)
 def xtd_div(td_list):#
     rep=""
     for td_obj in td_list:

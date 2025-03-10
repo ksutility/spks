@@ -172,7 +172,7 @@ x_data={
                 'cp_code':{'type':'text','title':'کد موضوع','len':'10','uniq':''},
                 'cp_name':{'type':'text','title':'نام کامل','len':'140','lang':'fa'},
                 'cp_name2':{'type':'text','title':'نام کامل 2 ','len':'140','lang':'fa'},
-                'sm_name':{'type':'text','title':'نام مختصر','len':'30','lang':'fa'},
+                'sm_name':{'type':'text','title':'نام مختصر','len':'40','lang':'fa'},
                 'alt_names':{'type':'text','title':'نام های متفرقه','len':'250','lang':'fa'},
                 'salimi':{'type':'text','title':'نام در سیستم مهندس سلیمی','len':'150','lang':'fa'},
                 'c2_prjs':{'type':'reference','width':'20','title':'زیر پروژه های مرتبط','ref':{'db':'a_sub_p','tb':'a','key':'{code2}','val':'{code2}-{name2}'},'prop':['multiple']},
@@ -878,9 +878,9 @@ x_data={
                 'user_man':{'type':'text','width':'60','title':'رئیس جلسه'},
                 'units':{'type':'select','title':'معاونت مرتبط','select':{'D':'design-طراحی','S':'supervition-نظارت','P':'plan - برنامه ریزی و توسعه','M':'Management - مدیریت','-':'نا مشخص'},'prop':['multiple']},
                 'mm_type':{'type':'select','title':'نوع جلسه','select':{'I':'Interior-داخلی','C':'Client-کارفرما','O':'OutSource - با برون سپارها'},'prop':['update']},
-                'c_prj_id':{'type':'reference','width':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
+                'c_prj_id':{'type':'reference','width':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update']},
                 'c_prj_txt':{'type':'auto-x','width':'70','ref':'c_prj_id'},
-                'prj_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{sm_name}','where':'id = "{c_prj_id}"'},'title':'نام مختصر پروژه'},
+                'prj_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'id = "{c_prj_id}"'},'title':'نام پروژه'},
                 'prj_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'id = "{c_prj_id}"'},'title':'کد پروژه','prop':['update']},
                 'code_sn':{'type':'index','len':'3','ref':{'db':'doc_mm','tb':'a','key':'{id}','val':'{code_sn}','where':"prj_code = '{prj_code}' AND mm_type = '{mm_type}'"},'title':'شماره','prop':['update'],'start':1},
                 'code':{'type':'auto','len':'8','auto':'aqrc-_mm-{{=date[:4]+date[5:7]+date[8:10] if date else "000000"}}-{{=str(id).zfill(4)}}-{mm_type}','title':'کد پشتیبان'},
@@ -892,7 +892,7 @@ x_data={
                 'todo':{'type':'f2f','len':'60','title':'اقدامات','ref':{'tb':'todo','show_cols':['p_sy','des','p_do','p_ch','dur']},},
                 'note':{'type':'f2f','len':'60','title':'مذاکرات','ref':{'tb':'note','show_cols':['p_sy','des']},},
                 'attch':{'type':'f2f','len':'60','title':'پیوستها','ref':{'tb':'attch','show_cols':['name','file_v','file_r']},'var_set':{'f_code':'code'}},
-                'abstr':{'type':'text','width':'60','title':'خلاصه جلسه'},
+                'abstr':{'type':'text','len':'1000','title':'خلاصه جلسه'},
             },
             'steps':{
                 'pre':{'tasks':'date,time_st,user_crt,user_man,units,mm_type,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,name','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -904,8 +904,9 @@ x_data={
                 'all':{'input':'des_1','view1':'name,date,time_st,user_crt,units,mm_type,c_prj_id,c_prj_txt','view2':'code,file_v,file_r'}
             },
             'cols_filter':{
-                '':'همه',
                 'date,time_st,mm_type,prj_name,prj_code,code_sn,name,stn_code,pos,todo,note,attch,file_r':'لیست 1',
+                '':'همه',
+                
             },
             'data_filter':{'':'همه',}
         },
@@ -929,7 +930,7 @@ x_data={
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
                 'p_sy':{'type':'text','len':'60','title':'اعلام'},
-                'des':{'type':'text','len':'250','title':'شرح اقدام'},
+                'des':{'type':'text','len':'1000','title':'شرح اقدام'},
                 'p_do':{'type':'text','len':'60','title':'انجام'},
                 'p_ch':{'type':'text','len':'60','title':'پیگیری'},
                 'dur':{'type':'text','len':'60','title':'زمان'},
@@ -1249,31 +1250,32 @@ x_data={
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
-                'date':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
-                'time_st':{'type':'time_c','title':'از ساعت','prop':['update'],'def_value':'07:00'},
-                'time_len':{'type':'time_t','title':'به مدت','time_inf':{'maxTime':"03:30"},'prop':['update'],'def_value':'0:30'},
-                'time_en':{'type':'auto','title':'تا ساعت','auto':'''{{import k_time}}{{=k_time.add(__objs__['time_st']['value'],__objs__['time_len']['value'])}}'''},
-                #'frd_modir':{'type':'reference','len':'5','title':'مدیر مربوطه','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
+                'date_st':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
+                'date_en':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
+                'date_len':{'type':'num','min':1,'max':30,'len':2,'lang':'fa','title':'تعداد روز'},
+                'm_type':{'type':'select','title':'نوع مرخصی','select':['استحقاقی','استعلاجی','بدون حقوق','استعلاجی بدون حقوق'],'add_empty_first':False,},
+                'tel_ezt':{'type':'text','title':'تلفن اضطراری','len':'13'},
+                'frd_jnshn':{'type':'user','title':'جانشین','prop':['show_full','un_free']},
                 'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
-                'des_0':{'type':'text','len':150,'lang':'fa','title':'توضیحات',},
-                'des_modir':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
-                'des_2':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
-                'des_off':{'type':'text','len':150,'lang':'fa','title':'توضیحات'},
+                'des_0':{'type':'text','len':150,'lang':'fa','title':'توضیح همکار',},
+                'des_jnshn':{'type':'text','len':150,'lang':'fa','title':'توضیح جانشین'},
+                'des_modir':{'type':'text','len':150,'lang':'fa','title':'توضیح مدیر'},
+                'des_off':{'type':'text','len':150,'lang':'fa','title':'توضیح اداری'},
             },
             'steps':{
-                's0':{'tasks':'frd_1,date,time_st,lable_1,time_len,time_en,frd_modir,des_0','xjobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's0':{'tasks':'frd_1,m_type,date_len,date_st,date_en,frd_jnshn,frd_modir,des_0','xjobs':'*','title':'ثبت فرم توسط درخواست کننده','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des_jnshn','xjobs':'#task#frd_jnshn','title':'تایید جانشین','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's2':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
                 's3':{'tasks':'des_off','xjobs':'off_ens','title':'تطابق با ساعت دستگاه و ثبت اطلاعات','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
                 'all':{'input':'frd_1,time_st,time_len,frd_modir,des_0','view1':'des_off','view2':'des_modir'}
             },
             'labels':{
-                'lable_1':'حداکثرمیزان مرخصی ساعتی مجاز 3:30 می باشد',
             },
             'cols_filter':{
-                '':'همه',
-                'frd_1,date,time_st,time_en,time_len,frd_modir':'جهت چاپ اداری',
+                'frd_1,m_type,date_len,date_st,date_en,frd_jnshn,frd_modir':'منتخب',
+                '':'همه', 
             },
             'data_filter': 
                 {'step_2_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',

@@ -26,7 +26,8 @@ xjob = 1 extra text for define users by:
 """              
 class USER_LOG():
     inf={}
-    def __init__(self,ip='',un='',xtime=''):
+    lu=[['un','ip','xtime','xpath']] #last used
+    def __init__(self,ip='',un='',xtime='',xpath=''):
         if ip:
             if not un:un=''
             if not ip in self.inf:
@@ -37,8 +38,13 @@ class USER_LOG():
                     self.inf[ip]['start']+= [xtime]
             self.inf[ip]['log_count']+=1     
             self.inf[ip]['last']=xtime   
+            #----------------- 031215
+            self.lu +=[[un,ip,xtime,xpath]]
     def report(self):
-        return (self.inf)
+        rpt=['un','start','log_count','last']
+        rp=[rpt]
+        rp+=[[ipx[x] for x in rpt] for ip,ipx in self.inf.items() ]
+        return (rp,self.lu)
 
 def load_user_inf():
     db1=DB1('user')
@@ -307,7 +313,7 @@ def how_is_connect(subject,shoud_login=True):
     xdate=k_date.ir_date('yymmdd')
     xtime=k_date.ir_date('hh:gg:ss')
     file_n=os.path.join("c:\\","temp",'user_log',f'{xdate}-{subject}-user_log.txt')
-    u_log=USER_LOG(ip=u_ip,un=current.session["username"],xtime=xtime)
+    u_log=USER_LOG(ip=u_ip,un=current.session["username"],xtime=xtime,xpath=current.request.env.path_info)
     log=f'{xtime} , {u_ip} , {current.session["username"]} , {current.request.url}'
     with open(file_n,"a",encoding='utf8') as f:
         f.writelines('\n'+log)

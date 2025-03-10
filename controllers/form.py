@@ -1255,6 +1255,95 @@ def search():
         #out+=["o_cols => "+str(o_cols)]
         out+=[f"where={where}"]
     return dict(x=DIV(*[DIV(x) for x in out]))
+#----------------------------------------------------------------------------------------------------------------
+def date_picker():
+    '''
+        goal 1=creat 1 persian calender table for select date
+        هدف = ساخت 1 جدول تقویم ایرانی برای 1 ماه برای انتخاب تقویم 
+        با نمایش روز های تعطیل در انواع مختلف
+        steps:
+            1:select category (select_cat)
+            2:select 1 data from select_cat
+        input:
+            url args:
+                1:session name for save out_text
+        output:
+            date:str
+                format = yyyy/mm/dd
+            save result in sesstion 
+    '''
+    
+    obj_name_x=request.args[0] if request.args else ''
+    text_app=request.vars['text_app']
+    # close and return result
+    if text_app and obj_name_x:
+        session[obj_name_x]=text_app
+        session[obj_name_x+'_wd']=request.vars['text_app_wd']
+        return 'j_box_iframe_win_close | '+text_app
+    # start pro
+    import k_htm,jdatetime,k_form,k_date,k_time
+    
+    today='14'+jdatetime.date.today().strftime('%y/%m/%d')
+    #print('today='+today)
+    yy_v=request.vars['yy_v'] or '1403' #jdatetime.date.today().strftime('%y')
+    yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
+    yy_n=int(yy_v)
+    mm_v=request.vars['mm_v'] or jdatetime.date.today().strftime('%m')
+    mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,add_empty_first=False,_onchange="submit();")
+    mm_n=int(mm_v)
+    #print(mm_n)
+    style="""<style>
+    div.hd {
+        background-color:#3e506b;
+        color:#fff;
+        text-align:center;
+    }
+    div.cl {
+        text-align:center;
+    }
+    </style>
+    """
+    mm_len=k_date.ir_mon_len(yy_n,mm_n)
+    date=k_date.st_date(yy_n,mm_n,1)
+    w0=k_date.ir_weekday(date,w_case=0)
+    td1=[['','']]*w0
+    tr=[[DIV(x,_class="hd") for x in ['ش','ی','د','س','چ','پ','ج']]]
+    #return f"{date}-{mm_len}-{w0}"
+    for x_ruz in range(1,mm_len+1):
+        date=k_date.st_date(yy_n,mm_n,x_ruz)
+        
+        style_add="border:3px solid #00f;" if date==today else ''
+        color=k_date.tatil_mode(date,out_case='color')
+        w0+=1
+        wd=k_date.ir_weekday(date,w_case=2)
+        td1+=[[BUTTON(x_ruz,_class="btn",_style=f"background-color:{color};"+style_add,
+                _onclick=f"""document.getElementById('text_app').value='{date}';
+                            document.getElementById('text_app_wd').value='{wd}';
+                """)
+            ,color]]
+        if divmod(w0, 7)[1]==0:
+            #print(str(td1))
+            tr+=[[DIV(x[0],_class="cl",_style=f"background-color:{x[1]}") for x in td1]]
+            td1=[]
+    if td1:
+        td1+=[['','']]*(7-len(td1))
+        tr+=[[DIV(x[0],_class="cl",_style=f"background-color:{x[1]}") for x in td1]]    
+    return dict(htm=DIV(XML(style),FORM(
+        TABLE(TR(TD(mm_obj),TD(yy_obj)),TR(TD(TABLE(tr),_colspan=2))), #_style="width:150px"
+        INPUT(_id='text_app',_name='text_app',_value='',_type='hidden',),#
+        INPUT(_id='text_app_wd',_name='text_app_wd',_value='',_type='hidden',),
+        ))
+    )
+    '''
+    return dict(style=XML(style),f=FORM(
+        yy_obj,mm_obj,TABLE(tr),
+        INPUT(_id='text_app',_name='text_app',_value='',_type='hidden',),#
+        INPUT(_id='text_app_wd',_name='text_app_wd',_value='',_type='hidden',),
+        )
+    )
+    '''
+    #date=x_mon+"/"+('00'+str(x_ruz+1))[-2:] 
+#----------------------------------------------------------------------------------------------------------------
 def ss_set():
     '''
         goal 1=creat sql by pick category then pick data
@@ -1362,7 +1451,7 @@ def ss_input_htm(db_name,tb_name,obj_name):
     TR(
         TD(INPUT(_id=obj_name+'_ttl',_readonly='readonly',_value=ss_ttl_val,_style='width:100%;',_title=ss_ttl_val),_style="width:90%"),
         TD(k_htm.a("*",_target="box",reset=False,_href=URL('ss_set',args=[db_name,tb_name,obj_name_x])
-            ,j_box_params=f"'','{obj_name}_val,{obj_name_x}_val;{obj_name}_ttl,{obj_name_x}_ttl'"),_style="width:10%"),
+            ,j_box_params=f"ajax_do='',ajax_val_set='{obj_name}_val,{obj_name_x}_val;{obj_name}_ttl,{obj_name_x}_ttl'"),_style="width:10%"),
         ),
     TR(TD(INPUT(_id=obj_name+'_val',_value=ss_val_val,_class="filter_menu",_style='width:100%;'),_colspan="2",_style='width:100%;')),
     #TR(TD(obj_name_x)),
@@ -1398,3 +1487,26 @@ def pivot():
     table=XML(k_file_x.pivot_make_free(tb2,set2,htm0=htm0))
     return table
     #return dict(table=)
+def prj_inf():
+    """
+    spks/form/prj_inf
+    """
+    
+    cprj_id=request.vars['cprj_id'] 
+    obj_inf={'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه جاری','prop':['update']}
+
+    #obj_inf={'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
+    x_data_verify_task('cprj_id',obj_inf,'','')
+    prj_obj=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])
+    _class="btn btn-primary"
+    nn=k_htm.a('نامه ها',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['paper','a'],vars={'data_filter':f'cprj_id={cprj_id}'})) if session["admin"] else 'نامه ها'
+    return dict(htm=FORM(prj_obj['input'],
+        nn,"-",
+        k_htm.a('صورتجلسه',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['doc_mm','a'],vars={'data_filter':f'c_prj_id={cprj_id}'})),"-",
+        k_htm.a('گزارش عملکرد',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['person_act','a'],vars={'data_filter':f'prj_id={cprj_id}'})),"-",
+        k_htm.a('ماموریت ساعتی',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['off_mamurit_saat','a'],
+            vars={'data_filter':f'(c_prj_id = {cprj_id}) OR (c_prj_id like "%,{cprj_id},%") OR (c_prj_id like "{cprj_id},%") OR (c_prj_id like "%,{cprj_id}")'})),"-",
+        DIV(cprj_id)
+        ))
+    
+    

@@ -1005,6 +1005,8 @@ def need_links():
     links+=[k_htm.a("همکاران قدیمی",_href=url,_target="",**prm)]
     url=URL('form','list_0_mr')
     links+=[k_htm.a("آمار فراداده ها",_href=url,_target="",**prm)]
+    links+=[k_htm.a("اطلاعات پروژه ها",_target="",**prm,_dir="ltr",
+                    _href=URL('form',"prj_inf"))]
     links+=['']
     rows=[links]
     if session["admin"]:
@@ -1012,10 +1014,13 @@ def need_links():
                     _href=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
                         'table_class':2,'data_page_n':1,'data_page_len':40})),
                 k_htm.a("p date",_target="",**prm,_dir="ltr",
-                    _href=URL('tmsh','date_picker')),
+                    _href=URL('form','date_picker')),
+                
         
             ]
-        rows+=[links+["","","",""]]
+        rows+=[links+["","","","",""]]
+    else:
+        rows+=[["","","","","","",""]]
     lnk,trs,f_l='','',''
     xx00={    
     "papers=>todo !=''":lnk+"""data/xtable/paper/a?data_filter=act_todo+%21%3D%22%22&cols_filter=&table_class=2&data_page_n=1&data_page_len=20""",
