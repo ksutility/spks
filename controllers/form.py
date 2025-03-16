@@ -1267,6 +1267,7 @@ def date_picker():
         input:
             url args:
                 1:session name for save out_text
+                2:def date in format yyyy-mm-dd
         output:
             date:str
                 format = yyyy/mm/dd
@@ -1284,11 +1285,12 @@ def date_picker():
     import k_htm,jdatetime,k_form,k_date,k_time
     
     today='14'+jdatetime.date.today().strftime('%y/%m/%d')
-    #print('today='+today)
-    yy_v=request.vars['yy_v'] or '1403' #jdatetime.date.today().strftime('%y')
+    def_date=request.args[1].replace("-",r"/") if (request.args and len(request.args)>1) else today
+    #print(f'today={today} - def_date= {def_date} - {def_date[:4]} - {def_date[5:7]}')
+    yy_v=request.vars['yy_v'] or def_date[:4] #'1403' #jdatetime.date.today().strftime('%y')
     yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
     yy_n=int(yy_v)
-    mm_v=request.vars['mm_v'] or jdatetime.date.today().strftime('%m')
+    mm_v=request.vars['mm_v'] or def_date[5:7] #jdatetime.date.today().strftime('%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,add_empty_first=False,_onchange="submit();")
     mm_n=int(mm_v)
     #print(mm_n)
@@ -1312,7 +1314,7 @@ def date_picker():
     for x_ruz in range(1,mm_len+1):
         date=k_date.st_date(yy_n,mm_n,x_ruz)
         
-        style_add="border:3px solid #00f;" if date==today else ''
+        style_add="border:3px solid #00f;" if date==today else "border:3px solid #0f0;" if date==def_date else''
         color=k_date.tatil_mode(date,out_case='color')
         w0+=1
         wd=k_date.ir_weekday(date,w_case=2)
@@ -1327,9 +1329,28 @@ def date_picker():
             td1=[]
     if td1:
         td1+=[['','']]*(7-len(td1))
-        tr+=[[DIV(x[0],_class="cl",_style=f"background-color:{x[1]}") for x in td1]]    
+        tr+=[[DIV(x[0],_class="cl",_style=f"background-color:{x[1]}") for x in td1]]
+    mm_c=k_htm.a('=',_target="",_href =URL(f='date_picker',args=[obj_name_x]),_title='ماه جاری',_class="",_style="font-size=1.5em;font-family:tahoma;")
+    def mm_a_b(yy_v,mm_v):
+        '''
+            a=after
+            b=befor
+            find after & befor month od 1 date (yy_v,mm_v)
+        '''
+        yy=int(yy_v)
+        mm=int(mm_v)
+        mmx=yy*12+mm
+        mm_b=list(divmod(mmx-2,12))
+        mm_b[1]+=1
+        mm_a=list(divmod(mmx,12))
+        mm_a[1]+=1
+        return f'{mm_b[0]}-{mm_b[1]:02d}-00',f'{mm_a[0]}-{mm_a[1]:02d}-00'
+    mm_b_date,mm_a_date=mm_a_b(yy_v,mm_v)
+    #print(f'{mm_b_date}---{mm_a_date}')
+    mm_b=k_htm.a('>',_target="",_href =URL(f='date_picker',args=[obj_name_x,mm_b_date]),_title='ماه قبل',_class="btn")
+    mm_a=k_htm.a('<',_target="",_href =URL(f='date_picker',args=[obj_name_x,mm_a_date]),_title='ماه بعد',_class="btn")
     return dict(htm=DIV(XML(style),FORM(
-        TABLE(TR(TD(mm_obj),TD(yy_obj)),TR(TD(TABLE(tr),_colspan=2))), #_style="width:150px"
+        TABLE(TR(TD(mm_a),TD(mm_c),TD(mm_obj),TD(yy_obj),TD(mm_b)),TR(TD(TABLE(tr),_colspan=5))), #_style="width:150px"
         INPUT(_id='text_app',_name='text_app',_value='',_type='hidden',),#
         INPUT(_id='text_app_wd',_name='text_app_wd',_value='',_type='hidden',),
         ))
@@ -1499,7 +1520,7 @@ def prj_inf():
     x_data_verify_task('cprj_id',obj_inf,'','')
     prj_obj=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])
     _class="btn btn-primary"
-    nn=k_htm.a('نامه ها',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['paper','a'],vars={'data_filter':f'cprj_id={cprj_id}'})) if session["admin"] else 'نامه ها'
+    nn=k_htm.a('نامه ها',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['paper','a'],vars={'data_filter':f'cprj_id={cprj_id}'})) if (session["admin"] or session["username"]=='ks') else 'نامه ها'
     return dict(htm=FORM(prj_obj['input'],
         nn,"-",
         k_htm.a('صورتجلسه',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['doc_mm','a'],vars={'data_filter':f'c_prj_id={cprj_id}'})),"-",

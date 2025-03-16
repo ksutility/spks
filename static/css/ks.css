@@ -72,7 +72,9 @@ table th a{
 .table0 td,.table0 th {
     border: 1px solid #ddd;
     padding: 0px; }
-.table0 tr:nth-child(even){background-color: #f2f2f2;}	
+.table0 tr:nth-child(even){
+	background-color: #f2f2f2;
+	color:#222;}	
 
 .table0 td,.table0 th {
     font-size: 12px;
@@ -84,6 +86,7 @@ table th a{
     }
 .table0 tr:hover {
     background-color: #fffcaa;
+	color:#111;
     }
 .table0 th {
 	height:15px;

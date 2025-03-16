@@ -18,20 +18,23 @@ def _isok_un_ps (un,ps):
     #output		if un and ps is ok	=>	true
     #			else				=>	false
     # tavjoh natige in barname dakhel 2 session ("username","user_fullname") garar migirad ke khali budan anha neshaney adam vorud kamel mibashad
-    r1,fullname,rs=_user_chek_ps_get_Inf(un,ps)
+    import k_user
+    r1,fullname,rs=k_user.user_chek_ps_get_Inf(un,ps)
     if r1:
         session["user_fullname"]= fullname
         session["username"]=un.lower()
-        session["admin"]=False 
+        if session["username"] in ['admin','ks']:
+            session["admin"]=True
+            session["auth_prj"]="*"
+        else:
+            session["admin"]=False 
         session["file_access"]=rs["file_access"]
         session["my_folder"]=[f';{rs["eng"].strip()}-{rs["un"].strip()};',f';user;{rs["un"].strip()};']
         session["auth_prj"]=rs["auth_prj"]
-        import k_user
+        
         session["pass_is_safe"]=k_user.pass_is_safe(ps)
         session["pass_is_safe"]=ps
-        if session["username"]=='ks':
-            session["admin"]=True
-            session["auth_prj"]="*"
+        
         #session["reports"]={}
         
         #Session.Timeout=15
@@ -47,22 +50,7 @@ def _isok_un_ps (un,ps):
         response.cookies["user_fullname"]=""
         return False
 #------------------------------------------------
-def _user_chek_ps_get_Inf (un,ps):#,fullname):-
-    #return result , fullname
-    if un=="admin" and ps==";,vasuhnjd" : return True,"admin"
-    import k_tools
-    if k_tools.server_is_test(): 
-        sql=db1.sql_set("","*","user",{'un': un } ,"")
-    else:
-        ps=f_cod(ps)
-        sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
-        
-    #- print ('sql='+sql)
-    rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
-    if rs:
-        return True, '{m_w} {name} {family}'.format(**rs),rs
-    else:
-        return False,False,False
+
 def _login_report(isok_un_ps):
     if isok_un_ps:
         #session["username"]=un

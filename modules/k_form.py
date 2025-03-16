@@ -796,6 +796,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
             this field info is show in ["auto"] item or in ["ref"] item
         '''
+        #xreport_var([i_obj,x_dic,obj,''])
         obj["value"]=obj['output_text']=_value #au_txt
         
         obj['output']=DIV(_value,_class="input_auto")
@@ -1051,6 +1052,16 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if 'show_full' in obj['prop']:obj['output']=obj['output_text']
         if 'input' in need:
             import k_htm
+            if 'add_x' in obj:
+                print('add_x')
+                if obj['add_x'][0]=='len':
+                    n_d={str(len(_select)):obj['add_x'][1]}
+                    print(str(n_d))
+                    if _select:
+                        _select.update(n_d)
+                    else:
+                        _select=n_d
+                xxxprint(msg=['add_x',str(n_d)])
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
                 ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
                 ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first'],
@@ -1059,7 +1070,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
         obj['help']=obj['title']
         if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" readonly style="background-color:#aaa">''')
-    #elif sc =='fdate':
+
         
     elif sc=='fdate': #sc
         import k_date
@@ -1077,7 +1088,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 _value=session[obj_name_x]  
                 session[obj_name_x]  =''
             inp=INPUT(_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange,_class="text-center")#_class='fDATE',
-            obj['input']=DIV(k_htm.a(inp,_target="box",reset=False,_href=URL('form','date_picker',args=[obj_name_x]),_class=""
+            obj['input']=DIV(k_htm.a(inp,_target="box",reset=False,_href=URL('form','date_picker',args=[obj_name_x,_value.replace(r"/","-")]),_class=""
                     ,j_box_params=f"ajax_do='',ajax_val_set='{obj_name},{obj_name_x};{obj_name}_wd,{obj_name_x}_wd;',x_size='10cm;10cm',x_submit='form1'")#,hide_menu=true
                     ,)
             

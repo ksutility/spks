@@ -296,7 +296,27 @@ def xjobs_inf(jobs,x_data_s,c_form=''):
     'inf':",".join(list(t_users))
     }     
     return xjobs
-
+def user_chek_ps_get_Inf (un,ps):#,fullname):-
+    #return result , fullname
+    if un=="admin" and ps==";,vasuhnjd$09377953310@ksutility" : return True,"admin",''
+    import k_tools
+    db1=DB1('user')
+    if k_tools.server_is_test(): 
+        sql=db1.sql_set("","*","user",{'un': un } ,"")
+    else:
+        ps=f_cod(ps)
+        sql=db1.sql_set("","*","user",{'un': un,'ps':ps } ,"")
+        
+    #- print ('sql='+sql)
+    rs=db1.select('user',sql,result='dict')#share.setting_dbFile1,sql)
+    if rs:
+        return True, '{m_w} {name} {family}'.format(**rs),rs
+    else:
+        return False,False,False
+def f_cod(s1, enc_st='09377953310'):
+    return s1
+    s2=enc_st*5
+    return "".join([chr(ord(c1) ^ ord(c2)) for (c1,c2) in zip(s1,s2)])
 #--------------------------------------------------------------- not used
 
 

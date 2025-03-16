@@ -866,11 +866,11 @@ def user_inf():
     rep=user_log.report()
 
     return dict(report=DIV(XML("<h3>logged Users inf:</h3><hr>"),
-        K_TABLE.creat_htm(rep[0][1:],rep[0][0],table_class='1'),
+        K_TABLE.creat_htm(rep[0][1:],rep[0][0],table_class='1',add_index=True),
         #C_TABLE(rep[0][0],rep[0][1:]).creat_htm(table_class='1'),
         #TABLE(rep[0],_class="table"),
         #HR(),
-        K_TABLE.creat_htm(rep[1][1:],rep[1][0],table_class='1')
+        K_TABLE.creat_htm(rep[1][1:],rep[1][0],table_class='1',add_index=True)
         #TABLE(rep[1],_class="table")
         ))# #str(BEAUTIFY(user_log.report()))))creat_htm
 def _xxprint_reset_html():

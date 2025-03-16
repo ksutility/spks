@@ -142,11 +142,15 @@ def site_time():
 def ir_date_split(in_time,in_format='yyyy/mm/dd',x_mode='int'):
     l=len(in_time)
     r_o={}
-    for x in ['yyyy','mm','dd']:
-        n=in_format.index(x)
-        xx=in_time[n:n+len(x)]
-        r_o[x]=int(xx) if x_mode=='int' else xx
-    return r_o
+    try:
+        for x in ['yyyy','mm','dd']:
+            n=in_format.index(x)
+            xx=in_time[n:n+len(x)]
+            r_o[x]=int(xx) if x_mode=='int' else xx
+        return r_o
+    except:
+        #if in_time==0 or field is empty
+        return {'yyyy':'0000','mm':'00','dd':'00'}
     
 class C_IR_DATE():
     def from_en_strptime(self,en_strptime,strptime_format='%m/%d/%y %H:%M:%S'):
