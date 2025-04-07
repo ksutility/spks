@@ -70,6 +70,7 @@ function smart_num_list_correct(in_smart_num_list) {
 //-----------------------------------------------------------------------------------------------------------------
 function index_key(obj_n,smart_num_list,def,can_omit) {
 		var ss2 
+		//alert('smart_num_list='+smart_num_list)
 		ss2=smart_num_list_correct(smart_num_list);
 		obj=document.getElementById(obj_n);
 		var t=obj.value;

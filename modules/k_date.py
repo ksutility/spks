@@ -82,7 +82,8 @@ def out_in_format(dt_obj,out_format):
     return out_format
 
 #xprint (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
-def ir_weekday(in_time=jdatetime.date.today(),in_format='yyyy/mm/dd',w_case=0):
+def ir_weekday(in_time='14'+jdatetime.date.today().strftime('%y/%m/%d'),in_format='yyyy/mm/dd',w_case=0):
+    if not in_time or in_time=='0':return ''
     import datetime
     if type(in_time)==tuple:
         in_time=jdatetime.date(in_time)

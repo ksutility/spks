@@ -1088,13 +1088,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 _value=session[obj_name_x]  
                 session[obj_name_x]  =''
             inp=INPUT(_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange,_class="text-center")#_class='fDATE',
+            hazf=A('X',_title="حذف تاریخ",_id="fdate_reset",_onclick=f"document.getElementById('{_name}').value='0';;",_class="btn btn-warning") if 'hazf' in obj['prop'] else ''
             obj['input']=DIV(k_htm.a(inp,_target="box",reset=False,_href=URL('form','date_picker',args=[obj_name_x,_value.replace(r"/","-")]),_class=""
                     ,j_box_params=f"ajax_do='',ajax_val_set='{obj_name},{obj_name_x};{obj_name}_wd,{obj_name_x}_wd;',x_size='10cm;10cm',x_submit='form1'")#,hide_menu=true
-                    ,)
+                    ,hazf)
             
             '''
             obj['input']=DIV(INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange),
                 A('X',_title="حذف تاریخ",_id="fdate_reset",_onclick="this.previousSibling.value='0';",_class="btn btn-warning"))
+                this.previousSibling.children[1].value='0';
             '''
         wd=k_date.ir_weekday(_value,w_case=2)
         obj['help']=INPUT(_name=_name+'_wd',_id=_name+'_wd',_value=wd,_readonly=readonly,_class="text-center",_style="background-color:#ccc;border:0px;width:100%;") #DIV() #obj['format'],_dir='ltr')
@@ -1134,6 +1136,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #x_auto()    
     elif sc=="index": #sc
         if 'input' in need:
+            '''
+            از قبل مقدار دارد
+                بررسی درست بودن مقدار
+                
+            از قبل مقدار ندارد
+            
+            '''
             # start - 031107 - حذف اطلاعات فرم جاری از داخل لیست جستجو شده
             ref=obj['ref']
             if not xid and c_form:
@@ -1141,36 +1150,46 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #ref['where']=ref['where'] + " AND id !=" +xid if 'where' in ref else "id !="+xid
             # end
             
-            x_dt,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
-            if not x_dt and 'def_value' in obj and obj['def_value']:
-                index_new=obj['def_value']
-                index_hlp=obj['def_value']
-            else:     
-                x_list=[x_dt[x] for x in x_dt if x_dt[x]]
-                from k_num import SMART_NUM_LIST
-                smart_num_list=SMART_NUM_LIST(x_list)
-                    
-                #if def_val=="" : 
-                start=obj.get('start',0)
+            # start - 031225 - تهیه 1 راهنما از لیست موارد وارد شده با لینک به
+            x_data,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
+            index_hlp=''
+            from k_num import SMART_NUM_LIST
+            x_list=[x_data[x] for x in x_data if x_data[x]]
+            smart_num_list=SMART_NUM_LIST(x_list)
+            if x_data:
+                import k_sql
+                x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
+                args=request.args if request else []
                 index_hlp=str(smart_num_list)
-                #snm=smart_num_list.copy()
-                index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
+                obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=[],vars={'data_filter':x_where}))
+                #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
+                #,_href,_target="frame",_title='',_class
                 
-            
-                #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
-                #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
+            # end 
+                
+                
+            if _value: #از قبل مقدار دارد
+                index_new=_value
+            else : #از قبل مقدار ندارد
+
+                if not x_data and 'def_value' in obj and obj['def_value']:  # اگر هیچ موردی وجود ندارد
+                    index_new=obj['def_value']
+                else:      
+                    #if def_val=="" : 
+                    start=obj.get('start',0)
+                    
+                    #snm=smart_num_list.copy()
+                    index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
+
+                    #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
+                    #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
 
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
             
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
             
             
-            import k_sql
-            x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
-            args=request.args if request else []
-            obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=[],vars={'data_filter':x_where}))
-            #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
-            #,_href,_target="frame",_title='',_class
+            
             obj['value']=index_new
             #xreport_var([{'obj':obj}])
         #else:
@@ -1607,7 +1626,7 @@ class C_FORM():
     def f_nxt_u(self):
         import k_user
         f_nxt_s=self.f_nxt_s #self.all_data['f_nxt_s'] #tas
-        if not f_nxt_s or f_nxt_s=='-': return '' 
+        if not f_nxt_s or f_nxt_s=='-': return 'y' 
         step_x_ap=f'step_{f_nxt_s}_ap'
         last_text_app=self.all_data.get(step_x_ap,'')
         self.last_text_app =last_text_app

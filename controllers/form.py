@@ -894,6 +894,10 @@ def xtable():
     
     filter_data=["AND",c_filter.data_filter_obj["value"]]+c_filter.data_filter_x
     if auth.where:filter_data+=[auth.where]#__where__list__
+    '''
+        auth.where='cp_code NOT LIKE "AQRC%"'
+            نکته این شرط باعث حذف شدن فیلدهاییتکمیل نشده هم می شود
+    '''
     order=c_filter.data_sort["value"] or x_data_s['order']
     x_select=db1.select(table=tb_name,where=filter_data,result='dict_x',page_n=request.vars['data_page_n'],page_len=request.vars['data_page_len'],order=order)
     #xxxprint(out_case=3, msg=["filter_data",filter_data,""],vals={'filter_data':filter_data,"session['auth_prj']":session['auth_prj'],'sql':x_select["sql"]})

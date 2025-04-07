@@ -560,7 +560,7 @@ x_data={
                 
                 'job':{'type':'text','title':'سمت','len':'50'},#,'ref':{'db':'user','tb':'job','key':'id','val':'{id}{name}'}
                 'p_id':{'type':'num','len':4,'lang':'fa','title':'شماره پرسنلی','uniq':''},
-                'end':{'type':'fdate','title':'تاریخ خاتمه کار'},
+                'end':{'type':'fdate','title':'تاریخ خاتمه کار','prop':['hazf']},
                 'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی'},
                 'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'شناسنامه','auth':'dccm,#task#un,off_ens'},
                 'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,jpg",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی','auth':'dccm,#task#un,off_ens'},
@@ -698,13 +698,17 @@ x_data={
                 'doc_t':{'type':'reference','width':'5','title':'نوع مدرک','ref':{'db':'a_doc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'doc_t_name':{'type':'auto','len':'50','auto':"{{=__objs__['doc_t']['output_text'][3:]}}",'title':'نام نوع مدرک'},
                 'doc_p_code':{'type':'auto','len':'24','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}','title':'پیش کد مدرک'},
-                'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':''},
-                'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},               
+                'doc_srl_code':{'type':'text','len':'4','lang':'en','title':'کد سریال مدرک','uniq':'doc_p_code=`{doc_p_code}`'},
+                'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},
+                'doc_a_code':{'type':'auto','len':'50','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
+                'doc_rec':{'type':'f2f','len':'60','title':'سوابق','ref':{'db':'doc_rec','tb':'a','show_cols':['rev','date']},
+                    'var_set':{'prj':'prj','sub_p':'sub_p','step':'step','dspln':'dspln','doc_t':'doc_t','doc_srl_code':'doc_srl_code'}},
             },
             'steps':{
                 'pre':{'tasks':'prj,prj_name,sub_p,sub_p_name,step_x1,step_x2,step,step_name,dspln,dspln_name,doc_t,doc_t_name','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'doc_p_code,doc_srl_code','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'doc_srl_name','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
+                's2':{'tasks':'doc_srl_name,doc_a_code','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'doc_rec','xjobs':'dccm','title':'ط','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'all':{'input':'prj,sub_p,step,dspln,doc_t,doc_srl_code,doc_srl_name','view1':'','view2':''},
@@ -752,7 +756,7 @@ x_data={
             'base':{'mode':'form','title':'مرکز کنترل مدارک - DCC','help':'document_record','code':'402'
             },
             'tasks':{
-                'f2f_id':{'type':'reference','title':'فرم مبنا','ref':{'db':'doc_num','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
+                'f2f_id':{'type':'reference','title':'فرم مبنا','ref':{'db':'doc_num','tb':'a','key':'{id}','val':'{doc_a_code}-{doc_srl_name}'},},#'prop':['readonly']
                 'prj':{'type':'reference','width':'5','title':'پروژه','ref':{'db':'doc_num','tb':'a','key':'{prj}','val':'{prj}-{prj_name}'},'prop':['update']},
                 'sub_p':{'type':'reference','width':'5','title':'زیر پروژه','ref':{'db':'doc_num','tb':'a','key':'{sub_p}','val':'{sub_p}-{sub_p_name}'
                     ,'where':'''prj = "{{=__objs__['prj']['value']}}"'''},'prop':['update']},
@@ -769,18 +773,28 @@ x_data={
                 'doc_a_code':{'type':'auto','len':'50','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
                 'rev':{'type':'index','len':'2','ref':{'db':'doc_rec','tb':'a','key':'{id}','val':'{rev}','where':'''doc_a_code = "{{=__objs__['doc_a_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
                 'date':{'type':'fdate','width':'10','title':'تاریخ مدرک','prop':['update']},
-                'file_edt':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"doc,docx,xls,xlsx,ppt,pptx,dwg,zip,rar",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت تغییر پذیر'},
-                'file_fix':{'type':'file','len':'40','file_name':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت ثابت'},
+                'f_code_r':{'type':'auto','len':'8','auto':'{prj}-{sub_p}-{step}-{dspln}-{doc_t}-{doc_srl_code}-{rev}-{{=date[2:4]+date[5:7]+date[8:10] if date else ""}}','title':'کد فایل'},
+                #'file_edt':{'type':'file','len':'40','file_name':'{f_code_r}','file_ext':"doc,docx,xls,xlsx,ppt,pptx,dwg,zip,rar",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت تغییر پذیر'},
+                #'file_fix':{'type':'file','len':'40','file_name':'{f_code_r}','file_ext':"pdf,gif,jpg,jpeg,png",'path':'prj,{prj},{sub_p},{step},{dspln},{doc_t}','title':'فایل نهایی با فرمت ثابت'},
+                'file_b':{'type':'file_v','file_name':'{{=f_code_r}}-bas','title':'f_bas'},
+                'file_v':{'type':'file_v','file_name':'{{=f_code_r}}-vec','title':'f_vec'},
+                'file_r':{'type':'file_r','file_name':'{{=f_code_r}}-ras','title':'f_ras'},
+                'file_nx':{'type':'text','len':'240','title':'names','help':'سایر نام های فایل'},
                 'snd_ppr':{'type':'text','len':'240','title':'شماره نامه های ارسال فایل'},
             },
             'steps':{
-                'pre':{'tasks':'prj,sub_p,step,dspln,doc_t','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'doc_p_code,doc_srl_code,doc_srl_name','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'doc_a_code,rev,date','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'file_edt,file_fix','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
+                'pre':{'tasks':'f2f_id,prj,sub_p,step,dspln,doc_t,doc_p_code,doc_srl_code,doc_srl_name','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'doc_a_code,rev,date','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'f_code_r,lb_f_v,file_v,lb_f_r,file_r,lb_f_b,file_b','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'file_nx,snd_ppr','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'all':{'input':'prj,sub_p,step,dspln,doc_t','view1':'doc_p_code','view2':'doc_p_code'}
+            },
+            'labels':{
+                'lb_f_v':'vector - فایلهای قابل ویرایش ارسالی برای کارفرما',
+                'lb_f_r':'raster - فایلهای با فرمت ثابت ارسالی برای کارفرما',
+                'lb_f_b':'base - سایر اسناد پروژه که لازم نیست برای کارفرما فرستاده شود ولی برای مدیریت سوابق و یا اصلاحات احتمالی و ...  لازم می باشد',
             },
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
@@ -1753,12 +1767,12 @@ def x_data_verify_task(obj_name,obj,db,tb):
     '''
     if obj['type']=='file_v':
         obj['type']='file'
-        set_if_ns(obj,{'file_ext':"mm,md,ksm,txt,doc,docx,xls,xlsx,zip,rar,7z,dwg",
+        set_if_ns(obj,{'file_ext':"mm,md,ksm,txt,doc,docx,xls,xlsx,ppt,pptx,zip,rar,7z,dwg",
             'path':f'form,{db},{tb}',
             'len':'40'})
     elif obj['type']=='file_r':
         obj['type']='file'
-        set_if_ns(obj,{'file_ext':"pdf",
+        set_if_ns(obj,{'file_ext':"pdf,gif,jpg,jpeg,png",
             'path':f'form,{db},{tb}',
             'len':'40'})
     # ref        

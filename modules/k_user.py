@@ -415,6 +415,7 @@ class C_AUTH_FORM():
             این بخش بیشتر بر اساس دسترسی بر اساس پروژه تنظیم می شود
         '''
         from gluon import current
+        if current.session['admin']:return ''
         if 'auth_prj' in self.x_data_s['base']: # در صورت تعریف متغیر دسترسی بر حسب پروژه در قسمت مبنای دیکشنری اطلاعات فرم
             if not current.session['auth_prj']=="*": # در صورتی که فرد ادمین نباشد
                 auth_prj_n=self.x_data_s['base']['auth_prj'] #auth_prj_name
