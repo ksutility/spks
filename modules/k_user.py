@@ -23,7 +23,28 @@ xjob = 1 extra text for define users by:
     1 field of form :
     1 step of form :
     
-"""              
+"""   
+#=== pre func > begin ===================================================
+def pass_is_safe(x_pass):
+    if not x_pass: return False
+    if len(x_pass)<8: return False
+    
+    def eshterak(txt1,txt2):
+        res=''
+        for t in txt1:
+            if t in txt2:
+                res+=t
+        return res
+    #--------------------------
+    x_txts=[
+        '!@#$%^&*',
+        'abcdefghijklmnopqrstuvwxyz',
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        '0123456789']
+    for txt2 in x_txts:
+        if len(eshterak(x_pass,txt2))==0: return False
+    return True   
+#=== pre func > end ===================================================    
 class USER_LOG():
     inf={}
     lu=[['un','ip','xtime','xpath']] #last used
@@ -79,8 +100,9 @@ class ALL_USERS():
         self.inf=load_user_inf()
     def reset(self):  
         self.inf=load_user_inf()
-#a_users=load_user_inf()
+a_users=load_user_inf()
 #all_users=ALL_USERS()
+
 
 def jobs_load_inf():
     db1=DB1('job')
@@ -93,6 +115,11 @@ def jobs_load_inf():
     return jobs
 a_jobs=jobs_load_inf()
 
+def p_id_2_un(p_id):
+    for un in a_users:
+        if a_users[un]['p_id']==p_id:
+            return un,a_users[un]['user_fullname']
+    return '',''
 def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):###
     step_name=step_index
     form_sabt_data=c_form.form_sabt_data if c_form else {}
@@ -493,25 +520,7 @@ def creat_scr_pass():
     s1= sel(at)
     #s2=    
     return sel(at)+sel(ct)+"_"+sel(bt)+sel(bt)+sel(bt)+"-"+sel(dt)+sel(dt)+sel(dt)+sel(dt)+"-"+sel(bt)+sel(bt)+sel(bt)
-def pass_is_safe(x_pass):
-    if not x_pass: return False
-    if len(x_pass)<8: return False
-    
-    def eshterak(txt1,txt2):
-        res=''
-        for t in txt1:
-            if t in txt2:
-                res+=t
-        return res
-    #--------------------------
-    x_txts=[
-        '!@#$%^&*',
-        'abcdefghijklmnopqrstuvwxyz',
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        '0123456789']
-    for txt2 in x_txts:
-        if len(eshterak(x_pass,txt2))==0: return False
-    return True       
+       
 def pre_timesheet(x_un,x_mon):
     """
     x_mon=mmdd

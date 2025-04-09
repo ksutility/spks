@@ -997,18 +997,38 @@ def need_links():
     #AND end IS NULL
     #loc = 100
     prm={"_class":"btn btn-outline-primary text-center text-wrap rounded"}
-    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc LIKE "01%"','cols_filter':'name,family,tel_wrk,tel_mob',
-        'table_class':2,'data_page_n':1,'data_page_len':40})
-    links+=[k_htm.a("تلفن همکاران دفتر مرکزی",_href=url,_target="",**prm)]
-    url=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
-        'table_class':2,'data_page_n':1,'data_page_len':40})
-    links+=[k_htm.a("همکاران قدیمی",_href=url,_target="",**prm)]
-    url=URL('form','list_0_mr')
-    links+=[k_htm.a("آمار فراداده ها",_href=url,_target="",**prm)]
-    links+=[k_htm.a("اطلاعات پروژه ها",_target="",**prm,_dir="ltr",
-                    _href=URL('form',"prj_inf"))]
-    links+=['']
-    rows=[links]
+
+    rows=[
+        [
+            '',
+            [k_htm.a("تلفن همکاران دفتر مرکزی",_target="",**prm,
+                _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc LIKE "01%"','cols_filter':'name,family,tel_wrk,tel_mob',
+                        'table_class':2,'data_page_n':1,'data_page_len':40})         
+                )],
+            [k_htm.a("همکاران قدیمی",_target="",**prm,
+                _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
+                    'table_class':2,'data_page_n':1,'data_page_len':40})
+                )],
+            [k_htm.a("آمار فراداده ها",_target="",**prm
+                ,_href=URL('form','list_0_mr')
+                )],
+            [k_htm.a("اطلاعات پروژه ها",_target="",**prm,_dir="ltr",
+                        _href=URL('form',"prj_inf")
+                )],
+            '',
+        ],
+        [
+            '',
+            [k_htm.a("حاظران",_target="",**prm,_dir="ltr",
+                        _href=URL('tmsh',"hazeran")
+                )],
+            '',
+            '',
+            '',
+            '',
+        ]
+    ]
+    #rows=[links]
     if session["admin"]:
         links=[k_htm.a("papers=>todo !=''",_target="",**prm,_dir="ltr",
                     _href=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
