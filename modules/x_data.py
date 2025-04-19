@@ -810,6 +810,8 @@ x_data={
                 'hlp_des':{'type':'text','len':'150','title':'توضیح 1'},
                 'user_crt':{'type':'user','title':'تهیه کننده','prop':{'multiple'}},
                 'units':{'type':'select','title':'معاونت مرتبط','select':{'D':'design-طراحی','S':'supervition-نظارت','P':'plan - برنامه ریزی و توسعه','M':'Management - مدیریت','A':'All - کل شرکت ','-':'نا مشخص'},'prop':['multiple']},
+                'doc_type':{'type':'select','title':'نوع مدرک','select':{'FR':'فرم','IN':'دستورالعمل','CL':'چک لیست','WB':'نظام نامه یا سند'},'prop':['update'],'onchange':"document.getElementById('srl').value='';"},
+                'srl':{'type':'index','len':'3','start':1,'ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{srl}','where':'''doc_type = "{{=__objs__['doc_type']['value']}}"'''},'title':'سریال','prop':['update']},
                 'code':{'type':'text','len':'40','title':'کد مدرک'},
                 'f_code':{'type':'auto','len':'8','auto':'aqrc-tqm-{{=str(id).zfill(3)}}','title':'کد فایل'},
                 'inc_files':{'type':'f2f','width':'60','title':'فایل های ورودی','ref':{'db':'doc_tqm','tb':'inc_files','show_cols':['nn','file_inc_r']},'var_set':{'f_code':'f_code'}},
@@ -825,7 +827,7 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'name,user_crt,units,code,hlp_des,p_file_name','xjobs':'dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'f_code,inc_files,files','xjobs':'dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'f_code,inc_files,files,doc_type,srl','xjobs':'dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'des_2','xjobs':'dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             #file_inc_v,file_inc_r,file_1cr_v,file_1cr_r,file_2fr_v,file_2fr_r
             },
@@ -841,7 +843,7 @@ x_data={
             'tasks':{
                 'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
                 'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
-                'rev':{'type':'index','len':'2','ref':{'db':'doc_tqm','tb':'files','key':'{id}','val':'{rev}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
+                'rev':{'type':'index','start':0,'len':'2','ref':{'db':'doc_tqm','tb':'files','key':'{id}','val':'{rev}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
                 'date1':{'type':'fdate','title':'تاریخ تهیه سند اولیه','prop':['update']},
                 'date2':{'type':'fdate','title':'تاریخ تهیه سند فرمت شده','prop':['update']},
                 'f_code_r':{'type':'auto','len':'8','auto':'{f_code}-{rev}','title':'کد 2'},
@@ -867,14 +869,14 @@ x_data={
             'tasks':{
                 'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
                 'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
-                'nn':{'type':'index','len':'2','ref':{'db':'doc_tqm','tb':'inc_files','key':'{id}','val':'{nn}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'ایندکس','def_value':'01'},#,'prop':['readonly']
+                'nn':{'type':'index','len':'2','ref':{'db':'doc_tqm','tb':'inc_files','key':'{id}','val':'{nn}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'ایندکس','start':1},#,'prop':['readonly']
                 'user':{'type':'user','title':'جمع آوری','prop':['multiple']},
                 'date':{'type':'fdate','title':'تاریخ دریافت فایل','prop':['update']},
                 'f_code_r':{'type':'auto','len':'8','auto':"""{f_code}-inc-{{=__objs__['nn']['value']}}""",'title':'کد 2'},
                 'file_inc_v':{'type':'file','len':'40','file_name':'{f_code_r}-v','file_ext':"md,mm,doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'فایل ورودی'},
                 'file_inc_r':{'type':'file','len':'40','file_name':'{f_code_r}-inc-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf - فایل ورودی'},
-                'n_file_inc':{'type':'text','len':'40','title':'نام قبلی فایل'},
-                'des':{'type':'text','len':'60','title':'توضیحات'},
+                'n_file_inc':{'type':'text','len':'64','title':'نام قبلی فایل'},
+                'des':{'type':'text','len':'128','title':'توضیحات'},
                 
             },
             'steps':{
@@ -976,7 +978,7 @@ x_data={
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
                 'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
-                'nn':{'type':'index','len':'2','ref':{'where':'f_code = "{f_code}"'},'title':'شماره','def_value':'01','prop':['update']},
+                'nn':{'type':'index','len':'2','ref':{'where':'f_code = "{f_code}"'},'title':'شماره','start':1,'prop':['update']},
                 'f_code_r':{'type':'auto','len':'8','auto':'{f_code}-att-{nn}','title':'کد 2'},
                 'name':{'type':'text','len':'60','title':'عنوان فایل'},
                 'per':{'type':'text','len':'20','title':'ارائه دهنده'},
@@ -1226,7 +1228,7 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_saat':{ #db
         'a':{
-            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','internet':True,'multi_app':{'1':['snr'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -1303,7 +1305,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'off_mamurit_saat':{ #db
         'a':{
-            'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203','internet':True,'multi_app':{'1':['rms'],'3':['mlk']},
+            'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203','internet':True,'multi_app':{'1':['snr'],'3':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},

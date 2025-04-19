@@ -774,8 +774,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     onact_txt,x_class='',''
     _n=f"name='{_name}' id='{_name}'" 
     _len=int(obj['len']) if 'len' in obj else 256
-    _value=(request.post_vars[_name] or request.vars[_name]) if request else ''
-    _value=_value or (str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else '') or (str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  '')
+    _value_0=request.post_vars[_name] if request else ''
+    _value_1=request.vars[_name] if request else ''
+    _value_2=str(x_dic[obj['name']]) if (obj['name'] in x_dic) and x_dic[obj['name']] else ''
+    _value_3=str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  ''
+    _value=_value_0 or _value_1 or _value_2 or _value_3
+    #(str(obj.get('value','') or obj.get('def_value','')) if 'input' in need else  '')
+    #print(f"780 = _value={_value}")
     #if '__val__' not in x_dic:x_dic['__val__']={}
     #x_dic['__val__'][obj['name']]=_value
     x_dic[obj['name']]=_value
@@ -1167,27 +1172,32 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 
             # end 
                 
-                
-            if _value: #از قبل مقدار دارد
-                index_new=_value
+            print(f"x0: _value_0={_value_0} ,_value_1={_value_1}")
+            if _value_1 and (not smart_num_list.child(_value_1)): #از قبل مقدار دارد  و مقدار آن در داخل لیست اعداد موجود نیست
+                index_new=_value_1
+                #print(f"x1- 1177 = _value={_value}")
             else : #از قبل مقدار ندارد
-
+                '''
                 if not x_data and 'def_value' in obj and obj['def_value']:  # اگر هیچ موردی وجود ندارد
                     index_new=obj['def_value']
+                    #print(f"x2- 1187 = _value={_value}")
                 else:      
                     #if def_val=="" : 
-                    start=obj.get('start',0)
+                    
                     
                     #snm=smart_num_list.copy()
-                    index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
-
-                    #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
-                    #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
+                '''
+                start=obj.get('start',0)   
+                index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
+                xxxprint(3,msg=[index_new,'',''],vals={'smart_num_list':str(smart_num_list)})
+                print(f"x3- 1190 = _value={_value}")
+                #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
+                #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
 
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
             
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
-            
+            print('xx')
             
             
             obj['value']=index_new

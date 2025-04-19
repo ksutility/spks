@@ -88,6 +88,22 @@ class SMART_NUM_LIST():
         for x in self.snls:
             l+=x[-1]-x[0]+1
         return l
+    def child(self,n):
+        '''
+        بررسی وجود عدد n در مجموعه اعداد 
+        check : is n in smart_list ?  =>
+            true: n is in smart_list
+            False: n not in smart_list
+        '''
+        if type(n)==str:n=int(n)
+        for ll in self.snls:
+            if len(ll)==1:
+                if n==ll[0]:
+                    return True
+            else:
+                if n>= ll[0] and n<= ll[1]:
+                    return True
+        return False
 #-------------------------------------------------
 #====================================================== not used ===========================================================================
 def limit_x (x_father,x,x_min,x_max):
