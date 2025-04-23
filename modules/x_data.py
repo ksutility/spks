@@ -337,6 +337,24 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
+    'a_clint':{ #db
+        'a':{
+            'base':{'mode':'form','title':'لیست کارفرمایان','code':'104'},
+            'tasks':{
+                'name':{'type':'text','title':'نام کارفرما'},
+                'des':{'type':'text','title':'توضیح'},
+            },
+            'steps':{
+                'pre':{'tasks':'name','xjobs':'dcc_prj','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                'inf':{'tasks':'des','xjobs':'dcc_prj','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'name','view1':'','view2':''}
+            },
+        }
+    },
+    
+    #--------------------------------------------------------------------
     #'eng'
     #--------------------------------------------------------------------
     'a_doc':{ #db
@@ -1105,8 +1123,7 @@ x_data={
                 'verify_note':{'type':'text','len':'40','title':'توضیحات بررسی کننده'},
                 'des':{'type':'text','len':'250','title':'توضیح'},
                 'n_contr':{'type':'text','len':'40','title':'شماره قرارداد'},
-                'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
-                'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
+                
                 'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ اولیه','title_add':'مبلغ اولیه قرارداد بدون احتساب افزایش الحاقیه بر حسب میلیون تومان','auth':'dcc_prj'},
                 'price_se':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ نهایی','title_add':'مبلغ صورت وضعیت ارسالی بر حسب میلیون تومان'},
                 'date_lse':{'type':'fdate','title':'تاریخ آخرین صورت وضعیت ارسالی'},
@@ -1114,7 +1131,10 @@ x_data={
                 'prj_step1':{'type':'select','title':'وضعیت کلی','select':{'1':'پروپوزال','2':'در حال قرارداد','11':'جاری','21':'گذشته  و ناتمام مالی','31':'خاتمه کامل'}},
                 'price_off':{'type':'num','min':0,'max':100,'len':'6','title':'درصد تخفیف'},
                 'user_cord':{'type':'user','title':'مسئول هماهنگی','prop':{'multiple'}}, #cordinator
+                
                 'busn_name':{'type':'text','title':'عنوان تجاری','len':'80'},
+                'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge'},
+                'solution':{'type':'text','len':'240','title':'راهکار','help':'solution'},
                 'pos_link':{'type':'text','title':'لینک موقعیت','len':'80','link':{'target':'_blank','text':'G','class':'btn btn-info'},},
                 'ppr_name':{'type':'text','title':'عنوان مختصر در نامه ها','len':'80'},
                 'key_words':{'type':'text','title':'کلمات کلیدی','len':'120'},
@@ -1127,7 +1147,7 @@ x_data={
                 's1':{'tasks':'f_cnt_ppr,f_cnt,f_cnt_1p','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'verify_note,price,price_off','xjobs':'dccm','title':'تایید','app_keys':'','app_titls':'','oncomplete_act':'',
                     'start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False",},
-                'b':{'tasks':'busn_name,chlng,solution,pos_link,ppr_name,key_words,user_cord,f_busn_id,f_exe_pic,f_rndr','xjobs':'tqm_a','title':'فراداده ها','app_keys':'y','app_titls':'','oncomplete_act':'',
+                'b':{'tasks':'user_cord,busn_name,chlng,solution,pos_link,ppr_name,key_words,f_busn_id,f_exe_pic,f_rndr','xjobs':'tqm_a','title':'فراداده ها','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'b','auth':'tqm_a','start_where':"True",'end_where':"False"},
             },
             'views':{
@@ -1137,6 +1157,62 @@ x_data={
             'cols_filter':{
                 '':'همه',
                 'busn_name,chlng,solution,pos_link,ppr_name,key_words,user_cord,f_busn_id,f_exe_pic,f_rndr':'بررسی 1',
+                },
+            'data_filter':{'':'همه',}
+        }
+    },
+    #--------------------------------------------------------------------
+    'prj_shenasname':{ #db
+        'a':{
+            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'','code':'121','data_filter':'','multi_app':{'0':['ks'],'1':['ks']},
+            },
+            'tasks':{
+                'prj_name':{'type':'text','title':'نام پروژه','len':'150','height':'50px'},
+                'busn_name':{'type':'text','title':'عنوان تجاری','len':'80'},
+                'pos_txt':{'type':'text','title':'موقعیت جغرافیایی','len':'200'},
+                
+                
+                'date_st':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
+                'area':{'type':'num','min':1,'max':500000,'len':'6','title':'مساحت'},
+                'area_unit':{'type':'select','title':'واحد مساحت','select':['متر مربع','هکتار']},
+                'scale':{'type':'text','title':'مقیاس','len':'50'},
+                'prj_des':{'type':'text','title':'شرح مختصر','len':'1500','height':'100px'},
+                'goals':{'type':'text','title':'اهداف کلیدی','len':'1000','height':'75px'},
+                'prj_type':{'type':'text','title':'نوع پروژه','len':'50'},
+                'rslt_fin':{'type':'text','title':'دستاوردهای تجاری و اقتصادی','len':'1000','height':'75px'},
+                'rslt_aue':{'type':'text','title':'مزایای معماری، شهرسازی و محیط زیست','len':'1000','height':'75px'},
+                'rslt_out':{'type':'text','title':'نتیجه‌گیری و برنامه‌های آینده','len':'300'},
+                    
+                
+                'pos_link':{'type':'text','title':'لینک موقعیت','len':'80','link':{'target':'_blank','text':'G','class':'btn btn-info'},},
+                'ppr_name':{'type':'text','title':'عنوان مختصر در نامه ها','len':'80'},
+                'key_words':{'type':'text','title':'کلمات کلیدی','len':'120'},
+                
+                'clint_id':{'type':'reference','width':'5','title':'کد کارفرما','ref':{'db':'a_clint','tb':'a','key':'{id}','val':'{id}-{name}'},'prop':['update']},
+                'clint_txt':{'type':'auto-x','width':'70','ref':'clint_id','title':'کارفرما'},
+                
+                'f_busn_id':{'type':'file','auth':'dcc_prj','len':'40','title':'فایل شناسنامه تجاری','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-busn_id','file_ext':"pdf,zip",'path':'form,contract'},
+                'f_exe_pic':{'type':'file','auth':'dcc_prj','len':'40','title':'فایل تصاویر اجرایی','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-exe_pic','file_ext':"pdf,zip",'path':'form,contract'},
+                'f_rndr':{'type':'file','auth':'dcc_prj','len':'40','title':'فایل  رندر','file_name':'contract-{{=str(id).zfill(4)}}-{{=date[:4] if date else ""}}-rndr','file_ext':"pdf,zip",'path':'form,contract'},
+                
+                'chlng':{'type':'text','len':'240','title':'چالش','help':'challenge','height':'100px'},
+                'solution':{'type':'text','len':'240','title':'راهکار','help':'solution','height':'100px'},
+                'date_en':{'type':'fdate','len':'10','title':'تاریخ خاتمه','prop':[]},
+            },
+            'steps':{
+                'pre':{'tasks':'prj_name,busn_name,pos_txt','xjobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'date_st,area,area_unit,scale,prj_des,goals,prj_type,rslt_fin,rslt_aue,rslt_out,clint_id,clint_txt','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'chlng,solution','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'f_busn_id,f_exe_pic,f_rndr,pos_link','xjobs':'dccm','title':'تایید','app_keys':'','app_titls':'','oncomplete_act':'',
+                    'start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False",},
+                'b':{'tasks':'chlng,solution,ppr_name,key_words','xjobs':'tqm_a','title':'فراداده ها','app_keys':'y','app_titls':'','oncomplete_act':'',
+                        'name':'b','auth':'tqm_a','start_where':"True",'end_where':"False"},
+            },
+            'views':{
+                '1':{'input':'prj_name','view1':'','view2':''},
+            },
+            'cols_filter':{
+                '':'همه',
                 },
             'data_filter':{'':'همه',}
         }

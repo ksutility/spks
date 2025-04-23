@@ -821,7 +821,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     au_txt=x_dt['__0__'] if x_dt else ''
             #_len=60 if len(au_txt)>60 else len(au_txt)+2
             if len(au_txt)>60:
-                obj['input']=XML(f"<textarea readonly class='input_auto' {_n} rows='2' style='width:100%'>{au_txt} </textarea>")
+                obj['input']=XML(f"<textarea readonly class='input_auto' {_n} rows='2' style='width:100%'>{au_txt}</textarea>")
             else:
                 obj['input']=XML(f"<input {_n} value='{au_txt}'  readonly class='input_auto'  style='width:100%'>" )#size='{_len}'
             if au_txt and au_txt=='***':
@@ -929,8 +929,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     <input type="text" {_n} {x_class} {_dir} {tt} {t_val} size="{_len}" maxlength="{_len}" style='width:100%' onkeyup="txt_key('{_name}',{_len});" {onact_txt} required {readonly}>''')
                 #if 'disabled' in obj:ix=XML(f"<INPUT name={obj['name']} id={obj['name']} value={obj['value']} style='width:100%' disabled>")
             else:   
+                height=obj['height'] if 'height' in obj else '25px'
                 obj['input']=XML(f'''
-                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%;height:25px;' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} > {_value} </textarea>''' )
+                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%;height:{height};' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} >{_value}</textarea>''' )
                 #style='width:100%'
             
             ##--------  
@@ -1172,7 +1173,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 
             # end 
                 
-            print(f"x0: _value_0={_value_0} ,_value_1={_value_1}")
+            #print(f"x0: _value_0={_value_0} ,_value_1={_value_1}")
             if _value_1 and (not smart_num_list.child(_value_1)): #از قبل مقدار دارد  و مقدار آن در داخل لیست اعداد موجود نیست
                 index_new=_value_1
                 #print(f"x1- 1177 = _value={_value}")

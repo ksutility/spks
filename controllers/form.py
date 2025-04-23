@@ -1291,8 +1291,8 @@ def date_picker():
     today='14'+jdatetime.date.today().strftime('%y/%m/%d')
     def_date=request.args[1].replace("-",r"/") if (request.args and len(request.args)>1) else today
     #print(f'today={today} - def_date= {def_date} - {def_date[:4]} - {def_date[5:7]}')
-    yy_v=request.vars['yy_v'] or def_date[:4] #'1403' #jdatetime.date.today().strftime('%y')
-    yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
+    yy_v=request.vars['yy_v'] or def_date[:4] or '1404' #'1403' #jdatetime.date.today().strftime('%y')
+    yy_obj=k_htm.select(_options=[str(x) for x in range(1350,1405)],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
     yy_n=int(yy_v)
     mm_v=request.vars['mm_v'] or def_date[5:7] #jdatetime.date.today().strftime('%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,add_empty_first=False,_onchange="submit();")
