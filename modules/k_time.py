@@ -26,6 +26,9 @@ class Cornometer():
             st=self.last
             self.last=en
             print ('{} {:.4f} : {:.4f} - {:.4f} , {} , msg = {}'.format(self.pre_text,en-st,st % 1000,en % 1000,self.name,msg))
+    def xreport(self):
+        return str(round((time.time()-self.start)*1000,1)) + ' : mili seconed' #.zfill(5)
+        
 class C_TIME():
     def __init__(self,txt_time="0:0"):
         xx=txt_time.split(":")

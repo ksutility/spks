@@ -997,30 +997,28 @@ def need_links():
     #AND end IS NULL
     #loc = 100
     prm={"_class":"btn btn-outline-primary text-center text-wrap rounded"}
-
+    prm1={"_target":"",**prm}
+    prm2={"_target":"","_dir":"ltr",**prm}
     rows=[
         [
             '',
-            [k_htm.a("تلفن همکاران دفتر مرکزی",_target="",**prm,
+            [k_htm.a("تلفن همکاران دفتر مرکزی",**prm1,
                 _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc LIKE "01%"','cols_filter':'name,family,tel_wrk,tel_mob',
                         'table_class':2,'data_page_n':1,'data_page_len':40})         
                 )],
-            [k_htm.a("همکاران قدیمی",_target="",**prm,
+            [k_htm.a("همکاران قدیمی",**prm1,
                 _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
                     'table_class':2,'data_page_n':1,'data_page_len':40})
                 )],
-            [k_htm.a("آمار فراداده ها",_target="",**prm
-                ,_href=URL('form','list_0_mr')
+            [k_htm.a("آمار فراداده ها",**prm1,_href=URL('form','list_0_mr')
                 )],
-            [k_htm.a("اطلاعات پروژه ها",_target="",**prm,_dir="ltr",
-                        _href=URL('form',"prj_inf")
+            [k_htm.a("اطلاعات پروژه ها",**prm2,_href=URL('form',"prj_inf")
                 )],
             '',
         ],
         [
             '',
-            [k_htm.a("حاظران",_target="",**prm,_dir="ltr",
-                        _href=URL('tmsh',"hazeran")
+            [k_htm.a("حاظران",**prm2,_href=URL('tmsh',"hazeran")
                 )],
             '',
             '',
@@ -1030,13 +1028,15 @@ def need_links():
     ]
     #rows=[links]
     if session["admin"]:
-        links=[k_htm.a("papers=>todo !=''",_target="",**prm,_dir="ltr",
+        links=[k_htm.a("papers=>todo !=''",**prm2,
                     _href=URL('data','xtable',args=['paper','a'],vars={'data_filter':"todo !=''",
                         'table_class':2,'data_page_n':1,'data_page_len':40})),
-                k_htm.a("p date",_target="",**prm,_dir="ltr",
-                    _href=URL('form','date_picker')),
-                
-        
+                k_htm.a("p date",**prm2,_href=URL('form','date_picker')),
+                k_htm.a("لیست فیلد های لینک شده",**prm2,_href=URL('data','rc',args=('find_linked_target_fields'))),
+                k_htm.a("ریست پسورد همکاران",**prm2, _href=URL('user','reset_password')),
+                k_htm.a("مشخصات و اطلاعات ارتباط",**prm2,_href=URL('data','inf')),
+                k_htm.a("همکاران وارد شده به سیستم",**prm2,_href=URL('data','user_inf')),
+
             ]
         rows+=[links+["","","","",""]]
     else:
@@ -1072,9 +1072,8 @@ def need_links():
         
         t2="<hr>"      
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
-        t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
-        t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
-        t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
+        
+        
         """
         t2=f"""<br><div class="row">
             <div class="col">

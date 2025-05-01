@@ -223,7 +223,7 @@ def get_table_filter(tasks,x_data_s):
             name=obj['name']
             name2=name+'-x'
             obj['onchange']=f"document.getElementById('{name}').value=document.getElementById('{name2}').value;"
-            x_data_verify_task(name2,obj)
+            x_data_verify_task(name2,obj,'','')
             obj['def_value']=request.vars.get(name2,obj['def_value'])
             val=request.vars.get(name,_val)
             if width:obj['width']=width
@@ -505,7 +505,7 @@ def xtable():
         return trs,new_titles,len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')   
         #from k_table import K_TABLE
         #table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
-        #return K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type=""),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
+        #return K_TABLE.creat_htm(trs,new_titles,table_class=table_class),len(rows),htm_table_filter #DIV(,_style='height:100%;overflow:auto;')
     
     def row_view(tb_name,tasks,f_views,x_data_s,xid): 
         '''
@@ -690,7 +690,7 @@ def xtable():
                 
                 from k_table import K_TABLE
                 table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
-                table1=K_TABLE.creat_htm(trs,new_titles,table_class=table_class,table_type="")
+                table1=K_TABLE.creat_htm(trs,new_titles,table_class=table_class)
                 
                 htm_head=DIV(TABLE(TR(  
                                     TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
@@ -811,9 +811,6 @@ def index():
               )
         t2="<hr>"      
         t2+='<br>'.join([f"<a href={links[x]} > {x} </a>" for x in links])  
-        t2+=f"<br><a href={URL('rc',args=('find_linked_target_fields'))}>لیست فیلد های لینک شده</a> "
-        t2+=f"<br><a href={URL('user','reset_password')}>ریست پسورد همکاران</a> "
-        t2+=f"<br><a href={URL('inf')}> مشخصات و اطلاعات ارتباط </a> "
         t2+=f"<br><a href={URL('user','test_password')}> بررسی امنیت پسوردها </a> "
         t2+=f"<br><a href={URL('form','test_ajax_set')}> تست فیلتر اکسترنال اطلاعات </a> "
         t2+=f"<br><a href={URL('form','report_sessions')}> session </a> "
@@ -838,7 +835,6 @@ def index():
         t1=DIV('-')
         t2="<hr>"
         
-    t2+=f"<br><a href={URL('user_inf')}>همکاران وارد شده به سیستم</a> "
     t2+=f"<br><a href={URL('km','test_pivot')}>گزارش پایوت از لیست گزارش عملکرد همکاران</a> "
     t2+=f"<br><a href={URL('km','test_mermaid')}>نمونه اجرای فایل با فرمت عروس دریایی mermaid</a> "
     
@@ -1196,6 +1192,7 @@ def rc():#run 1 command
         for i,row in enumerate(rows):
             #tds=get_table_row_view(row[0],row,titles,x_data_s['tasks'],select_cols,x_data_s)
             x_dic=dict(zip(titles,row))
+            x_dic0=x_dic.copy()
             xid=row[0]
             tds=[xid]
             for fn in x_data_s['tasks']:#select_cols:
@@ -1204,7 +1201,7 @@ def rc():#run 1 command
                 if fn in select_cols:
                     #import k_err
                     #k_err.xreport_var([i_obj,x_dic,x_obj])
-                    x_old=x_dic[fn]
+                    x_old=x_dic0[fn]
                     x_new=x_obj['value']
                     import k_tools
                     rep=''
@@ -1217,13 +1214,15 @@ def rc():#run 1 command
                             rep=db1.update_data(tb_name,{x_obj['name']:x_new},{'id':xid})
                         else:
                             rep='=> to do'
-                    tds+=[k_tools.var_compare(x_old,x_new)['msg'],rep]#output_text
+                    tds+=[x_old,x_new,k_tools.var_compare(x_old,x_new)['msg'],rep]#output_text
+                    #tds+=[x_old,x_new]
             trs+=[tds]
         from k_table import K_TABLE
         tit=[]
         for x in select_cols:
-            tit+=[x,x+"-rep"]
+            tit+=[x+"-old",x+"-new",x+"-comp",x+"-rep"]
         rep2=K_TABLE.creat_htm(trs,['id']+tit,table_class='1')
+        #rep2=K_TABLE.creat_htm(rows,titles,table_class='1')
         return dict(x=DIV(rep2))
     elif cmd=='copy_table_inf': 
         '''
@@ -1310,35 +1309,30 @@ def rc():#run 1 command
             بررسی اینکه چه فیلدهایی در چه جداولی (مقصد لینک) به اطلاعات یک فیلد در یک جدول (مبدا لینک) لینک هستند
             لینک هستند یعنی اگر فیلد مبدا تغییر کند فیلدهای مقصد متناضر با آن نیز باید تغییر کنند
         sample:
-            /spks/data/rc/find_linked_target_fields    
+            /spks/data/rc/find_linked_target_fields  
+            /spks/data/rc/find_linked_target_fields/db/tb
         inputs:
         -------
-            internal:dt
-                tb1:str
-                    base table name in db1
-                db1:str
+            args:
+                args[1] = db:str
                     base db name
+                args[2] = tb:str
+                    base table name in db
+ 
                 field1:str 
                     base field name
                 
         '''
-        dt={'db1':'a_sub_p','tb1':'a','field1':'*'}
-        trs=[]
-        i=0
-        for db,db_data in x_data.items():
-            for tb,tb_data in db_data.items():
-                for fld,fld_data in tb_data['tasks'].items():
-                    db_tb=db+","+tb
-                    if 'ref' in fld_data:
-                        i+=1
-                        ref=fld_data['ref']
-                        db_tb2=ref['db']+","+ref['tb']
-                        trs+=[[str(i),'ref',db_tb,fld,fld_data['type'],db_tb2,str(fld_data['ref'])]]
-                    if 'auto' in fld_data:
-                        i+=1
-                        trs+=[[str(i),'auto',db_tb,fld,fld_data['type'],'',str(fld_data['auto'])]]
+        args=request.args
+        #dt={'db1':'a_sub_p','tb1':'a','field1':'*'}
+        
+        target=args[1]+","+args[2]  if len(args)>2 else ""
+        from x_data import LINKED_TARGET_FIELDS
+        linked_target_fields=LINKED_TARGET_FIELDS()
+        
+        trs=linked_target_fields.find(target=target)#'a_prj,a')   
         from k_table import K_TABLE
-        rep=K_TABLE.creat_htm(trs,['i','r-a','db_tb1','fld','type','db_tb2','data'],table_class='1')
+        rep=K_TABLE.creat_htm(trs[1:],trs[0],table_class='1')
         return dict(x=DIV(rep))
 
     #return dict(table=TABLE(THEAD([rep[0]],_class="thead-light"),TBODY(rep[1:]),_class="table table-bordered table-hover"))  

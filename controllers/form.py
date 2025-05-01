@@ -27,9 +27,11 @@ import k_date
 import k_tools,k_user
 k_user.how_is_connect('form')
 from k_time import Cornometer
+cornometer=Cornometer("form")
 from k_tools import C_URL
 c_url=C_URL()
 now = k_date.ir_date('yy/mm/dd-hh:gg:ss')
+
 # import datetime
 # now = datetime.datetime.now().strftime("%H:%M:%S")
 
@@ -330,6 +332,9 @@ def xform_cg():
     json_data1['_']={x:y for x,y in json_data.items()} #__inf__
     json_data1['_labels']={x:y for x,y in x_data_s['labels'].items()}
     x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
+    
+    url1=str(URL('xform',args=request.args,vars=request.vars))
+    x_file1=x_file1.replace('link_server',url1) 
     if tmplt_fname[-8:]!='-st.html':
         json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
     
@@ -337,9 +342,9 @@ def xform_cg():
         #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
         
         #return x_file1
-        url1=str(URL('xform',args=request.args,vars=request.vars))
+        
         #print(url1)
-        x_file1=x_file1.replace('link_server',url1) 
+        
         x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
         script2=""" 
         document.getElementById('help_div').style.display = "none"
@@ -398,7 +403,8 @@ def _xform(out_items=['head','body','tools'],section=-1):
         htm_x=[y for x in out_items for y in htm_form[x]]
         json_data=htm_form['body_json']
     htm=DIV(FORM(*htm_x,_id="form1"),_dir="rtl")
-    link=A('نمایش فرم با فرمت استاندارد',_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
+    #k_htm.a('+upload File',_target="box"
+    link=k_htm.a('نمایش فرم با فرمت استاندارد',_target="blank",_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
         ,_class='btn btn-primary') if 'xform_cg_file' in x_data_s['base'] else ''
     #xreport_var([{'htm':htm}])
     return {'htm':htm,'json':json_data,'link':link}
@@ -764,7 +770,7 @@ def list_0():
     #x_data_cat=x_data.x_data_cat
     trsx={x:[] for x in x_data_cat}
     n=0
-    titels=['n','نام فرم','تعداد منتظر اقدام شما','تعداد کل',""]
+    titels=['n','','نام فرم','تعداد منتظر اقدام شما','تعداد کل',""]
     afi=k_tools.access_from_internet()
     
     for db_name,db_obj in x_data.items():
@@ -803,7 +809,8 @@ def list_0():
                         k_htm.a("A",_target="box",reset=False,_class=_class,_title="به روز رسانی فیلدهای اتوماتیک",
                             _href=URL("data","rc",args=["update_auto_filed",db_name,tb_name,"do-x"]
                                     ,vars={'select_cols':XML(','.join([x for x in tb_obj['tasks'] if tb_obj['tasks'][x]['type']=='auto']))}
-                                    ))
+                                    )),
+                        k_htm.a("L",_target="box",reset=False,_class=_class,_title="لیست فیلد های لینک شده",_href=URL('data','rc',args=['find_linked_target_fields',db_name,tb_name])),                                  
                     ]
                 tools+=[k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))]
                 tools=TABLE(TR([TD(x,_class="m-0 p-0 border-0") for x in tools]),_class="table m-0 p-0 ")
@@ -815,8 +822,8 @@ def list_0():
                     ]
                 tn= [DIV(n,_title=code)]  
                 tn1= [DIV(n1,_title=code)] 
-                trsx[xcat]+=[tn1+tx]
-                trsx["-"]+=[tn+tx]
+                trsx[xcat]+=[tn1+['']+tx]
+                trsx["-"]+=[tn+[db_name+","+tb_name]+tx]
  
     from k_table import K_TABLE
     # tt=['<div class="tab-content">']
@@ -930,7 +937,8 @@ def xtable():
         return dict(style=style1,script=scripts['table cell display'],
             table_filter=c_filter.htm,
             table_head=_xtable_head(x_data_s,x_select,nr,new_record_link),
-            table=table1,btm_mnu=btm_mnu)
+            table=table1,btm_mnu=btm_mnu
+            ,xtime=cornometer.xreport())
     elif c_url.ext=='xls':
         tt="\ufeff" # BOM
         #return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in [new_titles]+trs])
@@ -1292,7 +1300,7 @@ def date_picker():
     def_date=request.args[1].replace("-",r"/") if (request.args and len(request.args)>1) else today
     #print(f'today={today} - def_date= {def_date} - {def_date[:4]} - {def_date[5:7]}')
     yy_v=request.vars['yy_v'] or def_date[:4] or '1404' #'1403' #jdatetime.date.today().strftime('%y')
-    yy_obj=k_htm.select(_options=[str(x) for x in range(1350,1405)],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
+    yy_obj=k_htm.select(_options=[str(x) for x in range(1340,1405)],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
     yy_n=int(yy_v)
     mm_v=request.vars['mm_v'] or def_date[5:7] #jdatetime.date.today().strftime('%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,add_empty_first=False,_onchange="submit();")
