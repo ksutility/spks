@@ -201,6 +201,35 @@ def ajax_val_get():
     return {'val':'','msg':msg}    
       
 #--------------------
+def uniq_inf_show():
+    '''
+    1404/02
+    goal:
+        نمایش لیستی از مقادیر استفاده شده که دیگر نمی توان از آنها در فیلد یونیک استفاده کرد
+        show 1 html_page of used value in uniq field
+    test:
+        /spks/km/uniq_inf_show/test/a/txt?uniq_where=,uniq_value=,
+    '''
+    args=''
+    x_dic=''
+    n='1'
+    #try:
+    args=request.args
+    x_dic=request.vars
+    if len(args)>2:
+        x_data_s,db_name,tb_name,msg=get_init_data()
+        x_field=args[2]
+        uniq_value=x_dic['uniq_value'] #args[3]
+        uniq_where=x_dic['uniq_where']
+        db1=DB1(db_name)
+        is_uniq,like_list=db1.chek_uniq(tb_name,x_field,uniq_where=uniq_where,uniq_value=uniq_value)
+        #inf=TABLE(TR('uniq_where=',uniq_where,'uniq_value=',uniq_value),_class='table')
+        return dict(htm=DIV(TABLE(like_list,_class='table')))
+        #{'uniq':uniq_value if is_uniq else '','is_uniq':'Y' if is_uniq else '','like_list':like_list,'msg':str(x_dic)}
+    msg='shoud len(args)>2'
+    #except Exception as err:
+    msg='err='+n+"|"+str(err)
+    return msg
 def uniq_inf():
     '''
     goal:
@@ -1018,8 +1047,8 @@ def need_links():
         ],
         [
             '',
-            [k_htm.a("حاظران",**prm2,_href=URL('tmsh',"hazeran")
-                )],
+            #[k_htm.a("حاظران",**prm2,_href=URL('tmsh',"hazeran"))],
+            [k_htm.a("تصویر 360 درجه",**prm2,_href=URL('xfile',"image360"))],
             '',
             '',
             '',

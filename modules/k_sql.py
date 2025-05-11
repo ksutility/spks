@@ -527,15 +527,16 @@ class DB1():
             value=title+tt
             o1[c_t]={'value':value,'num':int(num),'title':title}
         return o1
-    def chek_uniq(self,tb_name,field_name,uniq_where,uniq_value):
+    def chek_uniq(self,tb_name,field_name,uniq_where='',uniq_value=''):
         '''
             بررسی اینکه مقدار داده شده در فیلد مشخص شده یکتا می باشد و خیر و ارائه یک لیست از موارد مشابه در آن فیلد
         '''
         if debug:xxxprint (msg=['param=','uniq_where:'+uniq_where,''],vals=locals())
-        if uniq_where: uniq_where=uniq_where.replace("`",'"')+ " AND " 
-        rows,titles,rows_num=self.select(tb_name,where=uniq_where + f'{field_name} like "%{uniq_value}%"')
+        uniq_where=(uniq_where.replace("`",'"') if uniq_where else '') + (f' AND {field_name} like "%{uniq_value}%"' if uniq_value else '')
+        rows,titles,rows_num=self.select(tb_name,where=uniq_where )
         like_list=[row[titles.index(field_name)] for row in rows]
         is_uniq=uniq_value not in like_list
+        #return uniq_where,uniq_where#
         return is_uniq,like_list
     def x_update(self,tb_name,where_dic,set_dic,report=''):
         if report:

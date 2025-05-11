@@ -533,7 +533,7 @@ def f_list():#file_browser=file.index
         xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win','mermaid':'read_mermaid','mermaid2':'read_mermaid'}
             #'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]
-        link_txt=link_txt[:50] if len(link_txt)>50 else link_txt
+        link_txt=link_txt[:100] if len(link_txt)>100 else link_txt
         if ext in xd:
             return A(link_txt,_href=URL('xfile',xd[ext],args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
         return link_download(x_file,link_txt,link_title)    

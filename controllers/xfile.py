@@ -201,15 +201,21 @@ def htm_head(print_mode=1):
         font-size: 18px;
         margin:2px;
     }   
-    pre {direction:ltr;}
+    pre {
+        direction:ltr;
+        padding:0px;
+        margin:5px;
+        }
     code {
       font-family: Consolas,"courier new";
-      color: crimson;
-      background-color: #f1f1f1;
-      padding: 2px;
+      color: #000;
+      background-color: #ccc;
+      display: block;
+      padding: 5px 5px 5px 5px;
       font-size: 14px;
+      
+      border-radius: 5px;
     }
-    
     </style>
     <script>
     $(document).ready(function(){
@@ -951,4 +957,5 @@ def test1():
     section.append('web2py is great. '*100)
     response.headers['Content-Type']='text/rtf'
     return q.dumps(doc)    
-            
+def image360():
+    return dict(x='')

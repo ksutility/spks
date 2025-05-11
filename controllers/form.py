@@ -1439,16 +1439,21 @@ def ss_set():
     result_ttl='"{}"{}"{}"'.format(sel1_ttl,sign,sel2_ttl)
     #result_val_htm=XML(f'<div name="result" id="result">{result}</div>')
 
-    return FORM(
+    return dict(htm=FORM(
                 DIV(
-                    DIV(sel1_o,_class="col-3"),
+                    DIV(sel1_o,_class="col-5"),
                     DIV(sign_o,_class="col-2"),
-                    DIV(sel2_o,_class="col-3"),
-                    BUTTON('ok',_class="btn btn-primary",_style='width:100%;height:30px;background-color:#5f5;',_onclick='fill_text_app()'),
-                    DIV(result_val,_id='result_val',_class="col-2"),
-                    DIV(result_ttl,_id='result_ttl',_class="col-2"),
-                    HR(),
-                    BUTTON('حذف فیلتر',_class="btn btn-primary",_style='width:100%;height:30px;background-color:#ff5;',_onclick='clear_text_app()'),
+                    DIV(sel2_o,_class="col-5"), 
+                    _class="row",_style='width:100%'),
+                HR(), 
+                DIV(    
+                    DIV(result_val,_id='result_val',_class="col-4"),
+                    DIV(result_ttl,_id='result_ttl',_class="col-5"),
+                    DIV(BUTTON('حذف فیلتر',_class="btn btn-primary",_style='width:30%;height:30px;background-color:#ff5;color:#f00;',_onclick='clear_text_app()'),_class="col-3"),
+                    _class="row",_style='width:100%'),
+                HR(), 
+                DIV(    
+                    BUTTON('ok',_class="btn btn-primary",_style='width:100%;height:30px;background-color:#5f5;color:#000;',_onclick='fill_text_app()'),
                     INPUT(_id='text_app_ttl',_name='text_app_ttl',_value='',_type='hidden',), 
                     INPUT(_id='text_app_val',_name='text_app_val',_value='',_type='hidden',),
                     _class="row",_style='width:100%;height:90%'),
@@ -1462,7 +1467,7 @@ def ss_set():
                         document.getElementById('text_app_ttl').value='#clear#';
                     }
                 """)    
-                ,_id="form5")
+                ,_id="form5"))
     #<input type="submit">
 def get_session():
     if not request.args: return "not request.args"

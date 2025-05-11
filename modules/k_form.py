@@ -785,7 +785,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     #x_dic['__val__'][obj['name']]=_value
     x_dic[obj['name']]=_value
     obj['value']=_value
-    obj['help']=''
+    #obj['help']= obj.get('help') + ' - '
+    obj_help_pre =[ obj.get('help','') ]
     obj['output']=_value 
     obj['output_text']=_value # output in simple text
     obj['input']=obj.get('input',_value ) # if read im prop
@@ -855,7 +856,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     #obj['help']=XML(f'''<div >{msg3}</div>''')
                     obj['help']=DIV(XML(msg3))
                     obj['help_txt']='change' if msg3 else ''
-             
+            if 'prop' in obj and 'report' in obj['prop']:
+                from k_err import xreport_var
+                xreport_var ([{
+                    'obj':obj,
+                    'x_dic':x_dic,
+                    'c_form':c_form
+                }])            
     #------------------------------------------------------------------------------------------------------------------
     def update_1_obj_in_table(set_dic,x_where=''):
         #saved_file_fullname,new_file_fullname)
@@ -971,7 +978,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #f''<input {_n} type='hidden' value='0'>
             #                    <input {_n} {o_txt} {checked} {onact_txt}>   ''')
         obj['data_json']=1 if checked else 0
-        obj['help'],or_v,js_ff_chek="","",""  #msg is define correct in top of select
+        #obj['help'],
+        or_v,js_ff_chek="","" # #msg is define correct in top of select
     elif sc in ["select","user","reference"]: #sc
         onact_txt=obj['onchange']
         if "update" in obj['prop'] : onact_txt+= form_update_set(form_update_set_param) 
@@ -1112,7 +1120,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
         if 'input' in need :
             obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_c",_required=True,_dir="ltr",_onchange=onchange)#_type="time"
-        obj['help']=''
+        #obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     elif sc=='time_t': #sc
         onchange= form_update_set(form_update_set_param) if "update" in obj['prop'] else ""
@@ -1122,7 +1130,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             _time_inf=obj['time_inf'] if 'time_inf' in obj else ''
             obj['input']=INPUT(_name=_name,_id=_name,_value=_value,_type="text",_class="timepicker_t",
                 _required=True,_dir="ltr",_time_inf=_time_inf,_maxtime=_maxtime,_update=update)#_type="time"
-        obj['help']=''
+        #obj['help']=''
         msg ,or_v,js_ff_chek="",'',''
     
     
@@ -1430,7 +1438,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         link_x1='"j_box_show' + ("_test" if share.ksf["debug_mode"]==0 else "" ) + f"('{path}');\"" #=> j_box_show('path') or j_box_show_test('path')
         obj['input']="<input type='hidden' " + n_set + " value=1 >" 
         obj['input']+="<a  href = 'javascript:void(0)' onclick=" + link_x1 + "> انجام شود</a>"
-        obj['help'],or_v,js_ff_chek="","",""  #'msg is define correct in top of select
+        #obj['help']
+        or_v,js_ff_chek="","" #,""  #'msg is define correct in top of select
     """
             elif md== "private":
         pass
@@ -1457,22 +1466,22 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             args=[template_parser(x,x_dic) for x in x_link['args']]
             vars={x:template_parser(x_link['vars'][x],x_dic) for x in x_link['vars']}
             #obj[r1]=XML(A(DIV(obj[r1],_href=URL(*p,args=tuple(args),vars=vars))))
-            show_link=URL(*p,args=tuple(args),vars=vars)
+            link_url=URL(*p,args=tuple(args),vars=vars)
         elif 'x_url' in x_link:
-            show_link=x_link['x_url']
+            link_url=x_link['x_url']
         elif r1=='output':
-            show_link=obj[r1]
+            link_url=obj[r1]
         else:
-            show_link=obj['value']
-        #obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=show_link,_onclick=f'j_box_show("{show_link}",false)' ))
-        text=''
+            link_url=obj['value']
+        #obj[r1]=XML(A(DIV(obj[r1]),_href='javascript:void(0)',_title=link_url,_onclick=f'j_box_show("{link_url}",false)' ))
+        icon_text=''
         _class=''
         reset=True
         if obj[r1]:
-            text=x_link['text'] if 'text' in x_link else obj[r1]
+            icon_text=x_link['icon_text'] if 'icon_text' in x_link else obj[r1]
             _class= x_link['class'] if 'class' in x_link else 'btn'
             reset=x_link['reset'] if 'reset' in x_link else reset
-        x_link=k_htm.a(text,show_link,target,_class=_class,reset=reset) if show_link else ''
+        x_link=k_htm.a(icon_text,link_url,target,_class=_class,reset=reset) if link_url else ''
         obj[r1]=x_link if r1=='output' else DIV(obj[r1],x_link)
       
     ##----------------------
@@ -1484,7 +1493,11 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     
     if '__objs__' not in x_dic:x_dic['__objs__']={}
     x_dic['__objs__'][obj['name']]=obj
-    
+    if 'uniq' in obj: #db_name,tb_name
+        #url = f'''/spks/km/uniq_inf.json/{db_name}/{tb_name}/{obj['name']}'''
+        #data = {'uniq_value':req_field,'uniq_where':x_data_s['tasks'][step_field]['uniq'],'url':url};
+        obj_help_pre+=[k_htm.a('list',_target="box",_href=URL('km','uniq_inf_show',args=(db_name,tb_name,obj['name']),vars={'uniq_where':obj['uniq']}))]       
+    obj['help']=TABLE(obj.get('help',''),*obj_help_pre)
     ##obj['js']=
     return obj #,cm.records()
     
@@ -1681,7 +1694,7 @@ class C_FORM():
                 continue
             if 'uniq' in x_data_s['tasks'][step_field]:
                 url = f'''/spks/km/uniq_inf.json/{x_data_s['base']['db_name']}/{x_data_s['base']['tb_name']}/{step_field}'''
-                data = {'uniq_value':req_field,'uniq_where':x_data_s['tasks'][step_field]['uniq']};
+                data = {'uniq_value':req_field,'uniq_where':x_data_s['tasks'][step_field]['uniq'],'url':url};
             vv[step_field]=(lambda x:','.join(x) if type(x)==list else (x or " ").strip())(new_data[step_field]) if not reset else ''
         #c_form=k_form.C_FORM(x_data_s,xid,vv)
         self.__set_new_data(vv)
