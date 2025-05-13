@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+
+<input type="checkbox" class="a1" id="checkAll" style="width: 50px;height: 30px;margin: 0px;color:#hca;background color:#a00;"> انتخاب همه
+<script>
+	$("#checkAll").click(function(){
+		$('input:checkbox').not(this).prop('checked', this.checked);
+	});
+</script>
+{{=script}}
+{{=style}}
+{{=table_filter}}
+{{=table_head}}
+{{=table}}
+{{=btm_mnu}}
+{{include 'layout_add_j_box.html'}}

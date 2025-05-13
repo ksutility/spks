@@ -1,0 +1,51 @@
+{{extend 'layout.html'}}
+<STYLE>
+table {
+	width:100%;
+	border: 1px solid #ddd;
+	}
+td {
+	border: 1px solid #eee;
+	font-size:15px;
+	text-align:right;
+}
+#div_1{
+	height:300px;
+	overflow:auto;
+}
+.div2{
+	background-color:#dcc790;
+	height:300px;
+	overflow:auto;
+}
+#h2{
+	background-color:#cfb46a;
+	text-align:center;
+}
+</STYLE>
+<HR>
+<DIV class="row">
+	<div class="col-1"></div>
+	<div class="col-1"><h3>{{=new_form }} </h3></div>
+	<div class="col-2"><h3>{{=sum_time }} = مجموع ساعت </h3></div>
+	<div class="col-1"><h3>{{=x_ww }} </h3></div>
+	<div class="col-3"><h2>{{=inp_date}}  </h2></div>
+	<div class="col-3"><h3>{{=x_un }} </h3></div>
+	<div class="col-1"></div>
+</div>
+<DIV id="div_1">
+	{{=table}}
+</div>
+<DIV id="div_2">
+	<h2 id="h2">لینک های کمکی جهت ساخت ردیفهای جدید  برای روز جاری</h2>
+	{{=hlp}}
+</div>
+
+
+
+
+
+
+
+
+

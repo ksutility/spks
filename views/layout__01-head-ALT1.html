@@ -1,0 +1,132 @@
+	<!-- ks -->	
+		<link rel="stylesheet" href="{{=URL('static','css/fonts_b.css')}}"/>
+		<link rel="stylesheet" href="{{=URL('static','css/ks.css')}}"/>
+		<link rel="stylesheet" href="{{=URL('static','css/ks_swich.css')}}"/>
+		<link rel="stylesheet" href="{{=URL('static','css/ks-x.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','js/ks-form.js')}}"></script>
+	<!-- ks-input-placeholder -->	
+		<link rel="stylesheet" href="{{=URL('static','css/ks-input-placeholder.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','js/ks-input-placeholder.js')}}"></script>	
+	<!-- date piker fa -->
+			<link type="text/css" href="{{=URL('static','js/datepicker/jquery-ui-1.8.14.css')}}"/>
+			<link rel="stylesheet" href="{{=URL('static','js/datepicker/jquery-ui.css')}}/">
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery-1.8.2.min.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery-ui.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.core.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/calendar.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc-ar.js')}}"></script>
+			<script type="text/javascript" src="{{=URL('static','js/datepicker/jquery.ui.datepicker-cc-fa.js')}}"></script>
+	<!-- /date piker fa -->
+		<script type="text/javascript" src="{{=URL('static','js/jquery.tablesorter.js')}}"></script>
+	<!-- /time piker 030320 https://timepicker.co/
+		cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5  -->
+		<link rel="stylesheet" href="{{=URL('static','timepicker/1.3.5/jquery.timepicker.min.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','timepicker/1.3.5/jquery.timepicker.min.js')}}"></script> 
+	<!-- /time piker 030320 https://github.com/dmuy/MDTimePicker/wiki/Usage#usable-built-in-methods  -->
+		<link rel="stylesheet" href="{{=URL('static','timepicker/mdtimepicker-alt1.css')}}"/>
+		<script type="text/javascript" src="{{=URL('static','timepicker/mdtimepicker-alt1.js')}}"></script> 
+		
+	<!-- select2 -->
+		<link href="{{=URL('static','select2/select2-410-rc.min.css')}}" rel="stylesheet" />
+		<script type="text/javascript" src="{{=URL('static','select2/select2-410-rc.min.js')}}"></script>
+	<!-- /select2 -->
+	 
+	<script type="text/javascript">
+	window.onload = function () {
+			mdtimepicker('.timepicker_c', { readOnly: false, is24hour: true, //format: 'h:mm tt',
+			events: {
+				ready: function() {  },
+				shown: function() {  },
+				hidden: function() {  },
+				timeChanged: function (data) {
+				}
+			}
+		})
+		}
+	</script>
+	<!-- -->
+	<script type="text/javascript" >
+			$(document).ready(function() {
+				$('#xDATE1').datepicker({
+					dateFormat: 'ymmdd',
+					changeMonth: true,
+					changeYear: true,
+					maxDate: "+5y" ,
+					onSelect: function(dateText, inst) {
+						$('#xDATE2').datepicker('option', 'minDate', new JalaliDate(inst['selectedYear'], inst['selectedMonth'], inst['selectedDay']));
+					}
+				});
+				$('#xDATE2').datepicker({
+					dateFormat: 'ymmdd',
+					changeMonth: true,
+					changeYear: true,
+					maxDate: "+5y" ,								
+				});
+				$('.fDATE').datepicker({
+					dateFormat: 'yy/mm/dd',
+					changeMonth: true,
+					changeYear: true,
+				});
+				$('select').select2();
+				$('select.can_add').select2({
+					tags: true
+					});
+				$('table').tablesorter();
+                
+				$( "#j_box_light" ).draggable();
+                $( ".resizable" ).resizable();
+                $( ".sortable" ).sortable();
+				//highlight_last_clicked
+				$("a").on('click',  function(e) {
+					$("td").removeClass('a-active');
+					$(this).parent("td").addClass('a-active');
+				});
+				/*
+				$('.timepicker_c').mdtimepicker({ //c=circel + click
+					is24hour: true,
+					timeFormat: 'hh:mm', // format of the time value (data-time attribute)
+					format: 'hh:mm',    // format of the input value
+					readOnly: false,       // determines if input is readonly
+					hourPadding: false,
+					theme: 'blue',
+					okLabel: 'تایید',
+					cancelLabel: 'لغو',
+				});
+				*/
+				$('.timepicker_t').timepicker({ //t=text input base-$(this).maxtime
+					timeFormat: 'HH:mm',
+					dropdown:true,
+					dynamic:false,
+					//maxTime:$(this).attr("maxtime"),
+					//alert('set')
+					change: function(time) {
+						v=$(this).attr("value")
+						m=$(this).attr("maxtime")
+						if (v>m) {
+							alert('زمان وارد شده از زمان مجاز بیشتر است');
+							$(this).attr("value",m);
+						}
+						if ($(this).attr("update")=="update") {
+							$("form").submit();
+						}
+						//alert($(this).attr("onchange2"));
+						//alert($(this).timepicker('timeFormat'));
+						//alert(JSON.stringify(time.result));
+						//alert(JSON.stringify($(this).parent()));
+						//alert(JSON.stringify($(this)));
+						//lert(event.target.getAttribute("maxTime"));
+					}
+				});
+				$(".a_toggle_hide").click(); //hide all toggle that shoud be hide in first
+ 			}); 
+	</script>
+    <style>
+    
+    </style>
+<!-- 
+#
+/ks 
+-->	
+
+
