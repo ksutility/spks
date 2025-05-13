@@ -812,7 +812,7 @@ def list_0():
                                     )),
                         k_htm.a("L",_target="box",reset=False,_class=_class,_title="لیست فیلد های لینک شده",_href=URL('data','rc',args=['find_linked_target_fields',db_name,tb_name])),                                  
                     ]
-                tools+=[k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class=_class,_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))]
+                tools+=[k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class="btn",_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))]
                 tools=TABLE(TR([TD(x,_class="m-0 p-0 border-0") for x in tools]),_class="table m-0 p-0 ")
                     
                 tx=[A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
