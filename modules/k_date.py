@@ -119,14 +119,14 @@ def site_time():
     
     
     """ """
-    inp_d=XML(f"""{ird["yy"]}/{ird["mm"]}/{ird["dd"]}""") #<i {xs1}></i>
-    dd=k_htm.a(inp_d,_target="box",reset=False,_href=URL('form','date_picker',),_class="" #,_style="font-family: BYekan;font-size:1.2em;hight=25px;"
+    inp_d=XML(f"""{wd_2}  {ird["yy"]}/{ird["mm"]}/{ird["dd"]}""") #<i {xs1}></i>
+    dd=k_htm.a(inp_d,_target="box",reset=False,_href=URL('form','date_picker',),_class="x_btn2" #,_style="font-family: BYekan;font-size:1.2em;hight=25px;"
                     ,j_box_params="ajax_do='',ajax_val_set='',x_size='10cm;10cm'")
     inp= f"""<h5>
-                <i title='{wd_2}' {xs1}>{wd_1}</i>
-                {ird["hh"]}:{ird["gg"]}
+                
                 {XML(dd)}</h5>
                 """
+                #{ird["hh"]}:{ird["gg"]}
     return (inp) #<i {xs1}>{dd}</i> {XML(dd)}ird["dd"] <div style="font-family: BYekan;font-size:15px;"  dir="lrt"> <div>
     return f"""
                 <a title='{wd_2}' {xcs}>{wd_1}</a>
