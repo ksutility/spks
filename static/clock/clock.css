@@ -1,0 +1,84 @@
+.clock-main{
+display: flex;
+}
+.clock-container {
+display: flex;
+}
+
+.clock-container > div {
+
+	display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    padding: 5px;
+}
+
+.clock-container .clock-clock {
+    display: flex;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    position: relative;
+}
+
+.clock-clock label {
+    position: absolute;
+    inset: 0px;
+	font-size: 8px;
+    color:#000;
+    text-align: center;
+    transform: rotate(calc(var(--i) * (-360deg / 12)));
+	transform-origin: 25px 25px;
+}
+.clock label span {
+    display: inline-block;
+    font-size: 50px;
+    font-weight: 600;
+    transform: rotate(calc(var(--i) * (360deg / 12)));
+}
+
+.clock-container .clock-indicator {
+    position: absolute;
+    height: 2px;
+    width: 2px;
+    display: flex;
+    justify-content: center;
+}
+
+.clock-indicator::before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    z-index: 100;
+    background: #000;
+
+}
+
+.clock-indicator .clock-hand {
+    position: absolute;
+    height: 24px;
+    width: 1px;
+    bottom: 0;
+    border-radius: 5px;
+    transform-origin: bottom;
+    background: #fcc;
+}
+
+.clock-hand.clock-minute {
+    height: 25px;
+    width: 2px;
+	transform-origin: bottom;
+    background: #000;
+}
+
+.clock-hand.clock-hour {
+    height: 20px;
+    width: 4px;
+	transform-origin: bottom;
+    background: #008;
+}
