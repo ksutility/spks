@@ -505,7 +505,8 @@ x_data={
                  #,'get_inf':{'type':'xlink','width':'20','title':'دانلود','link':{'pro':['ksw','aqc','import_paper_inf'],'args':['{lno}']},'prop':['hide']}                
             },
             'steps':{
-                'pre':{'tasks':'lno,cprj_id,cp_code,cp_name,prj_id,prj1,prj2','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                #lno,
+                'pre':{'tasks':'cprj_id,cp_code,cp_name,prj_id,prj1,prj2','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'x_act_type,man_crt,x_num,x_des,x_inf,x_to_grup,x_act_rec,x_act_pey,x_act_todo,lable_1,act_todo,lable_2','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'x_act_type','xjobs':'dccm','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'folder,lno,sbj,comment,io_t,attach,lv_onvan,lv_archiv,lv_per_archiv,paper_num,num_x,num_link,cdate,date_s,date_e','xjobs':'_auto_','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
@@ -720,7 +721,7 @@ x_data={
     #--------------------------------------------------------------------
     'act':{ #db
         'a':{ 
-            'base':{'mode':'form','title':'اقدام','help':'act list of a person','code':'112'
+            'base':{'mode':'form','title':'لیست اقدام -  گزارش عملکرد','help':'act list of a person','code':'112'
             },
             'tasks':{
                 'code':{'type':'text','title':'کد','len':'4','uniq':''},

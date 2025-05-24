@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-020805-add 3 columns func(add,ren,del)
+این ماژول شامل دو کلاس اصلی برای مدیریت پایگاه داده SQLite و ساخت شرط‌های SQL است.
+
+کلاس‌ها:
+--------
+- C_SQL: ساخت عبارات WHERE برای SQL به‌صورت داینامیک
+- DB1: مدیریت کامل پایگاه داده SQLite شامل ساخت، درج، جستجو، و به‌روزرسانی رکوردها
+
+تاریخچه نسخه:
+-------------
+- 1400/11/19 - بروزرسانی select (پشتیبانی از where_dict) - ver 1.07
+    -update select (can get where_dict)
+- 1402/09/05 - نسخه 1.10
+- 020805 - افزودن 3 تابع ستونی (add, ren, del)
     -   add exec func
-001119-update select (can get where_dict)-v1.07
-#ver 1.10 1402/09/05-
 """
 from k_ui import var_report
 import datetime
@@ -17,9 +27,38 @@ def f_now():
     x=str(datetime.datetime.now())#trftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
     return today + "-" + x
 def report_txt(x_txt_list):
+    """
+    دریافت یک رشته از متغیرها به صورت کاما جدا و تولید گزارش متنی از مقادیر فعلی آن‌ها.
+
+    پارامتر:
+    --------
+    x_txt_list : str
+        رشته‌ای شامل نام متغیرها مانند "var1,var2"
+
+    خروجی:
+    -------
+    str : خروجی به فرمت "var1=..., var2=..."
+    """             
     x_list=x_txt_list.split(',')
     return ", ".join([x+'='+str(eval(x)) for x in x_list])
 def report_db_change(db_name,t1,dif_list,idx=1):#030815
+    """AI-docstring
+    ثبت تغییرات انجام‌شده در پایگاه داده در فایل متنی به منظور مستندسازی.
+
+    پارامترها:
+    ----------
+    db_name : str
+        مسیر فایل پایگاه داده (با پسوند .db)
+
+    t1 : str
+        توضیح کوتاه درباره عملیات انجام‌شده
+
+    dif_list : list
+        لیستی از توضیحات تغییرات انجام‌شده
+
+    idx : int
+        شماره‌گذاری ردیف تغییرات برای پیگیری راحت‌تر
+    """
     name_add='' if dif_list else '_no_change'
     file_path=db_name[:-3]+name_add+ '.txt'
     if debug:xxxprint(msg=['report','file_path='+file_path,''],args=dif_list)
@@ -46,6 +85,24 @@ class C_SQL():
             "res2":res2,
             })
     def where_cell(self,field_name,field_select_data,act="=",int_2_int=True): #erwer
+        """AI-docstring
+        تولید عبارت WHERE برای SQL بر اساس نوع داده ورودی.
+
+        ورودی‌ها:
+        ---------
+        q_where : str | dict | list
+            شرط موردنظر برای SQL. نوع‌های پشتیبانی‌شده:
+                - str: شرط SQL به‌صورت مستقیم ("id=1")
+                - dict: مانند {'id': 1, 'name': 'Ali'}
+                - list: لیست ترکیبی از شروط با AND یا OR
+
+        add_where_text : bool
+            اگر True باشد، کلمه "WHERE" به ابتدای رشته خروجی افزوده می‌شود.
+
+        خروجی:
+        -------
+        str : عبارت شرط WHERE کامل
+        """
         if type(field_select_data)==None:
             return "`{}` {} '{}'".format(field_name,act,str(field_select_data))
         elif type(field_select_data)==str:
@@ -64,6 +121,24 @@ class C_SQL():
         else:
             return "`{}` = ''".format(field_name,)        
     def where(self,q_where,add_where_text=True):
+        """AI-docstring
+        تولید عبارت WHERE برای SQL بر اساس نوع داده ورودی.
+
+        ورودی‌ها:
+        ---------
+        q_where : str | dict | list
+            شرط موردنظر برای SQL. نوع‌های پشتیبانی‌شده:
+                - str: شرط SQL به‌صورت مستقیم ("id=1")
+                - dict: مانند {'id': 1, 'name': 'Ali'}
+                - list: لیست ترکیبی از شروط با AND یا OR
+
+        add_where_text : bool
+            اگر True باشد، کلمه "WHERE" به ابتدای رشته خروجی افزوده می‌شود.
+
+        خروجی:
+        -------
+        str : عبارت شرط WHERE کامل
+        """   
         """
         q_where : str/dict/list
             str: natural sql string
@@ -306,6 +381,48 @@ class DB1():
         return f"SELECT {xtop} {_fields_name} FROM {_table_name} {xwhere} {xorder}"    
     #---------------------- main func ----------------------------------------------------------------------------------------------    
     def select(self,table='',sql='',where='',result='list',offset=0,page_n=1,page_len=20,limit=20,last=True,order='id',debug=False):
+        """AI-docstring
+        اجرای کوئری SELECT با پشتیبانی از فیلتر، ترتیب، صفحه‌بندی و قالب خروجی‌های متنوع.
+
+        پارامترها:
+        ----------
+        table : str
+            نام جدول هدف برای SELECT
+
+        sql : str
+            رشته SQL مستقیم، در صورت تنظیم نخواهد از پارامتر table استفاده شد
+
+        where : str | dict | list
+            شرایط WHERE به صورت دلخواه
+
+        result : str
+            نوع خروجی: 'list', 'dict', یا 'dict_x'
+
+        offset : int
+            شیفت اولیه نتایج در صورت استفاده مستقیم
+
+        page_n : int
+            شماره صفحه در حالت صفحه‌بندی
+
+        page_len : int
+            تعداد رکوردها در هر صفحه
+
+        limit : int
+            محدودیت تعداد نتایج
+
+        last : bool
+            اگر True باشد ترتیب نزولی در خروجی اعمال می‌شود
+
+        order : str
+            فیلد مرتب‌سازی
+
+        debug : bool
+            فعال‌سازی چاپ اطلاعات برای اشکال‌زدایی
+
+        خروجی:
+        -------
+        بسته به نوع result: لیست رکوردها، دیکشنری از رکورد اول، یا ساختار کامل همراه با اطلاعات جانبی
+        """
         table_name=table
         #select_data 
         ''' 
