@@ -69,9 +69,14 @@
 					changeYear: true,
 				});
 				$('select').select2();
-				$('select.can_add').select2({
-					tags: true
+				$('select.can_add').select2	({
+					tags: true,	
+					insertTag: function (data, tag) {
+						// Insert the tag at the end of the results
+						data.push(tag);
+					  }
 					});
+					//
 				$('table').tablesorter();
                 
 				$( "#j_box_light" ).draggable();

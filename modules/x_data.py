@@ -1731,6 +1731,91 @@ x_data={
                 },
         }
     },
+    #-------------------------------------------------------------------- 
+    'hr_arzyabi_amuzesh':{ #db
+        'a':{
+            'base':{'mode':'form','title':'ارزیابی دوره های آموزشی توسط پرسنل','data_filter':'f_nxt_u = "{{=_i_}}"','code':'801','internet':True,'prop':['noname'],
+            },
+            'tasks':{
+                'hmkr':{'type':'text','title':'نام و نام خانوادگی همکار','len':150,'lang':'fa',},
+                'date':{'type':'fdate','title':'تاریخ آموزش'},
+                'edu_id':{'type':'reference','title':'دوره',
+                    'ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}'},'prop':['update'],
+                    'team':{'prj':{'val':'{code}','title':'کد پروژه'},'prj_name':{'val':'{name}','title':'نام پروژه'}},},
+
+                'an1':{'type':'select','title':'تازگی','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
+                'an2':{'type':'select','title':'کاربرد','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},         
+                'an3':{'type':'select','title':'جزوه','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'عدم ارائه جزوه - 1'}}, 
+                'an4':{'type':'select','title':'ساختار','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
+                'an5':{'type':'select','title':'بیان','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
+                'an6':{'type':'select','title':'رهبری','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},   
+                'an7':{'type':'select','title':'دانش','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
+                'an8':{'type':'select','title':'پاسخ','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
+                'an_s1':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an1,an2,an3,an4,an5,an6,an7,an8]])*3.125)}}','title':'استاد'},
+                'an21':{'type':'select','title':'محیط','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
+                'an22':{'type':'select','title':'نظم','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}}, 
+                'an23':{'type':'select','title':'پذیرایی','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
+                'an24':{'type':'select','title':'امکانات','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                    'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
+                'an_s2':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an21,an22,an23,an24]])*6.25)}}','title':'شرکت'},
+            },
+            'steps':{
+                's0':{'tasks':'hmkr,date,lb_t1,lb_t2,lb-d1,lb-l,lb1,an1,lb2,an2,lb3,an3,lb4,an4,lb5,an5,lb6,an6,lb7,an7,lb8,an8,lb_s1,an_s1,lb-d1,lb-l,lb21,an21,lb22,an22,lb23,an23,lb24,an24,lb_s2,an_s2',
+                    'xjobs':'*','title':'ارزیابی دوره آموزشی توسط شرکت کنندگان','app_keys':'y','app_titls':'','oncomplete_act':'',
+                    'step_cols_width':'6,6','task_cols_width':'4,8,0',
+                    'header':'''
+                    <H4 class="text-center bg-white"> این فرم محرمانه می باشد </H4>
+                    <h5 class="text-center" style="background-color: #f2f2f2;">
+                    به منظور بهبود بخشيدن به كلاسها ودوره‌هاي آموزشي و در نتيجه استفاده مطلوبتر پرسنل از اين گونه كلاسها 
+                    خواهشمنداست به سئوالات زير به دقت پاسخ دهيد. بديهي است پاسخ نامه شماتاثير مستقيم درچگونگي برگزاري كلاسهاي آموزشي خواهد داشت
+                    </h5>
+                    ''',
+                    'footer':''},
+            },
+            'views':{
+                'all':{'input':'hmkr','view1':'date','view2':'date'}
+            },
+            'labels':{
+                'lb-l':'<div style="background-color: #fff;color:#000;">-------------------</div>',
+                'lb-d1':'<div style="background-color: #fff;color:#000;">امتیاز دهی به استاد</div>',
+                'lb-d2':'<div style="background-color: #fff;color:#000;">امتیاز دهی به شرکت</div>',
+                'lb_t1':'عنوان',
+                'lb_t2':'امتیاز',
+                'lb1':'تازگي مطالب',
+                'lb2':'کاربردی بودن مطالب',
+                'lb3':'كيفيت‌ومحتواي‌جزوات‌',
+                'lb4':'پيوستگي وطبقه بندي مطالب',
+                'lb5':'قدرت بيان وتفهيم مطالب توسط استاد',
+                'lb6':'روش اداره كلاس وميزان علاقه استاد به تدريس',
+                'lb7':'تسلط استاد به موضوع',
+                'lb8':'قدرت وحوصله استاد در جوابگويي ',
+                'lb21':'محيط آموزش',
+                'lb22':'نظم وانضباط دربموقع برگزار شدن كلاس ',
+                'lb23':'نحوه  پذيرايي',
+                'lb24':'امكانات آموزشي ( وايت برد ،ويدئو،……..)',
+                'lb_s1':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات استاد</div>''',
+                'lb_s2':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات شرکت</div>''',
+            },
+            'cols_filter':{
+                '':'همه',
+
+            },
+            'data_filter': {
+                
+                },
+        }
+    },
     #--------------------------------------------------------------------
     'tel':{ #db
         'a':{

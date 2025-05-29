@@ -160,6 +160,7 @@ def htm_head(print_mode=1):
        font-size: 18px;
        width: 90%;
        margin: 5 auto;
+       direction:ltr;
     }
     blockquote h1 {
        font-size: 4rem;

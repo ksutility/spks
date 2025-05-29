@@ -93,6 +93,7 @@ def load_user_inf():
         #users[u_inf['un']]=u_inf-
     #import k_err 
     #k_err.xreport_var(['users',users]) #,[titles],rows
+    #users['noname']={"username":'noname'}
     return users #           'fullname' report--
 class ALL_USERS():
     inf={}
@@ -152,7 +153,7 @@ def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):##
     if not un:
         from gluon import current
         session=current.session
-        un=session["username"]
+        un=session.get("noname_un") or session["username"]
     if not un:
         return False
     if not xjobs:
@@ -161,7 +162,7 @@ def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):##
 
     #xxxprint(out_case=3,msg=['user_in_xjobs_can',xjobs,un],vals=form_sabt_data)
     step=x_data_s['steps'][step_name]
-
+    #print('t01')
     for xjob in xjobs.split(','):
         if do=='view':
             if not 'auth' in step :
@@ -172,13 +173,17 @@ def user_in_xjobs_can(do,x_data_s={},c_form='',step_index='0',un='',xjobs=''):##
                     if un in users_list:return True
         elif xjob =='*':
             if do == 'creat':
+                #k_err.xxxprint(3,msg=['1','1','1'])
+                #print('1')
                 return True
             elif do == 'edit':
                 step_un=form_sabt_data.get(f'step_{step_name}_un','')
                 if ((not step_un) or (un==step_un)):
                     #import k_err
                     #k_err.xxxprint(3,msg=[step_un,un])
+                    #print('step_un='+step_un)
                     return True
+                #print('step_un=xxx-'+step_un)    
             #return False   
         else:
             users_list=C_XJOB(xjob,x_data_s,c_form).users_list() 
@@ -291,6 +296,7 @@ class C_XJOB():
         فرد مسئول در آیتم شماره 0 لیست بر گردانده می شود
         '''
         code=self.code
+        if not code:return ['']
         if code =='*':
             return ['','*']
         elif code[0] != "#":
@@ -351,6 +357,7 @@ def how_is_connect(subject,shoud_login=True):
     import k_date,os,k_tools
     from gluon import current
     from gluon.http import redirect
+    current.session['noname_un']=''
     if shoud_login:
         if not current.session['username']:redirect(URL('spks','user','login',args=['go']))
     u_ip=str(current.request.client)

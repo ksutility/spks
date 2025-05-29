@@ -35,9 +35,8 @@
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
 	{{include 'layout__01-head.html'}}
-		
 	
-    {{block head}}{{end}}
+	{{block head}}{{end}}
   </head>
   
   <body style="height:700px">
@@ -57,7 +56,7 @@
       {{include}}
       {{=response.toolbar() if response.show_toolbar else ''}}
 
-     </div>
+    </div>
     {{block footer}} <!-- this is default footer -->
 	
 	<!-- footer

@@ -520,6 +520,7 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
         remember:bool
             remember last select value
     '''
+    # tagging => can_add
     #convert _options :list to dict
     _dict={x:x for x in _options} if type(_options)==list else _options
     vs=''
@@ -535,6 +536,11 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     opts=[]
     if add_empty_first:
         opts+=[OPTION("-",_value="-")]
+    if can_add:
+        if vs:
+            for vsi in vs:
+                if not vsi in _dict:
+                    opts+=[OPTION(vsi,_value=vsi,_selected='selected')]
     for v in _dict:
         value=_dict[v]
         if type(value)==dict:value=value['value'] 
