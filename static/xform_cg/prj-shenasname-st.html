@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شناسنامه تجاری پروژه</title>
+    <script src="link_url/js-yaml.min.js"></script>
+	<script src="link_url/vue.global.js"></script>
+	<link rel="stylesheet" href="link_url/fonts_b.css">
+	<link rel="stylesheet" href="link_url/aqrc-_mm.css">
+	
+	
+</head>
+<style>
+body {
+	font-family:BYekan;
+}
+</style>
+<body >
+
+
+<table class="tb_head">
+	<tr><td><table ><tr>
+		<td style="width:10%;"> 	<img class="arm_img"  src="link_url/arm-aqrc.gif"  alt="آرم مشاور قدس" /> 	</td>
+		<td style="width:80%;"> 	
+				<h6> بنام خداوند دانا و توانا </h6>
+				<h1> شناسنامه تجاری پروژه </h2>	
+				<a href="link_server"><p class="riz">تهیه و تنظیم : مهندسان مشاور آستان قدس رضوی </p></a>
+		</td>
+		<td style="width:10%;"> 	<img class="arm_img"  src="link_url/arm-aqbb.gif"  alt="آرم بنیاد" /> 	</td> </td>
+	</tr></table ></td></tr>
+</table>
+
+<h2 class="h_d">عنوان پروژه	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=prj_name}} </b></p><BR>
+
+<h2 class="h_d">اطلاعات کلی پروژه‌ها</h2>
+<table class="tb_do">
+	<tr>
+		<th style="width:30%;">نام تجاری پروژه</th>
+		<th style="width:30%;">موقعیت جغرافیایی</th>
+		<th style="width:25%;">کارفرما</th>
+		<th style="width:15%;">تاریخ شروع</th>
+	</tr>
+	<tr>
+		<td>{{ =busn_name }} </td>
+		<td>{{ =pos_txt }} </td>
+		<td>{{ =clint_txt }} </td>
+		<td>{{ =date_st }} </td>
+	</tr>
+</table>
+
+<h2 class="h_d">توضیح پروژه	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=prj_des}} </b></p><BR>
+
+<h2 class="h_d">اهداف کلیدی	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=goals}} </b></p><BR>
+
+<h2 class="h_d">نوع پروژه	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=prj_type}} </b></p><BR>
+
+<h2 class="h_d">دستاوردهای تجاری و اقتصادی	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=rslt_fin}} </b></p><BR>
+
+<h2 class="h_d">مزایای شهرسازی و زیست‌محیطی	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=rslt_aue}} </b></p><BR>
+
+<h2 class="h_d">نتیجه‌گیری و برنامه‌های آینده	</h2>
+<BR> <p style="white-space: pre-line;direction:rtl;"><b> {{=rslt_out}} </b></p><BR>
+
+
+	<!-- #################################################################  --> 
+	</div>
+	<script src="link_url/vu_inc_f.js"></script>
+	<script >
+	const app = Vue.createApp({
+	data() {
+		return {
+			yml: {'date':'0000/00/00','time':'00:00',}//script_inject1
+			,but_show :true
+		}
+	},
+	methods: {
+		writeText() {
+		  this.yml = yaml;
+		  this.but_show =false;
+		}
+	} 
+})
+  
+app.mount('#app')
+//script2_inject
+</script>
+</body>
+</html>
+<!-- script2 
+	document.getElementById('help_div').style.display = "none"
+	document.getElementById('bt_writetext').style.display = "none"
+--> 

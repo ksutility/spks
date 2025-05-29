@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ارزیابی عملکرد</title>
+    <script src="link_url/js-yaml.min.js"></script>
+	<script src="link_url/vue.global.js"></script>
+	<link rel="stylesheet" href="link_url/aqrc-_mm.css">
+	
+</head>
+<style>
+	.tb_li tr{height:30px;}
+	.tb_li td {border:1px solid gray;}
+	.td2{text-align:center;}
+</style>
+<body>
+
+    <div id="help_div"> 
+		<input type="file" id="fileInput" />خواندن فایل YAML	
+		<div id="out1"></div>
+		<div id="out2"></div>
+		<div id="out3"></div>
+	</div>	
+ 
+	
+	<div id="app">
+		<button id="bt_writetext" v-if="but_show" @click="writeText()">refresh</button>
+ 
+<div id="body1">
+<div>
+<table class="tb_head">
+	<tr><td><table><tr>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم مشاور قدس" /> 	</td>
+		<td style="width:80%;"> 	
+				<h4> بنام خداوند دانا و توانا </h4>
+				<h1> فرم ارزشیابی عملکرد پرسنل </h2>	
+				<p> <a href="link_server">تهیه و تنظیم : مهندسان مشاور آستان قدس رضوی </a></p>
+		</td>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم بنیاد" /> 	</td> </td>
+	</tr></table></td></tr>
+	<tr><td><table><tr>
+		<td style="width:33%;">	نام و نام خانوادگی :  	 		 		</td>
+		<td style="width:33%;">	پست سازمانی : {{yml.job }} 	</td>
+		<td style="width:33%;">	دفتر : {{yml.loc_name }} 	</td>
+	</tr></table></td></tr>
+	
+	<tr><td><table><tr>
+		<td style="width:50%;"> 	سال تمدید قرارداد : {{yml.sal }} </td>
+		<td style="width:50%;"> 	میزان تمدید قرارداد :{{yml.dur_1 }} </td>
+	</tr></table></td></tr>
+</table>
+</div>
+
+
+</div>
+
+	<!-- #################################################################  --> 
+	</div>
+	<script src="link_url/vu_inc_f.js"></script>
+	<script >
+	const app = Vue.createApp({
+	data() {
+		return {
+			yml: {'date':'0000/00/00','time':'00:00',}//script_inject1
+			,but_show :true
+		}
+	},
+	methods: {
+		writeText() {
+		  this.yml = yaml;
+		  this.but_show =false;
+		}
+	} 
+})
+  
+app.mount('#app')
+//script2_inject
+</script>
+</body>
+</html>
+<!-- script2 
+	document.getElementById('help_div').style.display = "none"
+	document.getElementById('bt_writetext').style.display = "none"
+--> 

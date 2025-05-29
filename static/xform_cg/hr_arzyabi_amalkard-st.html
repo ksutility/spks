@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ارزیابی عملکرد</title>
+	<link rel="stylesheet" href="link_url/fonts_b.css">
+	<link rel="stylesheet" href="link_url/aqrc-_mm.css">
+	
+</head>
+<style>
+	.tb_li tr{height:30px;}
+	.tb_li td {border:1px solid gray;}
+	.td2{text-align:center;}
+</style>
+<body>
+
+ 
+	
+	<div id="app">
+
+ 
+<div id="body1">
+<div>
+<table class="tb_head">
+	<tr><td><table><tr>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم مشاور قدس" /> 	</td>
+		<td style="width:80%;"> 	
+				<h4> بنام خداوند دانا و توانا </h4>
+				<h1> فرم ارزشیابی عملکرد پرسنل </h2>	
+				<p> <a href="link_server">تهیه و تنظیم : مهندسان مشاور آستان قدس رضوی </a></p>
+		</td>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم بنیاد" /> 	</td> </td>
+	</tr></table></td></tr>
+	<tr><td><table><tr>
+		<td style="width:33%;">	نام و نام خانوادگی : {{=_.frd_1.help }} 	 		 		</td>
+		<td style="width:33%;">	پست سازمانی : {{=job }} 	</td>
+		<td style="width:33%;">	دفتر : {{=loc_name }} 	</td>
+	</tr></table></td></tr>
+	
+	<tr><td><table><tr>
+		<td style="width:50%;"> 	سال تمدید قرارداد : {{=sal }} </td>
+		<td style="width:50%;"> 	میزان تمدید قرارداد :	{{=_.dur_1.help }} </td>
+	</tr></table></td></tr>
+</table>
+</div>
+
+<h2 class="h_d">	جدول ارزشیابی	</h2>
+<table class="tb_li">
+	<tr>
+		<th style="width:40%">{{=_labels.lb01 }}</th>
+		<th style="width:10%;">{{=_labels.lb02 }}</th>
+		<th style="width:50%;">{{=_labels.lb03 }}</th>
+	</tr>
+	<tr>
+		<td class="td1">{{=_labels.lb1 }}</td>
+		<td class="td2">{{=_.an1.help }}</td>
+		<td class="td3">{{=_.ad1.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb2 }}</td>
+		<td class="td2" >{{=_.an2.help }}</td>
+		<td class="td3" >{{=_.ad2.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb3 }}</td>
+		<td class="td2" >{{=_.an3.help }}</td>
+		<td class="td3" >{{=_.ad3.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb4 }}</td>
+		<td class="td2" >{{=_.an4.help }}</td>
+		<td class="td3" >{{=_.ad4.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb5 }}</td>
+		<td class="td2" >{{=_.an5.help }}</td>
+		<td class="td3" >{{=_.ad5.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb6 }}</td>
+		<td class="td2" >{{=_.an6.help }}</td>
+		<td class="td3" >{{=_.ad6.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb7 }}</td>
+		<td class="td2" >{{=_.an7.help }}</td>
+		<td class="td3" >{{=_.ad7.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb8 }}</td>
+		<td class="td2" >{{=_.an8.help }}</td>
+		<td class="td3" >{{=_.ad8.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb9 }}</td>
+		<td class="td2" >{{=_.an9.help }}</td>
+		<td class="td3" >{{=_.ad9.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" >{{=_labels.lb10 }}</td>
+		<td class="td2" >{{=_.an10.help }}</td>
+		<td class="td3" >{{=_.ad10.value  }}</td>
+	</tr>
+	<tr>
+		<td class="td1" ><h2>{{=_labels.lb_sum }}</h2></td>
+		<td class="td2" ><h2>{{=_.an_sum.value }}</h2></td>
+		<td class="td3" >{{=_labels.lb_s2 }}</td>
+	</tr>
+</table>
+<h2 class="h_d">	تایید کننده 	</h2>
+<table class="tb_li">
+	<tr>
+		<td class="td2" >{{=_.step_1_un.value }}</td>
+		<td class="td3" >{{=_.step_1_dt.value }}</td>
+	</tr>
+</table>
+</div>
+
+	<!-- #################################################################  --> 
+	</div>
+
+</body>
+</html>

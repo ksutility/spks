@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صورتجلسه</title>
+    <script src="link_url/js-yaml.min.js"></script>
+	<script src="link_url/vue.global.js"></script>
+	<link rel="stylesheet" href="link_url/aqrc-_mm.css">
+	
+</head>
+<body>
+	<!-- show on local use
+    <div id="help"> 
+		<input type="file" id="fileInput" />خواندن فایل YAML	
+		<div id="out1"></div>
+		<div id="out2"></div>
+		<div id="out3"></div>
+	</div>	
+	--> 
+	
+	<div id="app">
+		<!-- show on local use
+		<button id="bt_writetext" v-if="but_show" @click="writeText()">refresh</button>
+		 --> 
+<div id="body1">
+<div>
+<table class="tb_head">
+	<tr><td><table><tr>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم مشاور قدس" /> 	</td>
+		<td style="width:80%;"> 	
+				<h4> بنام خداوند دانا و توانا </h4>
+				<h1> صورتجلسه </h2>	
+				<p> <a href="link_server">تهیه و تنظیم : مهندسان مشاور آستان قدس رضوی </a></p>
+		</td>
+		<td style="width:10%;"> 	<img style="width:110px;height:90px;"  src="link_url/aqrc-arm.gif"  alt="آرم بنیاد" /> 	</td> </td>
+	</tr></table></td></tr>
+	<tr><td><table><tr>
+		<td style="width:20%;"> 	عنوان جلسه 	 		</td>
+		<td style="width:80%;"> 	{{yml.name }} 	</td>
+	</tr></table></td></tr>
+	<tr><td><table><tr>
+		<td style="width:15%;"> 	حاظران	</td>
+		<td style="width:85%;">	
+			<table >
+				<tr>
+					<th style="width:20%;"></th>
+					<th style="width:80%;"></th>
+				</tr>
+				<tr v-for="pos in yml.pos">
+					<td v-for="x in pos">{{ x }} </td>
+				</tr>
+			</table>
+		</td>
+	</tr></table></td></tr>
+	<tr><td><table><tr>
+		<td style="width:20%;"> 	تاریخ : {{yml.date }} </td>
+		<td style="width:20%;"> 	ساعت :	{{yml.time_st }} </td>
+		<td style="width:20%;"> 	شماره : {{yml.code }}</td>
+		<td style="width:40%;"> 	مکان :	{{yml.loc }} </td>
+	</tr></table></td></tr>
+</table>
+</div>
+
+<h2 class="h_d">	خلاصه جلسه	</h2>
+<BR> <p> {{yml.des }} </p> <BR>
+
+<h2  class="h_d">	مصوبات جلسه	</h2>
+<table class="tb_do">
+	<tr>
+		<th style="width:3%">ردیف</th>
+		<th style="width:7%;">اعلام کننده</th>
+		<th style="width:69%;">شرح موضوعات</th>
+		<th style="width:7%;">اقدام کننده</th>
+		<th style="width:7%;">پیگیری</th>
+		<th style="width:7%;">زمان</th>
+	</tr>
+	<tr v-for="(value ,index) in yml.todo">
+		<td>{{ index+1 }} </td>
+		<td v-for="x in value">{{ x }} </td>
+	</tr>
+</table>
+
+<h2  class="h_d"> شرح مذاکرات </h2>
+<table class="tb_do">
+	<tr>
+		<th style="width:3%">ردیف</th>
+		<th style="width:7%;">اعلام کننده</th>
+		<th style="width:90%;">شرح</th>
+	</tr>
+	<tr v-for="(value ,index) in yml.note">
+		<td>{{ index+1 }} </td>
+		<td v-for="x in value">{{ x }} </td>
+	</tr>
+</table>
+
+</div>
+
+	<!-- #################################################################  --> 
+	</div>
+	<script src="link_url/vu_inc_f.js"></script>
+	<script >
+	const app = Vue.createApp({
+	data() {
+		return {
+			yml: {'date':'0000/00/00','time':'00:00',}
+			,but_show :true
+		}
+	},
+	methods: {
+		writeText() {
+		  this.yml = yaml;
+		  this.but_show =false;
+		}
+	} 
+})
+  
+app.mount('#app')
+</script>
+</body>
+</html>
