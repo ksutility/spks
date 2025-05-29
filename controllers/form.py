@@ -339,7 +339,14 @@ def xtable():
             new_record_link='-'
         import k_date,k_icon
         btm_mnu= DIV(A("XLS",XML(k_icon.download(20)),_title="Download XLS",_class="btn btn-success",_href=URL('xtable.xls',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars)),
-                     A("CSV",XML(k_icon.download(20)),_title="Download CSV",_class="btn btn-warning",_href=URL('xtable.csv',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars)))
+                     A("CSV",XML(k_icon.download(20)),_title="Download CSV",_class="btn btn-warning",_href=URL('xtable.csv',args=args+[args[0]+"_form_"+k_date.ir_date('yymmdd-hhggss')],vars=request.vars)),
+                     A("sd",_title="sd form",_class="btn btn-info",_href=URL('xtable',args=args+['sd_form'],vars=request.vars)))
+        if 'sd_form' in args:
+            return dict(style=style1,script=scripts['table cell display'],
+                table_filter='',
+                table_head=_xtable_head(x_data_s,x_select,nr,new_record_link),
+                table=table1,btm_mnu=''
+                ,xtime='')
         return dict(style=style1,script=scripts['table cell display'],
             table_filter=c_filter.htm,
             table_head=_xtable_head(x_data_s,x_select,nr,new_record_link),

@@ -82,12 +82,13 @@ def out_in_format(dt_obj,out_format):
     return out_format
 
 #xprint (date_dif('01/09/18 16:45','01/08/19 17:55','yy/mm/dd hh:gg'))
-def ir_weekday(in_time='14'+jdatetime.date.today().strftime('%y/%m/%d'),in_format='yyyy/mm/dd',w_case=0):
-    if (not in_time) or (in_time in ['0','0000/00/00']):return ''
-    import datetime
+def ir_weekday(in_time='',in_format='yyyy/mm/dd',w_case=0):
+    if (in_time in ['0','0000/00/00']):return ''
+    import datetime,jdatetime
     if type(in_time)==tuple:
         in_time=jdatetime.date(in_time)
     elif type(in_time)==str:
+        if not in_time:in_time ='14'+jdatetime.date.today().strftime('%y/%m/%d')
         ids=ir_date_split(in_time,in_format)
         if ids['yyyy']=='0000':return ''
         #print(str(ids))

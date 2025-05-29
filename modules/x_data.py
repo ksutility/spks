@@ -146,9 +146,6 @@ steps.xjobs= list of name of xjobs
 
 'sp_order' =spesial order :1 step of form that shoud run in unsecoenc
 """
-x_data_cat:{
-    '1':{'titel':'ex','db':'a_prj,a_sub_p,a_step'}
-}
 x_data_cat={
     '-':'همه فرمها',
     '1':'اطلاعات اصلی',
@@ -1740,8 +1737,9 @@ x_data={
                 'hmkr':{'type':'text','title':'نام و نام خانوادگی همکار','len':150,'lang':'fa',},
                 'date':{'type':'fdate','title':'تاریخ آموزش'},
                 'edu_id':{'type':'reference','title':'دوره',
-                    'ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}'},'prop':['update'],
-                    'team':{'prj':{'val':'{code}','title':'کد پروژه'},'prj_name':{'val':'{name}','title':'نام پروژه'}},},
+                    'ref':{'db':'amuzesh','tb':'a','key':'{id}','val':'{date}-{tchr_name}-{subj}'},'prop':['update'],
+                    'team':{'date':{'val':'{date}','title':'تاریخ'},'tchr_name':{'val':'{tchr_name}','title':'نام استاد'}
+                        ,'subj':{'val':'{subj}','title':'موضوع'}},},
 
                 'an1':{'type':'select','title':'تازگی','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
@@ -1768,10 +1766,10 @@ x_data={
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
                 'an24':{'type':'select','title':'امکانات','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
-                'an_s2':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an21,an22,an23,an24]])*6.25)}}','title':'شرکت'},
+                'an_s2':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an21,an22,an23,an24]])*3.125)}}','title':'شرکت'},
             },
             'steps':{
-                's0':{'tasks':'hmkr,date,lb_t1,lb_t2,lb-d1,lb-l,lb1,an1,lb2,an2,lb3,an3,lb4,an4,lb5,an5,lb6,an6,lb7,an7,lb8,an8,lb_s1,an_s1,lb-d1,lb-l,lb21,an21,lb22,an22,lb23,an23,lb24,an24,lb_s2,an_s2',
+                's0':{'tasks':'edu_id,date,tchr_name,subj,lb_t1,lb_t2,lb_d1,lb_l,lb1,an1,lb2,an2,lb3,an3,lb4,an4,lb5,an5,lb6,an6,lb7,an7,lb8,an8,lb_s1,an_s1,lb_d2,lb_l,lb21,an21,lb22,an22,lb23,an23,lb24,an24,lb_s2,an_s2,hmkr',
                     'xjobs':'*','title':'ارزیابی دوره آموزشی توسط شرکت کنندگان','app_keys':'y','app_titls':'','oncomplete_act':'',
                     'step_cols_width':'6,6','task_cols_width':'4,8,0',
                     'header':'''
@@ -1787,9 +1785,9 @@ x_data={
                 'all':{'input':'hmkr','view1':'date','view2':'date'}
             },
             'labels':{
-                'lb-l':'<div style="background-color: #fff;color:#000;">-------------------</div>',
-                'lb-d1':'<div style="background-color: #fff;color:#000;">امتیاز دهی به استاد</div>',
-                'lb-d2':'<div style="background-color: #fff;color:#000;">امتیاز دهی به شرکت</div>',
+                'lb_l':'<div style="background-color: #fff;color:#000;">-------------------</div>',
+                'lb_d1':'<div style="background-color: #fff;color:#000;">امتیاز دهی به استاد</div>',
+                'lb_d2':'<div style="background-color: #fff;color:#000;">امتیاز دهی به شرکت</div>',
                 'lb_t1':'عنوان',
                 'lb_t2':'امتیاز',
                 'lb1':'تازگي مطالب',
@@ -1804,8 +1802,8 @@ x_data={
                 'lb22':'نظم وانضباط دربموقع برگزار شدن كلاس ',
                 'lb23':'نحوه  پذيرايي',
                 'lb24':'امكانات آموزشي ( وايت برد ،ويدئو،……..)',
-                'lb_s1':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات استاد</div>''',
-                'lb_s2':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات شرکت</div>''',
+                'lb_s1':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات استاد - 0 تا 100</div>''',
+                'lb_s2':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات شرکت - 0 تا 50</div>''',
             },
             'cols_filter':{
                 '':'همه',
