@@ -1065,7 +1065,7 @@ x_data={
             'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'410'
             },
             'tasks':{
-                'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_id_','title':'کد همکار'},
+                'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_un_','title':'کد همکار'},
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title': 'نام همکار'},
                 'date1':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
                 'prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه','prop':['update']},
@@ -1127,7 +1127,7 @@ x_data={
             'base':{'mode':'form','title':'برنامه اقدامات لازم','help':'todo_act_4_person','code':'410'
             },
             'tasks':{
-                'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_id_','title':'ثبت کننده  -کد'},
+                'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_un_','title':'ثبت کننده  -کد'},
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام'},
                 'date1':{'type':'fdate','len':'10','title':'تا تاریخ','prop':[]},
                 'prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه','prop':['update']},
@@ -1270,20 +1270,29 @@ x_data={
     #--------------------------------------------------------------------
     'suggestion':{ #db
         'a':{
-            'base':{'mode':'form','title':'ثبت پیشنهاد','code':'311'
+            'base':{'mode':'form','title':'فرم پیشنهاد ها','code':'311','rev':'01-040310'
             },
             'tasks':{
-                'idea':{'type':'text','title':'شرح ایده / پیشنهاد'},
-                'idea_bnft':{'type':'text','title':'فایده ایده / پیشنهاد'},
-                'idea_dscr':{'type':'text','title':'توضیحات لازم'},
-                'vrfy_rslt':{'type':'text','title':'نتیجه بررسی'},
-                'vrfy_meta':{'type':'text','title':'اقدامات انجام شده جهت بررسی'},
+                'u_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'کد همکار'},
+                'u_nm':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{name} {family}','where':'''un = "{u_un}"'''},'title':'نام و نام خانوادگی'},
+                'u_id':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{p_id}','where':'''un = "{u_un}"'''},'title':'شماره پرسنلی'},
+                'u_ml':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{Idc_num}','where':'''un = "{u_un}"'''},'title':'کد ملی'},
+                'u_li':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{loc}','where':'''un = "{u_un}"'''},'title':'کد دفتر/پروژه'},
+                'u_ln':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{u_li}"'''},'title':'نام دفتر/پروژه'},
+                'idea':{'type':'text','title':'شرح و نحوه اجرای پیشنهاد','height':'60px'},
+                'idea_titl':{'type':'text','title':'عنوان پیشنهاد'},
+                'idea_bnft':{'type':'text','title':'مزایا و نتایج پیشنهاد( ریالی / غیر ریالی) ','height':'60px'},
+                'idea_dscr':{'type':'text','title':'توضیحات لازم','height':'60px'},
+                'vrfy_rslt':{'type':'text','title':'نتیجه بررسی - نظریه کارشناسی شرکت','height':'60px'},
+                'vrfy_meta':{'type':'text','title':'اقدامات انجام شده جهت بررسی','height':'60px'},
                 'clnt_stf':{'type':'num','min':'1','max':'100', 'title':'میزان رضایت پیشنهاد دهنده از اقدامات انجام شده بر حسب درصد'},
                 'clnt_stf_dscr':{'type':'text','title':'توضیحات در خصوص میزان رضایت'},
+                'comp':{'type':'auto','auto':'مهندسان مشاور آستان قدس رضوی','title':'نام شرکت- موسسه'}
+                #{'type':'text','title':'نام شرکت- موسسه','def_value':'مهندسان مشاور آستان قدس رضوی'},
             },
             'steps':{
-                's0':{'tasks':'lable_1,idea,idea_bnft,idea_dscr','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'lable_2,vrfy_rslt,vrfy_meta','xjobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'comp,u_un,u_nm,u_id,u_ml,u_li,u_ln,lable_1,idea_titl,idea,idea_bnft','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'lable_2,vrfy_rslt,vrfy_meta,idea_dscr','xjobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'clnt_stf,clnt_stf_dscr','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
@@ -1735,6 +1744,7 @@ x_data={
             },
             'tasks':{
                 'hmkr':{'type':'text','title':'نام و نام خانوادگی همکار','len':150,'lang':'fa',},
+                'h_des':{'type':'text','title':'توضیحات','lang':'fa','height':"60px"},
                 'date':{'type':'fdate','title':'تاریخ آموزش'},
                 'edu_id':{'type':'reference','title':'دوره',
                     'ref':{'db':'amuzesh','tb':'a','key':'{id}','val':'{date}-{tchr_name}-{subj}'},'prop':['update'],
@@ -1769,7 +1779,7 @@ x_data={
                 'an_s2':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an21,an22,an23,an24]])*3.125)}}','title':'شرکت'},
             },
             'steps':{
-                's0':{'tasks':'edu_id,date,tchr_name,subj,lb_t1,lb_t2,lb_d1,lb_l,lb1,an1,lb2,an2,lb3,an3,lb4,an4,lb5,an5,lb6,an6,lb7,an7,lb8,an8,lb_s1,an_s1,lb_d2,lb_l,lb21,an21,lb22,an22,lb23,an23,lb24,an24,lb_s2,an_s2,hmkr',
+                's0':{'tasks':'edu_id,date,tchr_name,subj,lb_t1,lb_t2,lb_d1,lb_l,lb1,an1,lb2,an2,lb3,an3,lb4,an4,lb5,an5,lb6,an6,lb7,an7,lb8,an8,lb_s1,an_s1,lb_d2,lb_l,lb21,an21,lb22,an22,lb23,an23,lb24,an24,lb_s2,an_s2,lb_hmkr,hmkr,lb_h_des,h_des',
                     'xjobs':'*','title':'ارزیابی دوره آموزشی توسط شرکت کنندگان','app_keys':'y','app_titls':'','oncomplete_act':'',
                     'step_cols_width':'6,6','task_cols_width':'4,8,0',
                     'header':'''
@@ -1804,6 +1814,8 @@ x_data={
                 'lb24':'امكانات آموزشي ( وايت برد ،ويدئو،……..)',
                 'lb_s1':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات استاد - 0 تا 100</div>''',
                 'lb_s2':'''<div style="background-color: #ff0;color:#000;">مجموع امتیازات شرکت - 0 تا 50</div>''',
+                'lb_hmkr':'''<div style="background-color: #fff;color:#000;">در صورت تمایل نام خود را  ذکر بفرمایید</div>''',
+                'lb_h_des':'''<div style="background-color: #fff;color:#000;">پیشنهادات - انتقادات و یا سایر توضیحات</div>''',
             },
             'cols_filter':{
                 '':'همه',

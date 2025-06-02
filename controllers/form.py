@@ -141,7 +141,7 @@ def xform_cg():
     
     url1=str(URL('xform',args=request.args,vars=request.vars))
     x_file1=x_file1.replace('link_server',url1) 
-    if tmplt_fname[-8:]!='-st.html':
+    if tmplt_fname[-8:]!='-st.html':#vue mode
         json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
     
         #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])

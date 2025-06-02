@@ -2,7 +2,40 @@
 {{include 'layout__menu-sd.html'}}
 <div style="margin-top:20px;" dir='rtl'></div>
 <h4 class="text-center">{{=form_name}}</h1>
-{{=htm}}
+{{if finish:}}
+	<HR>
+	<h2 class="text-center">
+		همکار گرامی
+		<u><a onclick="toggleText()">نظر</a></u>
+		شما ثبت شد
+	</h2>	
+	<h2 class="text-center">
+		از همکاری شما سپاس گزاریم
+	</h2>
+	<HR>
+	<h4 class="text-center">
+		میتوانید این پنجره را در مرورگر خود ببندید
+	</h4>
+
+	<div id="hiddenText" style="display: none;">
+        {{=htm}}
+    </div>  
+	
+    <script>
+        function toggleText() {
+            const text = document.getElementById("hiddenText");
+            if (text.style.display === "none" || text.style.display === "") {
+                text.style.display = "block";
+            } else {
+                text.style.display = "none";
+            }
+        }
+        
+    </script>
+{{else:}}
+	{{=htm}}
+{{pass}}
+
    
 
 

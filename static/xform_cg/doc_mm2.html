@@ -51,7 +51,7 @@ body {
 			<th style="width:20%;">غایبان</th>
 		</tr>
 		<tr v-for="pos in yml.pos">
-			<td v-for="x in pos">{{ x }} </td>
+			<td v-for="x in pos" height="30px">{{ x }} </td>
 	</tr></table></td></tr>
 	<tr><td><table class="tbhd1"><tr>
 		<td style="width:16%;"><b> 	تاریخ : </b>{{yml.date }} </td>
@@ -76,9 +76,15 @@ body {
 		<th style="width:7%;">پیگیری</th>
 		<th style="width:7%;">زمان</th>
 	</tr>
-	<tr v-for="(value ,index) in yml.todo">
+	      
+	<tr v-if="yml.todo.length" v-for="(value ,index) in yml.todo">
 		<td>{{ index+1 }} </td>
 		<td v-for="x in value" style="white-space: pre-line">{{ x }}</td>
+	</tr>
+	<!-- اگر خالی باشد: فرم خالی برای چاپ -->
+	<tr v-else v-for="n in 12">
+        <td>{{n}}</td>
+        <td v-for="m in 5" ></td>
 	</tr>
 </table>
 

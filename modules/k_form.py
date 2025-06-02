@@ -1145,7 +1145,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             obj2['auto-x']=x_dic['__objs__'][obj['ref']]['output_text']
         else:
             if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
-            elif obj['auto']=='_cur_user_id_':obj2['auto']='{{=session["username"]}}'
+            elif obj['auto']=='_cur_user_un_':obj2['auto']='{{=session["username"]}}'
             elif obj['auto']=='_cur_user_name_':obj2['auto']='{{=session["user_fullname"]}}'
         return obj_set(obj2,x_dic,x_data_s,xid, need,request,c_form)
             #x_auto()    
@@ -1402,7 +1402,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         
         #table of record data - جدول اصلاعات ثبت شده
         res=DB1(db2).select(tb2,where={'f2f_id':x_dic['id']},limit=0,result='dict_x',order='id',last=False)
-        #xreport_var([{'res':res}])
+        if not(x_dic['id']) or int(x_dic['id'])<1:
+            print("x_dic['id']"+str(x_dic['id']))
+            #xreport_var([{'res':res}])
         x_r_input,x_r_output,show_cols,titles=[],[],obj['ref']['show_cols'],res['titles']
         from x_data import x_data
         show_cols_tit=[x_data[db2][tb2]['tasks'][x]['title'] for x in show_cols]
@@ -1422,10 +1424,13 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
 
         #json
         json_list=[]
-        for row in res['rows']:
-            xd=dict(zip(titles,row))
-            xd2={x:xd[x] for x in show_cols}
-            json_list+=[xd2]
+        if not(x_dic['id']):#for empty page = base form for print  
+            json_list=[[' ']*len(show_cols)]*(int(obj['empty_form_row']) if 'empty_form_row' in obj else 0)
+        else:
+            for row in res['rows']:
+                xd=dict(zip(titles,row))
+                xd2={x:xd[x] for x in show_cols}
+                json_list+=[xd2]
         obj['data_json']=json_list
         
         
@@ -2043,6 +2048,7 @@ class C_FORM_HTM():
         text_app_added=False
         #step_befor='' # svae name of before step
         #xxxprint(3,msg=['form_sabt_data','',''])
+        form_editable=False #show none step of form can edit by cur_user or vice_versa
         for i,step_name in enumerate(x_data_s['steps']):
             step=x_data_s['steps'][step_name]
             step['i']=i
@@ -2052,20 +2058,24 @@ class C_FORM_HTM():
             #htm_form['body']+=[self.c_form.step_state(step_name)[2]]
             #print('uwc='+uwc)
             if uwc=='edit':
-                
+                form_editable=True
                 #xxxprint(3,msg=['edit',i,step_name])
+                
+                # show 1th editable_step in edit_mode and other editable_step in fix_mode
+                # use self.c_form.cur_step for this goal 
                 if self.c_form.cur_step:
                     json,body=self.show_step_not_cur(x_data_s,xid,c_form,step,'2')
                     htm_form['body']+=[body] 
                     htm_form['body_json'].update(json)
                 else:
-                    self.c_form.cur_step=step_name
+                    self.c_form.cur_step=step_name 
                     json,body=self.show_step_cur(step=step)
                     htm_form['body']+=[body]
                     htm_form['body_json'].update(json)
                     text_app_added=True
                     
             elif uwc=='ret_edit':
+                #form_editable=True
                 json,body=self.show_step_not_cur(x_data_s,xid,c_form,step,'1')
                 htm_form['body']+=[body,self.app_review(step_name)]
                 htm_form['body_json'].update(json)
@@ -2073,6 +2083,7 @@ class C_FORM_HTM():
                 json,body=self.show_step_not_cur(x_data_s,xid,c_form,step, fsc_mode )
                 htm_form['body']+=[body]
                 htm_form['body_json'].update(json) 
+                #xreport_var([{'json':json}])
             #htm_form['body_json'].update({})   
             htm_form['body']+=[DIV('',_class="text-center",_style="height:5px;background-color:#888")]
             '''        
@@ -2120,6 +2131,7 @@ class C_FORM_HTM():
         htm_form['inf']=['cur_step = '+str(self.c_form.cur_step)]
         htm_form['inf']+=[' | f_nxt_u = '+str(self.c_form.form_sabt_data['f_nxt_u'])]
         htm_form['inf']+=[' | f_nxt_s = '+str(self.c_form.form_sabt_data['f_nxt_s'])]
+        htm_form['form_editable']=form_editable
         return htm_form #['body']
     def show_step_not_cur(self,x_data_s,xid,c_form,step,fsc_mode,out_mode=''): #like=row_view
         '''
@@ -2134,7 +2146,7 @@ class C_FORM_HTM():
         #print (step)
         fsc_class=f"form_step_c{fsc_mode}" #fsc_mode=form_step_class
         hx={'data':[],'stp':'','app':[],'data_json':{}}#fsc_mode
-        
+        #print ("step['tasks']="+step['tasks'])
         for field_name in step['tasks'].split(','):
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
@@ -2253,10 +2265,10 @@ def _xform(out_items=['head','body','tools'],section=-1):
         #print("text_app="+str(current.request.vars['text_app']))
         text_app=request.vars['text_app'].lower()
         if 'ir' in text_app:
-            return {'htm':XML(save_app_review()),'json':'','link':''}
+            return {'htm':XML(save_app_review()),'json':'','link':'','c_form_htm':''}
         else:
             
-            return {'htm':XML(save_form()),'json':'','link':''}
+            return {'htm':XML(save_form()),'json':'','link':'','c_form_htm':''}
     #session.view_page='xform'
     
     '''
@@ -2270,21 +2282,20 @@ def _xform(out_items=['head','body','tools'],section=-1):
     #------------------------------------------
     x_data_s,db_name,tb_name,msg=_get_init_data()
     if not x_data_s:
-        return {'htm':msg,'json':''}
+        return {'htm':msg,'json':'','link':'','c_form_htm':''}
     
     # check access /auth
     auth= k_user.C_AUTH_FORM(x_data_s)
     if not auth.ok:
-        return {'htm':H1(auth.msg),'json':''}
+        return {'htm':H1(auth.msg),'json':'','link':'','c_form_htm':''}
         print("auth - not ok")
    
     xid=request.args[2] or 1
-    
+    c_form_htm=C_FORM_HTM(x_data_s,xid)
     if section>-1:
-        
-        json_data,htm_x=C_FORM_HTM(x_data_s,xid).show_step_cur(step_n=section)
+        json_data,htm_x=c_form_htm.show_step_cur(step_n=section)
     else: #entire of form
-        htm_form=C_FORM_HTM(x_data_s,xid).show_form()
+        htm_form=c_form_htm.show_form()
         #xreport_var([{'htm_form':htm_form}])
         htm_x=[y for x in out_items for y in htm_form[x]]
         json_data=htm_form['body_json']
@@ -2293,7 +2304,7 @@ def _xform(out_items=['head','body','tools'],section=-1):
     link=k_htm.a('نمایش فرم با فرمت استاندارد',_target="blank",_title='فرم استاندارد',_href=URL('xform_cg',args=request.args)
         ,_class='btn btn-primary') if 'xform_cg_file' in x_data_s['base'] else ''
     #xreport_var([{'htm':htm}])
-    return {'htm':htm,'json':json_data,'link':link}
+    return {'htm':htm,'json':json_data,'link':link,'c_form_htm':c_form_htm,'htm_form':htm_form}
 #------------------------------------------------------------------------------------------------------------------------
 def _get_init_data():
     '''
