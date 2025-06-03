@@ -2292,6 +2292,7 @@ def _xform(out_items=['head','body','tools'],section=-1):
    
     xid=request.args[2] or 1
     c_form_htm=C_FORM_HTM(x_data_s,xid)
+    htm_form=''
     if section>-1:
         json_data,htm_x=c_form_htm.show_step_cur(step_n=section)
     else: #entire of form

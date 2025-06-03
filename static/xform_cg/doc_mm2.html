@@ -77,12 +77,13 @@ body {
 		<th style="width:7%;">زمان</th>
 	</tr>
 	      
-	<tr v-if="yml.todo.length" v-for="(value ,index) in yml.todo">
+	<tr v-if="yml._id!=-1" v-for="(value ,index) in yml.todo">
 		<td>{{ index+1 }} </td>
 		<td v-for="x in value" style="white-space: pre-line">{{ x }}</td>
 	</tr>
-	<!-- اگر خالی باشد: فرم خالی برای چاپ -->
-	<tr v-else v-for="n in 12">
+	<!-- اگر خالی باشد: فرم خالی برای چاپ 
+	v-if="yml.todo.length"-->
+	<tr v-else v-for="n in 8">
         <td>{{n}}</td>
         <td v-for="m in 5" ></td>
 	</tr>
@@ -95,9 +96,14 @@ body {
 		<th style="width:7%;">اعلام کننده</th>
 		<th style="width:90%;">شرح</th>
 	</tr>
-	<tr v-for="(value ,index) in yml.note">
+	<tr v-if="yml._id!=-1" v-for="(value ,index) in yml.note">
 		<td>{{ index+1 }} </td>
 		<td v-for="x in value" style="white-space: pre-line">{{ x }} </td>
+	</tr>
+	<!-- اگر خالی باشد: فرم خالی برای چاپ -->
+	<tr v-else v-for="n in 10">
+        <td>{{n}}</td>
+        <td v-for="m in 2" ></td>
 	</tr>
 </table>
 
@@ -109,9 +115,14 @@ body {
 		<th style="width:25%;">فایل اصلی</th>
 		<th style="width:25%;">PDF</th>
 	</tr>
-	<tr v-for="(value ,index) in yml.attch">
+	<tr  v-if="yml._id!=-1" v-for="(value ,index) in yml.attch">
 		<td>{{ index+1 }} </td>
 		<td v-for="x in value" style="white-space: pre-line">{{ x }} </td>
+	</tr>
+	<!-- اگر خالی باشد: فرم خالی برای چاپ -->
+	<tr v-else v-for="n in 2">
+        <td>{{n}}</td>
+        <td v-for="m in 3" ></td>
 	</tr>
 </table>
 

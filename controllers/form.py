@@ -125,18 +125,26 @@ def xform():
     res=k_form._xform() 
     return dict(htm=res['htm'],link=res['link'])#k_form._xform())
 def xform_cg():
-    import k_file,json
+    import k_file,json,os
     session.view_page='xform_cg'
     session['update_step']=True
     x_data_s,db_name,tb_name,msg=_get_init_data()
     tmplt_fname=x_data_s['base']['xform_cg_file']
-    x_file=k_file.read('text',r"D:\ks\I\web2py-test\applications\spks\static\xform_cg"+"\\"+ tmplt_fname)
-    
-    #return x_file
+    cur_dir=os.getcwd() #D:\ks\I\web2py-test
+    file_dir=cur_dir+r"\applications\spks\static\xform_cg"+"\\"+ tmplt_fname
+    x_file=k_file.read('text',file_dir)
+    #print(file_dir)
     json_data=k_form._xform()['json']
-    json_data1={x:y['value'] for x,y in json_data.items() if 'value' in y}#str(XML(y['value']
-    json_data1['_']={x:y for x,y in json_data.items()} #__inf__
+    if request.args[2]=="-1":
+        json_data1={x:'' for x,y in json_data.items() if 'value' in y} #str(XML(y['value']
+        json_data1['_']={x:{yi:'' for yi in y} for x,y in json_data.items()} #__inf__
+    else:
+        json_data1={x:y['value'] for x,y in json_data.items() if 'value' in y}#str(XML(y['value']
+        json_data1['_']={x:y for x,y in json_data.items()} #__inf__
+        
     json_data1['_labels']={x:y for x,y in x_data_s['labels'].items()}
+    json_data1['_id']=request.args[2] #new for =>id=-1
+    
     x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
     
     url1=str(URL('xform',args=request.args,vars=request.vars))

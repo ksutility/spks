@@ -1093,7 +1093,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_get':{ #db
         'a':{
-            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'920','xform_cg_file':'doc_mm2.html'#'hr_arzyabi_amalkard.html'
+            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'920'
             },
             'tasks':{
                 'name_f':{'type':'text','len':'20','title':'نام'},
@@ -1637,7 +1637,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'hr_arzyabi_amalkard_mdr':{ #db
         'a':{
-            'base':{'mode':'form','title':'ارزشیابی عملکرد مدیران','data_filter':'f_nxt_u = "{{=_i_}}"','code':'802','internet':True,'xform_cg_file':'hr_arzyabi_amalkard.html',
+            'base':{'mode':'form','title':'ارزشیابی عملکرد مدیران','data_filter':'f_nxt_u = "{{=_i_}}"','code':'802','internet':True,'xform_cg_file':'hr_arzyabi_amalkard_mdr.html',
             },
             'tasks':{
                 'frd_1':{'type':'user','title':'نام همکار','xjobs':'mod_mst','prop':['show_full','p_id','un_free'],},
