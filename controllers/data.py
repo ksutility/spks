@@ -776,6 +776,8 @@ def show_sptable(x_data,ref_col):
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # ==== level 0 (use by user)=========================================================================================================
 def index():
+    import os
+    cur_dir=os.getcwd() #D:\ks\I\web2py-test
     f_l='لیست - '
     ff={'a_sub_p':'پروژه ها','paper':'نامه ها','a_dspln':'رسته های مهندسی','user':'لیست همکاران','job':'سمتها'}
     ff1={'xtable':'{}','select':'-'}
@@ -790,7 +792,7 @@ def index():
     "papers=>GGA-Layouts":lnk+"""data/xtable/paper?data_filter=%22prj%22%3D%2229%22+AND+%22des%22+like+%22%25L-%25%22&cols_filter=&table_class=1""",
     "papers=>standard":lnk+"""data/xtable/paper?data_filter=%22prj%22%3D%2248%22""",
     "-----------":"", 
-    "spks help":lnk+"""file/f_list?xpath=D:\ks\I\web2py\Applications\spks\help""",
+    "spks help":lnk+"""file/f_list?xpath=""" + cur_dir + """\Applications\spks\help""",
     "km":lnk+"""file/f_list/ks/i/dropbox/01-KM/1-ACT?xpath=d%3A """,
     "TimeSHeet":lnk+"""xfile/read/ks/i/dropbox/01-KM/1-ACT/11-KS/Timesheet/TMST-NNNN-AQC.mm?xpath=d%3A""",
     "------------":"",

@@ -896,6 +896,37 @@ def diff_files():
             TR('OLD (Original) File =',f1_select2),_style='width:100%;'),
         #XML(''' <input name="file" type="file" size="60"> '''),
         INPUT(_value='Compare',_type='submit')),XML("<HR>"),DIV(XML(dif)))
+def diff_files_1():
+    import k_file,os,k_htm
+    path=request.vars.path or request.vars.file
+    if path:
+        files=k_file.list_files(path,full_name=False)
+        f1_select=k_htm.select(_options=files,_name='file1')
+        f2_select=k_htm.select(_options=files,_name='file2')
+        d2_htm=INPUT(_name="dir2",_value=path)
+    else:
+        f1_select='path=""'
+        f2_select=''
+        d2_htm=''
+    f_name1=request.vars.file1
+    f_name2=request.vars.file2
+    dir2=request.vars.dir2
+    dif=''
+    if f_name2 and f_name1 and dir2:
+        dif=_diff_files(from_file_path=os.path.join(path,f_name1),to_file_path=os.path.join(dir2,f_name2),
+            fromdesc="Original - "+f_name1, todesc="Modified - "+f_name2,dif_file_path='')    
+    return DIV(FORM(
+        TABLE(TR(
+            TD('file1 ='),
+            TD(f1_select),
+            TD('file2 ='),
+            TD(d2_htm),
+            TD(f2_select),
+            TD(INPUT(_value='Compare',_type='submit'))
+            )),
+        XML("<HR>"),
+        DIV(XML(dif))
+        ))
 def tools(): 
     ''' creat=1401/10/21
        انتخاب یک عمل برای اعمال روی فایل

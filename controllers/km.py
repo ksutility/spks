@@ -1206,3 +1206,8 @@ cleaner, more lightweight and works better without JavaScript.</p>
     </body>
     </html>
     """
+def help():
+    import os
+    url=URL('xfile','read',args=['_SPKS-KM-RP-0000-masterlist.ksm'],vars={'xpath':os.path.join(os.getcwd(),'Applications','spks','help')})
+    #return str(url)
+    redirect(url)

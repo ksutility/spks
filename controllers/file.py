@@ -85,62 +85,80 @@ def _list_files(path,full_name=False):
 def upload_file():
     fwa=k_file_w2p.folder_w_access()
     if not fwa['ok']:return fwa['msg']
+    if 'file' in request.vars:
+        #file=request.vars.filepicker
+        filename_base = request.vars.file.filename
+        filename_goal =request.vars.filename
+        fn_obj =k_file.file_name_split(filename_base)#.replace(" ", "")
+        xdata={    
+            'user_filename':k_file.name_correct(fn_obj['name']),
+            'un':session["username"]}
+        filefullname=filename_goal.format(**xdata) or xdata['user_filename']
+        filefullname+=fn_obj['ext']
     
-    file=request.vars.filepicker
-    
-    filename1=request.vars.filename
-    ff=k_file.file_name_split(file.filename)#.replace(" ", "")
-    xdata={    
-        'user_filename':k_file.name_correct(ff['name']),
-        'un':session["username"]}
-    filefullname=filename1.format(**xdata) or xdata['user_filename']
-    filefullname+=ff['ext']
-    
-    #input_file_name= file.filename
-    #ou=str(file.file.read())
-    
-    #ou+=str(file.filename)
-    #ou+='<br>'+ str(file_b)
-    
-    if filefullname:
-        session['uploaded_name']=filefullname
-        path1=xpath+'\\'.join(request.args) #join((*request.args,filefullname))
-        path=path1+'\\'+filefullname
-        session['uploaded_path']=path
-        session['uploaded_time']=time.time() #now
-        response.flash=T("File Upload started!")
-        if not os.path.exists(path1):k_file.dir_make(path1)
-        msgs=[k_file.file_delete_rcl(path,recycle_sub_folder=request.args[0])]  
-        file_b=file.file.read() #file contents in byte format
-        with open(path, 'wb') as f:f.write(file_b)
-        msgs+=['File Upload Succesfully',f'filename={path}',f'args={request.args}','uploaded_time = '+ str(time.time()-session['uploaded_time']),'-'*25]
+        #input_file_name= file.filename
+        #ou=str(file.file.read())
         
-        if request.vars.todo :
-            msgs+=_update_todo(request.vars.todo,filefullname)
-            '''
-            import json
-            todo1=request.vars.todo
-            todo2=todo1.replace("$filefullname$",filefullname)
-            todo= json.loads(todo2)
+        #ou+=str(file.filename)
+        #ou+='<br>'+ str(file_b)
+        res={}
+        if filefullname:
+            session['uploaded_name']=filefullname
+            path1=xpath+'\\'.join(request.args) #join((*request.args,filefullname))
+            filepath=path1+'\\'+filefullname
+            session['uploaded_path']=filepath
+            session['uploaded_time']=time.time() #now
+            response.flash=T("File Upload started!")
+            if not os.path.exists(path1):k_file.dir_make(path1)
+            msgs=[k_file.file_delete_rcl(filepath,recycle_sub_folder=request.args[0])]  
             
-                     
+            #save file
             
-            if todo['do']=='sql':                 
-                from k_sql import DB1
-                db_path='applications\\spks\\databases\\'
-                db_p=db_path+todo['db']+'.db'
-                if os.path.isfile(db_p):
-                    msgs+=['todo file is found =>'+ db_p]   
-                    db1=DB1(db_p)
-                    xu=db1.update_data(table_name=todo['tb'],set_dic=todo['set_dic'],x_where=todo['where']) #tb_name=sq[1]
-                    msgs+=['update db is done =>'+ str(xu)]
-
-                else:
-                    msgs+=['error path:'+ str(db_p)]
-            '''        
-        return "<br><h2>فایل با موفقیت آپلود شد</h2><hr>"+'<br>'.join(msgs)
+            #file_b=file.file.read() #file contents in byte format
+            #with open(filepath, 'wb') as f:f.write(file_b)
+            
+            with open(filepath, 'wb') as f:
+                while True:
+                    chunk = request.vars.file.file.read(65536)  # 64KB chunks
+                    if not chunk:
+                        break
+                    f.write(chunk)    
+                
+            
+            msgs+=['File Upload Succesfully',f'filename={filepath}',f'args={request.args}','uploaded_time = '+ str(time.time()-session['uploaded_time']),'-'*25]
+            
+            if request.vars.todo :
+                msgs+=_update_todo(request.vars.todo,filefullname)
+           
+            msg='<br>'.join(msgs) #"<h2>فایل با موفقیت آپلود شد</h2><hr>"+
+            res={'status': 'success', 'filename': filepath,'msg':msg}
+        else:
+            msg=f'File Not Found <br> filename={path}'
+            res={'status': 'error','msg':msg}
     else:
-        return f'File Not Found <br> filename={path}'
+        res={'status': 'error','msg':'file not set'}
+    return response.json(res) #return msg
+        
+def upload_file_1():#040314
+    import os
+    # این تابع فایل را دریافت و ذخیره می‌کند
+    if request.vars.file:
+        # تنظیم مسیر ذخیره‌سازی
+        upload_folder = r"c:\temp" #os.path.join(request.folder, 'uploads')
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        # دریافت اطلاعات فایل
+        filename = request.vars.file.filename
+        filepath = os.path.join(upload_folder, filename)
+        # ذخیره فایل با امکان ردیابی پیشرفت
+        with open(filepath, 'wb') as f:
+            while True:
+                chunk = request.vars.file.file.read(65536)  # 64KB chunks
+                if not chunk:
+                    break
+                f.write(chunk)
+        return response.json({'status': 'success', 'filename': filename})
+    return response.json({'status': 'error'})
 def _update_todo(todo,filefullname):
     '''
         todo=request.vars.todo

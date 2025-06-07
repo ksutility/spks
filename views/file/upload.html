@@ -1,4 +1,6 @@
 <!--  
+note some var like filename is in request from before
+--------------------------------------------
 input = 
 	link
 	file_ext_dot
@@ -57,10 +59,23 @@ p	{
 	margin: 0 auto;
 	text-align: center;
 	width:90%;}
+.success {
+    color: green;
+}
+.error {
+    color: red;
+}
+#progress-bar {
+    transition: width 0.3s;
+}    
 </style>
-<form method="post" enctype="multipart/form-data" action="{{=link}}">
+<!--<form method="post" enctype="multipart/form-data" >  action="{{=link}}" 
+<input id="but1" class="button-33" type="Submit" value="Upload">
+</form> 
+-->
+
 	<div class="cen"><h1>فرم ارسال فایل</h1></div>
-	<table><tr>
+	<table id="table1"><tr>
 		<td><div name="ext_inf" id="ext_inf">{{=file_ext_tit}}</div></td>
 		<td><p>مشخصات فایل</p></td>
 		<td><p>1</p></td>
@@ -69,14 +84,24 @@ p	{
 		<td><p>انتخاب فایل جهت ارسال</p></td>
 		<td><p>2</p></td>
 	</tr><tr>
-		<td><input id="but1" class="button-33" type="Submit" value="Upload"></td>
+		<td>
+            
+            <button id="but1" class="button-33" onclick="startUpload()">آپلود فایل</button>
+        </td>
 		<td><p>تایید جهت ارسال فایل</p></td>
 		<td><p>3</p></td>
 	</tr></table>
-	<br>
+    <ul id="output"></ul>
 	<a title="{{=args}}"> --- </a>
-	<ul id="output"></ul>
-</form> 
+	
+    <div id="progress-container" style="margin-top: 20px; display: none;">
+        <div id="progress-bar" style="width: 0%; height: 20px; background-color: #4CAF50;"></div>
+        <div id="progress-text">0% (0 بایت از 0 بایت)</div>
+    </div>
+    
+    <div id="result" style="margin-top: 20px;"></div>
+    
+
 <script>
 	document.getElementById("but1").style.display = "none";
 	
@@ -133,6 +158,63 @@ p	{
 		return `${(number / 1048576).toFixed(1)} MB`;
 	  }
 	}
+function startUpload() {
+    const fileInput = document.getElementById('filepicker');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('لطفا یک فایل انتخاب کنید');
+        return;
+    }
+    
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const resultDiv = document.getElementById('result');
+    
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    progressText.innerHTML = '0% (0 بایت از ' + formatBytes(file.size) + ')';
+    resultDiv.innerHTML = '';
+    document.getElementById("table1").style.display = "none";
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + '%';
+            progressText.innerHTML = percent + '% (' + formatBytes(e.loaded) + ' از ' + formatBytes(e.total) + ')';
+        }
+    };
+    
+    xhr.onload = function() {
+        
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resultDiv.innerHTML = '<div class="success"><h2> فایل با موفقیت آپلود شد: </h2></div><hr><div>'+response.msg + '</div>';
+        } else {
+            resultDiv.innerHTML = '<div class="error"><h2>خطا در آپلود فایل</h2></div><hr><div>'+response.msg + '</div>';
+        }
+    };
+    
+    xhr.open('POST', '{{=URL("spks","file", "upload_file",args=request.args,vars=request.vars)}}', true);
+    xhr.send(formData);
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 بایت';
+    
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['بایت', 'کیلوبایت', 'مگابایت', 'گیگابایت'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 </script>
    
 

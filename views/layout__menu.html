@@ -67,6 +67,7 @@
                                 <a class="dropdown-item" href="{{=URL('file','f_list',args=('lib'),port=80)}}">{{=XML(k_icon.book(16))}} کتابخانه</a>
 								<a class="dropdown-item" href="{{=URL('file','f_list',args=('prj'))}}">{{=XML(k_icon.folder2_open(16))}} اسناد - پروژه ها و فرایندها</a>
 								<!-- 
+								=URL('file','index',port=80)
 								<a class="dropdown-item" href="{{=URL('file','index',args=('paper','pre'))}}">پیش نویس نامه </a>
 								<a class="dropdown-item" href="{{=URL('xfile','read',
 									args=('AQC0-SPX-A0-KM-RP-1001-1-021224-FORM-INTRO-media.mm'),
@@ -91,8 +92,8 @@
 			
 			<td width="20%" class="head-cell"><div class="head-cell">
 				<a class="btn x_btn" href="{{=URL('form','list_0')}}" title="مدیریت فرمها">{{=XML(k_icon.house_fill(24))}}</a>
-				<a class="btn x_btn" href="{{=URL('file','index',port=80)}}" title="اشتراک فایل">{{=XML(k_icon.share_fill(20))}}</a>
-				<a class="btn x_btn" href="{{=URL('file','f_list',args=('lib'),port=80)}}" title="کتابخانه">{{=XML(k_icon.book(20))}}</a>
+				<a class="btn x_btn" href="{{=URL('file','index')}}" title="اشتراک فایل">{{=XML(k_icon.share_fill(20))}}</a>
+				<a class="btn x_btn" href="{{=URL('file','f_list',args=('lib'))}}" title="کتابخانه">{{=XML(k_icon.book(20))}}</a>
 				<a class="btn x_btn" href="{{=URL('file','f_list',args=('prj'))}}" title="اسناد - پروژه ها و فرایندها">{{=XML(k_icon.folder2_open(20))}}</a>
 				<!-- 
 				<a class="btn x_btn" href="{{=URL('data','index')}}" title="جداول اطلاعات">T</a>
