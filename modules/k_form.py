@@ -1010,6 +1010,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 modir_un='rms'
                 '''
             #obj['add_empty_first']=False
+            if 'def_value' in obj:
+                if obj['def_value']=='_cur_user_un_':
+                    _value=session["username"]
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf

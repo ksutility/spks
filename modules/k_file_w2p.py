@@ -53,7 +53,11 @@ class FILES_X_TOOLS1():
         return A('Cut',_title='CUT',_class='btn btn-warning',_href=URL(f='move_x',args=['cut']+self.args,vars=self.r_vars)
         #DIV(A('Copy',_title='COPY',_class='btn btn-warning',_href='javascript:void(0)',_onclick=f"""j_box_show("{URL(f='move_x',args=['copy']+args+[fname],vars=r_vars)}",true)"""))
         ) if self.fc_access else '' #_target="x_frame"
-
+    def link_edit(self)#,x_file,link_txt,link_title='Edit'):  
+        ext=x_file['ext'][1:]
+        if ext in ['md','mm','json','csv','txt','ksm','mermaid','mermaid2']:#files that can edit by edit_r page
+            return A(link_txt,_href=URL('xfile','edit_r',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
+        return ''   
 def folder_w_access(args=[],x_path=''):
     '''
     old name=fca

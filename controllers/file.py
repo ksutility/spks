@@ -565,7 +565,7 @@ def f_list():#file_browser=file.index
             ) if fc_access else ''      
     def link_edit(x_file,link_txt,link_title='Edit'):  
         ext=x_file['ext'][1:]
-        if ext in ['md','mm','json','csv','txt','ksm']:#files that can edit by edit_r page
+        if ext in ['md','mm','json','csv','txt','ksm','mermaid','mermaid2']:#files that can edit by edit_r page
             return A(link_txt,_href=URL('xfile','edit_r',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
         return ''   
     def link_download(x_file,link_txt,link_title='download'):

@@ -448,7 +448,7 @@ def read_mermaid():
     if ext=="mermaid2":
         return mermaid_2_html(lines[0],lines[1:]) 
     if ext=="mermaid":
-        return mermaid_2_html("abc",lines) 
+        return mermaid_2_html("مهندسان مشاور معماری و شهر سازی آستان قدس رضوی",lines) 
     pass
 def read(): #read all markup
     f_name,f_msg,file_inf=_x_file()
