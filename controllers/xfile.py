@@ -414,6 +414,12 @@ def read_mermaid():
             <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
             <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
         """
+        head=f'''
+                    <h1 class="center">
+                        {head}
+                    </h1>
+                    <hr>
+        ''' if head else ''
         return f'''
         <html><head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -428,10 +434,7 @@ def read_mermaid():
         <body >
             <div class="container1">
                 <div class="center">
-                    <h1 class="center">
-                        {head}
-                    </h1>
-                    <hr>
+                    {head}
                     <div>
                         <pre class="mermaid">
                             {''.join(mermaid_base)}
@@ -448,7 +451,7 @@ def read_mermaid():
     if ext=="mermaid2":
         return mermaid_2_html(lines[0],lines[1:]) 
     if ext=="mermaid":
-        return mermaid_2_html("مهندسان مشاور معماری و شهر سازی آستان قدس رضوی",lines) 
+        return mermaid_2_html("",lines) #"مهندسان مشاور معماری و شهر سازی آستان قدس رضوی"
     pass
 def read(): #read all markup
     f_name,f_msg,file_inf=_x_file()
