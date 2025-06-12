@@ -798,7 +798,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     '''
     #xprint('output='+str(obj['output']))
     #cm.tik('step 3')
-    def x_auto():
+    def x_auto():#sc
         ''' 
             اطلاعات این فیلد یا در آیتم auto نشان داده می شود و یا در آیتم ref
             this field info is show in ["auto"] item or in ["ref"] item
@@ -2158,7 +2158,6 @@ class C_FORM_HTM():
                 hx['data']+=[self._show_row(hh,step)]
                 #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
-                #hx['data_json'][field_name]={'name':str(hh[4]),'value':str(hh[1]),'help':str(hh[2]),'title':str(hh[3])}
         #breakpoint() f_nxt_s
         def val_in_dic(x_dict,v_name):
             '''

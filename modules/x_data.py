@@ -955,7 +955,7 @@ x_data={
     #--------------------------------------------------------------------
     'doc_mm':{ #db
         'a':{
-            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'403','xform_cg_file':'doc_mm2.html','multi_app':{'2':['ks']},
+            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'403','xform_cg_file':'fr-cg-doc_mm2.html','multi_app':{'2':['ks']},
             },
             'tasks':{
                 'name':{'type':'text','width':'60','title':'عنوان جلسه'},
@@ -976,14 +976,14 @@ x_data={
                 'file_r':{'type':'file','len':'40','file_name':'{{=code}}-ras','file_ext':"pdf",'path':'form,doc__mm','title':'pdf'},
                 'des_1':{'type':'text','width':'60','title':'توضیحات'},
                 'pos':{'type':'f2f','len':'60','title':'محل جلسه','ref':{'tb':'pos','show_cols':['name','per','per_x']},},
-                'todo':{'type':'f2f','len':'60','title':'اقدامات','ref':{'tb':'todo','show_cols':['p_sy','des','p_do','p_ch','dur']},},
                 'note':{'type':'f2f','len':'60','title':'مذاکرات','ref':{'tb':'note','show_cols':['p_sy','des']},},
+                'todo':{'type':'f2f','len':'60','title':'مصوبات','ref':{'tb':'todo','show_cols':['p_sy','des','p_do','p_ch','dur']},},
                 'attch':{'type':'f2f','len':'60','title':'پیوستها','ref':{'tb':'attch','show_cols':['name','file_v','file_r']},'var_set':{'f_code':'code'}},
                 'abstr':{'type':'text','len':'1000','title':'خلاصه جلسه'},
             },
             'steps':{
                 'pre':{'tasks':'date,time_st,user_crt,user_man,units,mm_type,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,name','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'code,stn_code,pos,todo,note,attch,abstr','xjobs':'#step#0,dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'code,stn_code,pos,note,todo,attch,abstr','xjobs':'#step#0,dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'file_v,file_r','xjobs':'#step#0,dcc_grp','title':'بارگزاری فایل نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'date,time_st,user_crt,user_man,units,mm_type,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,name,des_1,stn_code','xjobs':'dcc_grp','title':'مدیریت سوابق','app_keys':'','app_titls':'','oncomplete_act':''},
             },
@@ -1480,10 +1480,11 @@ x_data={
                 },
         }
     },
-        #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
+    #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_mamurit_ruz':{ #db
         'a':{
-            'base':{'mode':'form','title':'ماموریت روزانه','data_filter':'f_nxt_u = "{{=_i_}}"','code':'902','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+            'base':{'mode':'form','title':'ماموریت روزانه',
+                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'902','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -1521,6 +1522,47 @@ x_data={
             },
             'data_filter': 
                 {'step_2_dt like "{{=_d_}}%"':'فرمهای نهایی شده در امروز',
+                },
+        }
+    },
+    #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
+    'rep_mamurit':{ #db msr=mission-report  
+        'a':{
+            'base':{'mode':'form','title':'گزارش ماموریت','rev':'01-040325',
+                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'207','xform_cg_file':'fr-cg-rep_mamurit.html','multi_app':{'1':['snr'],'3':['mlk']},
+            },
+            'tasks':{
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
+                'u_li':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{loc}','where':'''un = "{frd_1}"'''},'title':'کد دفتر/پروژه'},
+                'u_ln':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{u_li}"'''},'title':'نام دفتر/پروژه'},
+                'date':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
+                'c_prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
+                'c_prj_txt':{'type':'auto-x','len':'30','ref':'c_prj_id'},
+                'prj_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'id = "{c_prj_id}"'},'title':'نام پروژه'},
+                'prj_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'id = "{c_prj_id}"'},'title':'کد پروژه','prop':['hidden','update']},
+                'code_sn':{'type':'index','len':'3','ref':{'db':'rep_mamurit','tb':'a','key':'{id}','val':'{code_sn}','where':"prj_code = '{prj_code}'"},'title':'شماره','prop':['update'],'start':1},
+                'code':{'type':'auto','len':'8','auto':'aqrc-tqm-fr-msr-{{=date[:4]+date[5:7]+date[8:10] if date else "000000"}}-{{=str(id).zfill(4)}}','title':'کد پشتیبان'},
+                'stn_code':{'type':'auto','len':'8','auto':'{prj_code}-_D-{{=date[2:4]+date[5:7]+date[8:10] if date else "000000"}}-MSR-{code_sn}-{{=str(id).zfill(5)}}','title':'کد فایل'},
+                'report':{'type':'text','len':5000,'lang':'fa','title':'شرح ماموریت','height':'300px'},
+                'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},        
+                'des_modir':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
+               
+            },
+            'steps':{
+                's0':{'tasks':'frd_1,date,frd_modir,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,code,stn_code,report','xjobs':'*','title':'ثبت فرم توسط همکار','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'frd_1,time_st,frd_modir','view1':'time_en','view2':'des_modir'}
+            },
+            'labels':{
+            },
+            'cols_filter':{
+                'frd_1,date,frd_modir,c_prj_id,c_prj_txt':'-',
+                '':'همه',
+            },
+            'data_filter': 
+                {
                 },
         }
     },

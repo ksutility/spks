@@ -100,7 +100,7 @@ def call():
     return service()    
 #for python server - end
 
-def _aqc_report_daily_read():
+def _aqc_report_daily_read(start_date=''):
     from gluon import current
     args=current.request.args
     #print (args)
@@ -112,7 +112,7 @@ def _aqc_report_daily_read():
     if read_xl: data+=_aqc_report_daily_read_1()
     if not data:data=[["نام و نام خانوادگی",'سال','ماه',"روز",'w','پروژه','دسته','اقدام',"زمان"]]
 
-    if read_db : data+=_aqc_report_daily_read_2()
+    if read_db : data+=_aqc_report_daily_read_2(start_date)
     return {'ok':True,'data':data}
   
 
@@ -144,15 +144,13 @@ def _aqc_report_daily_title(in_titels=''): #rows[0]
 #@cache(request.env.path_info, time_expire=3600, cache_model=cache.ram)    
 def aqc_report_daily_pivot():
     
-    inp=_aqc_report_daily_read()
-    if not inp['ok']:return inp['msg']
-    data=inp['data']
+    
     
     import k_file_x
     #return (str(data))
     case=request.args[0]
     if case=="user_day":
-        set1="""{
+         set1="""{
             rows: ["نام و نام خانوادگی"], 
             cols: ["روز"],
             vals: ["زمان"],
@@ -164,7 +162,12 @@ def aqc_report_daily_pivot():
             vals: ["زمان"],
             aggregatorName: "Sum",
             rendererName: "Heatmap"}"""
+    start_date=(request.args[1]).replace("-","/") if len(request.args)>1 else ''
+    #print("start_date="+start_date)
     import json
+    inp=_aqc_report_daily_read(start_date)
+    if not inp['ok']:return inp['msg']
+    data=inp['data']
     tb2=json.dumps(data)
     htm0= f"<a class='btn btn-primary' href={URL('tmsh','aqc_report_daily_pivot',args=['user_day'])}>نفرات</a> - "
     htm0+=f"<a class='btn btn-primary' href={URL('tmsh','aqc_report_daily_pivot',args=['prj'])}>پروژه</a> "
@@ -485,7 +488,7 @@ def help_tmsh_mm(x_un,x_date):
     #table_mam=k_htm.C_TABLE(titles_mam,rows_mam).creat_htm(div_class='div_mam') if rows_mam else ''
     #table_mor=k_htm.C_TABLE(titles_mor,rows_mor).creat_htm(div_class='div_mor') if rows_mor else ''
     return mam_list_dict,mor_list_dict# table_mam,table_mor
-def _aqc_report_daily_read_2(): 
+def _aqc_report_daily_read_2(start_date=''): 
     ''' aqc_report_daily_read =name_famil,yy,mm,dd,ww,prj,act_cat,act_des,time) '''
     import k_time
     def person_act_2_xl_like(person_act_row_dict):
@@ -504,7 +507,8 @@ def _aqc_report_daily_read_2():
             k_time.time_2_num(x['time']) #8 = time
             ]    
     db1=DB1('person_act')
-    data2_rows,data2_titles,data2_rows_num=db1.select('a',limit=0)
+    where="`date1` > '{}'".format(start_date) if start_date else ''
+    data2_rows,data2_titles,data2_rows_num=db1.select('a',limit=0,where=where)
     x_list=[]
     for row in data2_rows:
         x_list+=[person_act_2_xl_like(zip(data2_titles,row))]

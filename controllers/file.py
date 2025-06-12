@@ -83,10 +83,12 @@ def _list_files(path,full_name=False):
 
 #-----------------------------------------------------------------      
 def upload_file():
+    # این تابع فایل را دریافت و ذخیره می‌کند
     fwa=k_file_w2p.folder_w_access()
     if not fwa['ok']:return fwa['msg']
     if 'file' in request.vars:
-        #file=request.vars.filepicker
+        import os
+        # دریافت اطلاعات فایل
         filename_base = request.vars.file.filename
         filename_goal =request.vars.filename
         fn_obj =k_file.file_name_split(filename_base)#.replace(" ", "")
@@ -103,8 +105,10 @@ def upload_file():
         #ou+='<br>'+ str(file_b)
         res={}
         if filefullname:
+            
             session['uploaded_name']=filefullname
             path1=xpath+'\\'.join(request.args) #join((*request.args,filefullname))
+            # تنظیم مسیر ذخیره‌سازی
             filepath=path1+'\\'+filefullname
             session['uploaded_path']=filepath
             session['uploaded_time']=time.time() #now
@@ -112,11 +116,12 @@ def upload_file():
             if not os.path.exists(path1):k_file.dir_make(path1)
             msgs=[k_file.file_delete_rcl(filepath,recycle_sub_folder=request.args[0])]  
             
-            #save file
+
             
             #file_b=file.file.read() #file contents in byte format
             #with open(filepath, 'wb') as f:f.write(file_b)
             
+            # ذخیره فایل با امکان ردیابی پیشرفت
             with open(filepath, 'wb') as f:
                 while True:
                     chunk = request.vars.file.file.read(65536)  # 64KB chunks
@@ -139,26 +144,7 @@ def upload_file():
         res={'status': 'error','msg':'file not set'}
     return response.json(res) #return msg
         
-def upload_file_1():#040314
-    import os
-    # این تابع فایل را دریافت و ذخیره می‌کند
-    if request.vars.file:
-        # تنظیم مسیر ذخیره‌سازی
-        upload_folder = r"c:\temp" #os.path.join(request.folder, 'uploads')
-        if not os.path.exists(upload_folder):
-            os.makedirs(upload_folder)
-        # دریافت اطلاعات فایل
-        filename = request.vars.file.filename
-        filepath = os.path.join(upload_folder, filename)
-        # ذخیره فایل با امکان ردیابی پیشرفت
-        with open(filepath, 'wb') as f:
-            while True:
-                chunk = request.vars.file.file.read(65536)  # 64KB chunks
-                if not chunk:
-                    break
-                f.write(chunk)
-        return response.json({'status': 'success', 'filename': filename})
-    return response.json({'status': 'error'})
+
 def _update_todo(todo,filefullname):
     '''
         todo=request.vars.todo

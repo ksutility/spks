@@ -733,54 +733,16 @@ def edit_r():
         save_t=dif_t+f"<hr>save=ok --- <hr> write to file:{f_name}<hr><pre>{file_txt}</pre>"    
     comp='backup='+bak_file + _diff_files(from_file_path=bak_file,to_file_path=f_name,fromdesc="Old",todesc="New",encoding=encode_n) if bak_file else ''
 
-    on='file_txt'
+    #on='file_txt'
+    obj_name='file_txt'
     lines_num=len(data.split('\n'))
     xpath=request.vars['xpath'] or r"D:\ks\0-file"
-    vars={'xpath':xpath}
-    file_name=f"<a title={f_name}> {file_inf['name']}.{file_inf['ext']} </a>"
-    o1=XML(f"""
-                <a id='view_but' href={URL('read',args=request.args,vars=vars) }>view</a> | {file_name} |  
-                {enc}
-                {lines_num}
-                <input type='hidden' name='textarea_top' id='textarea_top' onchange='file_txt.scrollTop=textarea_top.value;' value='{request.vars['textarea_top']}'>
-                <input type='hidden' name='save_chek' id='save_chek' >
-                """)
-    btn= INPUT(_type='submit',_name="save_but",_id="save_but",_value="Save changed",_style='width:100%,color:#ff00ff' )
-    o2= XML(f"""
-                <textarea name={on} id={on} rows='50' style='direction:{dir_x};width:100%;height:700px' onclick='textarea_top.value=file_txt.scrollTop;' 
-                onchange="text_changed();" scrollTop="{request.vars['textarea_top']}">{data}</textarea>
-                """)
-    ''
-    ''
-    #view_link=f"<hr>"-hidden
-    '''  $("#save_but").prop('disbled', true);
-        var textarea_init=""
-        if (textarea_init != document.getElementById("file_txt").value)
-        $(document).ready(function(){
-            textarea_init=document.getElementById("file_txt").value;
-    '''
-    script1=(f"""<head><title>+{file_inf['name']}</title></head>"""+
-        f"""<script type="text/javascript" src="{URL('static','js/datepicker/jquery-1.8.2.min.js')}"></script> """ +
-        """ 
-        <script> 
-        function text_changed() {
-                $("#save_but").css("background-color","red");
-                $("#save_chek").val("1")
-                $("#save_but").show();
-                $("#view_but").hide();
-        }
-        $(document).ready(function(){
-            $("#save_but").hide()
-            var textarea = document.getElementById('file_txt');
-            var tt = document.getElementById('textarea_top');
-            textarea.scrollTop = tt.value;
-        });
-        </script>
-    """)
-    return dict(scr= XML(script1),
-        mnu=o1,
-        btn=btn,
-        bdy=o2,
+    x_vars={'xpath':xpath}
+    
+    return dict(file_inf=file_inf,x_vars=x_vars,obj_name=obj_name,data=data,
+        encode_n=encode_n,
+        f_name=f_name,
+		lines_num=lines_num,
         cmp=XML(comp),
         txt=XML(save_t) )#_action=URL('edit_s',args=request.args,vars=request.vars)
 def edit_r2():
