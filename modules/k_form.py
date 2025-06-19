@@ -817,9 +817,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     au_txt=obj['auto']
                 elif 'ref' in obj:
                     x_dt=reference_select(obj['ref'],form_data=x_dic)[0]
-                    #xxxprint(vals=obj['ref'])
-                    #xxxprint(vals=x_dic)
-                    #xxxprint(msg=['x_dt','',''],vals=x_dt)
+                    #debug
+                    #xxxprint(msg=['x_dt','',''],vals={'ref':obj['ref'],'x_dic':x_dic,'x_dt':x_dt})
                     au_txt=x_dt['__0__'] if x_dt else ''
             #_len=60 if len(au_txt)>60 else len(au_txt)+2
             if len(au_txt)>60:
@@ -1010,9 +1009,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 modir_un='rms'
                 '''
             #obj['add_empty_first']=False
+            ''' not used 040322
             if 'def_value' in obj:
                 if obj['def_value']=='_cur_user_un_':
-                    _value=session["username"]
+                    print('_cur_user_un_1='+_value)
+                    #'-' for pre empty row
+                    if not _value or _value.strip()=='-' :_value=session["username"]
+            ''' 
+
+
         if sc in ['reference','user']:
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf
@@ -1066,15 +1071,18 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
             xxxprint(msg=["err",'',''],err=err,vals={'select':_select}) 
         obj["value"]=_value
+        if 'update' in obj['prop'] :x_dic[obj['name']]=_value
+        #print('obj["value"]'+obj["value"])
         obj['output_text']=obj['title'] #_select[_value] if (type(_value)==str and _value in _select) else ""
         if 'show_full' in obj['prop']:obj['output']=obj['output_text']
         if 'input' in need:
             import k_htm
+            # اضافه کردن 1 ردیف با اطلاعات خاص به انتخابگر
             if 'add_x' in obj:
-                print('add_x')
+                #print('add_x')
                 if obj['add_x'][0]=='len':
                     n_d={str(len(_select)):obj['add_x'][1]}
-                    print(str(n_d))
+                    #print(str(n_d))
                     if _select:
                         _select.update(n_d)
                     else:
@@ -1203,14 +1211,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 start=obj.get('start',0)   
                 index_new=str(max(smart_num_list.max()+1,start)).zfill(_len)# index_ar[0] #else =def_val  #_value or
                 xxxprint(3,msg=[index_new,'',''],vals={'smart_num_list':str(smart_num_list)})
-                print(f"x3- 1190 = _value={_value}")
+                #print(f"x3- 1190 = _value={_value}")
                 #if len(index_new)>60 : obj['len']=60 else obj['len']=len(index_new)
                 #if select_addition_inf[:5].lower()=="updat" :  onact_txt= " onblur='" + form_update_set(form_update_set_param) + "'" 
 
             x_end= "' readonly class='input_auto' >" if "readonly" in obj['prop'] else f'''' onchange='index_key("{_name}","{index_hlp}","{index_new}",true);' {onact_txt}>'''
             
             obj['input']=XML(f'''<input {_n} value='{index_new}' size='{_len} {x_end}''')
-            print('xx')
+            #print('xx')
             
             
             obj['value']=index_new
@@ -1282,9 +1290,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             #xxxprint(3,msg=[_value,obj['file_name'],''],vals={'file_name':obj['file_name'],'x_dic':x_dic,'_value':_value,'msg1':msg1})
         # vars = 'from':'form' => for pass write_file_access in file.py(_folder_w_access) 
         #<input {_n} value="{_value}" readonly>
-        bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>''' if _value else ''
-        file_icon=obj['s_ext'] #"F"
-        bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
+        if 'img' in obj:
+        
+            img=f'''<img src="{URL('default', 'serve_external_image', args=[_value])}" {obj['img']}><br>'''
+            bt_view=f'''<a  title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{img}</a>''' if _value else ''
+            bt_view_mini=bt_view
+        else:
+            bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>''' if _value else ''
+            file_icon=obj['s_ext'] #"F"
+            bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
         bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
         bt_del=''
         bt_upload=f'''<a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a>'''

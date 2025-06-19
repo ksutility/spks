@@ -779,13 +779,13 @@ x_data={
     #--------------------------------------------------------------------
     'dcc_cd':{ #db
         'a':{
-            'base':{'mode':'form','title':'آرشیو دیسک نوری - CD','code':'402'
+            'base':{'mode':'form','title':'آرشیو دیسک نوری - CD','code':'402','rev':'01-040326',
             },
             'tasks':{
                 'c_prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
                 'c_prj_txt':{'type':'auto-x','len':'30','ref':'c_prj_id'},
                 'sbj':{'type':'text','len':'60','title':'موضوع'},
-                'date':{'type':'fdate','width':'10','title':'تاریخ تهیه','prop':['update']},
+                'date':{'type':'fdate','width':'10','title':'تاریخ دریافت','prop':['update']},
                 'un':{'type':'user','title':'مسئول هماهنگی'}, #cordinator
                 'p_s2':{'type':'text','len':'150','title':'فرد مقابل'},
                 'side2':{'type':'text','len':'150','title':'نام سازمان مقابل'},
@@ -794,7 +794,7 @@ x_data={
                 'f_code':{'type':'auto','len':'8','auto':'aqrc-_cd-{{=str(id).zfill(3)}}','title':'کد فایل'},
                 'file_pp1':{'type':'file','len':'40','file_name':'{{=f_code}}-ppr','file_ext':"pdf",'path':'form,doc_cd','title':'مکاتبه درخواست'},
                 'file_pp2':{'type':'file','len':'40','file_name':'{{=f_code}}-ppr','file_ext':"pdf",'path':'form,doc_cd','title':'مکاتبه تحویل'},
-                'file_cd':{'type':'file','len':'40','file_name':'{{=f_code}}-cd','file_ext':"zip,rar,7z,pdf",'path':'form,doc_cd','title':'فایل CD'},
+                'file_cd':{'type':'file','len':'40','file_name':'{{=f_code}}-cd','file_ext':"zip,rar,7z,pdf,ppt,pptx,doc,docx,xls,xlsx,vldx",'path':'form,doc_cd','title':'فایل CD'},
             },
             'steps':{
                 'pre':{'tasks':'c_prj_id,c_prj_txt,date','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -1268,13 +1268,13 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
-    'suggestion':{ #db
+    'suggestion':{ #db {_cur_user_un_}
         'a':{
             'base':{'mode':'form','title':'فرم پیشنهاد ها','code':'311','rev':'01-040310'
             },
             'tasks':{
-                'u_un':{'type':'user','len':'24','def_value':'_cur_user_un_','title':'کد همکار','prop':['show_full','un_free']},
-                #'u_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'کد همکار'},
+                #'u_un':{'type':'user','len':'24','def_value':'{_i_}','title':'کد همکار','prop':['update','show_full','un_free']},
+                'u_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'کد همکار'},
                 'u_nm':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{name} {family}','where':'''un = "{u_un}"'''},'title':'نام و نام خانوادگی'},
                 'u_id':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{p_id}','where':'''un = "{u_un}"'''},'title':'شماره پرسنلی'},
                 'u_ml':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{Idc_num}','where':'''un = "{u_un}"'''},'title':'کد ملی'},
@@ -1999,6 +1999,7 @@ x_data={
                 },
             'tasks':{
                 'txt':{'type':'text','len':50,'lang':'fa','title':'متن','uniq':''},#'sel=`x`'
+                'img':{'type':'file','len':'24','file_name':'abc-{id}-{{=dt[:4] if dt else "0000"}}','file_ext':"gif,jpg,jpeg,png",'path':'form,image','title':'تصویر','img':"""style='width:200px;' """},
                 'n':{'type':'num','min':5,'max':15,'title':'عدد','prop':[]},
                 'sel':{'type':'select','select':{'a':'طراحی','x':'نظارت'},'title':'واحد','prop':[]},
                 'ref':{'type':'reference','len':'5','title':' مسئول اقدام','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
@@ -2013,7 +2014,7 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'txt,n,sel,indx1','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'img,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'at,fl,time_st2','xjobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's4':{'tasks':'dt,at,fl','xjobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
             },           

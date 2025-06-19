@@ -239,3 +239,25 @@ def download():
     """
     return response.download(request, db)
 
+# controllers/default.py
+folder = r'''D:\ks\0-file\AUTO\form\image''' #+'\\' 
+# 'D:/external_images/'
+
+def serve_external_image():
+    import os
+    from gluon.contenttype import contenttype
+
+    filename = request.args(0)
+    full_path = os.path.join(folder, filename)
+
+    if not os.path.isfile(full_path):
+        raise HTTP(404, "File not found")
+
+    response.headers['Content-Type'] = contenttype(full_path)
+    return response.stream(full_path)
+
+# در همان کنترلر
+def image_list():
+    import os
+    files = [f for f in os.listdir(folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+    return dict(files=files)

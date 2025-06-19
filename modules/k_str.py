@@ -122,5 +122,5 @@ if __name__ == "__main__":
         x=ui.input([['pro',['correct_fa','compare_2_str'],'c']])
         if not x:break
         xx='do_'+x['pro']+'()'
-        print(xx)
+        #print(xx)
         exec(xx)
