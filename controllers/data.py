@@ -1103,12 +1103,10 @@ def rc():#run 1 command
         
         #031207
         # - آپدیت اتوماتیک فیلدهای نامه ها - فیلد پروژه جاری
-        inf_a1 ={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'53'},'where':{"prj1":"HRG1"}}
-        #--  130 نامه  گیتها 
-        inf_a2={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'4'},'where':{"prj_id":"112"}}
-        #-- 312 نامه  صحن 
-        inf_a3={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'36'},'where':{"prj2":"AQC0-PMO"}}
-        #-- 26 نامه کنترل پروژه
+        inf_a1 ={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'53'},'where':{"prj1":"HRG1"}} #--  130 نامه  گیتها 
+        inf_a2={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'4'},'where':{"prj_id":"112"}}  #-- 312 نامه  صحن 
+        inf_a3={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'36'},'where':{"prj2":"AQC0-PMO"}} #-- 26 نامه کنترل پروژه
+        inf_a4={'db_name':'paper','tb_name':'a','set_dic':{'cprj_id':'3'},'where':{"prj_id":"110"}} #مدیریت سوابق 
         
         db1=DB1(inf['db_name'])
         tb_name=inf['tb_name']

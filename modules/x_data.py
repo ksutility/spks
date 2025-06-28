@@ -538,7 +538,7 @@ x_data={
             'data_filter':
                 {'':'همه نامه ها',
                 'prj_id = "112"':'پروژه صحن جامع',
-                'prj_id = "110"':'مدیریت سوابق',
+                'cprj_id = "3"':'مدیریت سوابق',
                 'cprj_id = "57"':'تیرپارک',
                 'prj_id is Null':'نیاز به تعیین پروژه',
                 'prj_id = "36"':'پروژه پیوندراه',
@@ -955,7 +955,8 @@ x_data={
     #--------------------------------------------------------------------
     'doc_mm':{ #db
         'a':{
-            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'403','xform_cg_file':'fr-cg-doc_mm2.html','multi_app':{'2':['ks']},
+            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'403','xform_cg_file':'fr-cg-doc_mm2.html',
+                'multi_app':{'2':['ks'],'rev':'01-040403'},
             },
             'tasks':{
                 'name':{'type':'text','width':'60','title':'عنوان جلسه'},
@@ -974,17 +975,19 @@ x_data={
                 'stn_code':{'type':'auto','len':'8','auto':'{prj_code}-_C-{{=date[2:4]+date[5:7]+date[8:10] if date else "000000"}}-MM-A{mm_type}-{code_sn}-{{=str(id).zfill(5)}}','title':'کد فایل'},
                 'file_v':{'type':'file','len':'40','file_name':'{{=code}}-vec','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc__mm','title':'فایل اصلی'},
                 'file_r':{'type':'file','len':'40','file_name':'{{=code}}-ras','file_ext':"pdf",'path':'form,doc__mm','title':'pdf'},
+                'file_a':{'type':'file','len':'40','file_name':'{{=code}}-app','file_ext':"pdf,jpg",'path':'form,doc__mm','title':'اسکن فایل امضا شده'},
                 'des_1':{'type':'text','width':'60','title':'توضیحات'},
                 'pos':{'type':'f2f','len':'60','title':'محل جلسه','ref':{'tb':'pos','show_cols':['name','per','per_x']},},
                 'note':{'type':'f2f','len':'60','title':'مذاکرات','ref':{'tb':'note','show_cols':['p_sy','des']},},
                 'todo':{'type':'f2f','len':'60','title':'مصوبات','ref':{'tb':'todo','show_cols':['p_sy','des','p_do','p_ch','dur']},},
                 'attch':{'type':'f2f','len':'60','title':'پیوستها','ref':{'tb':'attch','show_cols':['name','file_v','file_r']},'var_set':{'f_code':'code'}},
+                'pic':{'type':'f2f','len':'60','title':'تصاویر جلسه','ref':{'tb':'pic','show_cols':['file_pic']},'var_set':{'f_code':'code'}},
                 'abstr':{'type':'text','len':'1000','title':'خلاصه جلسه'},
             },
             'steps':{
                 'pre':{'tasks':'date,time_st,user_crt,user_man,units,mm_type,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,name','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'code,stn_code,pos,note,todo,attch,abstr','xjobs':'#step#0,dcc_grp','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'file_v,file_r','xjobs':'#step#0,dcc_grp','title':'بارگزاری فایل نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'file_v,file_r,file_a,pic','xjobs':'#step#0,dcc_grp','title':'بارگزاری فایل نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'date,time_st,user_crt,user_man,units,mm_type,c_prj_id,c_prj_txt,prj_name,prj_code,code_sn,name,des_1,stn_code','xjobs':'dcc_grp','title':'مدیریت سوابق','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
@@ -1003,7 +1006,7 @@ x_data={
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
                 'name':{'type':'text','len':'60','title':'نام محل'},
-                'per':{'type':'text','len':'250','title':'افراد حاضر'},
+                'per':{'type':'text','len':'500','title':'افراد حاضر'},
                 'per_x':{'type':'text','len':'250','title':'غایبین'},
             },
             'steps':{
@@ -1056,6 +1059,19 @@ x_data={
             'steps':{
                 'pre':{'tasks':'f2f_id,f_code,nn,name,per','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'f_code_r,file_v,file_r,des','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+            },    
+        },
+        'pic':{
+            'base':{'mode':'form','title':'تصاویر جلسه','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
+                'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
+                'nn':{'type':'index','len':'2','ref':{'where':'f_code = "{f_code}"'},'title':'شماره','start':1,'prop':['update']},
+                'file_pic':{'type':'file_r','file_name':'{f_code}-pic-{nn}','title':'تصویر'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,f_code,nn,file_pic','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
             },    
         }
     },
