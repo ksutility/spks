@@ -522,7 +522,7 @@ def _aqc_report_daily_read_2(start_date=''):
     return x_list
 def mon_report():
     # عدم حق دسترسی
-    if not session['username'] in ['ks','snr','lvi','mhm','htk','hrm']:return A1('Error')
+    if not session['username'] in ['ks','snr','lvi','mhm','htk','hrm','atl']:return A1('Error')
     if session['username'] in ['mlk','mss','nmn']:return ''
     args=request.args
     #if not args :return A1('Error')

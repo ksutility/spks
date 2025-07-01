@@ -391,72 +391,22 @@ def read_csv2():
     if not f_name:return f_msg
     return dict(x_table = _read_csv(f_name))
 def read_mermaid():
+    from k_file_x import mermaid_2_html
     f_name,f_msg,file_inf=_x_file()
     with open(f_name,'r',encoding='utf8') as file: 
         lines = [line for line in file]
-    def mermaid_2_html(head,mermaid_base): 
-        style='''
-        .center {
-            width:"100%";
-            margin: auto;
-            text-align: center;
-        }
-        .container {
-          display: flex;
-          justify-content: center;
-        }
-        '''
-        """
-            <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
-            <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
-            <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
-            <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
-            <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
-            <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
-        """
-        head=f'''
-                    <h1 class="center">
-                        {head}
-                    </h1>
-                    <hr>
-        ''' if head else ''
-        return f'''
-        <html><head>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            <title>mermaid</title>
-            
-            <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
-
-            <style>
-            {style}
-            </style>
-        </head>
-        <body >
-            <div class="container1">
-                <div class="center">
-                    {head}
-                    <div>
-                        <pre class="mermaid">
-                            {''.join(mermaid_base)}
-                        </pre>
-                    </div>
-                </div
-            </div>
-        </body>
-        '''
-        
-    #--------------
+    #mermaid_2_html(head,mermaid_base)
     ext=file_inf['ext'][1:]
     #return ext
     if ext=="mermaid2":
-        return mermaid_2_html(lines[0],lines[1:]) 
+        return mermaid_2_html(lines[1:],head=lines[0]) 
     if ext=="mermaid":
-        return mermaid_2_html("",lines) #"مهندسان مشاور معماری و شهر سازی آستان قدس رضوی"
+        return mermaid_2_html(lines) 
     pass
-def read(): #read all markup
+def read_xx(): #read all markup
     f_name,f_msg,file_inf=_x_file()
     ext=file_inf['ext'][1:]
-    if ext in ['md','mm','ksm']:
+    if ext in ['md','mm','ksm','mermaid']:
         return _read_markup(ext)
     #elif ext in[""]
     #xd={'json':'json_read','csv':'read_csv','md':'read_m','mm':'read_m','ksm':'read_m','ipt2win':'read_ipt2win'}    
@@ -513,10 +463,16 @@ def _read_markup(mm_case):
             return markdown(data)
         elif ext=='htm':
             return data
+        elif ext=='mermaid': 
+            from k_file_x import mermaid_2_html
+            lines= data.split("/n")
+            return mermaid_2_html(lines)
     def _r_mm(data):
         return file_2_htm(data,'mm')
     def _r_md(data):
         return file_2_htm(data,'md')
+    def _r_mermaid(data):  
+        return file_2_htm(data,'mermaid')
     def _r_ksm1(f_name):
         d2=""
         with open(f_name) as file: #open(f_name,'r',encoding='utf8')
@@ -563,10 +519,11 @@ def _read_markup(mm_case):
                 if not f_name1:
                     return DIV(H1("ERROR: file not found"),HR(),H2(f_name))
                 ext=k_file.file_name_split(f_name1)['ext'][1:]
-                if ext in ['mm','md']:
+                if ext in ['mm','md','mermaid']:
                     with open(f_name1,'r',encoding='utf8') as f:
                         d1=f.read()
-                    d2+=str(file_2_htm(d1,ext))
+                    d3=str(file_2_htm(d1,ext))
+                    d2+=d3
                 elif ext=='csv':
                     d2+=str(_read_csv(f_name1))
             elif len(line)>3 and line[:2]=='%%':
@@ -635,8 +592,11 @@ def _read_markup(mm_case):
             k_s_dom.tag_set_by_jad_list(tag=h_o,jad=x[2],html=rp)
         return str(h_o)
     # /def - 1 -------------------------------------    
-    with open(f_name,'r',encoding='utf8') as f:
-        data0=f.read()
+    with open(f_name,'r',encoding='utf8') as file:
+        data0=file.read()
+    
+    #with open(f_name,'r',encoding='utf8') as file:
+    #    lines = [line for line in file]    
     # slice -----------------    
     
     #data='\n# '.join(data0.split('\n# ')[0:2])
@@ -649,10 +609,12 @@ def _read_markup(mm_case):
     if mm_case=='mm':
         html_1=_r_mm(data)  
     elif mm_case=='md':
-        html_1=_r_md(data) 
+        html_1=_r_md(data)     
     elif mm_case=='ksm':
         html_1=_r_ksm(f_name) 
         data=""
+    elif mm_case=='mermaid':
+        html_1=_r_mermaid(data)  
     html_2=_dir_x(html_1)    
     def report(data,html_1,html_2):
         if not request.vars.debug: return ''

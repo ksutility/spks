@@ -203,6 +203,18 @@ def download():#ownload
         #fn=args[0] if len(args)>0 else 'per.xlsx'
         #path=xpath+fn
         return response.stream(open(path,'rb'),chunk_size=4096)
+def serve_external_image():
+    import os
+    from gluon.contenttype import contenttype
+    args=request.args
+    xpath=k_set.xpath(args[-1]) # check for access to files with "share_for_all"
+    if args:
+        full_path=os.path.join(xpath, *args) #xpath+'\\'.join(args)
+        if not os.path.exists(full_path): #if not os.path.isfile(full_path)
+            #return DIV('path not exist'+full_path)
+            raise HTTP(404, "File not found : "+full_path)
+        response.headers['Content-Type'] = contenttype(full_path)
+        return response.stream(full_path)
 def unzip():
     args=request.args
     if args:
@@ -534,7 +546,8 @@ def f_list():#file_browser=file.index
         pass
 
     def link_view(x_file,link_txt,link_title='View'):
-        xd={'json':'json_read','csv':'read_csv','md':'read','mm':'read','ksm':'read','ipt2win':'read_ipt2win','mermaid':'read_mermaid','mermaid2':'read_mermaid'}
+        xd={'json':'json_read','csv':'read_csv','md':'read_xx','mm':'read_xx','ksm':'read_xx','ipt2win':'read_ipt2win',
+            'mermaid':'read_xx','mermaid2':'read_mermaid'}
             #'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]
         link_txt=link_txt[:100] if len(link_txt)>100 else link_txt

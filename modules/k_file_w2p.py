@@ -88,9 +88,11 @@ def folder_w_access(args=[],x_path=''):
                 return True
     #------------------------    
     import k_err
-    k_err.xxxprint(msg=['a','b','c'],vals={'session':[session["file_access"],session["my_folder"]]})
-    fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+session["my_folder"] #[f';{session["my_folder"]};']
-
+    #k_err.xxxprint(msg=['a','b','c'],vals={'session':[session["file_access"],session["my_folder"]]})
+    if session["file_access"]:
+        fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+session["my_folder"] #[f';{session["my_folder"]};']
+    else:
+        fc_list=session["my_folder"]
     if session["admin"] or x_path[:-1] in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
         return {'ok':True}  
     else:

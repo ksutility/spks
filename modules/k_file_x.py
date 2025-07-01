@@ -533,3 +533,55 @@ def ipgrid_make(grid_inf):
             });
     """
     
+def mermaid_2_html(mermaid_base,head=''): 
+    style='''
+    .center {
+        width:"100%";
+        margin: auto;
+        text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+    }
+    '''
+    """
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery.min.js')}"></script>
+        <script type="text/javascript" src="{URL('static','js/pivot/jquery-ui.min.js')}"></script>
+        <script src="{URL('static','js/bootstrap.bundle.min.js')}"></script>
+        <script src="{URL('static','js/web2py-bootstrap4.js')}"></script>
+        <link rel="stylesheet" href="{URL('static','css/bootstrap.min.css')}"/>
+        <link rel="stylesheet" href="{URL('static','css/web2py-bootstrap4.css')}"/>
+    """
+    head=f'''
+                <h1 class="center">
+                    {head}
+                </h1>
+                <hr>
+    ''' if head else ''
+    return f'''
+    <html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>mermaid</title>
+        
+        <script src="{URL('static','js/mermaid/mermaid.min.js')}"></script>
+
+        <style>
+        {style}
+        </style>
+    </head>
+    <body >
+        <div class="container1">
+            <div class="center">
+                {head}
+                <div>
+                    <pre class="mermaid">
+                        {''.join(mermaid_base)}
+                    </pre>
+                </div>
+            </div
+        </div>
+    </body>
+    '''
+    
+#--------------

@@ -189,12 +189,13 @@ x_data={
                 'dspln':{'type':'reference','title':'دیسیپلین اصلی','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code} , {name} , {name_e}'},},
                 'mdr_prj':{'type':'user','title':'مسئول پیگیری پروژه'},
                 'dsplns':{'type':'f2f','len':'60','title':'دیسیپلینها','ref':{'tb':'dsplns','show_cols':['d_name','per','des']},},
+                'wbs_l1':{'type':'f2f','len':'60','title':'WBS- لایه 1','ref':{'tb':'wbs_l1','show_cols':['wbs_l1_name','wbs_l1_code']},},
                 'cat':{'type':'select','title':'دسته','select':{'P':'پروژه','F':'فرایند'}}
             },
             'steps':{
                 'pre':{'tasks':'cp_name','xjobs':'dcc_dsn','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},#cp_code,cp_name
                 's1':{'tasks':'prj_id,prj,prj_name,sub_p_id,sub_p,sub_p_name,cp_code,cat,dspln,mdr_prj','xjobs':'dccm','title':'گام2','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'dsplns,sm_name,alt_names','xjobs':'dcc_dsn','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'dsplns,wbs_l1,sm_name,alt_names','xjobs':'dcc_dsn','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'sub_p_id','xjobs':'dccm','title':'تصویب','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'views':{
@@ -220,6 +221,42 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'f2f_id,d_name,per,des','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            
+        },
+        'wbs_l1':{
+            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 1 ','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','prop':['readonly'],
+                    'ref':{'tb':'a','key':'{id}','val':'{cp_code} , {cp_name}'},
+                    'team':{'cp_code':{'val':'{cp_code}','title':'کد پروژه'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'}},},
+                'wbs_l1_name':{'type':'text','title':'دسته موضوع اقدام','len':'250',},
+                'wbs_l1_code':{'type':'index','len':'1','title':'کد دسته  موضوع اقدام','start':1,'ref':{'db':'a_cur_subject','tb':'wbs_l1','key':'{id}','val':'{wbs_l1_code}','where':'''f2f_id = "{{=__objs__['f2f_id']['value']}}"'''},},
+                'des':{'type':'text','len':'250','title':'توضیحات'},
+                'wbs_l2':{'type':'f2f','len':'60','title':'WBS- لایه 2','ref':{'tb':'wbs_l2','show_cols':['wbs_l2_name','wbs_l2_code']},},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,cp_code,cp_name,wbs_l1_name,wbs_l1_code,des','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                'inf':{'tasks':'wbs_l2','xjobs':'dccm','title':'اطلاعات کلی','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            
+        },
+        'wbs_l2':{
+            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 2 ','code':'93'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','prop':['readonly'],
+                    'ref':{'tb':'wbs_l1','key':'{id}','val':'{cp_code} , {cp_name}'},
+                    'team':{'cp_code':{'val':'{cp_code}','title':'کد پروژه'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'},
+                            'wbs_l1_name':{'val':'{wbs_l1_name}','title':'دسته موضوع اقدام'},'wbs_l1_code':{'val':'{wbs_l1_code}','title':'کد دسته  موضوع اقدام'}
+                            },},
+                'wbs_l2_name':{'type':'text','title':'موضوع اقدام','len':'250',},
+                'wbs_l2_code':{'type':'index','len':'1','title':'کد موضوع اقدام','start':1,'ref':{'db':'a_cur_subject','tb':'wbs_l2','key':'{id}','val':'{wbs_l2_code}','where':'''f2f_id = "{{=__objs__['f2f_id']['value']}}"'''},},
+                'des':{'type':'text','len':'250','title':'توضیحات'},
+            },
+            'steps':{
+                'pre':{'tasks':'f2f_id,cp_code,cp_name,wbs_l2_name,wbs_l2_code,des','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             
         },
@@ -579,7 +616,7 @@ x_data={
     #--------------------------------------------------------------------
     'user':{ #db
         'user':{
-            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc = "100"','code':'201','cols_filter':'name,family,tel_wrk,loc,office,p_id',
+            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc like "01%"','code':'201','cols_filter':'name,family,tel_wrk,loc,office,p_id,file_pic_per',
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
@@ -602,7 +639,7 @@ x_data={
                 'job':{'type':'text','title':'سمت','len':'50'},#,'ref':{'db':'user','tb':'job','key':'id','val':'{id}{name}'}
                 'p_id':{'type':'num','len':4,'lang':'fa','title':'شماره پرسنلی','uniq':''},
                 'end':{'type':'fdate','title':'تاریخ خاتمه کار','prop':['hazf']},
-                'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی'},
+                'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی','img':"""style='height:200px;' """},
                 'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'شناسنامه','auth':'dccm,#task#un,off_ens'},
                 'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,jpg",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی','auth':'dccm,#task#un,off_ens'},
                 'file_ot':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}3-ot','file_ext':"zip",'path':'form,hrm,cv,{un}','title':'سایر مدارک','auth':'dccm,#task#un,off_ens'},
@@ -645,14 +682,14 @@ x_data={
                 '1':{'tasks':'file_ot,file_off','xjobs':'off_ens','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'dccm'},#'xjobs':'#task#un,dccm',
                 '2':{'tasks':'p_id','xjobs':'off_ens,dccm','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':'',
                         'start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False",'auth':'dccm,#task#un,off_ens',},
-                'b':{'tasks':'Idc_num,tel_wrk','xjobs':'edu','title':'ثبت توسط مسئول آموزش','app_keys':'y','app_titls':'','oncomplete_act':'',
+                'b':{'tasks':'Idc_num,tel_wrk,file_pic_per','xjobs':'edu','title':'ثبت توسط مسئول آموزش','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'b','auth':'dccm,#task#un,edu,off_ens','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
-                'd':{'tasks':'date,job_rec,Idc_num,p_id,tel_mob,tel_wrk,end,loc','xjobs':'dccm','title':'ثبت توسط مسئول dcc','app_keys':'y','app_titls':'','oncomplete_act':'',
+                'd':{'tasks':'file_pic_per,date,job_rec,Idc_num,p_id,tel_mob,tel_wrk,end,loc','xjobs':'dccm','title':'ثبت توسط مسئول dcc','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'d','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
                 'c1':{'tasks':'tel_mob,date,rlgn,mltr,Idc_num,shnsnme_num,father,brt_pos,mrg_case,mrg_date,n_suprt,n_child,lable_1,edu_l_cert_grade,edu_l_cert_date,edu_l_cert_pos,edu_l_cert_univ,edu_l_cert_dcpln,start_date,home_adrs,tel_home,mrf_name',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد- بخش 1','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'c1','auth':'dccm,#task#un,off_ens','start_step':'','start_where':"True",'end_where':"'{step_c2_ap}' == 'y'"},
-                'c2':{'tasks':'file_cv,file_mdrk_thsl,file_shnsnm,file_ins_rec,idc_p1_file,idc_p2_file,file_pic_per,idc_serial',
+                'c2':{'tasks':'file_cv,file_mdrk_thsl,file_shnsnm,file_ins_rec,idc_p1_file,idc_p2_file,idc_serial',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد-بخش 2','app_keys':'y,r','app_titls':'','oncomplete_act':'',
                         'name':'c2','auth':'dccm,#task#un,off_ens','start_step':'c1','start_where':"'{step_c1_ap}' == 'y'",'end_where':"'{step_c3_ap}' == 'y'"},  
                 'c3':{'tasks':'mrf_name',
@@ -973,8 +1010,8 @@ x_data={
                 'code_sn':{'type':'index','len':'3','ref':{'db':'doc_mm','tb':'a','key':'{id}','val':'{code_sn}','where':"prj_code = '{prj_code}' AND mm_type = '{mm_type}'"},'title':'شماره','prop':['update'],'start':1},
                 'code':{'type':'auto','len':'8','auto':'aqrc-_mm-{{=date[:4]+date[5:7]+date[8:10] if date else "000000"}}-{{=str(id).zfill(4)}}-{mm_type}','title':'کد پشتیبان'},
                 'stn_code':{'type':'auto','len':'8','auto':'{prj_code}-_C-{{=date[2:4]+date[5:7]+date[8:10] if date else "000000"}}-MM-A{mm_type}-{code_sn}-{{=str(id).zfill(5)}}','title':'کد فایل'},
-                'file_v':{'type':'file','len':'40','file_name':'{{=code}}-vec','file_ext':"doc,docx,xls,xlsx,zip,rar",'path':'form,doc__mm','title':'فایل اصلی'},
-                'file_r':{'type':'file','len':'40','file_name':'{{=code}}-ras','file_ext':"pdf",'path':'form,doc__mm','title':'pdf'},
+                'file_v':{'type':'file_v','len':'40','file_name':'{{=code}}-vec','path':'form,doc__mm','title':'فایل اصلی'},
+                'file_r':{'type':'file_r','len':'40','file_name':'{{=code}}-ras','path':'form,doc__mm','title':'pdf'},
                 'file_a':{'type':'file','len':'40','file_name':'{{=code}}-app','file_ext':"pdf,jpg",'path':'form,doc__mm','title':'اسکن فایل امضا شده'},
                 'des_1':{'type':'text','width':'60','title':'توضیحات'},
                 'pos':{'type':'f2f','len':'60','title':'محل جلسه','ref':{'tb':'pos','show_cols':['name','per','per_x']},},
@@ -1085,16 +1122,25 @@ x_data={
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title': 'نام همکار'},
                 'date1':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
                 'prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه','prop':['update']},
-                'cp_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه'},
-                'cp_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'نام پروژه'},
+                'cp_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه','prop':['hidden']},
+                'cp_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'نام پروژه','prop':['hidden']},
+                'wbs_l1':{'type':'reference','len':'30','title':'دسته موضوع اقدام - WBS-L1','prop':['update'],
+                    'ref':{'db':'a_cur_subject','tb':'wbs_l1','key':'{id}','val':'{id:03d},{wbs_l1_code},{wbs_l1_name}','where':'''f2f_id = "{prj_id}"'''},
+                    'team':{'wbs_l1_name':{'val':'{wbs_l1_name}','title':'نام دسته موضوع اقدام','prop':['hidden']},
+                            'wbs_l1_code':{'val':'{wbs_l1_code}','title':'کد دسته  موضوع اقدام','prop':['hidden']}},},
+                'wbs_l2':{'type':'reference','len':'30','title':'موضوع اقدام- WBS-L2','prop':['update'],
+                    'ref':{'db':'a_cur_subject','tb':'wbs_l2','key':'{id}','val':'{id:03d},{wbs_l1_code},{wbs_l1_name}'},
+                    'team':{'wbs_l2_name':{'val':'{wbs_l2_name}','title':'نام موضوع اقدام','prop':['hidden']},
+                            'wbs_l2_code':{'val':'{wbs_l1_code}','title':'کد موضوع اقدام','prop':['hidden']}},},
                 'tact_cod':{'type':'reference','len':'30','ref':{'db':'act','tb':'a','key':'{code}','val':'{code}-{title}'},'title':'نوع اقدام','prop':['update','multiple']},
-                'tact_ttl':{'type':'auto-x','len':'30','ref':'tact_cod'},
+                'tact_ttl':{'type':'auto-x','len':'30','ref':'tact_cod','prop':['hidden']},
                 'act_des':{'type':'text','len':'255','title':'شرح اقدام'},
                 'act_cat':{'type':'text','len':'35','title':'دسته اقدام'},
                 'time':{'type':'time_t','title':'به مدت','def_value':'0:30'},
             },
             'steps':{
-                'pre':{'tasks':'frd_id,frd_1,date1,prj_id,cp_code,cp_name,tact_cod,tact_ttl,act_cat,act_des,time','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'frd_id,frd_1,date1,prj_id,cp_code,cp_name,wbs_l1,wbs_l1_name,wbs_l1_code,lable_1,tact_cod,tact_ttl,act_cat,lable_1,act_des,time','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                #'pre':{'tasks':'frd_id,frd_1,date1,prj_id,cp_code,cp_name,wbs_l1,wbs_l1_name,wbs_l1_code,wbs_l2,wbs_l2_name,wbs_l2_code,lable_1,tact_cod,tact_ttl,act_cat,lable_1,act_des,time','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
             },
             'views':{
                 'all':{'input':'frd_id,frd_1,date1,prj_id,cp_code,cp_name,act_cat,act_des,time','view1':'','view2':'','view_cols':1},
@@ -2016,6 +2062,7 @@ x_data={
             'tasks':{
                 'txt':{'type':'text','len':50,'lang':'fa','title':'متن','uniq':''},#'sel=`x`'
                 'img':{'type':'file','len':'24','file_name':'abc-{id}-{{=dt[:4] if dt else "0000"}}','file_ext':"gif,jpg,jpeg,png",'path':'form,image','title':'تصویر','img':"""style='width:200px;' """},
+                'img2':{'type':'file','len':'24','file_name':'abc-{id}-{{=dt[:4] if dt else "0000"}}','file_ext':"gif,jpg,jpeg,png",'path':'test,a','title':'تصویر','img':"""style='width:200px;' """},
                 'n':{'type':'num','min':5,'max':15,'title':'عدد','prop':[]},
                 'sel':{'type':'select','select':{'a':'طراحی','x':'نظارت'},'title':'واحد','prop':[]},
                 'ref':{'type':'reference','len':'5','title':' مسئول اقدام','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}-{m_w} {pre_n} {name} {family}'},'prop':[]},
@@ -2027,10 +2074,11 @@ x_data={
                 'tt':{'type':'time_c','title':'زمان شروع'},
                 'time_st2':{'type':'time_c','title':'از ساعت','def_value':'{tt}'},
                 'frd_jnshin':{'type':'reference','len':'5','title':'جانشین','ref':{'db':'user','tb':'user','key':'{un}','val':'{un}- {m_w} {name} {family}'},'prop':['show_full']},
+                'xxlink':{'type':'f_link','len':'5','title':' فرم مرتبط - پروژه','ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}','show_cols':['name','code']},'prop':['update','multiple'] },
             },
             'steps':{
-                'pre':{'tasks':'txt,n,sel,indx1','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'img,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'xxlink,img,img2','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'txt,n,sel,indx1,img2,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'at,fl,time_st2','xjobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's4':{'tasks':'dt,at,fl','xjobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
             },           
@@ -2074,7 +2122,7 @@ def x_data_verify_task(obj_name,obj,db,tb):
         set_if_ns(obj['ref'],{'db':db,'tb':tb,'key':'{id}','val':('{%s}' % (obj_name))})
     elif 'ref' in obj:
         if type(obj['ref'])==dict:
-            set_if_ns(obj['ref'],{'db':db})
+            set_if_ns(obj['ref'],{'db':db})   
 
 def x_data_verify(x_data): 
     #defult data_filter
@@ -2101,10 +2149,12 @@ def x_data_verify(x_data):
         for tb_name,tb_obj in db_obj.items():
             tasks_add={}
             for obj_name,obj in tb_obj['tasks'].items():
+                x_data_verify_task(obj_name,obj,db_name,tb_name) #040409
                 if obj['type']=='reference':
                     if 'team' in obj: 
                         for team_name,team_obj in obj['team'].items():
-                            new_fld={team_name:{'type':'auto','ref':{'db':obj['ref']['db'],'tb':obj['ref']['tb'],'key':'__0__','val':team_obj['val'],'where':obj['ref']['key'][1:-1]+ ' = "{' + obj_name + '}"'},'title':team_obj['title']}}
+                            new_fld={team_name:{'type':'auto','ref':{'db':obj['ref']['db'],'tb':obj['ref']['tb'],'key':'__0__','val':team_obj['val'],'where':obj['ref']['key'][1:-1]+ ' = "{' + obj_name + '}"'},'title':team_obj['title'],
+                                'prop':team_obj['prop'] if 'prop' in team_obj else []}}
                             #                                  'a_prj'               'a'                                  '{code}'                '{id}={prj_id}'                                       'کد پروژه'
                             #print(str(new_fld))
                             tasks_add.update(new_fld)
@@ -2116,7 +2166,7 @@ def x_data_verify(x_data):
             #print(str(tb_obj))
             for obj_name,obj in tb_obj['tasks'].items():
                 #for obj_name,obj in ff_o.items():
-                x_data_verify_task(obj_name,obj,db_name,tb_name)
+                x_data_verify_task(obj_name,obj,db_name,tb_name) #040409
             if not 'views' in tb_obj:tb_obj['views']={}  
             if not tb_obj['views']:
                 tb_obj['views']={

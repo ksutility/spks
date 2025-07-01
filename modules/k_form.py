@@ -862,7 +862,20 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     'obj':obj,
                     'x_dic':x_dic,
                     'c_form':c_form
-                }])            
+                }])  
+    #------------------------------------------------------------------------------------------------------------------
+    def select_1orX_title(_value,_multiple): #select_1_or_multi   #sc
+        if not _value:return''
+        if _multiple:
+            if type( _value)==list:
+                return ' | '.join([_select[x] for x in _value])
+            else: #type( _value)==str:
+                return ' | '.join([_select[x] for x in _value.split(',')])
+        else:
+            if _value in _select:
+                return _select[_value]
+            else:
+                return '' 
     #------------------------------------------------------------------------------------------------------------------
     def update_1_obj_in_table(set_dic,x_where=''):
         #saved_file_fullname,new_file_fullname)
@@ -1022,7 +1035,6 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             tt_dif=0
             # obj['select']= 1 field to cach reference_select inf
             if 'select' not in obj:
-                #tt_dif=time.time()
                 #_select=cache_ram(str(obj['ref']),reference_select(obj['ref']))#,time_expire=60)
                 #ref_t1=str(obj['ref'])
                 
@@ -1030,7 +1042,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 #    cache_ram[ref_t]=reference_select(obj['ref'],form_data=x_dic)
                 #_select= cache_ram[ref_t]   
                 _select= reference_select(obj['ref'],form_data=x_dic,debug=False)[0]
-                #tt_dif=(time.time()-tt_dif)*10000
+
                 obj['select']=_select
             else:
                 _select=obj['select']
@@ -1052,19 +1064,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             xprint('tt_dif='+ str(tt_dif))
         
         try:
-            def select_1_or_multi(_value,_multiple):
-                if not _value:return''
-                if _multiple:
-                    if type( _value)==list:
-                        return ' | '.join([_select[x] for x in _value])
-                    else: #type( _value)==str:
-                        return ' | '.join([_select[x] for x in _value.split(',')])
-                else:
-                    if _value in _select:
-                        return _select[_value]
-                    else:
-                        return ''
-            obj['title']=select_1_or_multi(_value,_multiple)  
+            obj['title']=select_1orX_title(_value,_multiple)  
             obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
             obj['data_json']=_value
         except Exception as err:
@@ -1238,7 +1238,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #if _value==None:_value==''
         #_value=obj['file_name']#_value or 
         #print(f'value={_value},type={type(_value)},len={len(_value)}')
-        show_link=XML(URL('file','download',args=['auto']+obj['path'].split(',')+[_value]))
+        path_args=['auto']+obj['path'].split(',')+[_value]
+        show_link=XML(URL('file','download',args=path_args))
         obj['s_ext']=_value.rpartition(".")[2] #s_xt=saved_extention
         
         import k_set,os 
@@ -1292,7 +1293,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #<input {_n} value="{_value}" readonly>
         if 'img' in obj:
         
-            img=f'''<img src="{URL('default', 'serve_external_image', args=[_value])}" {obj['img']}><br>'''
+            #img=f'''<img src="{URL('default', 'serve_external_image', args=[_value])}" {obj['img']}><br>'''
+            img=f'''<img src="{URL('file', 'serve_external_image', args=path_args)}" {obj['img']}><br>'''
             bt_view=f'''<a  title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{img}</a>''' if _value else ''
             bt_view_mini=bt_view
         else:
@@ -1454,6 +1456,84 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         obj['output']=DIV(rec_table_output)
         obj['output-mini']=len(res['rows'])
         obj['input']=DIV(rec_table_input,new_form_link)
+    elif sc=="f_link": #sc   form link
+        onact_txt=obj['onchange']
+        if "update" in obj['prop'] : onact_txt+= form_update_set(form_update_set_param)
+        _multiple=('multiple' in i_obj['prop'])
+        obj['key']=_value
+        ref1={x:obj['ref'][x] for x in ['db','tb','key','val']}
+        _select= reference_select(ref1,form_data=x_dic,debug=False)[0]
+        obj['select']=_select
+        _select=obj['select']
+        _select={x:x for x in _select} if type(_select)==list else _select
+        def select_1orX_link(_value,_multiple): #select_1_or_multi   #sc
+            if not _value:return''
+            if _multiple:
+                if type( _value)==list:
+                    return ' | '.join([_select[x] for x in _value])
+                else: #type( _value)==str:
+                    return ' | '.join([_select[x] for x in _value.split(',')])
+            else:
+                if _value in _select:
+                    return _select[_value]
+                else:
+                    return '' 
+        obj['title']=select_1orX_title(_value,_multiple)  
+        obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
+        obj['data_json']=_value
+        
+        
+        obj["value"]=_value
+        if 'update' in obj['prop'] :x_dic[obj['name']]=_value
+        obj['output_text']=obj['title'] #_select[_value] if (type(_value)==str and _value in _select) else ""
+        if 'show_full' in obj['prop']:obj['output']=obj['output_text']
+        
+        or_v= " or j_n='...'"
+        js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
+        obj['help']=obj['title']
+        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" readonly style="background-color:#aaa">''')
+        if _value:
+            if type( _value)==str:_value=_value.split(',')
+            
+            '''
+            res=DB1(db2).select(tb2,where={'f2f_id':x_dic['id']},limit=0,result='dict_x',order='id',last=False)
+            
+            '''
+            db2,tb2=obj['ref']['db'],obj['ref']['tb']
+            from x_data import x_data
+            x_r_input,x_r_output,show_cols=[],[],obj['ref']['show_cols']
+            
+            print(_value)
+            for i,xid in enumerate(_value):#.reverse():          
+                url=URL('form','xform_sd',args=[db2,tb2,xid])
+                link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
+                print("xid=" +str(xid))
+                res=DB1(db2).select(tb2,where={'id':str(xid)},limit=0,result='dict_x',order='id',last=False)
+                print("res=" +str(res))
+                print("res['rows']=" +str(res['rows']))
+                row=res['rows'][0]
+                row_o=get_table_row_view(xid,row,res['titles'],show_cols,x_data[db2][tb2],request=request) #row objects
+                x_r_input+=[[link , *row_o]]
+                x_r_output+=[row_o]
+            show_cols_tit=[x_data[db2][tb2]['tasks'][x]['title'] for x in obj['ref']['show_cols']]
+            rec_table_input=k_htm.C_TABLE(['']+show_cols_tit,x_r_input).creat_htm(div_class='div2')
+            rec_table_output=k_htm.C_TABLE(['']+show_cols_tit,x_r_input).creat_htm(thead=False,cover_div=False)
+            obj['output']=DIV(rec_table_output)
+        
+        if 'input' in need:
+            obj['input']=DIV(k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
+                ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
+                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first'],
+                ),obj['output'])
+        
+        
+        
+        
+        
+        '''
+        
+        db2,tb2=obj['ref']['db'],obj['ref']['tb']
+        '''
     elif sc=="do": #sc
         do_name,do_param=base_data.split(share.st_splite_chr2)
         
@@ -2169,7 +2249,7 @@ class C_FORM_HTM():
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,current.request,mode='output')#output_text')
-                hx['data']+=[self._show_row(hh,step)]
+                hx['data']+=[self._show_row(hh,step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
                 #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
         #breakpoint() f_nxt_s
@@ -2225,7 +2305,7 @@ class C_FORM_HTM():
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,current.request,mode='input')
-                hx['data']+=[self._show_row(hh,step)]
+                hx['data']+=[self._show_row(hh,step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
                 #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
         hx['app1']=[DIV(BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{self.x_color[xx]}',_onclick=f"app_key('{xx}')") if xx in step['app_kt'] else '' ,_class='col-'+{'y':'8','r':'2','x':'2'}[xx]) for xx in ['x','y','r']]
@@ -2241,10 +2321,11 @@ class C_FORM_HTM():
                 DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid form_step_cur")
                 ,DIV(*hx['app1'],_class="row p-2"))
                      #,_action=URL('save',args=request.args)
-    def _show_row(self,hh,step):
+    def _show_row(self,hh,step,hidden=False):
         task_cols_width=step.get('task_cols_width','3,6,3')
         tcw=task_cols_width.split(',')
-        return DIV(*[DIV(hh[i],_class=f'col-{tcw[i]} text-right') for i in range(0,3) if tcw[i]!='0'],_class='row border')
+        style="display:none;" if hidden else ''
+        return DIV(*[DIV(hh[i],_class=f'col-{tcw[i]} text-right') for i in range(0,3) if tcw[i]!='0'],_class='row border',_style=style)
         #hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
     def app_review (self,step_name): 
         '''

@@ -203,6 +203,8 @@ def tatil_mode(x_date,out_case='num'):
     rr=0
     if iw==6:
         rr= 1
+    if iw==5 and x_date> "1404/04/01":  
+        rr= 1
     elif (xx in a_tatil['all']) or ((yy in a_tatil) and (xx in a_tatil[yy])):
         rr= 2
     elif ((yy in b_tatil) and (xx in b_tatil[yy])):
