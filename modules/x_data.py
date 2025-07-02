@@ -190,11 +190,12 @@ x_data={
                 'mdr_prj':{'type':'user','title':'مسئول پیگیری پروژه'},
                 'dsplns':{'type':'f2f','len':'60','title':'دیسیپلینها','ref':{'tb':'dsplns','show_cols':['d_name','per','des']},},
                 'wbs_l1':{'type':'f2f','len':'60','title':'WBS- لایه 1','ref':{'tb':'wbs_l1','show_cols':['wbs_l1_name','wbs_l1_code']},},
-                'cat':{'type':'select','title':'دسته','select':{'P':'پروژه','F':'فرایند'}}
+                'cat':{'type':'select','title':'دسته','select':{'P':'پروژه','F':'فرایند'}},
+                'contract':{'type':'f_link','title':'قرارداد','ref':{'db':'a_contract','tb':'a','key':'{id}','val':'{date}-{subject}','show_cols':['date','subject']},'prop':['update','multiple'] },
             },
             'steps':{
                 'pre':{'tasks':'cp_name','xjobs':'dcc_dsn','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},#cp_code,cp_name
-                's1':{'tasks':'prj_id,prj,prj_name,sub_p_id,sub_p,sub_p_name,cp_code,cat,dspln,mdr_prj','xjobs':'dccm','title':'گام2','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'prj_id,prj,prj_name,sub_p_id,sub_p,sub_p_name,cp_code,cat,dspln,mdr_prj,contract','xjobs':'dccm','title':'گام2','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'dsplns,wbs_l1,sm_name,alt_names','xjobs':'dcc_dsn','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'sub_p_id','xjobs':'dccm','title':'تصویب','app_keys':'','app_titls':'','oncomplete_act':''},
             },
@@ -2158,6 +2159,16 @@ def x_data_verify(x_data):
                             #                                  'a_prj'               'a'                                  '{code}'                '{id}={prj_id}'                                       'کد پروژه'
                             #print(str(new_fld))
                             tasks_add.update(new_fld)
+                # - 040410 ----------------------------------------------------------------------
+                # ساخت فیلدهای f2f_db,f2f_tb,f2f_nm از روی فیلد با نام f2f_id برای تغییرات سریع جهت "اضافه شدن فیلدهای جدید لازم"
+                # make fildes(f2f_db,f2f_tb,f2f_nm) from field(f2f_id) : speed change => make need fiels
+                if obj['name']=='f2f_id':
+                    new_fld={
+                        'f2f_db':{'type':'text','title':'database'},
+                        'f2f_tb':{'type':'text','title':'table'},
+                        'f2f_nm':{'type':'text','title':'name'}
+                        }
+                    tasks_add.update(new_fld)    
             #print(str(tasks_add))
             tb_obj['tasks'].update(tasks_add)
             

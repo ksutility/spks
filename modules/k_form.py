@@ -1503,14 +1503,14 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             from x_data import x_data
             x_r_input,x_r_output,show_cols=[],[],obj['ref']['show_cols']
             
-            print(_value)
+            #print(_value)
             for i,xid in enumerate(_value):#.reverse():          
                 url=URL('form','xform_sd',args=[db2,tb2,xid])
                 link=XML(k_htm.a(i+1,_href=url,_target="box",_title='بازبینی',_class='btn btn-info'))
-                print("xid=" +str(xid))
+                #print("xid=" +str(xid))
                 res=DB1(db2).select(tb2,where={'id':str(xid)},limit=0,result='dict_x',order='id',last=False)
-                print("res=" +str(res))
-                print("res['rows']=" +str(res['rows']))
+                #print("res=" +str(res))
+                #print("res['rows']=" +str(res['rows']))
                 row=res['rows'][0]
                 row_o=get_table_row_view(xid,row,res['titles'],show_cols,x_data[db2][tb2],request=request) #row objects
                 x_r_input+=[[link , *row_o]]
