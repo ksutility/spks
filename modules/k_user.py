@@ -112,7 +112,7 @@ def jobs_load_inf():
     for row in rows:
         j_inf=dict(zip(titles,row))
         jobs[j_inf['code']]={x:j_inf[x] for x in ['title','base_user']} 
-        jobs[j_inf['code']]['users']=j_inf['users'].split(',')
+        jobs[j_inf['code']]['users']=j_inf['users'].split(',') if j_inf['users'] else ['']
     return jobs
 a_jobs=jobs_load_inf()
 

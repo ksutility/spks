@@ -1,6 +1,10 @@
 body {
   font-family: BNazanin;
 }
+input.readonly {
+	background-color:#aaa;
+	
+}
 /* ---------------------------------------------------------------------------------------------------------------- */
 table th {
     position: sticky;

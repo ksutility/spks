@@ -89,6 +89,26 @@ form_xinf   =>keys=['f_step','f_revn','f_revs','f_nexu','reject_text'] =>
     share.f_step,share.f_revn,share.f_revs,share.f_nexu,share.reject_text
 '''
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
+fsc_mode:int  => {'help':'form_step_class','def':'step_state'}
+    0: befor of cur - approved
+        - filled and not can review - start & end (where)
+    1: cur
+        - curent for fill  -filled and     can review - start & not end (where) & filled
+    2: cur
+        - curent for fill           - start & not end (where) & not filled
+    3: aftre of cur - empty or review
+        - empty or fill and review  - not start (where)
+-------------------------------------------------------
+start_step:int
+    شماره مرحله ای که در صورت زدن دکمه بازبینی باید کد تایید آن خالی شود
+    prees (review_buttom) --> step_{start_step}_ap=''  
+    ---------------------------------------------------------------
+    در فرایندهای معمولی ( سریالی) شماره آن معادل شماره مرحله قبل می باشد -توجه شروه شماره مرحله ها از صفر می باشد
+    for common step : start_step = step_index of befor step = cur_step_index -1
+         - step_index start from 0
+    
+'''
 from gluon.html import *
 #from gluon.cache import CacheInRam
 cache_ram={} #CacheInRam()
@@ -793,6 +813,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     obj['input']=obj.get('input',_value ) # if read im prop
     obj['help_txt']=''
     obj['data_json']=_value
+    
+    readonly ='readonly class="readonly"' if ('readonly' in obj['prop']) else '' #:obj['input']=obj['output'] 
     '''
         input may creat by auto_x
     '''
@@ -914,7 +936,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             res1=db1.update_data(tb_name,set_dic,x_where)
         return XML(res1['msg'])
     #------------------------------------------------------------------------------------------------------------------ 
-    readonly='readonly' if 'readonly' in obj['prop'] else '' #:obj['input']=obj['output']    
+       
     if sc=='text':#sc
         def htm_correct(x):
             if x:
@@ -946,12 +968,12 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             t_val= f' value="{_value}"' #'' if 'placeholder' in obj else
             if _len<60 :
                 obj['input']=XML(f'''
-                    <input type="text" {_n} {x_class} {_dir} {tt} {t_val} size="{_len}" maxlength="{_len}" style='width:100%' onkeyup="txt_key('{_name}',{_len});" {onact_txt} required {readonly}>''')
+                    <input type="text" {_n} {x_class} {_dir} {readonly} {tt} {t_val} size="{_len}" maxlength="{_len}" style='width:100%' onkeyup="txt_key('{_name}',{_len});" {onact_txt} required {readonly}>''')
                 #if 'disabled' in obj:ix=XML(f"<INPUT name={obj['name']} id={obj['name']} value={obj['value']} style='width:100%' disabled>")
             else:   
                 height=obj['height'] if 'height' in obj else '25px'
                 obj['input']=XML(f'''
-                    <textarea {_n} {x_class} {_dir} rows="2" style='width:100%;height:{height};' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} >{_value}</textarea>''' )
+                    <textarea {_n} {x_class} {_dir} {readonly} rows="2" style='width:100%;height:{height};' maxlength="{_len}" onkeyup='txt_key("{_name}",{_len});'  {onact_txt} {readonly} >{_value}</textarea>''' )
                 #style='width:100%'
             
             ##--------  
@@ -1095,8 +1117,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
         obj['help']=obj['title']
-        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" readonly style="background-color:#aaa">''')
-
+        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" {readonly} >''')# style="background-color:#aaa">'''
+        if "can_add" in obj['prop']:obj['help']= XML('<a title="امکان اضافه کردن متن جدید"> ✏️ </a> - ' +obj['help'] )
         
     elif sc=='fdate': #sc
         import k_date
@@ -1416,7 +1438,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     elif sc=="f2f": #sc 
         db2,tb2=obj['ref']['db'],obj['ref']['tb']
         var_set={x:x_dic[y] for x,y in obj['var_set'].items()} if 'var_set' in obj else {}
-        var_set.update({'f2f_id':x_dic['id'],'form_case':1})
+        var_set.update({'f2f_id':x_dic['id'],'f2f_db':db_name,'f2f_tb':tb_name,'f2f_nm':x_data_s['base'].get('title'),'form_case':1})
         new_form_link=k_htm.a('ردیف جدید',_href=URL('form','xform_sd',args=[db2,tb2,'-1'],vars=var_set),_target="box",_title='فرم جدید') #box
         
         #table of record data - جدول اصلاعات ثبت شده
@@ -1491,7 +1513,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
         obj['help']=obj['title']
-        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" readonly style="background-color:#aaa">''')
+        if readonly: obj['input']= XML(f'''<input type="text" {_n} value="{_value}" {readonly} >''')
         if _value:
             if type( _value)==str:_value=_value.split(',')
             
@@ -1668,6 +1690,10 @@ class C_FORM():
         self.cur_step=''
         self.cur_step_name=''
     def __set_new_data(self,new_data): 
+        # به روز کردن و یا اضافه کردن اطلاعات جدید
+        # update new_data to 
+        # self.new_data & self.all_data
+        
         #self.new_data=new_data.copy() if not hasattr(self, 'new_data') else 
         self.new_data.update(new_data)
         self.all_data.update(new_data)
@@ -1693,7 +1719,7 @@ class C_FORM():
             به روز رسانی / ثبت اطلاعات مربوط به تایید 1 مرحله در داخل کلاس
         '''
         import k_date
-        if reset:
+        if reset: #
             x_d= {f'step_{cur_step_name}_ap':''}
             """    
                     f'step_{cur_step_name}_un':'',
@@ -1771,6 +1797,9 @@ class C_FORM():
         '''
         goal:
             تهیه یک دیکشنری از اطلاعاتی که قرار است در دیتا بیس به روز رسانی شوند
+                بر اساس اطلاعات موجود در 
+                all_data
+            
             reset:
                 True:all field in cur step of form shoud be reset =>(set to '')
                 False:all field in cur step of form shoud be save
@@ -1950,13 +1979,7 @@ class C_FORM():
     def step_state(self,step_name):
         '''
             مشخص کردن اینکه 1 مرحله در وضعیت آماده برای ویرایش می باشد - با توجه به نتایج مراحل دیگر
-            step_state= str 0 to 4
-                '0': filled and not can review - start & end (where)
-                '1': filled and     can review - start & not end (where) & filled
-                '2': curent for fill           - start & not end (where) & not filled
-                '3': empty or fill and review  - not start (where)
-                
-                
+        return [fsc_mode,,] @ 
         '''
         step=self.x_data_s['steps'][f'{step_name}']
         start_where=step['start_where'] #"'{step_0_ap}' =='y' and not '{step_2_ap}' in ['y','x']"
@@ -2235,10 +2258,8 @@ class C_FORM_HTM():
             0209012
         INPUT:
         ------
-            fsc_mode:str ('b'/'a')
-                1,2=cur
-                0=befor of cur - approved
-                3=aftre of cur - empty or review
+            fsc_mode: @
+
         '''
         #print (step)
         fsc_class=f"form_step_c{fsc_mode}" #fsc_mode=form_step_class
