@@ -406,7 +406,7 @@ def read_mermaid():
 def read_xx(): #read all markup
     f_name,f_msg,file_inf=_x_file()
     ext=file_inf['ext'][1:]
-    if ext in ['md','mm','ksm','mermaid']:
+    if ext in ['md','mm','ksm','ksml','mermaid']:
         return _read_markup(ext)
     #elif ext in[""]
     #xd={'json':'json_read','csv':'read_csv','md':'read_m','mm':'read_m','ksm':'read_m','ipt2win':'read_ipt2win'}    
@@ -435,44 +435,19 @@ def _read_markup(mm_case):
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
     import k_s_dom,k_file
+    from k_file_x import file_2_htm
     #from gluon.ks import markdown
     #return x.xx()
-    def file_2_htm(data,ext):
-        if ext=='mm':
-            from gluon.contrib.markmin.markmin2html import markmin2html
-            """
-            from gluon.contrib.markmin.markmin2latex import markmin2latex
-            latex=markmin2latex(data)
-            from gluon.contrib.markmin.markmin2pdf import markmin2pdf
-            pdf=markmin2pdf(data)  # requires pdflatex 
-            """
-            return markmin2html(data)#[2:-2]
-        elif ext=='md1':
-            """
-                module\mistune3\
-            """
-            import mistune3
-            return mistune3.html(data)
-        elif ext=='md':
-            """
-                module\mistune.py
-            """
-            import mistune 
-            renderer = mistune.Renderer(escape=False, hard_wrap=True)
-            markdown = mistune.Markdown(renderer=renderer)
-            return markdown(data)
-        elif ext=='htm':
-            return data
-        elif ext=='mermaid': 
-            from k_file_x import mermaid_2_html
-            lines= data.split("/n")
-            return mermaid_2_html(lines)
+    list_url=URL('file','f_list',args=request.args[:-1],vars=request.vars)
+    list_link=f"<a title='سیستم مدیریت محتوا' href={list_url}>SPKS </a> | "
+    file_url=URL('edit_r',args=request.args,vars=request.vars)
+    file_link=f"<a title={f_name} href={file_url}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
     def _r_mm(data):
         return file_2_htm(data,'mm')
     def _r_md(data):
         return file_2_htm(data,'md')
     def _r_mermaid(data):  
-        return file_2_htm(data,'mermaid')
+        return file_2_htm(data,'mermaid')#str()
     def _r_ksm1(f_name):
         d2=""
         with open(f_name) as file: #open(f_name,'r',encoding='utf8')
@@ -485,63 +460,8 @@ def _read_markup(mm_case):
             d2+=d1 #<br>+f_name    
         return _r_mm(d2) #d2    #
     def _r_ksm(f_name):
-        d2=""
-        from gluon import template
-        with open(f_name,'r',encoding='utf8') as file: 
-            #lines = [line.rstrip() for line in file]
-            lines = [line for line in file]
-            lines_rs = [line.rstrip() for line in lines]
-        #return str(lines)   
-        if "---" in lines_rs:
-            n=lines_rs.index('---')
-            try:
-                xdic=eval(''.join(lines_rs[:n]))
-            except Exception as err:
-                import traceback
-                tb = traceback.format_exc()
-                return f'ERROR<br>خطا در محتوای داخل فایل <br> در قسمت دیکشنری تعریف متغرها در بالای فایل قبل از 3 دش<hr>file={f_name}<hr>{tb}'
-            #return (str(xdic))
-            xlines=lines[n+1:]
-            xdic['__cpath__']=k_file.file_name_split(f_name)['path']+"\\"
-            xlines=[template.render(content=x,context=xdic) for x in xlines]
-            #return (str(xlines))
-        else :
-            xlines=lines
-        ml_mode='md'
-        line_sum=''
-        for line in xlines:
-            if len(line)>6 and line[:6]=='%%read':
-                if line_sum: # output lasrt read content of cur file 
-                    d2+=str(file_2_htm(line_sum,ml_mode))
-                    line_sum=''
-                f_name=line[7:].rstrip()
-                f_name1=k_file.find (f_name)
-                if not f_name1:
-                    return DIV(H1("ERROR: file not found"),HR(),H2(f_name))
-                ext=k_file.file_name_split(f_name1)['ext'][1:]
-                if ext in ['mm','md','mermaid']:
-                    with open(f_name1,'r',encoding='utf8') as f:
-                        d1=f.read()
-                    d3=str(file_2_htm(d1,ext))
-                    d2+=d3
-                elif ext=='csv':
-                    d2+=str(_read_csv(f_name1))
-            elif len(line)>3 and line[:2]=='%%':
-                if line_sum:
-                    d2+=str(file_2_htm(line_sum,ml_mode))
-                    line_sum=''
-                x_act=line[2:].strip().lower()
-                if x_act in ['md','mm','htm']:
-                    ml_mode=x_act
-                    #print (x_act)
-                else:
-                    print(f"error : {line} => {x_act}")
-            else:
-                line_sum+=line
-                #d1=file_2_htm(line,ml_mode)
-            #d2+=d1 #XML(d1) #<br>+f_name    
-        d2+=str(file_2_htm(line_sum,ml_mode))
-        return d2 #_r_mm(d2) #d2    #
+        from k_file_x import ksml_to_html
+        return ksml_to_html(f_name,list_url,file_url)
             
     def html_visible(html):
         return html.replace('<','^').replace('\n','/n').replace('\t','/t')
@@ -610,7 +530,7 @@ def _read_markup(mm_case):
         html_1=_r_mm(data)  
     elif mm_case=='md':
         html_1=_r_md(data)     
-    elif mm_case=='ksm':
+    elif mm_case in ['ksm','ksml']:
         html_1=_r_ksm(f_name) 
         data=""
     elif mm_case=='mermaid':
@@ -642,9 +562,13 @@ def _read_markup(mm_case):
             #:return XML(DIV(html.replace('<','^').replace('\n','/n').replace('\t','/t'),_style='direction:ltr'))
         #return '<hr><div style="width:100%><div style="width:45%;float: left;">data'+tbl0(data)+'</div><div style="width:45%;float: left;>html_1'+tbl(html_1)+'</div></div>html_2'+tbl(html_2)+'<hr>html_2<br>'+r2(html_2)+'<hr>data<br>'+r2(data)
         return '<hr>data'+tbl0(data)+'<hr>html_1'+tbl(html_1)+'<hr>html_2'+tbl(html_2)+'<hr>html_2<br>'+r2(html_2)+'<hr>data<br>'+r2(data)
-    list_link=f"<a title='سیستم مدیریت محتوا' href={URL('file','f_list',args=request.args[:-1],vars=request.vars)}>SPKS </a> | "
-    file_name=f"<a title={f_name} href={URL('edit_r',args=request.args,vars=request.vars)}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
-    return htm_head(print_mode=0)+DIV(XML(list_link+file_name),_class="menu")+ html_2 + report(data,html_1,html_2)
+    
+    if mm_case =='ksml':
+        return html_1
+    htm_head1=htm_head(print_mode=0) if mm_case!='ksml' else XML('')
+    menu=DIV(XML(list_link+file_link),_class="menu")
+    
+    return htm_head1+menu+ html_2 + report(data,html_1,html_2)
     #return "----"+ html_1
     #return dict(xml=XML(view_link+list_link+html_2)+ report(data,html_1,html_2)
     #return dict(htm_head=htm_head,xml=XML(html),htm1=rr(html))

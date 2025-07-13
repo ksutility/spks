@@ -1006,7 +1006,7 @@ x_data={
                 'date':{'type':'fdate','title':'تاریخ پیشنهاد','prop':['update']},
                 'f_code_r':{'type':'auto','len':'8','auto':"""{f_code}-sug-{nn}""",'title':'کد 2'},
                 'file_r':{'type':'file_r','len':'40','file_name':'{f_code_r}-r','path':'form,doc_tqm','title':'pdf - فایل ورودی'},
-                'suggest':{'type':'text','len':'128','title':'متن پیشنهاد اصلاحی'},
+                'suggest':{'type':'text','len':'512','title':'متن پیشنهاد اصلاحی','height':'50px'},
                 
             },
             'steps':{

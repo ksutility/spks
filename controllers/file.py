@@ -546,7 +546,7 @@ def f_list():#file_browser=file.index
         pass
 
     def link_view(x_file,link_txt,link_title='View'):
-        xd={'json':'json_read','csv':'read_csv','md':'read_xx','mm':'read_xx','ksm':'read_xx','ipt2win':'read_ipt2win',
+        xd={'json':'json_read','csv':'read_csv','md':'read_xx','mm':'read_xx','ksm':'read_xx','ksml':'read_xx','ipt2win':'read_ipt2win',
             'mermaid':'read_xx','mermaid2':'read_mermaid'}
             #'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]
@@ -564,7 +564,7 @@ def f_list():#file_browser=file.index
             ) if fc_access else ''      
     def link_edit(x_file,link_txt,link_title='Edit'):  
         ext=x_file['ext'][1:]
-        if ext in ['md','mm','json','csv','txt','ksm','mermaid','mermaid2']:#files that can edit by edit_r page
+        if ext in ['md','mm','json','csv','txt','ksm','ksml','mermaid','mermaid2']:#files that can edit by edit_r page
             return A(link_txt,_href=URL('xfile','edit_r',args=args+[x_file['filename']],vars=r_vars),_target="x_frame",_title=link_title)
         return ''   
     def link_download(x_file,link_txt,link_title='download'):

@@ -125,14 +125,12 @@ def xform():
     res=k_form._xform() 
     return dict(htm=res['htm'],link=res['link'])#k_form._xform())
 def xform_cg():
-    import k_file,json,os
+    
     session.view_page='xform_cg'
     session['update_step']=True
     x_data_s,db_name,tb_name,msg=_get_init_data()
     tmplt_fname=x_data_s['base']['xform_cg_file']
-    cur_dir=os.getcwd() #D:\ks\I\web2py-test
-    file_dir=cur_dir+r"\applications\spks\static\xform_cg"+"\\"+ tmplt_fname
-    x_file=k_file.read('text',file_dir)
+        
     #print(file_dir)
     json_data=k_form._xform()['json']
     if request.args[2]=="-1":
@@ -143,37 +141,12 @@ def xform_cg():
         json_data1['_']={x:y for x,y in json_data.items()} #__inf__
         
     json_data1['_labels']={x:y for x,y in x_data_s['labels'].items()}
-    json_data1['_id']=request.args[2] #new for =>id=-1
-    
-    x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
+    json_data1['_id']=request.args[2] #new for =>id=-1 
     
     url1=str(URL('xform',args=request.args,vars=request.vars))
-    x_file1=x_file1.replace('link_server',url1) 
-    if tmplt_fname[-8:]!='-st.html':#vue mode
-        json_txt=json.dumps(json_data1,indent=4,ensure_ascii=False)
     
-        #xreport_var([{'json_data':json_data,'json_data1':json_data1,'json_txt':json_txt}])
-        #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
-        
-        #return x_file1
-        
-        #print(url1)
-        
-        x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
-        script2=""" 
-        document.getElementById('help_div').style.display = "none"
-        document.getElementById('bt_writetext').style.display = "none"
-        """
-        x_file2=x_file2.replace("//script2_inject",script2)
-        #return x_file2
-        return XML(x_file2)
-    else:
-        import k_tools,k_str
-        #--------------------
-        x_dic=k_tools.dict2obj(json_data1)
-        #return json.dumps(x_dic,indent=4,ensure_ascii=False)
-        x_file1=k_str.template_parser(x_file1,x_dic,do_format=False)
-        return XML(x_file1)
+    from k_file_x import cg_form
+    return cg_form(tmplt_fname,json_data1,url1)
 
 
 

@@ -82,8 +82,11 @@ def sum_times(time_list):
     return str(hh+h2).zfill(2)+":"+str(m2).zfill(2)
     #return round((hh+mm/60),1)
 def time_2_num(x_time):
-    h1,m1=x_time.split(":")[:2]
-    return round(int(h1)+int(m1)/60,1)    
+    try:
+        h1,m1=x_time.split(":")[:2]
+        return round(int(h1)+int(m1)/60,1) 
+    except:
+        return 0
 def time_2_min(x_time):
     h1,m1=x_time.split(":")[:2]
     return (int(h1)*60+int(m1))        

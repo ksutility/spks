@@ -8,6 +8,7 @@ Created on 1403/04/31
 last update 1403/04/31
 """
 from gluon.html import *
+from k_err import xreport_var
 
 def read_csv(f_name,out_form='str'):
     enc_list={'utf8':',','utf-16':'\t'}
@@ -579,9 +580,153 @@ def mermaid_2_html(mermaid_base,head=''):
                         {''.join(mermaid_base)}
                     </pre>
                 </div>
-            </div
+            </div>
         </div>
     </body>
     '''
     
 #--------------
+def cg_form(tmplt_fname,json_data,url1):
+    '''
+        goal:show 1 form in grafical form
+        use : 
+            - form.xform_cg
+            - ksml
+    '''
+    import os,k_file,json
+    cur_dir=os.getcwd() #D:\ks\I\web2py-test
+    file_dir=cur_dir+r"\applications\spks\static\xform_cg"+"\\"+ tmplt_fname
+    x_file=k_file.read('text',file_dir)
+    x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
+    
+    x_file1=x_file1.replace('link_server',url1) 
+    if tmplt_fname[-8:]!='-st.html': #vue mode
+        
+        #xreport_var([{'json_data':json_data}])
+        
+        json_txt=json.dumps(json_data,indent=4,ensure_ascii=False)
+        #xreport_var([{'json_data':json_data,'json_txt':json_txt}])
+        #'json_txt':json.dumps(htm_form['body_json'],indent=4,ensure_ascii=False) }#,TABLE([str(y) for x,y in htm_form['body_json'].items()])
+        #return x_file1
+        
+        x_file2=x_file1.replace("{'date':'0000/00/00','time':'00:00',}",json_txt)
+        script2=""" 
+        document.getElementById('help_div').style.display = "none"
+        document.getElementById('bt_writetext').style.display = "none"
+        """
+        x_file2=x_file2.replace("//script2_inject",script2)
+        #return x_file2
+        return XML(x_file2)
+    else:                              #python mode
+        import k_tools,k_str
+        #--------------------
+        x_dic=k_tools.dict2obj(json_data)
+        #return json.dumps(x_dic,indent=4,ensure_ascii=False)
+        x_file1=k_str.template_parser(x_file1,x_dic,do_format=False)
+        return XML(x_file1)
+#------------------------------------------------------------------------------
+def file_2_htm(data,ext):
+    if ext=='mm':
+        from gluon.contrib.markmin.markmin2html import markmin2html
+        """
+        from gluon.contrib.markmin.markmin2latex import markmin2latex
+        latex=markmin2latex(data)
+        from gluon.contrib.markmin.markmin2pdf import markmin2pdf
+        pdf=markmin2pdf(data)  # requires pdflatex 
+        """
+        return markmin2html(data)#[2:-2]
+    elif ext=='md1':
+        """
+            module\mistune3\
+        """
+        import mistune3
+        return mistune3.html(data)
+    elif ext=='md':
+        """
+            module\mistune.py
+        """
+        import mistune 
+        renderer = mistune.Renderer(escape=False, hard_wrap=True)
+        markdown = mistune.Markdown(renderer=renderer)
+        return markdown(data)
+    elif ext=='htm':
+        return data
+    elif ext=='mermaid': 
+        from k_file_x import mermaid_2_html
+        lines= data.split("/n")
+        return mermaid_2_html(lines)
+#--------------------------------------------------------------------------------------
+def ksml_to_html(f_name,list_url,file_url): # ksml_to_html(f_name):   
+    import k_file
+    d2=""
+    from gluon import template
+    with open(f_name,'r',encoding='utf8') as file: 
+        #lines = [line.rstrip() for line in file]
+        lines = [line for line in file]
+        lines_rs = [line.rstrip() for line in lines]
+    #return str(lines)   
+    if "---" in lines_rs:
+        n=lines_rs.index('---')
+        try:
+            json_str=''.join(lines_rs[:n])
+            xdic=eval(json_str)
+            #xreport_var([{'json_str':json_str,'xdic':xdic}])
+        except Exception as err:
+            import traceback
+            tb = traceback.format_exc()
+            return f'ERROR<br>خطا در محتوای داخل فایل <br> در قسمت دیکشنری تعریف متغرها در بالای فایل قبل از 3 دش<hr>file={f_name}<hr>{tb}'
+        #return (str(xdic))
+        xlines=lines[n+1:]
+        xdic['__path__']=k_file.file_name_split(f_name)['path']+"\\"
+        xlines=[template.render(content=x,context=xdic.copy()) for x in xlines]
+        #return (str(xlines))
+    else :
+        xlines=lines
+    ml_mode='md'
+    line_sum=''
+    for line in xlines:
+        if len(line)>6 and line[:6]=='%%read':
+            if line_sum: # output lasrt read content of cur file 
+                d2+=str(file_2_htm(line_sum,ml_mode))
+                line_sum=''
+            f_name=line[7:].rstrip()
+            f_name1=k_file.find (f_name)
+            if not f_name1:
+                return DIV(H1("ERROR: file not found"),HR(),H2(f_name))
+            ext=k_file.file_name_split(f_name1)['ext'][1:]
+            if ext in ['mm','md','mermaid']:
+                with open(f_name1,'r',encoding='utf8') as f:
+                    d1=f.read()
+                d3=str(file_2_htm(d1,ext))
+                d2+=d3
+            elif ext=='csv':
+                d2+=str(_read_csv(f_name1))
+        elif len(line)>3 and line[:2]=='%%':
+            if line_sum:
+                d2+=str(file_2_htm(line_sum,ml_mode))
+                line_sum=''
+            x_act=line[2:].strip().lower()
+            if x_act in ['md','mm','htm']:
+                ml_mode=x_act
+                #print (x_act)
+            else:
+                print(f"error : {line} => {x_act}")
+        else:
+            line_sum+=line
+            #d1=file_2_htm(line,ml_mode)
+        #d2+=d1 #XML(d1) #<br>+f_name    
+    d2+=str(file_2_htm(line_sum,ml_mode))
+    if 'cg_form' in xdic :
+        import k_date
+        xdic['__text__']=DIV(XML(d2),_id='_t_',_style="direction:rtl")
+        if not 'text_list_color' in xdic:xdic['text_list_color']='1'
+        if not 'title' in xdic:xdic['title']=''
+        if not 'rev' in xdic:xdic['rev']='00'
+        if not 'date' in xdic:
+            xdic['date']=k_date.ir_date(xformat='yyyy/mm/dd')
+        xdic['__trace__']=f_name+"|"+k_date.ir_date(xformat='yy/mm/dd-hh:gg:ss')
+        xdic['list_url']=list_url
+        xdic['file_url']=file_url
+        return cg_form(tmplt_fname=xdic['cg_form'],json_data=xdic,url1='')
+    else:
+        return d2 #_r_mm(d2) #d2    #
