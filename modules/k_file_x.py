@@ -625,7 +625,7 @@ def cg_form(tmplt_fname,json_data,url1):
         x_file1=k_str.template_parser(x_file1,x_dic,do_format=False)
         return XML(x_file1)
 #------------------------------------------------------------------------------
-def file_2_htm(data,ext):
+def markup_2_htm(data,ext): # oldname =file_2_htm
     if ext=='mm':
         from gluon.contrib.markmin.markmin2html import markmin2html
         """
@@ -656,14 +656,21 @@ def file_2_htm(data,ext):
         lines= data.split("/n")
         return mermaid_2_html(lines)
 #--------------------------------------------------------------------------------------
-def ksml_to_html(f_name,list_url,file_url): # ksml_to_html(f_name):   
+def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):   
+    xdic={}
+
     import k_file
-    d2=""
+    
     from gluon import template
-    with open(f_name,'r',encoding='utf8') as file: 
-        #lines = [line.rstrip() for line in file]
-        lines = [line for line in file]
-        lines_rs = [line.rstrip() for line in lines]
+    if type(file)==str:
+        f_name=file
+        with open(f_name,'r',encoding='utf8') as file: 
+            #lines = [line.rstrip() for line in file]
+            lines = [line for line in file]
+    else: #type(file)==list:
+        lines=file 
+
+    lines_rs = [line.rstrip() for line in lines]
     #return str(lines)   
     if "---" in lines_rs:
         n=lines_rs.index('---')
@@ -677,17 +684,28 @@ def ksml_to_html(f_name,list_url,file_url): # ksml_to_html(f_name):
             return f'ERROR<br>خطا در محتوای داخل فایل <br> در قسمت دیکشنری تعریف متغرها در بالای فایل قبل از 3 دش<hr>file={f_name}<hr>{tb}'
         #return (str(xdic))
         xlines=lines[n+1:]
-        xdic['__path__']=k_file.file_name_split(f_name)['path']+"\\"
+        file_ns=k_file.file_name_split(f_name)
+        xdic['__path__']=file_ns['path']+"\\"
+        xdic['__filename__']=file_ns['name']
+        
         xlines=[template.render(content=x,context=xdic.copy()) for x in xlines]
         #return (str(xlines))
     else :
         xlines=lines
+        
+    if pre_case:
+        xdic['cg_form']={'1':'a01-st.html','2':'a02-st.html','3':'a03-st.html','4':'a04-st.html','a':'a10-pr-wip-st.html'}.get(pre_case,'a04-st.html')
+        
+    d1=""  #line in base format
+    d2=""  #convert md to html 
+    d3="" #contet of 1th read file
     ml_mode='md'
     line_sum=''
     for line in xlines:
         if len(line)>6 and line[:6]=='%%read':
             if line_sum: # output lasrt read content of cur file 
-                d2+=str(file_2_htm(line_sum,ml_mode))
+                d1+=line_sum+"\n"
+                d2+=str(markup_2_htm(line_sum,ml_mode))
                 line_sum=''
             f_name=line[7:].rstrip()
             f_name1=k_file.find (f_name)
@@ -696,14 +714,17 @@ def ksml_to_html(f_name,list_url,file_url): # ksml_to_html(f_name):
             ext=k_file.file_name_split(f_name1)['ext'][1:]
             if ext in ['mm','md','mermaid']:
                 with open(f_name1,'r',encoding='utf8') as f:
-                    d1=f.read()
-                d3=str(file_2_htm(d1,ext))
+                    f_t=f.read()
+                d3=str(markup_2_htm(f_t,ext))
+                d1+=f_t+"\n"
                 d2+=d3
             elif ext=='csv':
+                d1+="CSV\n"
                 d2+=str(_read_csv(f_name1))
         elif len(line)>3 and line[:2]=='%%':
             if line_sum:
-                d2+=str(file_2_htm(line_sum,ml_mode))
+                d1+=line_sum+"\n"
+                d2+=str(markup_2_htm(line_sum,ml_mode))
                 line_sum=''
             x_act=line[2:].strip().lower()
             if x_act in ['md','mm','htm']:
@@ -713,20 +734,57 @@ def ksml_to_html(f_name,list_url,file_url): # ksml_to_html(f_name):
                 print(f"error : {line} => {x_act}")
         else:
             line_sum+=line
-            #d1=file_2_htm(line,ml_mode)
+            #d1=markup_2_htm(line,ml_mode)
         #d2+=d1 #XML(d1) #<br>+f_name    
-    d2+=str(file_2_htm(line_sum,ml_mode))
+    d1+=line_sum+"\n"
+    d2+=str(markup_2_htm(line_sum,ml_mode))
+    def first_text_line(lines):
+        '''
+        برگرداندن اولین خط متنی 
+        خط متنی یعنی با کد های اچ تی ام ال شروع نمی شود
+        '''
+        xlines=lines.split("\n")
+        #import k_err
+        #k_err.xreport_var([xlines])
+        for line in xlines:
+            ll=line.strip()
+            if ll and ll[0]!="<":
+                return ll
+    #-------------------------------
     if 'cg_form' in xdic :
         import k_date
         xdic['__text__']=DIV(XML(d2),_id='_t_',_style="direction:rtl")
         if not 'text_list_color' in xdic:xdic['text_list_color']='1'
-        if not 'title' in xdic:xdic['title']=''
+        
         if not 'rev' in xdic:xdic['rev']='00'
+        #----------------------------
+        if not 'app' in xdic:
+            xdic['app']='''
+                - تهیه :
+                - 
+                - 
+                - تایید :
+                - 
+                - 
+                - تصویب :
+                - 
+                - 
+                '''
+        ap=xdic['app'].split("-")+['']*9
+        print (str(ap))
+        xdic['app1']=ap[1:4]
+        xdic['app2']=ap[4:7]
+        xdic['app3']=ap[7:10]
         if not 'date' in xdic:
             xdic['date']=k_date.ir_date(xformat='yyyy/mm/dd')
         xdic['__trace__']=f_name+"|"+k_date.ir_date(xformat='yy/mm/dd-hh:gg:ss')
         xdic['list_url']=list_url
         xdic['file_url']=file_url
+        #if not 'code' in xdic:
+        xdic['code']= (xdic.get('code') or k_file.file_name_split(f_name)['name'])
+        if not 'title' in xdic or (not xdic['title']):
+            xdic['title']=first_text_line(d1).replace("#","")
+        print(xdic)    
         return cg_form(tmplt_fname=xdic['cg_form'],json_data=xdic,url1='')
     else:
-        return d2 #_r_mm(d2) #d2    #
+        return d2 #markup_2_htm(d2,'mm') #d2    #

@@ -940,16 +940,20 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     if sc=='text':#sc
         def htm_correct(x):
             if x:
-                t= x.replace('"','|')
+                t= x.replace('"','`')
                 t= t.replace('None','')
                 t= t.replace('none','')
+                t= t.replace('ي','ی')
                 return t
             else:
                 return ''
         ##------
         _value=htm_correct(_value)
         if 'output' in need:
-            obj['output']=htm_correct(_value)
+            obj['output']=_value
+            if 'markup' in obj :
+                from k_file_x import markup_2_htm
+                obj['output']=XML(markup_2_htm(_value,obj['markup']))
             obj['output_text']=obj['output']
         else: #'input' in need
             _dir='dir="ltr"' if ('lang' in obj and obj['lang']=='en') else 'dir="rtl"' 
@@ -1016,6 +1020,11 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         #obj['help'],
         or_v,js_ff_chek="","" # #msg is define correct in top of select
     elif sc in ["select","user","reference"]: #sc
+        '''
+            obj(field).items:
+                prop:['can_add','']
+                value_show_case
+        '''
         onact_txt=obj['onchange']
         if "update" in obj['prop'] : onact_txt+= form_update_set(form_update_set_param) 
         # onact_txt= " onchange='" + form_update_set(form_update_set_param) + "'" 
@@ -1043,7 +1052,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 pass
                 modir_un='rms'
                 '''
-            #obj['add_empty_first']=False
+
             ''' not used 040322
             if 'def_value' in obj:
                 if obj['def_value']=='_cur_user_un_':
@@ -1112,7 +1121,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                 xxxprint(msg=['add_x',str(n_d)])
             obj['input']=k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
                 ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
-                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first'],
+                ,no_empty=True if ('no_empty' in obj['prop']) else False, #True (not 'add_empty_first' in obj) else obj['add_empty_first'],
                 )
         or_v= " or j_n='...'"
         js_ff_chek= " || j_n=='...'" #msg is define correct in top of select
@@ -1545,7 +1554,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if 'input' in need:
             obj['input']=DIV(k_htm.select(_options=_select,_name=_name,_value=_value #.split(',') if _multiple else _value 
                 ,_onchange=onact_txt,can_add=("can_add" in obj['prop']),_multiple=_multiple
-                ,add_empty_first=True if (not 'add_empty_first' in obj) else obj['add_empty_first'],
+                ,no_empty=True if ('no_empty' in obj['prop']) else False, #True (not 'add_empty_first' in obj) else obj['add_empty_first'],
                 ),obj['output'])
         
         
@@ -2489,18 +2498,18 @@ class C_FILTER():
 
         cols_filter=x_data_s['cols_filter']
         self.cols_filter_obj={'name':'cols_filter','type':'select','select':cols_filter,'def_value':x_data_s['base'].get('cols_filter','')
-            ,'add_empty_first':False}#,$hlp='prop':["can_add"],}
+            ,'prop':['no_empty']}#,$hlp='prop':["can_add"],}
         
         data_filter=x_data_s['data_filter'] 
         data_filter={template_parser(x):y for x,y in data_filter.items()}
         def_value=template_parser(x_data_s['base'].get('data_filter',''))
-        self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value,'add_empty_first':False}
+        self.data_filter_obj={'name':'data_filter','type':'select','select':data_filter,'def_value':def_value,'prop':['no_empty']}
         
         data_sort_items={'id':'id'}
         data_sort_items.update({x:y['title'] for x,y in x_data_s['tasks'].items()})
-        self.data_sort={'name':'data_sort','type':'select','select':data_sort_items,'add_empty_first':False}
+        self.data_sort={'name':'data_sort','type':'select','select':data_sort_items,'prop':['no_empty']}
         
-        self.data_page_len={'name':'data_page_len','type':'select','select':['20','50','100','200','500'],'add_empty_first':False}
+        self.data_page_len={'name':'data_page_len','type':'select','select':['20','50','100','200','500'],'prop':['no_empty']}
         #import k_err
         #k_err.xreport_var([data_filter,self.data_filter_obj])
         

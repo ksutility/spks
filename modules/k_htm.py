@@ -365,11 +365,20 @@ class C_TABLE:
         return tt+'\n'.join([','.join([str(cel) for cel in row]) for row in trs])
         #return trs
         
-    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table",thead=True,cover_div=True,row_colors=[]):
+    def creat_htm(self,table_class="0",table_type="",_id="table_c",titels=[],div_class="div_table",thead=True,cover_div=True,row_colors=[],td_div=True):
         import gluon
         '''
             old name= htm_table
         '''
+        def div_(x_in): 
+            return DIV(x_in) if td_div else x_in
+        def td_(td_in): 
+            return TD(DIV(td_in)) if td_div else TD(td_in)
+        def th_(td_in): 
+            return TH(DIV(td_in)) if td_div else TH(td_in)
+        def tr_(in_list):
+            return TR(*[td_(x) for x in in_list])
+        #--------------------
         rows=self.rows
         if titels:
             if type(titels)==list:
@@ -411,13 +420,13 @@ class C_TABLE:
                     _class=",".join(_class_l)
                     
                     _style=cell['style'] if 'style' in cell else ''
-                    tds+=[TD(cell['value'],_class=_class,_title=cell.get('title',''),_style=_style)]
+                    tds+=[TD(div_(cell['value']),_class=_class,_title=cell.get('title',''),_style=_style)]
                 elif type(cell) in [str,int,float,gluon.html.XML]:
                     try:
                         _class=heads[i]['class'] if 'class' in heads[i] else ''
                     except:  
                         _class=''
-                    tds+=[TD(cell,_class=_class)]
+                    tds+=[TD(div_(cell),_class=_class)]
                 else:
                     tds+=[TD('')]
                     #print('type(cell)='+str(type(cell)))
@@ -510,13 +519,14 @@ def table_x_not_used(cols,rows,class_table=''):
     class_table='table'+class_table if class_table else 'table2'
     return TABLE(thead,TBODY(*trs),_class=class_table,_dir="rtl")
  #---------------------------------------
-def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,add_empty_first=True,remember=True):#k_htm.select ,readonly=''
+def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onchange='',can_add=False,no_empty=False,remember=True):#k_htm.select ,readonly=''
     ''' (_options=_select,_name=_name,_value=_value.split(',') if _multiple else _value 
         make 1 select html object
         update 01/08/09 ks
         _options:list or dict
     INPUTS:
     -------
+        no_empty=obj['prop']['no_empty'] can not be empty => have not 1 empty row
         remember:bool
             remember last select value
     '''
@@ -534,7 +544,7 @@ def select(_options,_name,_title='',_width='100%',_multiple=False,_value='',_onc
     if _value:
         vs=_value if type(_value)==list else _value.split(",")
     opts=[]
-    if add_empty_first:
+    if not no_empty:
         opts+=[OPTION("-",_value="-")]
     if can_add:
         if vs:

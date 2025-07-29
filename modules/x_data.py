@@ -786,7 +786,7 @@ x_data={
                 'sub_p_name':{'type':'auto','len':'50','auto':"{{=__objs__['sub_p']['output_text'][4:]}}",'title':'نام زیر پروژه'},
                 'step_x1':{'type':'select','title':'فاز','select':{'A':'Assessment - مطالعات ارزیابی و امکان سنجی','B':'Basic of Design - فاز  0 - مطالعات و شکل گیری مبانی و انگاره',
                     'C':'Concept Design - فاز 1 -  طراحی مبانی و کلیات ','D':'Detail Design - فاز 2 - طراحی جزئیات و اجزا مورد نیاز','E':'Execution process -فاز 3 - مرحله اجرا (نظارت و نظارت عالیه )'},'prop':['update']},
-                'step_x2':{'type':'reference','title':'بازبینی','ref':{'db':'a_step','tb':'a','key':'{code_x2}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}" AND code_x1 =  "{{=__objs__['step_x1']['value']}}"'''},'prop':['update'],'add_x':['len','مرحله جاری'],'add_empty_first':False},
+                'step_x2':{'type':'reference','title':'بازبینی','ref':{'db':'a_step','tb':'a','key':'{code_x2}','val':'{code}-{name}','where':'''prj = "{{=__objs__['prj']['value']}}" AND sub_p =  "{{=__objs__['sub_p']['value']}}" AND code_x1 =  "{{=__objs__['step_x1']['value']}}"'''},'prop':['update','no_empty'],'add_x':['len','مرحله جاری']},
                 'step':{'type':'auto','len':'50','auto':"{step_x1}{step_x2}",'title':'کد مرحله'},
                 
                 'step_name':{'type':'auto','len':'50','auto':"{{=__objs__['step_x1']['output_text']}} - {{=__objs__['step_x2']['output_text']}}",'title':'نام مرحله'},
@@ -1134,6 +1134,7 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'f2f_id,f_code,nn,file_pic','xjobs':'*,dcc_grp','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                #'s1':{'tasks':'file_pic','xjobs':'*','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''}
             },    
         }
     },
@@ -1367,10 +1368,11 @@ x_data={
                 'u_ml':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{Idc_num}','where':'''un = "{u_un}"'''},'title':'کد ملی'},
                 'u_li':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{loc}','where':'''un = "{u_un}"'''},'title':'کد دفتر/پروژه'},
                 'u_ln':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{u_li}"'''},'title':'نام دفتر/پروژه'},
-                'idea':{'type':'text','title':'شرح و نحوه اجرای پیشنهاد','height':'60px','len':'1500'},
+                'idea':{'type':'text','title':'شرح و نحوه اجرای پیشنهاد','height':'60px','len':'1500','markup':'md'},
                 'idea_titl':{'type':'text','title':'عنوان پیشنهاد'},
                 'idea_bnft':{'type':'text','title':'مزایا و نتایج پیشنهاد( ریالی / غیر ریالی) ','height':'60px','len':'1500'},
                 'idea_dscr':{'type':'text','title':'توضیحات لازم','height':'60px'},
+                'file1':{'type':'file','len':'40','file_name':'AQC0-KNM-SUG-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,knm,sug','title':'پیوست','help':'در صورت نیاز'},
                 'vrfy_rslt':{'type':'text','title':'نتیجه بررسی - نظریه کارشناسی شرکت','height':'60px'},
                 'vrfy_meta':{'type':'text','title':'اقدامات انجام شده جهت بررسی','height':'60px'},
                 'clnt_stf':{'type':'num','min':'1','max':'100', 'title':'میزان رضایت پیشنهاد دهنده از اقدامات انجام شده بر حسب درصد'},
@@ -1379,7 +1381,7 @@ x_data={
                 #{'type':'text','title':'نام شرکت- موسسه','def_value':'مهندسان مشاور آستان قدس رضوی'},
             },
             'steps':{
-                's0':{'tasks':'comp,u_un,u_nm,u_id,u_ml,u_li,u_ln,lable_1,idea_titl,idea,idea_bnft','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'comp,u_un,u_nm,u_id,u_ml,u_li,u_ln,lable_1,idea_titl,idea,idea_bnft,file1','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'lable_2,vrfy_rslt,vrfy_meta,idea_dscr','xjobs':'rda','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'clnt_stf,clnt_stf_dscr','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
@@ -1415,7 +1417,7 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
-    'errors':{
+    'errors':{ #db
         'a':{
             'base':{'mode':'form','title':'مشکلات','code':'312'
             },
@@ -1468,6 +1470,101 @@ x_data={
             'data_filter':{'':'همه',}
         }
     },
+    #-------------------------------------------------------------------------------------------------------------------
+    'km':{ #db  "knowledge management"
+        'a':{
+            'base':{'mode':'form','title':'فرم جمع آوری و ثبت دانش','code':'201','rev':'00-040425',
+            },
+            'tasks':{
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
+                'date':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
+                'kdes':{'type':'text','len':1500,'lang':'fa','title':'دانش','help':' محتوا، مسئله، تجربه یا راهکار به‌دست‌آمده','height':'100px'},
+                'cat1':{'type':'select','title':'دسته بندی','help_e':'category 1',
+                    'select':{
+                            'TECH':'	دانش فنی	-   شامل نکات اجرایی، جزئیات طراحی، مصالح، ضوابط فنی و روش‌های بهینه فنی در پروژه‌ها',
+                            'MGMT':'	دانش مدیریتی	-   تجربه‌ها و روش‌های مدیریت پروژه، مدیریت منابع، زمان، هزینه و قرارداد',
+                            'PROC':'	دانش فرایندی	-   رویه‌ها، گام‌ها، ساختارها و بهینه‌سازی در فرآیندهای اداری یا پروژه‌ای',
+                            'SOFT':'	دانش نرم‌افزاری	-   نکات فنی، روش استفاده، مشکلات متداول و راهکارهای مربوط به نرم‌افزارهای تخصصی',
+                            'CONT':'	دانش قراردادی	-   نکات حقوقی، چالش‌های قراردادی، اسناد مناقصه، تفسیر شروط و...',
+                            'DESN':'	دانش طراحی	-   مبانی، تحلیل‌ها، راهکارهای خلاقانه و تجربیات طراحی معماری و شهری',
+                            'SITE':'	دانش کارگاهی	-   تجربه‌های اجرایی، خطاهای رایج، هماهنگی با پیمانکار، نظارت فاز اجرا',
+                            'STDS':'	دانش استانداردها و ضوابط	-   تفسیر و کاربرد آیین‌نامه‌ها، مقررات ملی ساختمان، ضوابط شهرداری و آستان',
+                            'QMGT':'	دانش مدیریت کیفیت	 -  چک‌لیست‌ها، خطاهای شایع، روش‌های کنترل کیفیت در طراحی یا نظارت',
+                            'HUMN':'	دانش منابع انسانی	-   تجارب در مدیریت، آموزش، ارزیابی و ارتقاء منابع انسانی',
+                            'CULT':'	دانش فرهنگی و بومی	-   آگاهی‌ها و رویکردهای مرتبط با معماری ایرانی-اسلامی، اقلیم، فرهنگ کاربران',
+                            'DOCS':'	دانش مستندسازی	-   نحوه تهیه، مدیریت، نسخه‌بندی و بایگانی اسناد در سامانه DCC',
+                            'INNO':'	دانش نوآورانه	-   روش‌ها یا ابزارهای جدید پیشنهادشده توسط همکاران برای بهبود عملکرد',
+                            'GENL':'	دانش عمومی	-   سایر موارد دانشی که در دسته‌بندی بالا نگنجند ولی دارای ارزش ثبت هستند'
+                    }},
+                'file_att':{'type':'file','len':'40','file_name':'AQC0-KNM-EXP-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,knm,exp','title':'پیوست','help':'مستندات در صورت نیاز'},
+                'km_des':{'type':'text','len':1500,'lang':'fa','title':' توضیح km'},
+                'km_res':{'type':'select','title':'سطح اثربخشی','help_e':'result','select':{'1':'محدود','2':'متوسط','3':'زیاد'},'prop':['no_empty']},
+
+            },
+            'steps':{
+                's0':{'tasks':'frd_1,date,kdes,cat1,file_att','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'km_des,km_res','xjobs':'kma','title':'ارزیابی','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'rd_1,date,cat1','view1':'km_des','view2':'km_res'}
+            },
+            'cols_filter':{
+                '':'همه',
+            },
+            'data_filter': 
+                {
+                },
+        }
+    },
+    #-------------------------------------------------------------------------------------------------------------------
+    'rqst_it_srvc':{ #db  "request an IT service"
+        'a':{
+            'base':{'mode':'form','title':'درخواست IT','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','rev':'00-040425',
+            },
+            'tasks':{
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
+                'date':{'type':'fdate','len':'10','title':'تاریخ وقوع مشکل','prop':[]},
+                'stress':{'type':'select','title':'اولویت درخواست','select':{'0':'عادی','1':'فوری','2':'بحرانی'},'prop':['no_empty']},
+                'cat1':{'type':'select','title':'دسته بندی','help_e':'category 1',
+                    'select':{'HARD':'	سخت‌افزار   -	خرابی کیس، پرینتر، مانیتور، کیبورد، موس، کابل شبکه، تعویض قطعه',
+                            'SOFT':'	نرم‌افزار   -	نصب/حذف نرم‌افزار، بروزرسانی، خطاهای نرم‌افزاری، کرک و لایسنس، اتوکد و Revit',
+                            'NETW':'	شبکه    -	قطع ارتباط، کندی شبکه، مشکلات VPN، اتصال به سرور، سوئیچ یا روتر',
+                            'SECU':'	امنیت   -	ویروس، فایروال، تغییر رمز، جلوگیری از دسترسی غیرمجاز، تنظیم مجوزها',
+                            'MAIL':'	پست الکترونیک   -	ایجاد/رفع مشکل ایمیل شرکتی، تنظیم Outlook، بازیابی رمز عبور',
+                            'ACCT':'	حساب‌های کاربری  -	ایجاد / غیرفعال‌سازی کاربر، تغییر سطح دسترسی، مشکلات ورود (Login)',
+                            'EQUP':'	تجهیزات جدید    -	درخواست لپ‌تاپ، مانیتور، پرینتر، مودم، یو‌پی‌اس و لوازم جانبی',
+                            'CNFG':'	تنظیمات / پیکربندی  -	تنظیم پرینتر شبکه، ستاپ نرم‌افزار، تغییر تنظیمات ویندوز یا اپلیکیشن‌ها',
+                            'CONS':'	مشاوره و آموزش  -	درخواست آموزش ابزار جدید، مشاوره در انتخاب نرم‌افزار یا ارتقاء سیستم',
+                            'SYSP':'	سامانه‌ها و نرم‌افزارهای سازمانی    - 	مشکل ورود به سامانه، خطای ثبت اطلاعات، عدم بارگذاری فرم‌ها',
+                            'OTHR':'	سایر    -	درخواست‌هایی که در دسته‌های بالا نگنجد'}},
+                'rqst':{'type':'text','len':2000,'lang':'fa','title':'شرح مشکل / درخواست','height':'100px'},
+                'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
+                'des_modir':{'type':'text','len':500,'lang':'fa','title':'توضیح مدیر'},
+                'file_err':{'type':'file','len':'40','file_name':'AQC0-ITM-USR-ERR-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,itm,usr,err','title':'پیوست','help':'در صورت نیاز'},
+                'it_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح it'},
+                'it_res':{'type':'select','title':'وضعیت نهایی','help_e':'result','select':{'OK':'انجام شد','RJ':'در حیطه وظایف این واحد نمی باشد','HL':'هولد - نیاز مند موارد زیر'},'prop':['no_empty']},
+                'fr_res':{'type':'select','title':'کفایت نتیجه','help_e':'result','select':{'2':'بله','1':'تقریبا','0':'خیر'},'prop':['no_empty']},
+                'fr_r_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح کفایت'},
+                'fr_satf':{'type':'select','title':'رضایت از اقدامات','help_e':'result','select':{'5':'عالی','4':'خوب','3':'متوسط','2':'نیاز به بهبود','1':'ضعیف'},'prop':['no_empty']},
+                'fr_s_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح رضایت'},
+            },
+            'steps':{
+                's0':{'tasks':'frd_1,date,stress,cat1,rqst,frd_modir,file_err','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's2':{'tasks':'it_res,it_des','xjobs':'ita','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''},
+                's3':{'tasks':'fr_res,fr_r_des,fr_satf,fr_s_des','xjobs':'#step#0','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+            },
+            'views':{
+                'all':{'input':'rd_1,date,stress,cat1,rqst,frd_modir,file_err','view1':'it_res','view2':'fr_res'}
+            },
+            'cols_filter':{
+                '':'همه',
+            },
+            'data_filter': 
+                {
+                },
+        }
+    },
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_saat':{ #db
         'a':{
@@ -1509,14 +1606,14 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_ruz':{ #db
         'a':{
-            'base':{'mode':'form','title':'مرخصی روزانه','data_filter':'f_nxt_u = "{{=_i_}}"','code':'901','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+            'base':{'mode':'form','title':'مرخصی روزانه','data_filter':'f_nxt_u = "{{=_i_}}"','code':'202','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
                 'date_st':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
                 'date_en':{'type':'fdate','len':'10','title':'تاریخ خاتمه','prop':[]},
                 'date_len':{'type':'num','min':1,'max':30,'len':2,'lang':'fa','title':'تعداد روز'},
-                'm_type':{'type':'select','title':'نوع مرخصی','select':['استحقاقی','استعلاجی','بدون حقوق','استعلاجی بدون حقوق'],'add_empty_first':False,},
+                'm_type':{'type':'select','title':'نوع مرخصی','select':['استحقاقی','استعلاجی','بدون حقوق','استعلاجی بدون حقوق'],'prop':['no_empty']},
                 'tel_ezt':{'type':'text','title':'تلفن اضطراری','len':'13'},
                 'frd_jnshn':{'type':'user','title':'جانشین','prop':['show_full','un_free']},
                 'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
@@ -1591,14 +1688,14 @@ x_data={
     'off_mamurit_ruz':{ #db
         'a':{
             'base':{'mode':'form','title':'ماموریت روزانه',
-                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'902','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'204','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
                 'date_st':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
                 'date_en':{'type':'fdate','len':'10','title':'تاریخ خاتمه','prop':[]},
                 'date_len':{'type':'num','min':1,'max':30,'len':2,'lang':'fa','title':'تعداد روز'},
-                'm_type':{'type':'select','title':'نوع درخواست','select':['صدور حکم ماموریت','تمدید ماموریت'],'add_empty_first':False,},
+                'm_type':{'type':'select','title':'نوع درخواست','select':['صدور حکم ماموریت','تمدید ماموریت'],'prop':['no_empty'],},
                 'tel_ezt':{'type':'text','title':'تلفن همراه','len':'13'},
                 'adrs_frd':{'type':'text','len':150,'lang':'fa','title':'آدرس قرار','help':'محل سوار شدن'},
                 'c_prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
@@ -1688,43 +1785,43 @@ x_data={
                 'loc_name':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{{=__objs__['loc']['value']}}"'''},'title':'نام پروژه و محل کار'},
                 'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],},
                 'frd_mvn':{'type':'user','title':'معاون','xjobs':'mvn_ha','prop':['show_full','un_free'],},
-                'sal':{'type':'select','title':'تمدید قرارداد برای سال','select':['1404','1405','1406'],'add_empty_first':False,},
-                'dur_1':{'type':'select','title':'میزان تمدید قرارداد','select':{'12':'1 سال','6':'6 ماه','3':'3 ماه','0':'عدم تمدید'},'add_empty_first':False,},
+                'sal':{'type':'select','title':'تمدید قرارداد برای سال','select':['1404','1405','1406'],'prop':['no_empty'],},
+                'dur_1':{'type':'select','title':'میزان تمدید قرارداد','select':{'12':'1 سال','6':'6 ماه','3':'3 ماه','0':'عدم تمدید'},'prop':['no_empty'],},
                 'des_1':{'type':'text','len':150,'lang':'fa','title':'نظر معاون'},
                 'des_2':{'type':'text','len':150,'lang':'fa','title':'نظر مدیر عامل'},
                 'des_3':{'type':'text','len':150,'lang':'fa','title':'نظر حراست'},
-                'an1':{'type':'select','title':'امتیاز - دانش','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an1':{'type':'select','title':'امتیاز - دانش','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad1':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an2':{'type':'select','title':'امتیاز - تعهد','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an2':{'type':'select','title':'امتیاز - تعهد','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad2':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an3':{'type':'select','title':'امتیاز - دقت','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an3':{'type':'select','title':'امتیاز - دقت','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad3':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an4':{'type':'select','title':'امتیاز - نظم','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an4':{'type':'select','title':'امتیاز - نظم','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad4':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an5':{'type':'select','title':'امتیاز - کار گروهی','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an5':{'type':'select','title':'امتیاز - کار گروهی','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad5':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an6':{'type':'select','title':'امتیاز - اخلاق','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an6':{'type':'select','title':'امتیاز - اخلاق','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad6':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
 
-                'an7':{'type':'select','title':'امتیاز - فن آوری','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an7':{'type':'select','title':'امتیاز - فن آوری','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad7':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an8':{'type':'select','title':'امتیاز - بهبود مداوم','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an8':{'type':'select','title':'امتیاز - بهبود مداوم','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad8':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an9':{'type':'select','title':'امتیاز - استاندارد فنی','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an9':{'type':'select','title':'امتیاز - استاندارد فنی','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad9':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an10':{'type':'select','title':'امتیاز - مقررات','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an10':{'type':'select','title':'امتیاز - مقررات','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad10':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 'an_sum':{'type':'auto','auto':'{{=sum([int(x) for x in [an1,an2,an3,an4,an5,an6,an7,an8,an9,an10]])}}','title':'مجموع امتیاز'},
@@ -1792,46 +1889,46 @@ x_data={
             'tasks':{
                 'frd_1':{'type':'user','title':'نام همکار','xjobs':'mod_mst','prop':['show_full','p_id','un_free'],},
                 'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],},
-                'sal':{'type':'select','title':'تمدید قرارداد برای سال','select':['1404','1405','1406'],'add_empty_first':False,},
-                'dur_1':{'type':'select','title':'میزان تمدید قرارداد','select':{'12':'1 سال','6':'6 ماه','3':'3 ماه','0':'عدم تمدید'},'add_empty_first':False,},
+                'sal':{'type':'select','title':'تمدید قرارداد برای سال','select':['1404','1405','1406'],'prop':['no_empty'],},
+                'dur_1':{'type':'select','title':'میزان تمدید قرارداد','select':{'12':'1 سال','6':'6 ماه','3':'3 ماه','0':'عدم تمدید'},'prop':['no_empty'],},
                 'des_0':{'type':'text','len':150,'lang':'fa','title':'توضیح'},
                 'des_1':{'type':'text','len':150,'lang':'fa','title':'جمع بندی'},
                 'des_2':{'type':'text','len':150,'lang':'fa','title':'نظر مدیر عامل'},
                 'des_3':{'type':'text','len':150,'lang':'fa','title':'نظر حراست'},
                 'loc':{'type':'reference','title':'کد محل کار','ref':{'db':'a_loc','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 'loc_name':{'type':'auto','ref':{'db':'a_loc','tb':'a','key':'__0__','val':'{name}','where':'''code = "{{=__objs__['loc']['value']}}"'''},'title':'نام پروژه و محل کار'},
-                'an1':{'type':'select','title':'امتیاز – کیفیت','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an1':{'type':'select','title':'امتیاز – کیفیت','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad1':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an2':{'type':'select','title':'امتیاز – صرفه جویی','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an2':{'type':'select','title':'امتیاز – صرفه جویی','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad2':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
 
-                'an3':{'type':'select','title':'امتیاز – مشارکت','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an3':{'type':'select','title':'امتیاز – مشارکت','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad3':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an4':{'type':'select','title':'امتیاز – استمرار','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an4':{'type':'select','title':'امتیاز – استمرار','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad4':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an5':{'type':'select','title':'امتیاز – فن آوری','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an5':{'type':'select','title':'امتیاز – فن آوری','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad5':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an6':{'type':'select','title':'امتیاز – ارزشیابی','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an6':{'type':'select','title':'امتیاز – ارزشیابی','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad6':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
 
-                'an7':{'type':'select','title':'امتیاز – ایده','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an7':{'type':'select','title':'امتیاز – ایده','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad7':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an8':{'type':'select','title':'امتیاز – اخلاق','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an8':{'type':'select','title':'امتیاز – اخلاق','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad8':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 
-                'an9':{'type':'select','title':'امتیاز – مشورت','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an9':{'type':'select','title':'امتیاز – مشورت','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad9':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
-                'an10':{'type':'select','title':'امتیاز – حل مساله','prop':['update'],'def_value':'8','add_empty_first':False,'value_show_case':True,
+                'an10':{'type':'select','title':'امتیاز – حل مساله','prop':['update','no_empty'],'def_value':'8','value_show_case':True,
                     'select':{'10':'عالی - 10','9':'خوب - 9','8':'متوسط - 8','7':'نیاز به بهبود - 7','6':'ضعیف - 6'}},
                 'ad10':{'type':'text','len':150,'lang':'fa','title':'توضیحات '},
                 'an_sum':{'type':'auto','auto':'{{=sum([int(x) for x in [an1,an2,an3,an4,an5,an6,an7,an8,an9,an10]])}}','title':'مجموع امتیاز'},
@@ -1901,30 +1998,30 @@ x_data={
                     'team':{'date':{'val':'{date}','title':'تاریخ'},'tchr_name':{'val':'{tchr_name}','title':'نام استاد'}
                         ,'subj':{'val':'{subj}','title':'موضوع'}},},
 
-                'an1':{'type':'select','title':'تازگی','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an1':{'type':'select','title':'تازگی','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
-                'an2':{'type':'select','title':'کاربرد','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an2':{'type':'select','title':'کاربرد','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},         
-                'an3':{'type':'select','title':'جزوه','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an3':{'type':'select','title':'جزوه','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'عدم ارائه جزوه - 1'}}, 
-                'an4':{'type':'select','title':'ساختار','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an4':{'type':'select','title':'ساختار','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
-                'an5':{'type':'select','title':'بیان','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an5':{'type':'select','title':'بیان','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
-                'an6':{'type':'select','title':'رهبری','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an6':{'type':'select','title':'رهبری','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},   
-                'an7':{'type':'select','title':'دانش','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an7':{'type':'select','title':'دانش','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
-                'an8':{'type':'select','title':'پاسخ','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an8':{'type':'select','title':'پاسخ','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
                 'an_s1':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an1,an2,an3,an4,an5,an6,an7,an8]])*3.125)}}','title':'استاد'},
-                'an21':{'type':'select','title':'محیط','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an21':{'type':'select','title':'محیط','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},  
-                'an22':{'type':'select','title':'نظم','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an22':{'type':'select','title':'نظم','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}}, 
-                'an23':{'type':'select','title':'پذیرایی','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an23':{'type':'select','title':'پذیرایی','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
-                'an24':{'type':'select','title':'امکانات','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'an24':{'type':'select','title':'امکانات','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'عالی - 5','4':'خوب - 4','3':'متوسط - 3','2':'ضعیف - 2','1':'خیلی ضعیف - 1'}},
                 'an_s2':{'type':'auto','auto':'{{=int(sum([int(x)-1 for x in [an21,an22,an23,an24]])*3.125)}}','title':'شرکت'},
             },
@@ -2064,7 +2161,7 @@ x_data={
                 'pos':{'type':'text','title':'مکان خبر','len':'250'},
                 'imgs':{'type':'f2f','len':'60','title':'تصاویر','ref':{'tb':'imgs','show_cols':['file']},},
                 'link':{'type':'text','title':'لینک خبر','len':'80','link':{'target':'_blank','text':'L','class':'btn btn-info'},},
-                'imp_g':{'type':'select','title':'اهمیت','prop':['update'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'imp_g':{'type':'select','title':'اهمیت','prop':['update','no_empty'],'def_value':'3','value_show_case':True,
                     'select':{'5':'5 - فوری و حیاتی','4':'4 - مهم','3':'3 - اهمیت متوسط','2':'2 - اهمیت کم','1':'1 - اطلاع عمومی'}},
                 },
             'steps':{
@@ -2095,7 +2192,9 @@ x_data={
                 'file':{'type':'file','len':'40','file_name':'AQC0-PRD-NEWS-IMG-{id:04d}-{f2f_id}','file_ext':"jpg",'path':'form,prd,news,img','title':'تصویر خبر'},
             },
             'steps':{
-                'pre':{'tasks':'f2f_id,file','xjobs':'dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                #'pre':{'tasks':'f2f_id,file','xjobs':'dcc_grp','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                '0':{'tasks':'f2f_db,f2f_tb,f2f_id','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                '1':{'tasks':'file','xjobs':'*','title':'تکمیل','app_keys':'y','app_titls':'','oncomplete_act':''},
             }, 
         },
     },
@@ -2113,15 +2212,15 @@ x_data={
                     'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple'],
                     'team':{'cp_code':{'val':'{cp_code}','title':'کد موضوع'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'}},},
                 'title':{'type':'text','title':'عنوان یا موضوع سفارش','len':'250','height':'50px'},
-                'xtype':{'type':'select','title':'نوع سفارش','prop':['can_add'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'xtype':{'type':'select','title':'نوع سفارش','prop':['can_add','no_empty'],'def_value':'3', 'value_show_case':True,
                     'select':['کارت ویزیت','پوستر','بروشور','سربرگ','نقشه','بنر']},            
-                'size':{'type':'select','title':'ابعاد نهایی','prop':['can_add'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'size':{'type':'select','title':'ابعاد نهایی','prop':['can_add','no_empty'],'def_value':'3','value_show_case':True,
                     'select':['A0','A1','A2','A3','A4','A5','B4']}, 
-                'color':{'type':'select','title':'رنگ‌بندی','def_value':'3','add_empty_first':False,'value_show_case':True,
+                'color':{'type':'select','title':'رنگ‌بندی','def_value':'3','prop':['no_empty'],'value_show_case':True,
                     'select':['رنگی','سیاه‌وسفید']},
-                'paper':{'type':'select','title':'نوع کاغذ','prop':['can_add'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'paper':{'type':'select','title':'نوع کاغذ','prop':['can_add','no_empty'],'def_value':'3','value_show_case':True,
                     'select':['تحریر','گلاسه','مات','براق']}, 
-                'add':{'type':'select','title':'خدمات اضافه','prop':['can_add','multiple'],'def_value':'3','add_empty_first':False,'value_show_case':True,
+                'add':{'type':'select','title':'خدمات اضافه','prop':['can_add','multiple','no_empty'],'def_value':'3','value_show_case':True,
                     'select':['لمینت','طلاکوب','خط تا','سلفون','پانچ','صحافی']}, 
                 'des_1':{'type':'text','title':'توضیح - درخواست ','len':'2500'},
                 'des_2':{'type':'text','title':'توضیح - برآورد','len':'250'},
@@ -2130,7 +2229,7 @@ x_data={
                 'n_plot':{'type':'num','min':1,'max':999,'len':'3','title':'تعداد مورد نیاز'},
                 'price':{'type':'num','min':1,'max':999000,'len':'6','title':'برآورد قیمت کل - هزار تومان'},
                 'f_code':{'type':'auto','len':'8','auto':'AQC0-K8S-RQST-PLOT-{{=str(id).zfill(3)}}-{cp_code}','title':'کد فایل'},
-                'file_plot_r':{'type':'file_r','len':'40','file_name':'{f_code}-r','path':'form,rqst,plot','title':'فایل چاپ'},
+                'file_plot_r':{'type':'file_r','len':'40','file_name':'{f_code}-r','path':'form,rqst,plot','title':'فایل چاپ','file_ext':"pdf,gif,jpg,jpeg,png,zip",},
             },
             'steps':{
                 'pre':{'tasks':'u_un,u_nm,date,frd_modir,c_prj_id,cp_code,cp_name,title','xjobs':'*','title':'اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},

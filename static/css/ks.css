@@ -109,60 +109,74 @@ table th a{
 /* ---------------------------------------------------------------------------------------------------------------- 
 */
 .table2 {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 12px;
-      border-collapse: collapse;
-      text-align: center;
-      background-color: #ffffff;
-      width: 100%;    }
-.table2 td,.table2 th {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	border-collapse: collapse;
+	text-align: center;
+	background-color: #ffffff;
+	width: 100%; 
+	
+	td, th {
     border: 1px solid #ddd;
-    padding: 0px; }
+    padding: 0px; 
+	}
 
-.table2 tr:nth-child(even){background-color: #f2f2f2;}
-.table2 tr:hover {background-color: #ffccaa}
-.table2 th {
-    padding: 8px;
-    padding-top: 12px;
-    padding-bottom: 12px;
+	tr:nth-child(even){background-color: #f2f2f2;}
+	tr:hover {background-color: #ffccaa}
+	th {
+		padding: 8px;
+		padding-top: 12px;
+		padding-bottom: 12px;
 
-    border: 1px solid #ddd;
-    position: sticky;
-    top: 0; /* Don't forget this, required for the stickiness */
-    color: white; }
+		border: 1px solid #ddd;
+		position: sticky;
+		top: 0; /* Don't forget this, required for the stickiness */
+		color: white; 
+	}
+	div {
+		max-height: 50px;
+		overflow: hidden;
+	}
+}
 /* ---------------------------------------------------------------------------------------------------------------- */
 .table3 {
     table-layout: fixed;
-}
-.table3 td,.table3 th {
-    font-size: 12px;
-    height: 30px; 
-    overflow: hidden;
-    white-space: pre;
-    text-overflow: clip;
-    padding:0px;
-    margin:0px;
+	td , th {
+		font-size: 12px;
+		max-height: 50px; 
+		overflow: hidden;
+		white-space: pre;
+		
+		padding:0px;
+		margin:0px;
     }
-.table3 td:hover{  
-    word-wrap: break-word;
-    display: block;
-    background-color: #ffccaa;
-    overflow-y: auto;
-    text-overflow:ellipsis;
-    white-space: normal;
+	td:hover{  
+		word-wrap: break-word;
+		display: block;
+		background-color: #ffccaa;
+		overflow-y: auto;
+		text-overflow:ellipsis;
+		white-space: normal;
     }
+	div {
+		max-height: 50px;
+		overflow: hidden;
+		text-overflow:ellipsis;
+		white-space: pre;
+		overflow-y: auto;
+	}
+}	
 /* ---------------------------------------------------------------------------------------------------------------- */
 .table4 {
     table-layout: fixed;
 }
 .table4 tr{
-    height: 15px; 
+    max-height: 50px; 
 }
 .table4 td,.table4 th {
     font-size: 12px;
-    overflow: hidden;
-    white-space: pre;
-    text-overflow: clip;
+    
+    
     padding:0px;
     margin:0px;
     }
@@ -171,6 +185,11 @@ table th a{
     }
 .table4 th {
     height:15px;
+}
+.table4 div {
+    max-height: 50px;
+    text-overflow: clip;
+	white-space: pre;
 }
 /* ---------------------------------------------------------------------------------------------------------------- */
 .table5 {

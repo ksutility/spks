@@ -311,6 +311,9 @@ def xtable():
         table1=c_table.creat_htm(table_class,_id="table_f")   
         
         #print(f'job={job}')
+        import k_icon
+        search_link=k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class="btn",
+            _title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))
         if session["admin"] or k_user.user_in_xjobs_can('creat',x_data_s,step_index='0'):
             #jobs=k_tools.nth_item_of_dict(x_data_s['steps'],0)['jobs']
             #k_user.user_in_jobs(jobs):
@@ -325,12 +328,12 @@ def xtable():
         if 'sd_form' in args:
             return dict(style=style1,script=scripts['table cell display'],
                 table_filter='',
-                table_head=_xtable_head(x_data_s,x_select,nr,new_record_link),
+                table_head=_xtable_head(x_data_s,x_select,nr,search_link,new_record_link),
                 table=table1,btm_mnu=''
                 ,xtime='')
         return dict(style=style1,script=scripts['table cell display'],
             table_filter=c_filter.htm,
-            table_head=_xtable_head(x_data_s,x_select,nr,new_record_link),
+            table_head=_xtable_head(x_data_s,x_select,nr,search_link,new_record_link),
             table=table1,btm_mnu=btm_mnu
             ,xtime=cornometer.xreport())
     elif c_url.ext=='xls':
@@ -579,9 +582,10 @@ def sabege():
 def msg():
     msg='<br>'.join(request.vars['msg'].split('\n'))
     return dict(msg=DIV(H1(XML(msg)),_dir="rtl"))
-def _xtable_head(x_data_s,x_select,nr,new_record_link):
+def _xtable_head(x_data_s,x_select,nr,search_link,new_record_link):
     return DIV(TABLE(TR( 
                 TD(new_record_link,_width='20px')
+                ,TD(search_link,_width='20px')
                 ,TD(A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=request.args)),_width='30px')
                 ,TD(A("T",_title="Table",_class="btn btn-primary",_href=URL('data','xtable',args=request.args,vars=request.vars)),_width='30px')
                 ,TD(A(f"{nr}",_title="تعداد نمایش داده شده"),_width='30px')
@@ -694,10 +698,10 @@ def date_picker():
     def_date=request.args[1].replace("-",r"/") if (request.args and len(request.args)>1) else today
     #print(f'today={today} - def_date= {def_date} - {def_date[:4]} - {def_date[5:7]}')
     yy_v=request.vars['yy_v'] or def_date[:4] or '1404' #'1403' #jdatetime.date.today().strftime('%y')
-    yy_obj=k_htm.select(_options=[str(x) for x in range(1340,1405)],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
+    yy_obj=k_htm.select(_options=[str(x) for x in range(1340,1405)],_name='yy_v',_value=yy_v,no_empty=True,_onchange="submit();")
     yy_n=int(yy_v)
     mm_v=request.vars['mm_v'] or def_date[5:7] #jdatetime.date.today().strftime('%m')
-    mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,add_empty_first=False,_onchange="submit();")
+    mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,no_empty=True,_onchange="submit();")
     mm_n=int(mm_v)
     #print(mm_n)
     style="""<style>
@@ -807,7 +811,7 @@ def ss_set():
     #--------------------------------------------------------------------------------------------------------------------------------------
     val_dic={x:tasks[x]['title'] for x in tasks if 'auth' not in tasks[x]}
     sel1=request.vars['sel1'] or session[obj_name_x+'_sel1'] or list(val_dic)[0]
-    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();",add_empty_first=False,_value=sel1)
+    sel1_o=k_htm.select(_options=val_dic,_name='sel1',_onchange="submit();",no_empty=True,_value=sel1)
     
     
     session[obj_name_x+'_sel1']=sel1
@@ -821,12 +825,12 @@ def ss_set():
         #010921# i1=XML('<input name="sign" id="sign" value="=" onchange="submit();">')
         signs=[" = "," != "," > "," < "," like "]
         sign=request.vars['sign'] or session[obj_name_x+'_sign'] or signs[0]
-        sign_o=k_htm.select(_options=signs,_name='sign',_onchange="submit();",add_empty_first=False,_value=sign)#,_value=request.vars['sign']
+        sign_o=k_htm.select(_options=signs,_name='sign',_onchange="submit();",no_empty=True,_value=sign)#,_value=request.vars['sign']
         session[obj_name_x+'_sign']=sign
         if sign:
             sel2=request.vars['sel2'] or session[obj_name_x+'_sel2'] or list(val_dic)[0]
             #if not sel2 in val_dic:sel2 =list(val_dic)[0]
-            sel2_o=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();",add_empty_first=False,_value=sel2,can_add=True)#  ,_value=request.vars['sel2']_onchange="set_val();
+            sel2_o=k_htm.select(_options=val_dic,_name='sel2',_onchange="submit();",no_empty=True,_value=sel2,can_add=True)#  ,_value=request.vars['sel2']_onchange="set_val();
             session[obj_name_x+'_sel2']=sel2
             sel2_ttl=val_dic[sel2]['title'] if sel2 in val_dic else sel2
     result_val='"{}"{}"{}"'.format(sel1,sign,sel2)

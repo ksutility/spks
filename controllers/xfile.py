@@ -435,19 +435,15 @@ def _read_markup(mm_case):
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
     import k_s_dom,k_file
-    from k_file_x import file_2_htm
+    from k_file_x import markup_2_htm
     #from gluon.ks import markdown
     #return x.xx()
     list_url=URL('file','f_list',args=request.args[:-1],vars=request.vars)
     list_link=f"<a title='سیستم مدیریت محتوا' href={list_url}>SPKS </a> | "
     file_url=URL('edit_r',args=request.args,vars=request.vars)
-    file_link=f"<a title={f_name} href={file_url}> {file_inf['name']}.{file_inf['ext']} </a><hr>"
-    def _r_mm(data):
-        return file_2_htm(data,'mm')
-    def _r_md(data):
-        return file_2_htm(data,'md')
-    def _r_mermaid(data):  
-        return file_2_htm(data,'mermaid')#str()
+    file_link=f"<a title={f_name} href={file_url}> {file_inf['name']}.{file_inf['ext']} </a>"
+    from k_file_x import ksml_to_html
+    
     def _r_ksm1(f_name):
         d2=""
         with open(f_name) as file: #open(f_name,'r',encoding='utf8')
@@ -458,9 +454,8 @@ def _read_markup(mm_case):
             with open(files[0]+f_name,'r',encoding='utf8') as f:
                 d1=f.read()
             d2+=d1 #<br>+f_name    
-        return _r_mm(d2) #d2    #
+        return markup_2_htm(d2,'mm') #d2
     def _r_ksm(f_name):
-        from k_file_x import ksml_to_html
         return ksml_to_html(f_name,list_url,file_url)
             
     def html_visible(html):
@@ -526,15 +521,20 @@ def _read_markup(mm_case):
     
     data=data0
     # \slice----------------- 
-    if mm_case=='mm':
-        html_1=_r_mm(data)  
+    pre_case=request.vars.pre_case or request.vars.p
+    if pre_case:
+        html_1= ksml_to_html(f_name,list_url,file_url,pre_case=pre_case)
+        data=""
+        mm_case ='ksml'
+    elif mm_case=='mm':
+        html_1=markup_2_htm(data,'mm') #
     elif mm_case=='md':
-        html_1=_r_md(data)     
+        html_1=markup_2_htm(data,'md')     
     elif mm_case in ['ksm','ksml']:
         html_1=_r_ksm(f_name) 
         data=""
     elif mm_case=='mermaid':
-        html_1=_r_mermaid(data)  
+        html_1=markup_2_htm(data,'mermaid') #_r_mermaid(data)  
     html_2=_dir_x(html_1)    
     def report(data,html_1,html_2):
         if not request.vars.debug: return ''
@@ -566,8 +566,15 @@ def _read_markup(mm_case):
     if mm_case =='ksml':
         return html_1
     htm_head1=htm_head(print_mode=0) if mm_case!='ksml' else XML('')
-    menu=DIV(XML(list_link+file_link),_class="menu")
-    
+    options = [OPTION(display, _value=value) 
+              for (value, display) in [('1', '1'), ('2', '2'),('3', '3'),('4', '4'),('a', 'a')] ]
+ 
+    # ایجاد تگ SELECT
+    dropdown = SELECT(*options, _name='my_field', _id='my_field')
+    menu=DIV(XML(list_link+file_link),
+            FORM(SELECT(*options, _name='pre_case', _id='pre_case',_onchange='this.form.submit()')),
+            HR(),_class="menu")
+    SELECT
     return htm_head1+menu+ html_2 + report(data,html_1,html_2)
     #return "----"+ html_1
     #return dict(xml=XML(view_link+list_link+html_2)+ report(data,html_1,html_2)

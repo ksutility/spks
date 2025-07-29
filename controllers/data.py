@@ -690,8 +690,8 @@ def xtable():
                 
                 from k_table import K_TABLE
                 table_class=request.vars['table_class'] if request.vars['table_class'] else '0'
-                table1=K_TABLE.creat_htm(trs,new_titles,table_class=table_class)
-                
+                table1=K_TABLE.creat_htm(trs,new_titles,table_class=table_class)#,div=True
+                #print("table_class")
                 htm_head=DIV(TABLE(TR(  
                                     TD(A('+',_title='NEW RECORD',_href=URL(args=(args[0],args[1],"insert")),_class="btn btn-primary") if session["admin"] else '-',_width='20px')
                                     ,TD( A("S",_title="Smart Select",_class="btn btn-success",_href=URL('data','select',args=args)),_width='40px')

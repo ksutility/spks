@@ -828,7 +828,7 @@ def index():
     link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{user_filename}',
         'file_ext':"csv,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,mp4,mkv,mp3,m4a,htm,html"}))
     '''samplemple : 
-    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{un}-{user_filename}','file_ext':"gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx"}))
+    link1=XML(URL(f='upload',args=args,vars={**request.vars,'filename':'{un}-{user_filename}','file_ext':"txt,gif,jpg,jpeg,png,doc,docx,xls,xlsx,pdf,dwg,zip,rar,ppt,pptx,md,ksml,ksm,mm"}))
     '''
     #<input name="file" type="file" size="60" maxlength="10000000">
     return dict(

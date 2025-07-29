@@ -532,12 +532,12 @@ def mon_report():
     """
     import k_htm,jdatetime,k_form,k_date,k_time
     mm_v=request.vars['mm_v'] or jdatetime.date.today().strftime('%m') #'14'+jdatetime.date.today().strftime('%y/%m')
-    mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,_onchange="submit();",add_empty_first=False)
+    mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,_onchange="submit();",no_empty=True)
     
     #yy_v="1403" #k_htm.select(_options=['1403'],_name=fn,_value=f['value'])
     yy_v=request.vars['yy_v'] or "14"+jdatetime.date.today().strftime('%y') #def_date[:4] #'1403' #
     #print("-->>>"+jdatetime.date.today().strftime('%y'))
-    yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,add_empty_first=False,_onchange="submit();")
+    yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,no_empty=True,_onchange="submit();")
     yy_n=int(yy_v)
     #yy_obj
     x_mon=request.vars['x_mon'] or yy_v+r"/"+mm_v
