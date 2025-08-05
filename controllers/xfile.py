@@ -349,7 +349,7 @@ def json_read():
     import os,k_file,json
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
-    meta=k_file.read('json',f_name)
+    meta=k_file.read(f_name,'json')
     style1="""
        .input1{
        height:20px;
@@ -624,6 +624,7 @@ def edit_r():
         bak_file=_save_file(f_name,file_txt,encode_n)
         data=file_txt
         save_t=dif_t+f"<hr>save=ok --- <hr> write to file:{f_name}<hr><pre>{file_txt}</pre>"    
+    from k_diff import _diff_files
     comp='backup='+bak_file + _diff_files(from_file_path=bak_file,to_file_path=f_name,fromdesc="Old",todesc="New",encoding=encode_n) if bak_file else ''
 
     #on='file_txt'
@@ -663,7 +664,8 @@ def edit_r2():
         dif_t='' #_diff_txt(data,file_txt)
         bak_file=_save_file(f_name,file_txt)
         data=file_txt
-        save_t=dif_t+f"<hr>save=ok --- <hr> write to file:{f_name}<hr><pre>{file_txt}</pre>"    
+        save_t=dif_t+f"<hr>save=ok --- <hr> write to file:{f_name}<hr><pre>{file_txt}</pre>" 
+    from k_diff import _diff_files
     comp='backup='+bak_file + _diff_files(from_file_path=bak_file,to_file_path=f_name,fromdesc="Old",todesc="New") if bak_file else ''
 
     on='file_txt'
@@ -693,30 +695,8 @@ def edit_view():
     return dict(frame1=XML(f'<iframe id="f_frame" name="f_frame" src="{URL("read_mm",args=request.args,vars=request.vars)}" height="1000" width="800" title="file previw"></iframe>'),
     frame2=XML(f'<iframe id="f_frame2" name="f_frame2" src="{URL("edit_r",args=request.args,vars=request.vars)}" height="1000" width="800" title="file previw"></iframe>'))
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
-def _diff_files(from_file_path,to_file_path,fromdesc="Original",todesc="Modified",dif_file_path='',encoding='utf8'):
-    ''' creat=1401/10/14
-    '''
-    from difflib import HtmlDiff
-        
-    f1 = open(from_file_path, "r",encoding=encoding).readlines()
-    f2 = open(to_file_path, "r",encoding=encoding).readlines()   #f2 = "cdef"
-    difference = HtmlDiff(tabsize=2)
-    html_0 = difference.make_file(fromlines=f1, tolines=f2, fromdesc=fromdesc, todesc=todesc,
-            context=True, numlines=1)
-    html=html_0.replace("&nbsp;"," ").replace('nowrap="nowrap"',' ')
-    if dif_file_path:
-        with open(dif_file_path, "w",encoding=encoding) as f:
-            f.write(html)
-    return html
-def _diff_txt(fromlines,tolines,fromdesc="Original",todesc="Modified"):
-    ''' creat=1401/10/14
-    '''
-    from difflib import HtmlDiff
-    difference = HtmlDiff(tabsize=2)
-    html_0 = difference.make_file(fromlines=fromlines, tolines=tolines, fromdesc=fromdesc, todesc=todesc,
-            context=False, numlines=5)
-    html=html_0.replace("&nbsp;"," ").replace('nowrap="nowrap"',' ')
-    return html    
+
+  
 def diff_files():
     import k_file,os,k_htm
     ''' creat=1401/10/21
@@ -746,6 +726,7 @@ def diff_files():
         f_name1=request.vars.file1
         f_name2=request.vars.file2
         if f_name2:
+            from k_diff import _diff_files
             dif=_diff_files(from_file_path=f_name2,to_file_path=f_name1,
             fromdesc="Original - "+f_name2, todesc="Modified - "+f_name1,dif_file_path='')
     return DIV(FORM(
@@ -771,6 +752,7 @@ def diff_files_1():
     dir2=request.vars.dir2
     dif=''
     if f_name2 and f_name1 and dir2:
+        from k_diff import _diff_files
         dif=_diff_files(from_file_path=os.path.join(path,f_name1),to_file_path=os.path.join(dir2,f_name2),
             fromdesc="Original - "+f_name1, todesc="Modified - "+f_name2,dif_file_path='')    
     return DIV(FORM(
@@ -804,6 +786,7 @@ def diff_files_test():
     fe='-bak.md'
     f1_n=f0+"120133"+fe
     f2_n=f0+"123920"+fe
+    from k_diff import _diff_files
     return _diff_files(from_file_path=f1_n,to_file_path=f2_n,
         fromdesc="Original - "+f1_n, todesc="Modified - "+f2_n,dif_file_path=path+"diff.html")
 #---------------------------------------------------------------------------------

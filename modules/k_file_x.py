@@ -596,7 +596,7 @@ def cg_form(tmplt_fname,json_data,url1):
     import os,k_file,json
     cur_dir=os.getcwd() #D:\ks\I\web2py-test
     file_dir=cur_dir+r"\applications\spks\static\xform_cg"+"\\"+ tmplt_fname
-    x_file=k_file.read('text',file_dir)
+    x_file=k_file.read(file_dir,'text')
     x_file1=x_file.replace('link_url',str(URL('static','xform_cg/link_url')))
     
     x_file1=x_file1.replace('link_server',url1) 
@@ -658,10 +658,39 @@ def markup_2_htm(data,ext): # oldname =file_2_htm
 #--------------------------------------------------------------------------------------
 def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):   
     xdic={}
-
-    import k_file
-    
+    f_name=''
+    import k_file,k_str
     from gluon import template
+    from k_err import xxxprint,xprint
+    def read_global_ksml(f_name):
+        #  read global ksml in self folder
+
+        xdic2={}
+        if f_name:
+            folder=k_file.file_name_split(f_name)['path']
+            ksml_file=folder+"\\00.ksml"
+            import os
+            if os.path.exists(ksml_file):
+                with open(ksml_file,'r',encoding='utf8') as file: 
+                    lines = [line for line in file]
+                lines_rs = [line.rstrip() for line in lines] 
+                try:
+                    json_str=''.join(lines_rs)
+                    xdic2=eval(json_str)   
+                except Exception as err:
+                    xxxprint(msg=['err',err,''],err=err,vals={'lines_rs':lines_rs},launch=True)
+                    xprint ('error in template_parser :'+str(err))
+   
+                xk=list(xdic2.keys())
+                for x in xk:
+                    xdic2[x]=k_str.template_parser(xdic2[x],xdic2)  
+                #xdic.update(xdic2)
+ 
+                return xdic2
+            xprint(ksml_file + " => not exist")
+        xprint(" ** f_name is epmty")    
+        return {}
+    #-----------------------------------            
     if type(file)==str:
         f_name=file
         with open(f_name,'r',encoding='utf8') as file: 
@@ -688,10 +717,15 @@ def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):
         xdic['__path__']=file_ns['path']+"\\"
         xdic['__filename__']=file_ns['name']
         
+        xdic2=read_global_ksml(f_name)
+        xdic.update(xdic2)
+        
         xlines=[template.render(content=x,context=xdic.copy()) for x in xlines]
         #return (str(xlines))
     else :
         xlines=lines
+    
+    
         
     if pre_case:
         xdic['cg_form']={'1':'a01-st.html','2':'a02-st.html','3':'a03-st.html','4':'a04-st.html','a':'a10-pr-wip-st.html'}.get(pre_case,'a04-st.html')

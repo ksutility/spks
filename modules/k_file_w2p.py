@@ -71,6 +71,32 @@ def folder_w_access(args=[],x_path=''):
             سسشن های فایل_اکسس و مای_فلدر در داخل برنامه یوزر.پای در زمان لاگین کردن فرد تنظیم می شود
             
     '''
+    def access_acording_base_file(x_path):
+        '''
+        فایل مبنای دسترسی در فلدر جاری را در صورت موجود بودن باز می کند و بررسی می کند که نام کار بر جاری در فال فوق به معنی امکان دسترسی تغییر ثبت شده و یا خیر
+        در صورت امکان دسترسی با معیار بالا خروجی درست و در غیر اینصورت نادرست خواهد بود
+        '''
+        import os
+        from k_err import xprint
+        x_path1=x_path.split(";")
+        x_path1=['d:','ks','0-file']+x_path1 if x_path1[0].lower()!="d:" else x_path1
+        if (not x_path1[-1]):x_path1=x_path1[:-1]
+        #xprint(x_path1[-1])
+        if "." in x_path1[-1]:
+            x_path1[-1]='__.acs' 
+        else:
+            x_path1+=['__.acs']
+        f_path=os.path.join(*x_path1).replace("d:","d:"+"\\" ) #*x_path.split(";"),'__.acs')
+        #xprint(f_path)
+        if os.path.exists(f_path):
+            import k_file
+            access_un=k_file.read(f_path).split(",")
+            #xprint(access_txt)
+            
+            #xprint(session["username"])
+            #xprint(session["username"] in access_un)
+            return session["username"] in access_un 
+    #-------------------------------------------------------------------------
     session=current.session
     request=current.request
     from k_set import C_SET
@@ -93,7 +119,9 @@ def folder_w_access(args=[],x_path=''):
         fc_list=(session["file_access"].split(",") if type(session["file_access"])==str else [])+session["my_folder"] #[f';{session["my_folder"]};']
     else:
         fc_list=session["my_folder"]
-    if session["admin"] or x_path[:-1] in share_inf or (list_match(fc_list,x_path)) or request.vars['from']=='form': #file_change_access: user have file_change_access for this folder 
+    if access_acording_base_file(x_path): 
+        return {'ok':True}
+    elif session["admin"] or (x_path[:-1] in share_inf) or (list_match(fc_list,x_path)) or (request.vars['from']=='form'): #file_change_access: user have file_change_access for this folder 
         return {'ok':True}  
     else:
         import k_err

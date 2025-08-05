@@ -77,6 +77,25 @@ tasks
                         '{id:03d}-{name}'
                         '{un}-{family}'
                         '{un}-{m_w} {pre_n} {name} {family}'
+        reference addition data:
+            sample:
+                1:
+                    text:
+                        'c_prj_id':{'type':'reference','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
+                        'c_prj_txt':{'type':'auto-x','ref':'c_prj_id'},
+                    result:
+                2:
+                    text:
+                        'c_prj_id':{'type':'reference','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},'title':'پروژه','prop':['update']},
+                        'cp_code':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_code}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'کد پروژه','prop':['hidden']},
+                        'cp_name':{'type':'auto','ref':{'db':'a_cur_subject','tb':'a','key':'__0__','val':'{cp_name}','where':'''id = "{{=__objs__['prj_id']['value']}}"'''},'title':'نام پروژه','prop':['hidden']},
+                        
+                3:
+                    text:
+                        'c_prj_id':{'type':'reference','title':'پروژه','prop':['update'],
+                            'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},
+                            'team':{'cp_code':{'val':'{cp_code}','title':'کد پروژه'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'}},},
+                            
         index:
             'len':num_str : number in str format
                 *important*         
@@ -407,6 +426,85 @@ x_data={
             'views':{
                 'all':{'input':'name','view1':'','view2':''}
             },
+        },
+        'persona':{ 
+            'base':{'mode':'form','title':'پرسونای شخصی کارفرمایان','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','rev':'00-040513',
+            },
+            'tasks':{
+                'name':{'type':'text','title':'نام و نام خانوادگی'},
+                'rsm':{'type':'text','title':'نام رسمی بین سازمانی'},
+                'szmn':{'type':'reference','title':'سازمان','prop':['update'],
+                        'ref':{'db':'a_clint','tb':'a','key':'{id}','val':'{id:03d},{name}'},
+                        'team':{'szmn_name':{'val':'{name}','title':'نام سازمان'}},},
+                'date':{'type':'fdate','len':'10','title':'تاریخ شروع سمت','prop':[]},
+
+                
+                
+                'dcst':{'type':'select','title':'روش تصمیم‌گیری','help_e':'Decision Style',
+                    'select':{'QIND':'تصمیم‌گیری سریع توسط فرد، بدون مشورت گسترده، اغلب بر اساس اعتماد به تجربه شخصی یا مشاور',
+                        'COLL':'تصمیم‌گیری با مشارکت اعضای یک گروه نزدیک؛ نیازمند هماهنگی نظرات مختلف',
+                        'RSCH':'تصمیم‌گیری پس از بررسی عمیق اطلاعات، تحلیل ریسک و مقایسه چند گزینه',
+                        'STEP':' تصمیم‌گیری تدریجی، هر مرحله پس از مشاهده و ارزیابی نتایج مرحله قبلی انجام می‌شود.',
+                        'CONS':'تصمیم‌گیری بر اساس مشاوره با متخصصان، مشاوران فنی یا دوستان باتجربه پیش از هر اقدام.',
+                        'EMOT':'تصمیم‌گیری سریع و مبتنی بر حس و شهود شخصی، بیشتر از تحلیل منطقی متأثر از احساسات و ترجیحات شخصی.',
+                        'OPPO':'تصمیم‌گیری بر اساس استفاده از فرصت‌های پیش‌بینی‌نشده (مثل تخفیف، موقعیت خاص زمین یا سرمایه).',
+                        'FINC':'تمرکز اصلی بر بودجه و مسائل مالی؛ تصمیم‌ها بر اساس کمترین هزینه یا بیشترین بازده مالی اتخاذ می‌شود.',
+                        'CNSV':'تمایل به انتخاب راه‌حل‌های آزموده‌شده، کم‌ریسک و پایبند به عرف و استانداردهای سنتی.',
+                        'HYBR':' ترکیبی از چند سبک (مثلاً شروع با تحقیق و سپس تصمیم جمعی یا احساسی)؛ انعطاف‌پذیر نسبت به شرایط پروژه.'
+                    }},
+                'ira':{'type':'select','title':'نگرش نسبت به نوآوری و ریسک','help_e':'Innovation & Risk Attitude',
+                    'select':{'INRV':' نوآور و ریسک‌پذیر (Innovative & Risk-taking) - مشتاق ایده‌های جدید، پذیرش متریال مدرن و طراحی‌های غیرمتعارف حتی با ریسک بالا.',
+                        'BALA':' میانه‌رو (Balanced) -  پذیرش نوآوری در صورت وجود توجیه فنی و اقتصادی؛ مایل به تعادل بین ریسک و امنیت.',
+                        'CNSV':'محافظه‌کار (Conservative) - تمایل به استفاده از روش‌ها و طرح‌های سنتی و آزموده‌شده؛ پرهیز از ریسک بالا.',
+                        'OPRT':'فرصت‌محور (Opportunistic) - پذیرش نوآوری در شرایطی که منافع کوتاه‌مدت یا موقعیت ویژه‌ای ایجاد شود (مثل تخفیف یا مزیت رقابتی خاص).',
+                        'PRAG':'عمل‌گرا و نتیجه‌محور (Pragmatic) - پذیرش نوآوری صرفاً در صورت بهبود مستقیم عملکرد یا نتایج ملموس پروژه.',
+                        'EXPL':'جستجوگر و آزمایشی (Exploratory) - علاقه‌مند به آزمایش ایده‌های جدید و پیشرو بودن در تجربه متدهای نوین، حتی بدون تضمین نتیجه.',
+                    }},
+
+
+                
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
+                'stress':{'type':'select','title':'اولویت درخواست','select':{'0':'عادی','1':'فوری','2':'بحرانی'},'prop':['no_empty']},
+                
+                'rqst':{'type':'text','len':2000,'lang':'fa','title':'شرح مشکل / درخواست','height':'100px'},
+                'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
+                'des_modir':{'type':'text','len':500,'lang':'fa','title':'توضیح مدیر'},
+                'file_err':{'type':'file','len':'40','file_name':'AQC0-ITM-USR-ERR-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,itm,usr,err','title':'پیوست','help':'در صورت نیاز'},
+                'it_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح it'},
+                'it_res':{'type':'select','title':'وضعیت نهایی','help_e':'result','select':{'OK':'انجام شد','RJ':'در حیطه وظایف این واحد نمی باشد','HL':'هولد - نیاز مند موارد زیر'},'prop':['no_empty']},
+                'fr_res':{'type':'select','title':'کفایت نتیجه','help_e':'result','select':{'2':'بله','1':'تقریبا','0':'خیر'},'prop':['no_empty']},
+                'fr_r_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح کفایت'},
+                'fr_satf':{'type':'select','title':'رضایت از اقدامات','help_e':'result','select':{'5':'عالی','4':'خوب','3':'متوسط','2':'نیاز به بهبود','1':'ضعیف'},'prop':['no_empty']},
+                'fr_s_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح رضایت'},
+    
+
+
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            },
+            'steps':{
+                's0':{'tasks':'frd_1,date,stress,cat1,rqst,frd_modir,file_err','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's2':{'tasks':'it_res,it_des','xjobs':'ita','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''},
+                's3':{'tasks':'fr_res,fr_r_des,fr_satf,fr_s_des','xjobs':'#step#0','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+            },
+            'views':{
+                'all':{'input':'rd_1,date,stress,cat1,rqst,frd_modir,file_err','view1':'it_res','view2':'fr_res'}
+            },
+            'cols_filter':{
+                '':'همه',
+            },
+            'data_filter': 
+                {
+                },
         }
     },
     
@@ -687,7 +785,7 @@ x_data={
                         'name':'b','auth':'dccm,#task#un,edu,off_ens','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
                 'd':{'tasks':'file_pic_per,date,job_rec,Idc_num,p_id,tel_mob,tel_wrk,end,loc','xjobs':'dccm','title':'ثبت توسط مسئول dcc','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'d','start_step':'0','start_where':"'{step_0_ap}' == 'y'",'end_where':"False"},
-                'c1':{'tasks':'tel_mob,date,rlgn,mltr,Idc_num,shnsnme_num,father,brt_pos,mrg_case,mrg_date,n_suprt,n_child,lable_1,edu_l_cert_grade,edu_l_cert_date,edu_l_cert_pos,edu_l_cert_univ,edu_l_cert_dcpln,start_date,home_adrs,tel_home,mrf_name',
+                'c1':{'tasks':'tel_mob,date,rlgn,mltr,shnsnme_num,father,brt_pos,mrg_case,mrg_date,n_suprt,n_child,lable_1,edu_l_cert_grade,edu_l_cert_date,edu_l_cert_pos,edu_l_cert_univ,edu_l_cert_dcpln,start_date,home_adrs,tel_home,mrf_name',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد- بخش 1','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'c1','auth':'dccm,#task#un,off_ens','start_step':'','start_where':"True",'end_where':"'{step_c2_ap}' == 'y'"},
                 'c2':{'tasks':'file_cv,file_mdrk_thsl,file_shnsnm,file_ins_rec,idc_p1_file,idc_p2_file,idc_serial',
@@ -2099,7 +2197,8 @@ x_data={
             'data_filter': {},
          }
     },
-    #--------------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------------------
+
     #--------------------------------------------------------------------
     'amuzesh':{ #db
         'a':{
@@ -2239,6 +2338,38 @@ x_data={
                 's4':{'tasks':'des_4','xjobs':'mvn_pln','title':'تایید امکان پرداخت - معاونت برنامه ریزی و توسعه منابع ','app_keys':'y,r','app_titls':'','oncomplete_act':''},
             },
         },
+    },
+    #--------------------------------------------------------------------
+    'survey':{ #db نظر سنجی
+        'prsln':{
+            'base':{'mode':'form','title':'نتایج نظر سنجی در پرس لاین','help':'survey.porsline.ir','code':'410','rev':'00-040511'
+            },
+            'tasks':{
+                'date1':{'type':'fdate','len':'10','title':'تاریخ نظرسنجی','prop':[]},
+                'c_prj_id':{'type':'reference','title':'پروژه','prop':['update'],
+                            'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},
+                            'team':{'cp_code':{'val':'{cp_code}','title':'کد پروژه'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'}},},
+                'subject':{'type':'text','len':'255','title':'موضوع'},
+                'cat':{'type':'text','len':'255','title':'دسته بندی'},
+                'des':{'type':'text','len':'255','title':'توضیحات'},
+                'trgt':{'type':'text','len':'255','title':'جامعه مخاطبین'},
+                'file_r': {'type':'file','file_name':'AQC0-SRV-PRSLN-{id:04d}-{cp_code}-r','file_ext':"pdf",'path':'form,srv,prsln','title':'نمودار نتایج - PDF'},
+                'file_v': {'type':'file','file_name':'AQC0-SRV-PRSLN-{id:04d}-{cp_code}-v','file_ext':"xls,xlsx,csv",'path':'form,srv,prsln','title':'جدول اطلاعات'},
+                'link_r':{'type':'text','title':'لینک نتایج','len':'80','link':{'target':'_blank','icon_text':'R','class':'btn btn-info'},},
+                'link_v':{'type':'text','title':'لینک پرسشنامه','len':'80','link':{'target':'_blank','icon_text':'D','class':'btn btn-info'},},
+            },
+            'steps':{
+                's0':{'tasks':'date1,c_prj_id,cp_code,cp_name,subject,cat,des,trgt','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'file_r,file_v,link_r,link_v','xjobs':'#step#0','title':'تکمیل','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'date1,c_prj_id,cp_code,cp_name,subject,cat,des','view1':'','view2':'','view_cols':1},
+            },
+            'labels':{
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        }
     },
     #--------------------------------------------------------------------
     'test':{ #db

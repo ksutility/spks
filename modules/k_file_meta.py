@@ -54,7 +54,7 @@ class K_FILE_META:
                 f[t]=''
         f_path=self.meta_path(path) # f_path = file path
         if os.path.isfile(f_path):
-            meta=k_file.read('json',f_path)
+            meta=k_file.read(f_path,'json')
             '''
             meta={'files':{ '0-4901.pdf':{'title':'abc',
                             'x':'y'},
@@ -112,7 +112,7 @@ class K_FILE_META:
         p_json=P_JSON()
         try:
             if os.path.isfile(f_path): # if file exist 
-                meta=k_file.read('json',f_path)
+                meta=k_file.read(f_path,'json')
                 p_json.append_dict(meta,append_dic_2)
                 return self.write(f_path=f_path,meta=meta)
                 #k_file.write('json',f_path,meta)
@@ -165,7 +165,7 @@ class K_FILE_META:
         f_path=self.meta_path(path)
         #try:
         if os.path.isfile(f_path):
-            meta=k_file.read('json',f_path)
+            meta=k_file.read(f_path,'json')
             ok,msg=change_dic_key(meta,old_key_in_dict,new_key)
             if ok:
                 return "change_key ok<br>" + self.write(f_path=f_path,meta=meta)

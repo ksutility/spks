@@ -1001,7 +1001,7 @@ def set_ppr():
     import k_file
     f_name='c:\\temp\\x_export\\paper_num.txt'
     k_file.write('text',f_name,pp_num_min+",",append=True)
-    new_list=k_file.read('text',f_name)
+    new_list=k_file.read(f_name,'text')
     return f"<h2>ok</h2>{pp_num_min}<br> saved to => <br>{f_name}<hr>new list=<hr>{new_list}"
 def reports():
     import k_htm #k_err

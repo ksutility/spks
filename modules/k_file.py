@@ -401,7 +401,7 @@ def backup(file_path,bak_folder='',delete=False):
     return new_file_path
    
 #@check_err  
-def read(_format,file_path):
+def read(file_path,_format='text'):
     '''
     Parameters
     ----------
