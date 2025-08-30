@@ -645,7 +645,6 @@ def xtable():
     response.title='xtable-'+'-'.join(args)#[x] for x in range(0,len(args),2)])
       
     x_data_s,db_name,tb_name,msg=get_init_data()#x_data)
-
     if not x_data_s:
         return x_dict.add({'table':msg})
     else:
@@ -653,11 +652,14 @@ def xtable():
             if not (session["admin"] or k_user.user_in_xjobs_can('view',xjobs=x_data_s['base']['auth'])):
                 #k_user.user_in_jobs(x_data_s['base']['auth'])):
                 return x_dict.add({'table':DIV(H1("شما اجازه دسترسی به این فرم را ندارید"))})
-        if not ('all' in x_data_s['views']) :
-            return x_dict.add({'table':DIV(H1("برای این فرم جدول تعریف نشده است"))})
+        x_view=request.vars['view']
+        if not x_view:
+            x_view='all'
+        if not (x_view in x_data_s['views']) :
+            return x_dict.add({'table':DIV(H1(f"برای این فرم view با نام {x_view} تعریف نشده است"))})
         db1=DB1(db_name)
         tasks=x_data_s['tasks']
-        f_views=x_data_s['views']['all'] 
+        f_views=x_data_s['views'][x_view] 
         
         if len(args)>2 and args[2] in ['view','edit','insert']:
             if len(args)>3 and args[2]=='view':

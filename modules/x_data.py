@@ -164,6 +164,19 @@ steps.xjobs= list of name of xjobs
 	'auto':'{{import k_time}}{{=k_time.add(time_st,time_len)}}'
 
 'sp_order' =spesial order :1 step of form that shoud run in unsecoenc
+-----------------------
+prompt:
+    لیست زیر انواع 
+    سبک ارتباطی (Communication Preference
+    در
+    پرسونای کارفرما  
+    است  آنرا کامل کن و برای هر کدام 1 کد 4 حرفی پیشنهاد بده
+    خروجی در فرمت زیر باشد
+    [code]:'[persian title](english title) - [persian describ]'
+    "
+    
+    "
+    [کد 4 حرفی]:[عنوان فارسی]()-[]
 """
 x_data_cat={
     '-':'همه فرمها',
@@ -427,32 +440,88 @@ x_data={
                 'all':{'input':'name','view1':'','view2':''}
             },
         },
-        'persona':{ 
-            'base':{'mode':'form','title':'پرسونای شخصی کارفرمایان','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','rev':'00-040513',
-            },
+        'Competitors':{
+            'base':{'mode':'form','title':'لیست رقبا','code':'104','rev':'00-040515'},
             'tasks':{
-                'name':{'type':'text','title':'نام و نام خانوادگی'},
-                'rsm':{'type':'text','title':'نام رسمی بین سازمانی'},
+                'name':{'type':'text','title':'نام شرکت رقیب'},
                 'szmn':{'type':'reference','title':'سازمان','prop':['update'],
                         'ref':{'db':'a_clint','tb':'a','key':'{id}','val':'{id:03d},{name}'},
                         'team':{'szmn_name':{'val':'{name}','title':'نام سازمان'}},},
+                'com':{'type':'text','title':'کانال ارتباطی'},
+                'subj':{'type':'text','title':'نوع فعالیت'},
+                'des':{'type':'text','title':'توضیح'},
+            },
+            'steps':{
+                's0':{'tasks':'name,szmn,szmn_name','xjobs':'dcc_prj','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'com,subj','xjobs':'dcc_prj','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'des','xjobs':'dcc_prj','title':'ثبت نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+            'views':{
+                'all':{'input':'name','view1':'','view2':''}
+            },
+        },
+        'persona':{ 
+            'base':{'mode':'form','title':'پرسونای شخصی کارفرمایان','code':'108','rev':'00-040513',
+            },
+            'tasks':{
+                #'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
+                'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
+                'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
+                'name':{'type':'text','title':'نام','len':'15'},
+                'family':{'type':'text','title':'فامیل','len':'35'},
+                'rsm':{'type':'text','title':'نام رسمی سازمانی'},
+                'szmn':{'type':'reference','title':'سازمان','prop':['update'],
+                        'ref':{'db':'a_clint','tb':'a','key':'{id}','val':'{id:03d},{name}'},
+                        'team':{'szmn_name':{'val':'{name}','title':'نام سازمان'}},},
+                'pos':{'type':'text','title':'سمت رسمی سازمانی'},
                 'date':{'type':'fdate','len':'10','title':'تاریخ شروع سمت','prop':[]},
-
-                
-                
-                'dcst':{'type':'select','title':'روش تصمیم‌گیری','help_e':'Decision Style',
-                    'select':{'QIND':'تصمیم‌گیری سریع توسط فرد، بدون مشورت گسترده، اغلب بر اساس اعتماد به تجربه شخصی یا مشاور',
-                        'COLL':'تصمیم‌گیری با مشارکت اعضای یک گروه نزدیک؛ نیازمند هماهنگی نظرات مختلف',
-                        'RSCH':'تصمیم‌گیری پس از بررسی عمیق اطلاعات، تحلیل ریسک و مقایسه چند گزینه',
-                        'STEP':' تصمیم‌گیری تدریجی، هر مرحله پس از مشاهده و ارزیابی نتایج مرحله قبلی انجام می‌شود.',
-                        'CONS':'تصمیم‌گیری بر اساس مشاوره با متخصصان، مشاوران فنی یا دوستان باتجربه پیش از هر اقدام.',
-                        'EMOT':'تصمیم‌گیری سریع و مبتنی بر حس و شهود شخصی، بیشتر از تحلیل منطقی متأثر از احساسات و ترجیحات شخصی.',
-                        'OPPO':'تصمیم‌گیری بر اساس استفاده از فرصت‌های پیش‌بینی‌نشده (مثل تخفیف، موقعیت خاص زمین یا سرمایه).',
-                        'FINC':'تمرکز اصلی بر بودجه و مسائل مالی؛ تصمیم‌ها بر اساس کمترین هزینه یا بیشترین بازده مالی اتخاذ می‌شود.',
-                        'CNSV':'تمایل به انتخاب راه‌حل‌های آزموده‌شده، کم‌ریسک و پایبند به عرف و استانداردهای سنتی.',
-                        'HYBR':' ترکیبی از چند سبک (مثلاً شروع با تحقیق و سپس تصمیم جمعی یا احساسی)؛ انعطاف‌پذیر نسبت به شرایط پروژه.'
+                'rsm_t':{'type':'auto','len':'50','auto':"{rsm} - {pos} {szmn_name}",'title':'عنوان رسمی کامل'},
+                'dcst':{'type':'select','title':'روش تصمیم‌گیری','help_e':'Decision Style','prop':['update'],
+                    'select':{'QIND':'سریع و فردی (Quick Individual) - تصمیم‌گیری سریع توسط فرد، بدون مشورت گسترده، اغلب بر اساس اعتماد به تجربه شخصی یا مشاور.',
+                        'COLL':'جمعی / خانوادگی (Collective/Family-based) - تصمیم‌گیری با مشارکت اعضای خانواده یا گروه نزدیک؛ نیازمند هماهنگی نظرات مختلف.',
+                        'RSCH':'تحقیق‌محور و محتاط (Research-based) - تصمیم‌گیری پس از بررسی عمیق اطلاعات، تحلیل ریسک و مقایسه چند گزینه.',
+                        'STEP':'مرحله‌ای (Stepwise) - تصمیم‌گیری تدریجی، هر مرحله پس از مشاهده و ارزیابی نتایج مرحله قبلی انجام می‌شود.',
+                        'CONS':'مشورت‌محور (Consultative) - تصمیم‌گیری بر اساس مشاوره با متخصصان، مشاوران فنی یا دوستان باتجربه پیش از هر اقدام.',
+                        'EMOT':'احساسی و شهودی (Emotional/Intuitive) - تصمیم‌گیری سریع و مبتنی بر حس و شهود شخصی، بیشتر از تحلیل منطقی متأثر از احساسات و ترجیحات شخصی.',
+                        'OPPO':'فرصت‌محور (Opportunistic) - صمیم‌گیری بر اساس استفاده از فرصت‌های پیش‌بینی‌نشده (مثل تخفیف، موقعیت خاص زمین یا سرمایه).',
+                        'FINC':'اولویت‌محور مالی (Financial-priority) - تمرکز اصلی بر بودجه و مسائل مالی؛ تصمیم‌ها بر اساس کمترین هزینه یا بیشترین بازده مالی اتخاذ می‌شود.',
+                        'CNSV':'محافظه‌کارانه (Conservative) - تمایل به انتخاب راه‌حل‌های آزموده‌شده، کم‌ریسک و پایبند به عرف و استانداردهای سنتی.',
+                        'HYBR':'هیبرید (Hybrid) - ترکیبی از چند سبک (مثلاً شروع با تحقیق و سپس تصمیم جمعی یا احساسی)؛ انعطاف‌پذیر نسبت به شرایط پروژه.'
                     }},
-                'ira':{'type':'select','title':'نگرش نسبت به نوآوری و ریسک','help_e':'Innovation & Risk Attitude',
+                'dcst_t':{'type':'auto-x','ref':'dcst','title':'روش تصمیم‌گیری - متن','prop':['hidden']},
+                'dtl':{'type':'select','title':'میزان دخالت در جزئیات طراحی','help_e':'Detail Involvement','prop':['update'],
+                    'select':{'DETL':'جزئی‌نگر (Detail-oriented) -  علاقه‌مند به بررسی و تایید تمام جزئیات نقشه‌ها، متریال‌ها و مراحل طراحی و اجرا؛ تمایل به کنترل نزدیک روی روند کار.',
+                            'BIGP':'کلی‌نگر (Big-picture) - تمرکز بر تصویر کلی و نتیجه نهایی پروژه؛ علاقه‌مند به دیدن کانسپت و ایده کلی به جای جزئیات فنی.',
+                            'HNDW':'اعتماد کامل به مشاور (Hands-off) - واگذاری کامل تصمیمات به تیم مشاور؛ انتظار خروجی بدون دخالت مستقیم و صرفاً دریافت گزارش‌های دوره‌ای.',
+                            'BALA':'متعادل (Balanced) - پیگیری جزئیات مهم اما واگذاری تصمیم‌های کم‌اهمیت به مشاور؛ تعادل بین کنترل و اعتماد.',
+                            'ITRV':'بازنگر مکرر (Iterative Reviewer) - علاقه‌مند به بررسی طرح در هر مرحله و ارائه بازخورد مستمر برای اصلاحات جزئی و مرحله‌ای.'
+                    }},
+                'dtl_t':{'type':'auto-x','ref':'dtl','title':'میزان دخالت در جزئیات طراحی - متن','prop':['hidden']},
+                'com':{'type':'select','title':'سبک ارتباطی ترجیحی','help_e':'Communication Preferencet','prop':['update'],
+                    'select':{'FORM':'رسمی و مکتوب (Formal & Written) - ترجیح به نامه‌نگاری، ایمیل و گزارش‌های رسمی؛ تأکید بر مستندسازی و روند اداری مشخص.',
+                            'INFR':'غیررسمی و مستقیم (Informal & Direct) - تمایل به تماس تلفنی یا پیام‌رسان برای پاسخ سریع؛ تمرکز بر سادگی و سرعت ارتباط.',
+                            'FACE':'حضوری و تعاملی (Face-to-Face Interactive) - علاقه‌مند به جلسات حضوری، بازدید از پروژه و تعامل چهره‌به‌چهره با تیم طراحی و اجرا.',
+                            'DGVL':'دیجیتال و تصویری (Digital & Visual) - ترجیح به استفاده از داشبورد آنلاین، رندر سه‌بعدی و گزارش‌های تصویری برای درک پروژه.',
+                            'HYBR':'ترکیبی و منعطف (Hybrid & Flexible) - استفاده از ترکیب چند روش ارتباطی بسته به موقعیت (مثلاً جلسات حضوری برای تصمیمات مهم و پیام‌رسان برای هماهنگی روزمره).',
+                            'EXPR':'نمایشی و تجربه‌محور (Experiential/Showcase) - علاقه به دیدن ماکت، نمونه واقعی یا بازدید پروژه‌های مشابه به جای گزارش‌های صرفاً نوشتاری یا تصویری.'                 
+                    }},
+                'com_t':{'type':'auto-x','ref':'com','title':'سبک ارتباطی ترجیحی - متن','prop':['hidden']},
+                'ccm':{'type':'select','title':'روش ارتباط  فعلی','help_e':'Current Communication Method','prop':['update'],
+                    'select':{'AUTO':'اتوماسیون (Automation System) - سامانه اتوماسیون اداری',
+                            'EMAL':'ایمیل (Email) - طریق پست الکترونیک رسمی یا شخصی',
+                            'EITA':'ایتا (Eitaa) - پیام‌رسان ایتا',
+                            'PHYS':'فیزیکی (Physical) - مکاتبات کاغذی یا تحویل فیزیکی اسناد'
+                    }},  
+                'ccm_t':{'type':'auto-x','ref':'ccm','title':'روش ارتباط  فعلی - متن','prop':['hidden']},
+                'el':{'type':'select','title':'سطح مشارکت در فرآیند','help_e':'Engagement Level','prop':['update'],
+                    'select':{'HIGH':'فعال (High Engagement) - مشارکت بسیار بالا در فرآیند؛ حضور در اکثر جلسات، بررسی مستمر جزئیات و پیگیری پیشرفت پروژه به صورت مداوم.',
+                            'MODR':'متوسط (Moderate Engagement) - مشارکت در تصمیم‌های کلیدی و جلسات مهم؛ واگذاری جزئیات اجرایی به مشاور ولی پیگیری دوره‌ای روند پروژه.',
+                            'LOWE':'کم (Low Engagement) - مشارکت حداقلی؛ کارفرما فقط گزارش‌های دوره‌ای دریافت می‌کند و تصمیم‌های عمده را به تیم مشاور واگذار می‌کند.',
+                            'ONDE':'مرحله‌ای (On-Demand) - مشارکت مقطعی در نقاط عطف پروژه؛ ورود فقط هنگام نیاز به تصمیم‌های خاص یا تأیید بخش‌های کلیدی.',
+                            'CONS':'مشورتی (Consultative Engagement) - مشارکت از طریق ارائه بازخورد در جلسات مشاوره؛ بدون حضور مستقیم در مراحل روزمره اما مؤثر در تصمیمات نهایی.'
+                    }},
+                'el_t':{'type':'auto-x','ref':'el','title':'سطح مشارکت در فرآیند - متن','prop':['hidden'],},
+                'ira':{'type':'select','title':'نگرش نسبت به نوآوری و ریسک','help_e':'Innovation & Risk Attitude','prop':['update'],
                     'select':{'INRV':' نوآور و ریسک‌پذیر (Innovative & Risk-taking) - مشتاق ایده‌های جدید، پذیرش متریال مدرن و طراحی‌های غیرمتعارف حتی با ریسک بالا.',
                         'BALA':' میانه‌رو (Balanced) -  پذیرش نوآوری در صورت وجود توجیه فنی و اقتصادی؛ مایل به تعادل بین ریسک و امنیت.',
                         'CNSV':'محافظه‌کار (Conservative) - تمایل به استفاده از روش‌ها و طرح‌های سنتی و آزموده‌شده؛ پرهیز از ریسک بالا.',
@@ -460,44 +529,30 @@ x_data={
                         'PRAG':'عمل‌گرا و نتیجه‌محور (Pragmatic) - پذیرش نوآوری صرفاً در صورت بهبود مستقیم عملکرد یا نتایج ملموس پروژه.',
                         'EXPL':'جستجوگر و آزمایشی (Exploratory) - علاقه‌مند به آزمایش ایده‌های جدید و پیشرو بودن در تجربه متدهای نوین، حتی بدون تضمین نتیجه.',
                     }},
+                'ira_t':{'type':'auto-x','ref':'ira','title':'نگرش نسبت به نوآوری و ریسک - متن','prop':['hidden'],},
+                'cip':{'type':'select','title':'اولویت‌های تعامل با مشاور','help_e':'Consultant Interaction Priorities','prop':['update'],
+                    'select':{'RESP':' سرعت پاسخ‌دهی (Response Speed) -  تمایل به دریافت پاسخ فوری به سوالات، درخواست‌ها و تغییرات پروژه. ',
+                            'TRAN':' شفافیت فرآیند (Transparency) - نیاز به گزارش شفاف از وضعیت پروژه، هزینه‌ها، زمان‌بندی و تصمیمات کلیدی.',
+                            'CRTV':' خلاقیت و ایده‌های نو (Creativity & Innovation) - انتظار ارائه پیشنهادهای نوآورانه و متمایز در طراحی و راهکارهای پروژه.',
+                            'COST':'هزینه و کنترل بودجه (Cost & Budget Control) - تمرکز بر مدیریت مالی، صرفه‌جویی و پایبندی به بودجه توافق‌شده.',
+                            'QUAL':'کیفیت خروجی (Quality Focus) -  تمرکز بر دستیابی به بالاترین کیفیت طراحی و اجرا حتی با هزینه بالاتر.',
+                            'TIME':'تعهد و پایبندی به زمان (Time Commitment) - اولویت‌بخشی به تحویل به‌موقع مراحل پروژه و رعایت دقیق برنامه زمان‌بندی.',
+                            'SUPP':'پشتیبانی و خدمات پس از تحویل (Post-Delivery Support) - اهمیت وجود پشتیبانی فنی و خدمات مشاوره‌ای حتی پس از تحویل پروژه.',
+                            'CONT':'ارتباط مستمر و در دسترس بودن (Availability & Contact) - نیاز به امکان ارتباط مداوم و آسان با مشاور در طول پروژه.',
+                            'CULT':'هماهنگی با ارزش‌ها و فرهنگ مشتری (Cultural Fit) - اطمینان از اینکه مشاور ارزش‌ها، فرهنگ و اولویت‌های شخصی یا خانوادگی را در طراحی رعایت کند.',
+                            'FLEX':'انعطاف‌پذیری و سازگاری (Flexibility) -  تمایل به همکاری با مشاوری که توانایی تطبیق با تغییرات نیازها و شرایط پروژه را داشته باشد.'
+                    }},
+                'cip_t':{'type':'auto-x','ref':'cip','title':'اولویت‌های تعامل با مشاور - متن','prop':['hidden'],},
+                'des_1':{'type':'text','len':1500,'lang':'fa','title':'توضیحات اضافه'},  
 
-
-                
-                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
-                'stress':{'type':'select','title':'اولویت درخواست','select':{'0':'عادی','1':'فوری','2':'بحرانی'},'prop':['no_empty']},
-                
-                'rqst':{'type':'text','len':2000,'lang':'fa','title':'شرح مشکل / درخواست','height':'100px'},
-                'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
-                'des_modir':{'type':'text','len':500,'lang':'fa','title':'توضیح مدیر'},
-                'file_err':{'type':'file','len':'40','file_name':'AQC0-ITM-USR-ERR-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,itm,usr,err','title':'پیوست','help':'در صورت نیاز'},
-                'it_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح it'},
-                'it_res':{'type':'select','title':'وضعیت نهایی','help_e':'result','select':{'OK':'انجام شد','RJ':'در حیطه وظایف این واحد نمی باشد','HL':'هولد - نیاز مند موارد زیر'},'prop':['no_empty']},
-                'fr_res':{'type':'select','title':'کفایت نتیجه','help_e':'result','select':{'2':'بله','1':'تقریبا','0':'خیر'},'prop':['no_empty']},
-                'fr_r_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح کفایت'},
-                'fr_satf':{'type':'select','title':'رضایت از اقدامات','help_e':'result','select':{'5':'عالی','4':'خوب','3':'متوسط','2':'نیاز به بهبود','1':'ضعیف'},'prop':['no_empty']},
-                'fr_s_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح رضایت'},
-    
-
-
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
             },
             'steps':{
-                's0':{'tasks':'frd_1,date,stress,cat1,rqst,frd_modir,file_err','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
-                's2':{'tasks':'it_res,it_des','xjobs':'ita','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''},
-                's3':{'tasks':'fr_res,fr_r_des,fr_satf,fr_s_des','xjobs':'#step#0','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+                's0':{'tasks':'m_w,pre_n,name,family,rsm,szmn,szmn_name,pos,rsm_t,date','xjobs':'dcc_prj','title':'ثبت','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'dcst,dtl,com,ccm,el,ira,cip,dcst_t,dtl_t,com_t,ccm_t,el_t,ira_t,cip_t,des_1','xjobs':'dcc_prj','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's2':{'tasks':'des_1','xjobs':'dccm','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
             },
             'views':{
-                'all':{'input':'rd_1,date,stress,cat1,rqst,frd_modir,file_err','view1':'it_res','view2':'fr_res'}
+                'all':{'input':'m_w,pre_n,name,family,rsm,szmn,pos,date','view1':'dcst','view2':'dtl'}
             },
             'cols_filter':{
                 '':'همه',
@@ -738,6 +793,7 @@ x_data={
                 'job':{'type':'text','title':'سمت','len':'50'},#,'ref':{'db':'user','tb':'job','key':'id','val':'{id}{name}'}
                 'p_id':{'type':'num','len':4,'lang':'fa','title':'شماره پرسنلی','uniq':''},
                 'end':{'type':'fdate','title':'تاریخ خاتمه کار','prop':['hazf']},
+                'file_rqst':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}-09-rqst','file_ext':"pdf,jpg",'path':'form,hrm,cv,{un}','title':'فرم درخواست ثبت نام','auth':'dccm,#task#un,off_ens'},
                 'file_pic_per':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}0-pic_per','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس پرسنلی','img':"""style='height:100px;' """},
                 'file_shnsnm':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}1-shnsnm','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'شناسنامه','auth':'dccm,#task#un,off_ens'},
                 'file_mdrk_thsl':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}2-mdrk_thsl','file_ext':"pdf,jpg",'path':'form,hrm,cv,{un}','title':'آخرین مدرک تحصیلی','auth':'dccm,#task#un,off_ens'},
@@ -800,6 +856,7 @@ x_data={
             },
             'views':{
                 'all':{'input':'pre_n,file_pic_per,file_shnsnm,file_mdrk_thsl,file_ot,file_off,auth_prj,auth_prj_id','view1':'un,name,family','view2':'p_id','auth':'dccm'},
+                't1':{'input':'file_rqst','view1':'un,name,family','view2':'p_id','auth':'dccm'},
                 },
             'cols_filter':{
                 '':'همه',
@@ -999,7 +1056,7 @@ x_data={
     #--------------------------------------------------------------------
     'doc_tqm':{ #db
         'a':{
-            'base':{'mode':'form','title':'اسناد مدیریت کیفیت','help':'document_for_TQM','code':'402'
+            'base':{'mode':'form','title':'اسناد تعالی و مدیریت کیفیت','help':'document_for_TQM','code':'402','rev':'x01-040519'
             },
             'tasks':{
                 'name':{'type':'text','len':'150','title':'نام مدرک'},
@@ -1044,12 +1101,15 @@ x_data={
                 'f_code':{'type':'text','width':'30','title':'کد 1','prop':['readonly']},
                 'rev':{'type':'index','start':0,'len':'2','ref':{'db':'doc_tqm','tb':'files','key':'{id}','val':'{rev}','where':'''f_code = "{{=__objs__['f_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
                 'date1':{'type':'fdate','title':'تاریخ تهیه سند اولیه','prop':['update']},
-                'date2':{'type':'fdate','title':'تاریخ تهیه سند فرمت شده','prop':['update']},
+                'date2':{'type':'fdate','title':'تاریخ تهیه سند نهایی','prop':['update']},
                 'f_code_r':{'type':'auto','len':'8','auto':'{f_code}-{rev}','title':'کد 2'},
                 'file_1cr_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-1cr-v','file_ext':"md,mm,doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'سند اولیه'},
                 'file_1cr_r':{'type':'file','len':'40','file_name':'{{=f_code_r}}-1cr-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf - سند اولیه'},
-                'file_2fr_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-2fr-v','file_ext':"md,mm,doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'نهایی'},
-                'file_2fr_r':{'type':'file','len':'40','file_name':'{{=f_code_r}}-2fr-r','file_ext':"pdf",'path':'form,doc_tqm','title':'pdf نهایی'},
+                'file_2sh_v':{'type':'file_v','len':'40','file_name':'{{=f_code_r}}-2sh-v','path':'form,doc_tqm','title':'مستندات تعامل با ذینفعان'},
+                'file_2sh_r':{'type':'file_r','len':'40','file_name':'{{=f_code_r}}-2sh-r','path':'form,doc_tqm','title':'مستندات تعامل با ذینفعان - PDF'},
+                'file_2fr_v':{'type':'file_v','len':'40','file_name':'{{=f_code_r}}-2fr-v','path':'form,doc_tqm','title':'سند نهایی'},
+                'file_2fr_r':{'type':'file_r','len':'40','file_name':'{{=f_code_r}}-2fr-r','path':'form,doc_tqm','title':'سند نهایی  - PDF'},
+                'file_2fr_a':{'type':'file_r','len':'40','file_name':'{{=f_code_r}}-2fr-a','path':'form,doc_tqm','title':'سند نهایی مصوب'},
                 'date':{'type':'fdate','title':'تاریخ ابلاغ','prop':['update']},
                 'eblag':{'type':'text','len':'40','title':'مستندات ابلاغ'},
                 'file_3do_v':{'type':'file','len':'40','file_name':'{{=f_code_r}}-3do-v','file_ext':"md,mm,doc,docx,xls,xlsx,zip,rar",'path':'form,doc_tqm','title':'ابلاغیه'},
@@ -1062,14 +1122,17 @@ x_data={
                 'idea':{'type':'f2f','width':'60','title':'پیشنهاد اصلاح',
                     'ref':{'db':'suggestion','tb':'in_form','show_cols':['nn','user','idea']},
                     'var_set':{'f_code':'f_code'}},
-                #er= مشخص سازی مشکلات error
+                #er= مشخص سازی مشکلات error , cr=creat,zn=zinafan,
             },
             'steps':{
                 'pre':{'tasks':'f2f_id,f_code,rev','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'f_code_r,date1,file_1cr_v,file_1cr_r','xjobs':'*','title':'فایل اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'date2,file_2fr_v,file_2fr_r','xjobs':'*','title':'فایل فرمت شده','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'lable_1,date2,file_2sh_v,file_2sh_r,file_2fr_v,file_2fr_r,file_2fr_a','xjobs':'*','title':'فایل نهایی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'date,eblag,file_3do_v,file_3do_r','xjobs':'dcc_grp','title':'ابلاغ','app_keys':'','app_titls':'','oncomplete_act':''},
                 's4':{'tasks':'suggestion,file_4er_v,file_4er_r','xjobs':'dcc_grp','title':'ثبت اصلاحات','app_keys':'','app_titls':'','oncomplete_act':''},#idea
+            },
+            'labels':{
+                'lable_1':'اقدامات سند نهایی : اصلاح فرمت و اعمال تغییرات نهایی مد نظر مدیران و ذی نفعان',
             },
         },
         'inc_files':{
@@ -1400,23 +1463,32 @@ x_data={
     #--------------------------------------------------------------------
     'prj_shenasname':{ #db
         'a':{
-            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'','code':'121','data_filter':'','xform_cg_file':'prj-shenasname-st.html','multi_app':{'0':['ks'],'1':['ks']},
+            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'','code':'121','rev':'01-040518',
+                'data_filter':'','xform_cg_file':'prj-shenasname-st.html','multi_app':{'0':['ks'],'1':['ks']},
             },
             'tasks':{
-                'prj_name':{'type':'text','title':'نام پروژه','len':'150','height':'50px'},
+                'prj_name':{'type':'text','title':'نام پروژه - عنوان قرارداد','len':'150','height':'50px'},
                 'busn_name':{'type':'text','title':'عنوان تجاری','len':'80'},
-                'pos_txt':{'type':'text','title':'موقعیت جغرافیایی','len':'200'},
+                'pos_txt':{'type':'text','title':'موقعیت جغرافیایی - محل پروژه','len':'200'},
+                'time':{'type':'text','title':'زمان پروژه','len':'500','height':'50px' },
+                'prj_des':{'type':'text','title':'شرح مختصر - خلاصه','len':'1500','height':'100px'},
+                'rslt_fin':{'type':'text','title':'دستاور دهای پروژه ( تجاری ، اقتصادی ) ','len':'1000','height':'75px'},
+                'rslt_aue':{'type':'text','title':'مزایای معماری، شهرسازی و محیط زیست','len':'1000','height':'75px'},
+                'inco':{'type':'text','title':'همکاران داخلی','len':'1000','height':'75px' ,'help':'internal coworkers'},
+                'cons':{'type':'text','title':'مشاور اصلی پروژه','len':'1000','height':'50px' ,'help':'Consultant'},
+                'cont':{'type':'text','title':'پیمانکاران و افراد کلیدی آنها','len':'1000','height':'50px' ,'help':'Contractor'},
+                'conp':{'type':'text','title':'مشاوران همکار و افراد کلیدی آنها','len':'1000','height':'50px' ,'help':'Consultant Partner'},
                 
+
                 
                 'date_st':{'type':'fdate','len':'10','title':'تاریخ شروع','prop':[]},
-                'area':{'type':'num','min':1,'max':500000,'len':'6','title':'مساحت'},
-                'area_unit':{'type':'select','title':'واحد مساحت','select':['متر مربع','هکتار','کیلومتر']},
+                'area':{'type':'num','min':1,'max':500000,'len':'6','title':'مساحت یا طول'},
+                'area_unit':{'type':'select','title':'واحد مساحت','select':['متر مربع','هکتار','کیلومتر','متر','کیلومتر']},
                 'scale':{'type':'text','title':'مقیاس','len':'50'},
-                'prj_des':{'type':'text','title':'شرح مختصر','len':'1500','height':'100px'},
+                
                 'goals':{'type':'text','title':'اهداف کلیدی','len':'1000','height':'75px'},
                 'prj_type':{'type':'text','title':'نوع پروژه','len':'50'},
-                'rslt_fin':{'type':'text','title':'دستاوردهای تجاری و اقتصادی','len':'1000','height':'75px'},
-                'rslt_aue':{'type':'text','title':'مزایای معماری، شهرسازی و محیط زیست','len':'1000','height':'75px'},
+                
                 'rslt_out':{'type':'text','title':'نتیجه‌گیری و برنامه‌های آینده','len':'300'},
                     
                 
@@ -1436,10 +1508,12 @@ x_data={
                 'date_en':{'type':'fdate','len':'10','title':'تاریخ خاتمه','prop':[]},
             },
             'steps':{
-                'pre':{'tasks':'prj_name,busn_name,pos_txt','xjobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'date_st,area,area_unit,scale,prj_des,goals,prj_type,rslt_fin,rslt_aue,rslt_out,clint_id,clint_txt','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'chlng,solution','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'f_busn_id,f_exe_pic,f_rndr,pos_link','xjobs':'dccm','title':'تایید','app_keys':'','app_titls':'','oncomplete_act':'',
+                'pre':{'tasks':'prj_name,busn_name,pos_txt,time','xjobs':'dcc_prj','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'prj_des,rslt_fin,rslt_aue','xjobs':'dcc_prj','title':'تکمیل اطلاعات 1','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'cons,inco,cont,conp','xjobs':'dcc_prj','title':'تکمیل اطلاعات 2','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'date_st,area,area_unit,scale,goals,prj_type,rslt_out,clint_id,clint_txt','xjobs':'dcc_prj','title':'تکمیل اطلاعات 3','app_keys':'','app_titls':'','oncomplete_act':''},
+                's4':{'tasks':'chlng,solution','xjobs':'dcc_prj','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's5':{'tasks':'f_busn_id,f_exe_pic,f_rndr,pos_link','xjobs':'dccm','title':'تایید','app_keys':'','app_titls':'','oncomplete_act':'',
                     'start_step':'1','start_where':"'{step_1_ap}' == 'y'",'end_where':"False",},
                 'b':{'tasks':'chlng,solution,ppr_name,key_words','xjobs':'tqm_a','title':'فراداده ها','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'b','auth':'tqm_a','start_where':"True",'end_where':"False"},
@@ -1617,7 +1691,7 @@ x_data={
     #-------------------------------------------------------------------------------------------------------------------
     'rqst_it_srvc':{ #db  "request an IT service"
         'a':{
-            'base':{'mode':'form','title':'درخواست IT','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','rev':'00-040425',
+            'base':{'mode':'form','title':'درخواست IT','code':'201','rev':'00-040425',
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -1636,10 +1710,10 @@ x_data={
                             'SYSP':'	سامانه‌ها و نرم‌افزارهای سازمانی    - 	مشکل ورود به سامانه، خطای ثبت اطلاعات، عدم بارگذاری فرم‌ها',
                             'OTHR':'	سایر    -	درخواست‌هایی که در دسته‌های بالا نگنجد'}},
                 'rqst':{'type':'text','len':2000,'lang':'fa','title':'شرح مشکل / درخواست','height':'100px'},
-                'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
-                'des_modir':{'type':'text','len':500,'lang':'fa','title':'توضیح مدیر'},
+                #'frd_modir':{'type':'user','title':'مدیر','xjobs':'mod_mst','prop':['show_full','un_free'],'nesbat':'modir'},
+                #'des_modir':{'type':'text','len':500,'lang':'fa','title':'توضیح مدیر'},
                 'file_err':{'type':'file','len':'40','file_name':'AQC0-ITM-USR-ERR-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,itm,usr,err','title':'پیوست','help':'در صورت نیاز'},
-                'it_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح it'},
+                'it_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح it','height':'70px;'},
                 'it_res':{'type':'select','title':'وضعیت نهایی','help_e':'result','select':{'OK':'انجام شد','RJ':'در حیطه وظایف این واحد نمی باشد','HL':'هولد - نیاز مند موارد زیر'},'prop':['no_empty']},
                 'fr_res':{'type':'select','title':'کفایت نتیجه','help_e':'result','select':{'2':'بله','1':'تقریبا','0':'خیر'},'prop':['no_empty']},
                 'fr_r_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح کفایت'},
@@ -1647,13 +1721,13 @@ x_data={
                 'fr_s_des':{'type':'text','len':1500,'lang':'fa','title':'توضیح رضایت'},
             },
             'steps':{
-                's0':{'tasks':'frd_1,date,stress,cat1,rqst,frd_modir,file_err','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
-                's2':{'tasks':'it_res,it_des','xjobs':'ita','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''},
-                's3':{'tasks':'fr_res,fr_r_des,fr_satf,fr_s_des','xjobs':'#step#0','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
+                's0':{'tasks':'frd_1,date,stress,cat1,rqst,file_err','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
+                #,frd_modir 's1':{'tasks':'des_modir','xjobs':'#task#frd_modir','title':'تایید مدیر','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's1':{'tasks':'it_res,it_des','xjobs':'ita','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''},
+                's2':{'tasks':'fr_res,fr_r_des,fr_satf,fr_s_des','xjobs':'#step#0','title':'اقدامات واحد IT','app_keys':'y,r','app_titls':['ثبت شد','بازگشت جهت اصلاح'],'oncomplete_act':''}
             },
             'views':{
-                'all':{'input':'rd_1,date,stress,cat1,rqst,frd_modir,file_err','view1':'it_res','view2':'fr_res'}
+                'all':{'input':'rd_1,date,stress,cat1,rqst,file_err','view1':'it_res','view2':'fr_res'}
             },
             'cols_filter':{
                 '':'همه',
@@ -2370,6 +2444,91 @@ x_data={
             'cols_filter':{'':'همه',},
             'data_filter':{'':'همه',}
         }
+    },
+    #--------------------------------------------------------------------
+    'txt_bank':{ #db
+        'prompt':{
+            'base':{'mode':'form','title':'بانک پرامپت های هوش مصنوعی','help':'','code':'920','rev':'00-040520'
+            },
+            'tasks':{
+                'prmpt':{'type':'text','len':'500','title':'متن پرامپت','height':'100px;'},
+                'goal':{'type':'text','len':'500','title':'هدف','height':'50px;'},
+                'des':{'type':'text','len':'100','title':'توضیح - تغییرات'},
+            },
+            'steps':{
+                'pre':{'tasks':'prmpt,goal','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+            }
+        },
+        'link':{
+            'base':{'mode':'form','title':'بانک لینک های مفید','help':'','code':'920','rev':'00-040520'
+            },
+            'tasks':{
+                'link':{'type':'text','len':'500','title':'لینک','link':{'target':'_blank','icon_text':'L','class':'btn btn-info'},},
+                'sbjct':{'type':'text','len':'500','title':'موضوع - توضیح لینک'},
+                'cat':{'type':'select','title':'دسته','select':{'D':'design-طراحی','S':'supervition-نظارت','O':'Office-اداری','T':'Tools-کاربردی'},'prop':['can_add']},
+                'des':{'type':'text','len':'100','title':'توضیح - تغییرات'},
+            },
+            'steps':{
+                'pre':{'tasks':'link,sbjct,cat','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+            }
+        },
+        'msg':{
+            'base':{'mode':'form','title':'بانک پیام ها و نامه های آماده','help':'','code':'920','rev':'00-040520'
+            },
+            'tasks':{
+                'txt':{'type':'text','len':'500','title':'متن','height':'50px;'},
+                'sbjct':{'type':'text','len':'500','title':'موضوع - توضیح '},
+                'typ':{'type':'select','title':'نوع','select':{'L':'Letter-نامه','M':'Message-پیام'},'prop':['can_add']},
+                'cat':{'type':'text','len':'100','title':'دسته'},
+                'des':{'type':'text','len':'100','title':'توضیح - تغییرات'},
+            },
+            'steps':{
+                'pre':{'tasks':'txt,sbjct,typ,cat','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'des','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+            }
+        }
+    },
+    #--------------------------------------------------------------------
+    'Benchmarking':{ #db
+        'a':{
+            'base':{'mode':'form','title':'بنچ مارک و مقایسه تطبیقی','help':'','code':'920','rev':'00-040526'
+            },
+            'tasks':{
+                'sect':{'type':'text','len':'100','title':'حوزه / بخش','help':'section / domain'},
+                'proc':{'type':'text','len':'100','title':'موضوع یا فرآیند','help':'process / subject '},
+                'bmtp':{'type':'select','title':'نوع بنچ مارکینگ','help':' benchmarking type ',
+                        'select':{'داخلی':'Internal-(بنچ‌مارکینگ داخلی)-    -مقایسه فرآیندها و عملکرد **بین واحدها یا پروژه‌های داخلی یک سازمان**.   -مثال: مقایسه روش مدیریت جلسات بین واحد معماری و واحد شهرسازی شرکت.',
+                            'رقابتی':'Competitive-(بنچ‌مارکینگ رقابتی) - مقایسه با **رقبا و سازمان‌های مشابه** در صنعت.- مثال: مقایسه گزارش‌های توجیهی مالی پروژه‌های شهرسازی با سایر شرکت‌های مشاور هم‌سطح.',
+                            'عملکردی':'Functional-(بنچ‌مارکینگ کارکردی / عملکردی)- مقایسه یک **فرآیند خاص** با سازمان‌های **غیررقیب اما مشابه در عملکرد**. - مثال: مقایسه سیستم آرشیو اسناد در شرکت مشاور با بانک‌ها یا سازمان‌های بایگانی ملی.',
+                            'بهترین تجربه':'Best Practice-(بنچ‌مارکینگ بهترین تجربه / الگوگیری از برترین‌ها) - مقایسه با سازمان‌هایی که در یک زمینه خاص **بهترین عملکرد** را دارند (حتی اگر هم‌صنعت نباشند).- مثال: الگوگیری از رویه‌های BIM یا ISO در شرکت‌های بین‌المللی.',
+                            'فرایندی':'Process-(بنچ‌مارکینگ فرآیندی)- تمرکز روی یک **فرآیند مشخص** مثل طراحی، کنترل کیفیت یا مدیریت قراردادها.- مثال: مقایسه فرآیند کنترل کیفیت نقشه‌ها با روش‌های جهانی.',
+                            'استراتژیک':'Strategic-(بنچ‌مارکینگ استراتژیک)- مقایسه در سطح **استراتژی‌های کلان سازمان**.- مثال: مقایسه مدل کسب‌وکار یا استراتژی توسعه پایدار شرکت با مشاوران بین‌المللی.',
+                            'شاخص ها':'Performance- (بنچ‌مارکینگ عملکردی / شاخص‌ها)- تمرکز بر روی **شاخص‌های کلیدی عملکرد (KPIs)** و مقایسه آن‌ها با دیگران.- مثال: نرخ رضایت مشتریان، زمان تحویل پروژه، درصد خطاها.',
+                            'عمومی':'Generic-(بنچ‌مارکینگ عمومی / بین‌صنعتی)- مقایسه با سازمان‌هایی از صنایع کاملاً متفاوت برای گرفتن ایده‌های نو.- مثال: استفاده از روش‌های مدیریت مشتری در صنعت هتلداری برای بهبود CRM در شرکت مشاور.'
+                        },},
+
+                'refs':{'type':'text','len':'100','title':'منابع و مراکز مرجع','help':' reference sources ','link':{'target':'_blank','icon_text':'🎯','class':'btn btn-info'},}, 
+                'docs':{'type':'text','len':'100','title':' نوع اسناد / مستندات مرتبط','help':' related documents '},
+                'indx':{'type':'text','len':'100','title':' شاخص‌ها و معیارهای مقایسه','help':' indicators & metrics '},
+                'tool':{'type':'text','len':'100','title':'ابزارهای مورد استفاده ','help':' tools used '},
+                'date':{'type':'fdate','title':'تاریخ انجام بنچ مارک','help':' benchmark date '},
+                'unit':{'type':'text','len':'100','title':'واحد مسئول','help':' responsible unit '},
+                'prio':{'type':'select','select':{'L':'Low - کم','M':'Medium - متوسط','H':'High - متوسط'},'title':'سطح اولویت','help':' priority level '},
+                'resl':{'type':'text','len':'100','title':'نتایج و بهبودهای مورد انتظار','help':' results & expected improvements '},
+                'actn':{'type':'text','len':'100','title':'اقدامات اصلاحی / پیشنهادی ','help':' corrective / proposed actions '},
+                'stat':{'type':'text','len':'100','title':'وضعیت اجرا','help':' execution status '},
+                'attd':{'type':'text','len':'100','title':'مستندات ضمیمه','help':' attached documents '},
+                'foll':{'type':'user','title':'مسئول پیگیری','help':' follow-up responsible '},  
+                'des':{'type':'text','len':'100','title':'توضیح'},
+            },
+            'steps':{
+                'pre':{'tasks':'sect,proc,bmtp,refs,docs','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'indx,tool,date,unit,prio,resl,actn,stat,attd,foll','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'des','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''}
+            }
+        },
     },
     #--------------------------------------------------------------------
     'test':{ #db

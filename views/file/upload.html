@@ -140,7 +140,7 @@ p	{
 	function File_ext(filename) {
 		if (filename.lastIndexOf(".") > 0) {
             fileExtension = filename.substring(filename.lastIndexOf(".")+1, filename.length);
-			return fileExtension;
+			return fileExtension.toLowerCase();;
 			}
 			return ''
     }

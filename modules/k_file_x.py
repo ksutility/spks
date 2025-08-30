@@ -790,7 +790,10 @@ def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):
         xdic['__text__']=DIV(XML(d2),_id='_t_',_style="direction:rtl")
         if not 'text_list_color' in xdic:xdic['text_list_color']='1'
         
-        if not 'rev' in xdic:xdic['rev']='00'
+        from k_company import file_name_parser
+        fnp=file_name_parser(f_name)
+        if not 'rev' in xdic:
+            xdic['rev']=fnp['rev'] or '00'
         #----------------------------
         if not 'app' in xdic:
             xdic['app']='''
@@ -810,7 +813,7 @@ def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):
         xdic['app2']=ap[4:7]
         xdic['app3']=ap[7:10]
         if not 'date' in xdic:
-            xdic['date']=k_date.ir_date(xformat='yyyy/mm/dd')
+            xdic['date']=fnp['date'] or k_date.ir_date(xformat='yyyy/mm/dd')
         xdic['__trace__']=f_name+"|"+k_date.ir_date(xformat='yy/mm/dd-hh:gg:ss')
         xdic['list_url']=list_url
         xdic['file_url']=file_url
