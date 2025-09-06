@@ -1137,18 +1137,18 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         onchange= "submit();" if "update" in obj['prop'] else ""  #form_update_set(form_update_set_param)
         #x_end= " readonly >" if "readonly" in obj['prop'] else f''' onchange='date_key("{_name}","{def_val}","{x_format}");' {onact_txt} >'''
         #obj['input']="<input type='text' " + _n + " value='" + def_val + "' size='" + maxlen +"' maxlength='" + maxlen +"' dir='" + d_lan + "' class='date-picker' " + x_end  
-        readonly= "readonly" if "readonly" in obj['prop'] else ''
+        readonly= " readonly" if "readonly" in obj['prop'] else ''
         if 'input' in need :
             obj_name=_name
             obj_name_x=db_name+"_"+tb_name+"_"+str(xid)+"_"+obj_name
             if session[obj_name_x]:
                 _value=session[obj_name_x]  
                 session[obj_name_x]  =''
-            inp=INPUT(_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange,_class="text-center")#_class='fDATE',
+            inp=INPUT(_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange,_class="text-center"+readonly)#_class='fDATE',
             hazf=A('X',_title="حذف تاریخ",_id="fdate_reset",_onclick=f"document.getElementById('{_name}').value='0';;",_class="btn btn-warning") if 'hazf' in obj['prop'] else ''
             obj['input']=DIV(k_htm.a(inp,_target="box",reset=False,_href=URL('form','date_picker',args=[obj_name_x,_value.replace(r"/","-")]),_class=""
                     ,j_box_params=f"ajax_do='',ajax_val_set='{obj_name},{obj_name_x};{obj_name}_wd,{obj_name_x}_wd;',x_size='10cm;10cm',x_submit='form1'")#,hide_menu=true
-                    ,hazf)
+                    ,hazf) if not readonly else inp
             
             '''
             obj['input']=DIV(INPUT(_class='fDATE',_name=_name,_id=_name,_value=_value,_readonly=readonly,_required=True,_onchange=onchange),
@@ -1565,6 +1565,33 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         
         db2,tb2=obj['ref']['db'],obj['ref']['tb']
         '''
+    elif sc=="crt_1_rec_form": #sc
+        '''
+            ایجاد فیلد ثبت سابقه فرم - تهیه 1 سابقه  یکتا از 1 فرم مشخص بر اساس اطلاعات فرم جاری -
+            اگر سابقه وجود نداشته باشد برنامه سابقه را ایجاد می کند
+                با نام کاربری سیستم
+                و شماره فرم  ایدی فرم مرتبط را در داخل  این فیلد از فرم جاری یاد داشت می کند
+            اگر سابقه وجود داشته باشد - یعنی این فیلد مقدار داشته باشد
+                فرم مرتبط بر اساس شماره آیدی به روز می شود
+        '''
+        if 'input' in need:
+            db_name=obj['form']['db']
+            tb_name=obj['form']['tb']
+            db1=DB1(db_name )
+            if _value:
+                obj['set_dic']
+                xu = db1.update_data(tb_name,obj['set_dic'],{'id':_value})
+                xid=_value
+                vv="update"
+            else:
+                xu = db1.insert_data(tb_name,obj['set_dic'])
+                xid=xu['id']
+                vv="insert"
+        url=URL('form','xform_sd',args=[db_name,tb_name,xid])  
+        obj['input']=DIV(k_htm.a(_value,_href=url,_target="box",_title='لینک',_class='btn btn-info'),DIV(str(xu)))
+        obj['help']=vv
+        obj['output']=bj['input']
+        
     elif sc=="do": #sc
         do_name,do_param=base_data.split(share.st_splite_chr2)
         

@@ -102,6 +102,22 @@ def xform_sd():
     res=k_form._xform(out_items=['body'])
     #xreport_var([{'htm':htm}])
     return dict(htm=res['htm'],link=res['link'])#k_form._xform())
+def xform_json():
+    '''
+    goal:
+       ایجاد خروجی با فرمت جیسون برای استفاده توسط 1 برنامه مقیم در 1 فایل آفیس 
+       Generate JSON format output for use by a resident program in an Office file.
+    '''   
+    session.view_page='xform_sd'
+    session['update_step']=True
+    res=k_form._xform(out_items=['body'])
+    res1=res['json']
+    res2={}
+    for item in res1:
+        res2[item]=res1[item]['value']
+        res2[item+"_title"]=res1[item]['title']
+    #xreport_var([{'htm':htm}])
+    return res2 #{'date':'123','time_st':'22'} #dict(htm={'date':'123','time_st':'22'})#res2)#'body_json'
 def xform_info():
     x_data_s,db_name,tb_name,msg=_get_init_data()
     style="""

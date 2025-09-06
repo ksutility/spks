@@ -407,8 +407,34 @@ def user_timesheet():
     rows2+=k_tools.list_dict__2__list_list(mam_list_dict,out_titles)
     rows2+=k_tools.list_dict__2__list_list(mor_list_dict,out_titles)
     
-    table=k_htm.C_TABLE(out_titles,rows2).creat_htm(titels=out_titles,table_class="x",div_class='x')  
-
+    table_acts=k_htm.C_TABLE(out_titles,rows2).creat_htm(titels=out_titles,table_class="x",div_class='x')  
+    #----------------------------------------------------------------------------------------------------
+    db_name_2='tmsh'
+    tb_name_2='hand_io'
+    x_data_s=x_data[db_name_2][tb_name_2]
+    db2=DB1(db_name_2)
+    rows,titles,rows_num=db2.select(tb_name_2,where=["AND",{'date1':x_date},"`frd_1` LIKE '{}%'".format(x_un[:3])],limit=0)
+    
+    #tuple to list , add link
+    x_list={}
+    tds=[]
+    for row in rows:
+        row1=list(row)
+        id_n=titles.index('id')
+        url=URL('form','xform_section',args=['tmsh','hand_io',row[id_n]],vars={'form_case':1})
+        time=row[titles.index('time')]
+        time_link=TD(XML(k_htm.a(time,_href=url,_target="box",_title='')),_style='width:5px;')
+        x_case=row[titles.index('x_case')]
+        x_case=TD({'WR':'حضور','MM':'ماموریت','MR':'مرخصی','EX':'خاتمه'}[x_case],_style='width:50px;')
+        x_list[time]=[time_link,x_case]
+    x_list_st=sorted(list(x_list.keys()))
+    for xx in x_list_st:
+        yy=x_list[xx]
+        tds+=[yy[0],yy[1]]
+    tds+=[TD(k_htm.a('⏱️',_href=URL('form','xform_sd',args=['tmsh','hand_io','-1','auto_hide'],vars={'date1':x_date,'form_case':1}),_target="box",_title='ساعت جدید'))]
+    table_io=TABLE(TR(*tds)) 
+    #----------------------------------------------------------------------------------------------------
+    
     obj_inf={'type':'fdate','prop':['update'],'def_value':x_date}
     x_data_verify_task('x_date',obj_inf,'','')
     date_gr=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])
@@ -421,7 +447,9 @@ def user_timesheet():
         sum_time=k_time.sum_times([row[out_titles.index('time')] for row in rows2]),
         x_un=x_un,
         new_form=k_htm.a('+',_href=URL('form','xform_sd',args=['person_act','a','-1','auto_hide'],vars={'date1':x_date,'act_cat':'-','form_case':1}),_target="box",_title='فرم جدید'),
-        table=table,
+                    
+        table_acts=table_acts,
+        table_io=table_io,
         hlp=help_tmsh_links(db1,tb_name,x_un,x_date))
 def help_tmsh_links(db1,tb_name,x_un,x_date):
     '''
