@@ -633,8 +633,9 @@ def get_table_row_view(xid,row,titles,select_cols,x_data_s,id_cols=False,request
         tds+=['{:03d}'.format(xid)]
     x_dic=dict(zip(titles,row))
     c_form=C_FORM(x_data_s,xid)
-    for field_name in select_cols:#fn=field name  
-        tds.append(c_form.show_step_1_row(field_name,current.request,mode='output-mini')[1])
+    for field_name in select_cols:#fn=field name
+        if field_name:
+            tds.append(c_form.show_step_1_row(field_name,current.request,mode='output-mini')[1])
     return tds  
 #----------------------------------------------------------------------------------------------------------------------------------------------------
 #@lru_cache() #smaxsize=20) #Cache(maxsize=20)#.action(time_expire=60, cache_model=cache.ram, session=True, vars=True, public=True)
@@ -1654,6 +1655,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
     
     if '__objs__' not in x_dic:x_dic['__objs__']={}
     x_dic['__objs__'][obj['name']]=obj
+    x_dic[obj['name']]=obj['value']
     if 'uniq' in obj: #db_name,tb_name
         #url = f'''/spks/km/uniq_inf.json/{db_name}/{tb_name}/{obj['name']}'''
         #data = {'uniq_value':req_field,'uniq_where':x_data_s['tasks'][step_field]['uniq'],'url':url};
@@ -1725,6 +1727,63 @@ class C_FORM():
         self.__set_f_nxt_s()
         self.cur_step=''
         self.cur_step_name=''
+        self.__cnd_flow_pars()
+    def __cnd_flow_pars(self):
+        '''
+            Conditional Flow=cnd_flow
+            اجرای کدهای پایتون داخل مراحل فرم بر اساس اطلاعات فرم
+        '''
+        x_item ='cnd_flow'
+        if 'cnd_flow' in self.x_data_s:
+            cnd_flow=self.x_data_s['cnd_flow']
+            
+            x_select=cnd_flow[0]      
+            x_template=cnd_flow[1]
+            x_dic=self.all_data
+            x_pars=template_parser(x_template=x_template,x_dic=x_dic)
+            if x_pars and x_pars!='None':
+                cnd_flow_res=x_select[x_pars] #result
+                if 'tasks' in cnd_flow_res:
+                    #for cat_name,cat in cnd_flow_res.items():
+                    cat_name='tasks'
+                    cat=cnd_flow_res[cat_name]
+                    for obj_name,obj in cat.items():
+                        for item_name,item in obj.items():
+                            self.x_data_s[cat_name][obj_name][item_name]=obj[item_name]
+                            #print("-"*50,"\n", "\n cat_name :", cat_name,"\n obj_name: " ,obj_name,"\n item_name: " ,item_name,"\n res: ",obj[item_name])
+                if 'steps' in cnd_flow_res:
+                    #for cat_name,cat in cnd_flow_res.items():
+                    cat_name='steps'
+                    cat=cnd_flow_res[cat_name]
+                    for obj_name,obj in cat.items():
+                        dest=''
+                        for xx,x_obg in self.x_data_s[cat_name].items():
+                            #print(xx,str(x_obg))
+                            if x_obg['name']==obj_name:
+                                dest=x_obg
+                                break
+                        if dest:
+                            for item_name,item in obj.items():
+                            
+                                self.x_data_s[cat_name][obj_name][item_name]=obj[item_name]
+                                #print("-"*50,"\n", "\n cat_name :", cat_name,"\n obj_name: " ,obj_name,"\n item_name: " ,item_name,"\n res: ",obj[item_name])
+                        else:
+                            print("dest not found : " + obj_name)
+            #print ("-"*50,"\n template :", x_template,"\n pasr: ", x_pars)
+            
+        """
+        x_item ='cnd_flow'
+        for step,step_obj in self.x_data_s['steps'].items():
+            #print("*",end="")
+            if x_item in step_obj:
+                x_select=step_obj[x_item][0]      
+                x_template=step_obj[x_item][1]
+                x_dic=self.all_data
+                x_pars=template_parser(x_template=x_template,x_dic=x_dic)
+                if x_pars and x_pars!='None':
+                    step_obj['tasks']=x_select[x_pars]
+                #print ("-"*50,"\n", "{'OUT':'step_x1","\n template :", x_template,"\n pasr: ", x_pars,"\n result :",step_obj['task'])
+        """           
     def __set_new_data(self,new_data): 
         # به روز کردن و یا اضافه کردن اطلاعات جدید
         # update new_data to 
@@ -1776,7 +1835,8 @@ class C_FORM():
     def set_form_app(self):
         '''
         input:
-            با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
+            event: cur_user pressed app key
+                با فرض تایید 1 مرحله توسط کاربر جاری در همین لحظه
         output:   
             به روز رسانی اطلاعات مدیریت فرم در داخل کلاس
         '''
@@ -2302,6 +2362,7 @@ class C_FORM_HTM():
         hx={'data':[],'stp':'','app':[],'data_json':{}}#fsc_mode
         #print ("step['tasks']="+step['tasks'])
         for field_name in step['tasks'].split(','):
+            if not field_name :continue
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
@@ -2358,6 +2419,7 @@ class C_FORM_HTM():
             step=k_tools.nth_item_of_dict(x_data_s['steps'],int(step_n))
         hx={'data':[],'stp':'','app':[],'data_json':{}}
         for field_name in step['tasks'].split(','):
+            if not field_name :continue
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
