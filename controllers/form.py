@@ -217,8 +217,12 @@ def list_0():
                     ]
                 tools+=[k_htm.a(XML(k_icon.search(24)),_target="box",reset=False,_class="btn",_title="جستجو در اطلاعات فرم",_href=URL("form","search",args=[db_name,tb_name,""]))]
                 tools=TABLE(TR([TD(x,_class="m-0 p-0 border-0") for x in tools]),_class="table m-0 p-0 ")
-                    
-                tx=[A(tb_obj['base']['title'],_href=URL('xtable',args=[db_name,tb_name])),
+                
+                rev_str=tb_obj['base'].get('rev_str','')
+                if rev_str: rev_str=" ("+" باز ساخت  " + rev_str+")"
+                x_title=tb_obj['base']['title'] + rev_str
+                
+                tx=[A(x_title,_href=URL('xtable',args=[db_name,tb_name])),
                     for_me_n_link,
                     total_n,
                     tools,
@@ -932,6 +936,7 @@ def prj_inf():
     x_data_verify_task('cprj_id',obj_inf,'','')
     prj_obj=k_form.obj_set(i_obj=obj_inf,x_dic={},x_data_s={}, need=['input'])
     _class="btn btn-primary"
+    
     nn=k_htm.a('نامه ها',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['paper','a'],vars={'data_filter':f'cprj_id={cprj_id}'})) if (session["admin"] or session["username"]=='ks') else 'نامه ها'
     return dict(htm=FORM(prj_obj['input'],
         nn,"-",
@@ -939,6 +944,8 @@ def prj_inf():
         k_htm.a('گزارش عملکرد',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['person_act','a'],vars={'data_filter':f'prj_id={cprj_id}'})),"-",
         k_htm.a('ماموریت ساعتی',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['off_mamurit_saat','a'],
             vars={'data_filter':f'(c_prj_id = {cprj_id}) OR (c_prj_id like "%,{cprj_id},%") OR (c_prj_id like "{cprj_id},%") OR (c_prj_id like "%,{cprj_id}")'})),"-",
+        k_htm.a('MDL',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['doc_num_1','a'],vars={'data_filter':f'c_prj_id={cprj_id}'})),"-",
+        k_htm.a('DCC',_target="box",reset=False,_class=_class,_href=URL('form','xtable',args=['doc_rec_1','a'],vars={'data_filter':f'c_prj_id={cprj_id}'})),"-",
         DIV(cprj_id)
         ))
     
