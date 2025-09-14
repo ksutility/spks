@@ -596,7 +596,7 @@ def mon_report():
         inf[date]+=[time]
      
       
-    # get morakhasi v mamuriat
+    # get morakhasi v mamuriat for 1 month
     db_mor=DB1('off_morkhsi_saat')
     where=["AND","`date` LIKE '{}%'".format(x_mon),"`frd_1` LIKE '{}%'".format(x_un[:3])]
     rows_mor,titles_mor,rows_num_mor=db_mor.select('a',where=where,limit=0)
@@ -749,24 +749,34 @@ class C_TMSH_IO_TIME():
 class C_TMSH_IO_day():
     def __init__(self,io_times,mor_mam_list):
         c_tmsh_io_times=[]
+        # اولین بازه از نیمه شب تا اولین زمان
         c_tmsh_io_times.append(C_TMSH_IO_TIME('00:00',io_times[0]))
+        
         ll=len(io_times)
         for i in range(ll-1):
             case='' if i % 2 else 'hzr'
             c_tmsh_io_times.append(C_TMSH_IO_TIME(io_times[i],io_times[i+1],case))
+        
+        # آخرین بازه از آخرین زمان تا 24:00
         c_tmsh_io_times.append(C_TMSH_IO_TIME(io_times[-1],'24:00'))
-    
+        
+        # پیدا کردن mor_mam هایی که تطابق نداشتند
         not_maches_mm=[]
         for mor_mam in mor_mam_list:
             x_re=self._find_match_io_time(c_tmsh_io_times,mor_mam)
             if not x_re:
                 not_maches_mm+=[mor_mam]
+                
         self.mor_mam_list=mor_mam_list
         self.io_times=io_times       
         self.not_maches_mm=not_maches_mm
         self.c_tmsh_io_times=c_tmsh_io_times
         
     def _find_match_io_time(self,c_tmsh_io_times,mor_mam):
+        """
+        دنبال بازه‌ای می‌گردد که هنوز case ندارد و 
+        بتواند mor_mam را در خود جای دهد
+        """
         for i,c_io_time in enumerate(c_tmsh_io_times):
             if c_io_time.case=='':
                 if c_io_time.match(mor_mam['time_st'],mor_mam['time_en']):
@@ -778,11 +788,16 @@ class C_TMSH_IO_day():
                     return True     
         return False   
     def hozur_time(self):
+        """
+        محاسبه زمان‌های حضور، ماموریت، مرخصی، اضافه‌کار و ... 
+        خروجی: (sum_min, out_txt, o_times)
+        """
         times=self.io_times
-        o_times=(times+['-']*3)[:4]
+        o_times=(times+['-']*3)[:4] # اطمینان از داشتن ۴ عنصر
         lt=len(times)
         sum_min={'hzr':0,'mor':0,'mam':0,'slh':0,'ezf':0}
-        if lt%2==1:
+        
+        if lt%2==1: # اگر تعداد io_times فرد باشد → مشکل در داده
             out_txt=f'io = {lt}'
             sum_min['hzr']=-1
             sum_min['all']=-1
@@ -792,6 +807,7 @@ class C_TMSH_IO_day():
             sum_time['all']=out_txt
             sum_time['hzr']=out_txt
         else:
+            # محاسبه مجموع دقایق هر حالت
             for c_io_time in self.c_tmsh_io_times:
                 if c_io_time.case:
                     sum_min[c_io_time.case]+=c_io_time.len_min
@@ -799,14 +815,19 @@ class C_TMSH_IO_day():
             #print(self.c_tmsh_io_times[1].start_min)
             if 420 < self.c_tmsh_io_times[1].start_min < 450:
                 sum_min['slh']=self.c_tmsh_io_times[1].start_min-420
+            
+            # جمع کل و اضافه‌کاری
             sum_min['all']=sum([sum_min[x] for x in sum_min])
-            sum_min['ezf']=sum_min['all']-440
+            sum_min['ezf']=sum_min['all'] - 440
             sum_time={}
             for x in sum_min:
                 sum_time[x]=k_time.min_2_time(sum_min[x])
             out_txt=sum_time['all']
+        
+        # ذخیره در کلاس
         self.sum_min=sum_min
         self.o_times=o_times
         self.out_txt=out_txt
         self.sum_time=sum_time
+        
         return sum_min,out_txt,o_times             

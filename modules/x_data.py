@@ -2861,7 +2861,7 @@ x_data={
                 'xxlink':{'type':'f_link','len':'5','title':' فرم مرتبط - پروژه','ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}','show_cols':['name','code']},'prop':['update','multiple'] },
             },
             'steps':{
-                'pre':{'tasks':'xxlink,img,img2','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
+                'pre':{'tasks':'indx1,xxlink,img,img2','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'txt,n,sel,indx1,img2,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's3':{'tasks':'at,fl,time_st2','xjobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
                 's4':{'tasks':'dt,at,fl','xjobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},

@@ -1214,13 +1214,22 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             from k_num import SMART_NUM_LIST
             x_list=[x_data[x] for x in x_data if x_data[x]]
             smart_num_list=SMART_NUM_LIST(x_list)
+            import k_sql
+            x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
+            args=request.args if request else []
+            url=URL('form','xtable',args=args,vars={'data_filter':str(x_where)})
+            #from k_err import xprint
+            #xprint(str(ref_pars['where']))
+            #xprint(str(x_where))
+            #xprint(str(args)),
+            #xprint(str(url))
             if x_data:
-                import k_sql
-                x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
-                args=request.args if request else []
-                index_hlp=str(smart_num_list)
-                obj['help']=k_htm.a(index_hlp,_target="box",_href=URL('form','xtable',args=[],vars={'data_filter':x_where}))
-                #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
+                index_hlp=str(smart_num_list)  
+            else:
+                index_hlp="-"
+            obj['help']=k_htm.a(index_hlp,_target="box",_href=url)
+            
+            #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
                 #,_href,_target="frame",_title='',_class
                 
             # end 

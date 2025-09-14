@@ -282,7 +282,7 @@ def list_0_mr(): #mr=manage report
 #@k_tools.x_cornometer
 def xtable():
     from k_tools import X_DICT
-    x_dict=X_DICT({'style':'','script':'','table_filter':'','table_head':'','table':'','btm_mnu':''})
+    x_dict=X_DICT({'style':'','script':'','table_filter':'','table_head':'','table':'','btm_mnu':'','xtime':''})
 
     #cornometer=Cornometer("xtable")
     
