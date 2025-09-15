@@ -31,6 +31,7 @@ def _isok_un_ps (un,ps):
         session["file_access"]=rs["file_access"]
         session["my_folder"]=[f';{rs["eng"].strip()}-{rs["un"].strip()};',f';user;{rs["un"].strip()};']
         session["auth_prj"]=rs["auth_prj"]
+        session["p_id"]=rs["p_id"]
         
         session["pass_is_safe"]=k_user.pass_is_safe(ps)
         session["pass_is_safe"]=ps

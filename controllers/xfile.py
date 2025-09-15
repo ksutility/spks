@@ -736,6 +736,9 @@ def diff_files():
         #XML(''' <input name="file" type="file" size="60"> '''),
         INPUT(_value='Compare',_type='submit')),XML("<HR>"),DIV(XML(dif)))
 def diff_files_1():
+    '''
+        بررسی تغییرات 2 فایل در فلدر جاری
+    '''
     import k_file,os,k_htm
     path=request.vars.path or request.vars.file
     if path:
@@ -776,8 +779,11 @@ def tools():
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg       
     return XML(f'''<input name="file" type="text" value={f_name} style="width:100%">
-        <a href={URL('diff_files',vars={'file':f_name})}> comp diff by bak </a>''')
-        #<button onclick="$('#input_adr').val('{os.path.join(*args,x['filename'])}');alert('ok')">Copy</button>''')
+        <a href={URL('diff_files',vars={'file':f_name})}> comp diff by bak </a><br>
+        <a href={URL('diff_files_1',vars={'file':f_name})}> comp diff of 2 file </a>
+        ''')
+    #<button onclick="$('#input_adr').val('{os.path.join(*args,x['filename'])}');alert('ok')">Copy</button>''')
+        
 def diff_files_test():
     ''' creat=1401/10/14
     '''

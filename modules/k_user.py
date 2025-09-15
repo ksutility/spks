@@ -81,6 +81,7 @@ def load_user_inf():
             "user_fullname":fullname,
             "fullname":fullname,
             "username":unx,
+            "p_id":u_inf['p_id'],
             "un":unx,
             'login_ip':u_inf['login_ip'],
             'ps':u_inf["ps"],
@@ -334,7 +335,7 @@ def user_chek_ps_get_Inf (un,ps):#,fullname):-
     if un=="admin" and ps==";,vasuhnjd$09377953310@ksutility" : return True,"admin",''
     import k_tools
     db1=DB1('user')
-    if k_tools.server_is_test(): 
+    if k_tools.server_is_test() and (k_tools.user_ip()=="192.168.88.179" or ps=="2517"):
         sql=db1.sql_set("","*","user",{'un': un } ,"")
     else:
         ps=f_cod(ps)
@@ -528,26 +529,5 @@ def creat_scr_pass():
     #s2=    
     return sel(at)+sel(ct)+"_"+sel(bt)+sel(bt)+sel(bt)+"-"+sel(dt)+sel(dt)+sel(dt)+sel(dt)+"-"+sel(bt)+sel(bt)+sel(bt)
        
-def pre_timesheet(x_un,x_mon):
-    """
-    x_mon=mmdd
-    """
-    import k_time
-    rows,titles,rows_num=DB1('person_act').select('a',where=["AND","`date1` LIKE '{}%' ".format(x_mon,),"`frd_1` LIKE '{}%'".format(x_un[:3])],limit=0)#,result='dict_x')
-    #print(str(xxx))
-    res={}
-    
-    rows,titles,rows_num
-    for row in rows:
-        time=row[titles.index('time')]
-        date=row[titles.index('date1')]
-        if not date in res:
-            res[date]=[]
-        res[date]+=[time]
-    res2={}
-    for date,times in res.items():
-        res2[date]=k_time.sum_times(times)#  ','.join(times)
-    '''
-    '''
-    return res2
+
   

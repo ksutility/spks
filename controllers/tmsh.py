@@ -548,23 +548,23 @@ def _aqc_report_daily_read_2(start_date=''):
     k_err.xreport_var([data])
     '''
     return x_list
+
 def mon_report():
     # عدم حق دسترسی
-    if not session['username'] in ['ks','snr','lvi','mhm','htk','hrm','atl']:return 'Error'
-    if session['username'] in ['mlk','mss','nmn']:return ''
+    auth_g1=session['username'] in ['ks','snr','lvi','mhm','htk','hrm','atl']
+    #if session['username'] in ['mlk','mss','nmn']:return ''
     args=request.args
     #if not args :return A1('Error')
     
     """
     spks/tmsh/mon_report?x_mon=1403/05
     """
-    import k_htm,jdatetime,k_form,k_date,k_time
+    import k_htm,jdatetime,k_form,k_date,k_time,k_tmsh
     mm_v=request.vars['mm_v'] or jdatetime.date.today().strftime('%m') #'14'+jdatetime.date.today().strftime('%y/%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,_onchange="submit();",no_empty=True)
     
     #yy_v="1403" #k_htm.select(_options=['1403'],_name=fn,_value=f['value'])
     yy_v=request.vars['yy_v'] or "14"+jdatetime.date.today().strftime('%y') #def_date[:4] #'1403' #
-    #print("-->>>"+jdatetime.date.today().strftime('%y'))
     yy_obj=k_htm.select(_options=['1403','1404'],_name='yy_v',_value=yy_v,no_empty=True,_onchange="submit();")
     yy_n=int(yy_v)
     #yy_obj
@@ -573,101 +573,17 @@ def mon_report():
     un_obj=k_htm.select(_options={y['un']:y['fullname'] for x,y in k_user.ALL_USERS().inf.items() if y['loc'] in ['010','011','012','013']},_name='x_un',_value=x_un,_onchange="submit();")
     user_id=k_user.ALL_USERS().inf[x_un]['p_id'] #if session['username'] else '')
     
-    db_name='time_io'
-    tb_name='a'
-    db1=DB1(db_name)
-    rows,titles,rows_num=db1.select(tb_name,
-            where=["AND",
-                "`date_f` LIKE '{}%'".format(x_mon),
-                {'user_id':user_id},
-            ],last=False
-        ,limit=0)
+    x_titels_1,out_rows_1,row_colors=k_tmsh.mon_list_base(x_mon)
+    x_titels_2,out_rows_2,sum_min=k_tmsh.mon_list_io(x_mon,x_un,user_id,auth_g1)
+    x_titels_3,out_rows_3=k_tmsh.mon_list_amlkrd(x_un=x_un,x_mon=x_mon)
+    x_titels_4,out_rows_4=k_tmsh.mon_list_nahar(x_un=x_un,x_mon=x_mon)
+    x_titels_5,out_rows_5=k_tmsh.mon_list_nahar_mehman(x_un=x_un,x_mon=x_mon)
+    out_rows=[row +out_rows_2[i]+out_rows_3[i]+out_rows_4[i]+out_rows_5[i] for i,row in enumerate(out_rows_1)]
+    #import k_err
+    #k_err.xreport_var ([{'out_rows_1':out_rows_1,'out_rows_2':out_rows_2,'out_rows':out_rows}])
+    x_titels=x_titels_1+x_titels_2+x_titels_3+x_titels_4+x_titels_5
     
-    #table=k_htm.C_TABLE(titles,rows).creat_htm()    
-    #return dict(table=table)
-    
-    date_n=titles.index('date_f')
-    time_n=titles.index('time')
-    inf={}
-    for row in rows:
-        date,time=row[date_n],row[time_n]
-        if not date in inf:
-            inf[date]=[]
-        inf[date]+=[time]
-     
-      
-    # get morakhasi v mamuriat for 1 month
-    db_mor=DB1('off_morkhsi_saat')
-    where=["AND","`date` LIKE '{}%'".format(x_mon),"`frd_1` LIKE '{}%'".format(x_un[:3])]
-    rows_mor,titles_mor,rows_num_mor=db_mor.select('a',where=where,limit=0)
-    db_mam=DB1('off_mamurit_saat')
-    rows_mam,titles_mam,rows_num_mam=db_mam.select('a',where=where,limit=0)
-    #print(where)
-    #print(rows_mam)
-    def mor_mam(x_date):
-        mor_mam_list=[]
-        for row in rows_mor:
-            if row[titles_mor.index('date')]==x_date:
-                x=dict(zip(titles_mor,row))
-                id_n=titles_mor.index('id')
-                url=URL('form','xform_sd',args=['off_morkhsi_saat','a',row[id_n],'auto_hide'],vars={'form_case':1})
-                mor_mam_list+=[{
-                    'act':'mor',
-                    'time_st':x['time_st'],
-                    'time_len':x['time_len'],
-                    'time_en':x['time_en'],
-                    'id':row[id_n],
-                    'link':XML(k_htm.a(row[id_n],_href=url,_target="box",_title='',_class="btn btn-success"))
-                    }]
-        for row in rows_mam:
-            if row[titles_mam.index('date')]==x_date:
-                x=dict(zip(titles_mam,row))
-                id_n=titles_mor.index('id')
-                url=URL('form','xform_sd',args=['off_mamurit_saat','a',row[id_n],'auto_hide'],vars={'form_case':1})
-                mor_mam_list+=[{
-                    'act':'mam',
-                    'time_st':x['time_st'],
-                    'time_len':x['time_len'],
-                    'time_en':x['time_en'],
-                    'id':row[id_n],
-                    'link':XML(k_htm.a(row[id_n],_href=url,_target="box",_title='',_class="btn btn-success"))
-                    }]        
-        return mor_mam_list
-     
-    out=[]
-    row_colors=[]
-    sum_min={'hzr':0,'mor':0,'mam':0,'all':0,'slh':0,'ezf':0}
-    n_ok_day=0 #number of days that io_time not error
-    pre_timesheet=k_user.pre_timesheet(x_un,x_mon)
-    #print(f"{x_mon}-{x_un}" )
-    #print("pre_timesheet = " + str(pre_timesheet))
-    mm_n=int(mm_v)
-    
-    mm_len=k_date.ir_mon_len(yy_n,mm_n)
-    for x_ruz in range(mm_len):
-        date=x_mon+"/"+('00'+str(x_ruz+1))[-2:]
-        #for date,times in inf.items():
-        times=inf.get(date,[])
-        out1=[date,k_date.ir_weekday(date,w_case=2)]
-        if times:
-            mor_mam_list= mor_mam(date) 
-            c_day=C_TMSH_IO_day(times,mor_mam_list)
-            sum_m,sum_t,o_times=c_day.hozur_time()
-            for x in sum_min:
-                sum_min[x]+=sum_m[x]
-                if sum_min['all']>0:n_ok_day+=1
-            out1+=[sum_t,c_day.sum_time['ezf'],c_day.sum_time['slh'],c_day.sum_time['mor'],c_day.sum_time['mam']]+o_times
-            #out1+=[", " .join([str(c_io_time) for c_io_time in c_day.c_tmsh_io_times])]
-            #out1+=[str(c_day.sum_time)+", " .join([f"{mor_mam['act']}-{mor_mam['time_len']}-{mor_mam['id']}" for mor_mam in c_day.mor_mam_list])]
-            out1+=[", " .join([f"{mm['id']}-{mm['act']}" for mm in c_day.not_maches_mm])]
-        else:
-            out1+=['']*10
-        out1+=[XML(k_htm.a(pre_timesheet.get(date,''),_target="box",_href=URL('tmsh','user_timesheet',vars={'x_date':date}),_class="btn btn-info"))]
-        out+=[out1]
-        row_colors+=[k_date.tatil_mode(date,out_case='color')] #[['#efe','#f00','#fa5','#f5a'][k_date.tatil_mode(date,out_case=='color')]]
-    x_titels=['تاریخ','روز','حضور','اضافه کار','اصلاحی','مرخصی','ماموریت','ورود1','خروج1','ورود2','خروج2','-','عملکرد']#['date','sum','in_1','ou_1','in_2','ou_2']
-    #print('row_colors = ' +str(row_colors))
-    table=k_htm.C_TABLE(x_titels,out).creat_htm(table_class='x',row_colors=row_colors)    
+    table=k_htm.C_TABLE(x_titels,out_rows).creat_htm(table_class='x',row_colors=row_colors)    
     return dict(table=table,
         yy_obj=yy_obj,
         mm_obj=mm_obj,
@@ -676,7 +592,8 @@ def mon_report():
         ezf=k_time.min_2_time(sum_min['ezf']),
         mor=k_time.min_2_time(sum_min['mor']),
         mam=k_time.min_2_time(sum_min['mam']),
-        n_day=len(inf)
+        n_day=len(out_rows_1),
+        auth_g1=False
         )
 
 def hazeran():
@@ -724,110 +641,45 @@ def hazeran():
     x_titels=['n','کد','un','نام','ورود','خروج','ورود','خروج','ورود','خروج','']    
     table=k_htm.C_TABLE(x_titels,out).creat_htm(table_class='1')#,row_colors=row_colors)   
     return dict(htm=DIV(today,table))
-class C_TMSH_IO_TIME(): 
-    def __init__(self,start,end,case=''):
-        self.reset(start,end,case)
-    def reset(self,start,end,case=''):
-        self.start=start
-        self.start_min=k_time.time_2_min(start)
-        self.end=end
-        self.end_min=k_time.time_2_min(end)
-        self.len_min=self.end_min-self.start_min
-        self.len_time=k_time.min_2_time(self.len_min)
-        self.case=case        
-    def match(self,start,end):
-        start_min=k_time.time_2_min(start)
-        end_min=k_time.time_2_min(end)
-        st=max(start_min,self.start_min)
-        en=min(end_min,self.end_min)
-        match_len_min=en-st
-        #print(f"start={start},end={end},match_len_min={match_len_min}")
-        x_len_min=end_min-start_min
-        return True if match_len_min>(x_len_min/2) else False
-    def __str__(self):  
-        return f'{self.start}-{self.end}-{self.case}'
-class C_TMSH_IO_day():
-    def __init__(self,io_times,mor_mam_list):
-        c_tmsh_io_times=[]
-        # اولین بازه از نیمه شب تا اولین زمان
-        c_tmsh_io_times.append(C_TMSH_IO_TIME('00:00',io_times[0]))
-        
-        ll=len(io_times)
-        for i in range(ll-1):
-            case='' if i % 2 else 'hzr'
-            c_tmsh_io_times.append(C_TMSH_IO_TIME(io_times[i],io_times[i+1],case))
-        
-        # آخرین بازه از آخرین زمان تا 24:00
-        c_tmsh_io_times.append(C_TMSH_IO_TIME(io_times[-1],'24:00'))
-        
-        # پیدا کردن mor_mam هایی که تطابق نداشتند
-        not_maches_mm=[]
-        for mor_mam in mor_mam_list:
-            x_re=self._find_match_io_time(c_tmsh_io_times,mor_mam)
-            if not x_re:
-                not_maches_mm+=[mor_mam]
-                
-        self.mor_mam_list=mor_mam_list
-        self.io_times=io_times       
-        self.not_maches_mm=not_maches_mm
-        self.c_tmsh_io_times=c_tmsh_io_times
-        
-    def _find_match_io_time(self,c_tmsh_io_times,mor_mam):
-        """
-        دنبال بازه‌ای می‌گردد که هنوز case ندارد و 
-        بتواند mor_mam را در خود جای دهد
-        """
-        for i,c_io_time in enumerate(c_tmsh_io_times):
-            if c_io_time.case=='':
-                if c_io_time.match(mor_mam['time_st'],mor_mam['time_en']):
-                    c_io_time.case=mor_mam['act']
-                    if i==0:
-                        c_io_time.reset(mor_mam['time_st'],c_io_time.end,mor_mam['act'])
-                    if i==len(c_tmsh_io_times)-1:
-                        c_io_time.reset(c_io_time.start,mor_mam['time_en'],mor_mam['act'])
-                    return True     
-        return False   
-    def hozur_time(self):
-        """
-        محاسبه زمان‌های حضور، ماموریت، مرخصی، اضافه‌کار و ... 
-        خروجی: (sum_min, out_txt, o_times)
-        """
-        times=self.io_times
-        o_times=(times+['-']*3)[:4] # اطمینان از داشتن ۴ عنصر
-        lt=len(times)
-        sum_min={'hzr':0,'mor':0,'mam':0,'slh':0,'ezf':0}
-        
-        if lt%2==1: # اگر تعداد io_times فرد باشد → مشکل در داده
-            out_txt=f'io = {lt}'
-            sum_min['hzr']=-1
-            sum_min['all']=-1
-            sum_time={}
-            for x in sum_min:
-                sum_time[x]=k_time.min_2_time(sum_min[x])
-            sum_time['all']=out_txt
-            sum_time['hzr']=out_txt
-        else:
-            # محاسبه مجموع دقایق هر حالت
-            for c_io_time in self.c_tmsh_io_times:
-                if c_io_time.case:
-                    sum_min[c_io_time.case]+=c_io_time.len_min
-            #print(sum_min)
-            #print(self.c_tmsh_io_times[1].start_min)
-            if 420 < self.c_tmsh_io_times[1].start_min < 450:
-                sum_min['slh']=self.c_tmsh_io_times[1].start_min-420
-            
-            # جمع کل و اضافه‌کاری
-            sum_min['all']=sum([sum_min[x] for x in sum_min])
-            sum_min['ezf']=sum_min['all'] - 440
-            sum_time={}
-            for x in sum_min:
-                sum_time[x]=k_time.min_2_time(sum_min[x])
-            out_txt=sum_time['all']
-        
-        # ذخیره در کلاس
-        self.sum_min=sum_min
-        self.o_times=o_times
-        self.out_txt=out_txt
-        self.sum_time=sum_time
-        
-        return sum_min,out_txt,o_times             
+     
+def day_list_nahar():
+    '''
+    نمایش لیست نفرات حاضر برای ناهار و ناهار مهمان
+    جهت ارائه به مسئول توزیع غذا
+    '''
+    import k_tmsh
+    x_date=''
+    if request.args:
+        xd=request.args[0]
+        if len(xd)==6:
+            s="/"
+            x_date = f"14{xd[:2]}{s}{xd[2:4]}{s}{xd[-2:]}"
+    if not x_date:x_date=k_date.ir_date("yyyy/mm/dd")
+    #nahar
+    rows_1,titles_1,rows_num_1=DB1('hr_nahar').select('khod',where=["AND","`date1` = '{}' ".format(x_date),"`x_case` = '1'","`f_nxt_u` = 'y'"],limit=0,order='p_id',last=False)
+    rows_2,titles_2,rows_num_2=DB1('hr_nahar').select('mhmn',where=["AND","`date1` = '{}' ".format(x_date),"`x_case` = '1'","`f_nxt_u` = 'y'"],limit=0)
+    out_1,out_2=[],[]
+    for i,row in enumerate(rows_1):
+        frd=row[titles_1.index('frd_1')]
+        p_id=row[titles_1.index('p_id')]
+        out_1+= [[str(i+1),p_id,frd]]
+    for i,row in enumerate(rows_2):
+        frd=row[titles_2.index('frd_0')]
+        mhmn=row[titles_2.index('frd_1')]
+        out_2+= [[str(i+1),frd,mhmn]]    
+    x_titels_1=['n','شماره پرسنلی','نام']
+    x_titels_2=['n','نام','مهمان']
+    head=H2('لیست ناهار  ' + x_date )
+    
+    amar="تعداد کل = "+str(len(out_1)+len(out_2))
+    amar_t=k_date.ir_date("yyyy/mm/dd hh:gg")
+    if k_tmsh.in_nahar_change_time_(x_date):
+        stat="فرم نهایی نشده است"
+        _style="background-color:#faa;"
+    else:
+        stat="فرم نهایی شده است"
+        _style="background-color:#afa;"
+    head2=TABLE(TR(amar,stat,DIV(amar_t)),_style=_style,_id='head2')
+    table_1=k_htm.C_TABLE(x_titels_1,out_1).creat_htm(table_class='1')
+    table_2=k_htm.C_TABLE(x_titels_2,out_2).creat_htm(table_class='1')
+    return dict(htm=DIV(head,head2,table_1,HR(),table_2))

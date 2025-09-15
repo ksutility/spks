@@ -1189,10 +1189,34 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         else:
             if obj['auto']=='_cur_user_':obj2['auto']='{{=session["username"]}}- {{=session["user_fullname"]}}'
             elif obj['auto']=='_cur_user_un_':obj2['auto']='{{=session["username"]}}'
+            elif obj['auto']=='_cur_user_id_':obj2['auto']='{{=session["username"]}}'
             elif obj['auto']=='_cur_user_name_':obj2['auto']='{{=session["user_fullname"]}}'
         return obj_set(obj2,x_dic,x_data_s,xid, need,request,c_form)
             #x_auto()    
     elif sc=="index": #sc
+        
+        #-------- start - 031225 - تهیه 1 راهنما از لیست موارد وارد شده با لینک به
+        # start - 031107 - حذف اطلاعات فرم جاری از داخل لیست جستجو شده
+        ref=obj['ref']
+        if not xid and c_form:
+            xid=str(c_form.xid)
+            
+        x_data,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
+        index_hlp=''
+        from k_num import SMART_NUM_LIST
+        x_list=[x_data[x] for x in x_data if x_data[x]]
+        smart_num_list=SMART_NUM_LIST(x_list)
+        import k_sql
+        x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
+        args=request.args if request else []
+        url=URL('form','xtable',args=args,vars={'data_filter':str(x_where)})
+        if x_data:
+            index_hlp=str(smart_num_list)  
+        else:
+            index_hlp="-"
+        obj['help']=k_htm.a(index_hlp,_target="box",_href=url)
+        #--------------------------------------
+        
         if 'input' in need:
             '''
             از قبل مقدار دارد
@@ -1201,33 +1225,11 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             از قبل مقدار ندارد
             
             '''
-            # start - 031107 - حذف اطلاعات فرم جاری از داخل لیست جستجو شده
-            ref=obj['ref']
-            if not xid and c_form:
-                xid=str(c_form.xid)
+            
             #ref['where']=ref['where'] + " AND id !=" +xid if 'where' in ref else "id !="+xid
             # end
             
-            # start - 031225 - تهیه 1 راهنما از لیست موارد وارد شده با لینک به
-            x_data,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
-            index_hlp=''
-            from k_num import SMART_NUM_LIST
-            x_list=[x_data[x] for x in x_data if x_data[x]]
-            smart_num_list=SMART_NUM_LIST(x_list)
-            import k_sql
-            x_where=k_sql.C_SQL().where(ref_pars['where'],add_where_text=False)#['pars']
-            args=request.args if request else []
-            url=URL('form','xtable',args=args,vars={'data_filter':str(x_where)})
-            #from k_err import xprint
-            #xprint(str(ref_pars['where']))
-            #xprint(str(x_where))
-            #xprint(str(args)),
-            #xprint(str(url))
-            if x_data:
-                index_hlp=str(smart_num_list)  
-            else:
-                index_hlp="-"
-            obj['help']=k_htm.a(index_hlp,_target="box",_href=url)
+            
             
             #XML(f"""<a href = 'javascript:void(0)' title='لیست اعداد استفاده شده' >{index_hlp}</a>""")#ref['where']
                 #,_href,_target="frame",_title='',_class

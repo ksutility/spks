@@ -23,10 +23,13 @@ table {
 	background-color:#cfb46a;
 	text-align:center;
 }
-.row div{
+#div_2 .row div{
 	border: 1px solid #eee;
 	text-align:center;
 	}
+.div_table td{
+	height:30px;
+}
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
   [class*="view"] {
@@ -35,36 +38,42 @@ table {
 }	
 </STYLE>
 <DIV class="row">
-	<DIV id="div_1" class="col-6 col-s-12 view">
+	<DIV id="div_1" class="col-8 col-s-12 view">
 		{{=table}}
 	</div>
-	<DIV id="div_2" class="col-6 col-s-12 view">
+	<DIV id="div_2" class="col-4 col-s-12 view">
 		<form>
 		<DIV class="row">
-			<div class="col-2"><h4>سال</h4></div>
-			<div class="col-2"><h4>{{=yy_obj}} </h4></div>
-			<div class="col-2"><h4>ماه</h4></div>
-			<div class="col-2"><h4>{{=mm_obj}} </h4></div>
-			<div class="col-4"><h4>{{=un_obj}}</h4></div>			
+			<div class="col"><h4>{{=un_obj}}</h4></div>
+		</div>
+		<DIV class="row">
+			<div class="col-6"><h4>{{=yy_obj}} </h4></div>
+			<div class="col-6"><h4>سال</h4></div>
+		</div>
+		<DIV class="row">
+			<div class="col-6"><h4>{{=mm_obj}} </h4></div>
+			<div class="col-6"><h4>ماه</h4></div>			
 		</div>
 		</form>
-		<h2 class="hh"> خلاصه </h2>
-		<h4 style=text-align:center;"> محاسبات این قسمت نیاز به اصلاح بر اساس قوانین مالی و اداری دارد </h4>
-		<h6 style=text-align:center;"> اضافه کار بر اساس زمانهای حضورمحاسبه شده است </h6>
-		<DIV class="row">
-			<div class="col"><h4>مجموع حضور</h4></div>
-			<div class="col"><h4>مجموع اضافه کار</h4></div>
-			<div class="col"><h4>مجموع مرخصی</h4></div>
-			<div class="col"><h4>مجموع ماموریت</h4></div>
-			<div class="col"><h4>تعداد روز حضور</h4></div>
-		</div>
-		<DIV class="row">
-			<div class="col"><h4>{{=hozur }} </h4></div>
-			<div class="col"><h4>{{=ezf}} </h4></div>
-			<div class="col"><h4>{{=mor}} </h4></div>
-			<div class="col"><h4>{{=mam}} </h4></div>
-			<div class="col"><h4>{{=n_day}} </h4></div>
-		</div>
+		{{if auth_g1:}}
+			<h2 class="hh"> خلاصه </h2>
+			<h4 style=text-align:center;"> محاسبات این قسمت نیاز به اصلاح بر اساس قوانین مالی و اداری دارد </h4>
+			<h6 style=text-align:center;"> اضافه کار بر اساس زمانهای حضورمحاسبه شده است </h6>
+			<DIV class="row">
+				<div class="col"><h4>مجموع حضور</h4></div>
+				<div class="col"><h4>مجموع اضافه کار</h4></div>
+				<div class="col"><h4>مجموع مرخصی</h4></div>
+				<div class="col"><h4>مجموع ماموریت</h4></div>
+				<div class="col"><h4>تعداد روز حضور</h4></div>
+			</div>
+			<DIV class="row">
+				<div class="col"><h4>{{=hozur }} </h4></div>
+				<div class="col"><h4>{{=ezf}} </h4></div>
+				<div class="col"><h4>{{=mor}} </h4></div>
+				<div class="col"><h4>{{=mam}} </h4></div>
+				<div class="col"><h4>{{=n_day}} </h4></div>
+			</div>
+		{{pass}}
 	</div>
 </div>
 

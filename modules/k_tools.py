@@ -90,9 +90,11 @@ def server_python_add():
         return ip+":150"
     else:
         return ip+":100"
-def access_from_internet():
+def user_ip():
     from gluon import current
-    u_ip=str(current.request.client)
+    return str(current.request.client)
+def access_from_internet():
+    u_ip=user_ip()
     return True if u_ip!='127.0.0.1' and u_ip[:11]!='192.168.88.' else False
 class X_DICT():
     def __init__(self,in_dic):

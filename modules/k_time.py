@@ -102,7 +102,8 @@ def min_2_time(x_gg,z_text=''):
     if x_gg==0 :return z_text
     h2,m2=divmod(x_gg, 60)#hh=hh+mm\60
     return str(h2).zfill(2)+":"+str(m2).zfill(2)
-    
+#def cur_time():
+#   return time.time()
 if __name__ == "__main__":
     print(add("10:20","5:55","hh:gg:ss"))
     print(dif("10:20","5:55","hh:gg:ss"))

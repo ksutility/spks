@@ -1033,7 +1033,7 @@ def need_links():
             '',
             [k_htm.a("تلفن همکاران دفتر مرکزی",**prm1,
                 _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NULL OR end =0) AND loc LIKE "01%"','cols_filter':'name,family,tel_wrk,tel_mob',
-                        'table_class':2,'data_page_n':1,'data_page_len':40})         
+                        'table_class':2,'data_page_n':1,'data_page_len':100})         
                 )],
             [k_htm.a("همکاران قدیمی",**prm1,
                 _href=URL('form','xtable',args=['user','user'],vars={'data_filter':'(end IS NOT NULL AND end != 0)','cols_filter':'name,family,end',
@@ -1049,9 +1049,15 @@ def need_links():
             '',
             #[k_htm.a("حاظران",**prm2,_href=URL('tmsh',"hazeran"))],
             [k_htm.a("تصویر 360 درجه",**prm2,_href=URL('xfile',"image360"))],
-            '',
-            '',
-            '',
+            [k_htm.a("لیست ناهار امروز",**prm1,
+                _href=URL('form','xtable',args=['hr_nahar','khod'],vars={'data_filter':f'x_case = 1 and date1 = "{k_date.ir_date("yyyy/mm/dd")}"','cols_filter':'frd_1,x_case',
+                    'table_class':2,'data_page_n':1,'data_page_len':100})
+                )],
+            [k_htm.a("لیست ناهار مهمان امروز",**prm1,
+                _href=URL('form','xtable',args=['hr_nahar','mhmn'],vars={'data_filter':f'date1 = "{k_date.ir_date("yyyy/mm/dd")}"','cols_filter':'frd_0,frd_1,x_case',
+                    'table_class':2,'data_page_n':1,'data_page_len':100})
+                )],
+            [k_htm.a("لیست ناهار جهت توزیع",**prm,_href=URL('tmsh',"day_list_nahar"),_target="blank")],
             '',
         ]
     ]
@@ -1207,7 +1213,17 @@ cleaner, more lightweight and works better without JavaScript.</p>
     </html>
     """
 def help():
+    inf=[
+    ['_SPKS-KM-RP-0001-masterlist-learn.ksm','راهنمای سامانه برای همکاران'],
+    ['_SPKS-KM-RP-0000-masterlist.ksm','راهنمای تخصصی سامانه برای توسعه']
+    #,['_aqrc.mermaid','نمونه اجرای فایلهای مرماید بر روی سامانه']
+    ]
+    
     import os
-    url=URL('xfile','read',args=['_SPKS-KM-RP-0000-masterlist.ksm'],vars={'xpath':os.path.join(os.getcwd(),'Applications','spks','help')})
-    #return str(url)
-    redirect(url)
+    rows=[]
+    for xx in inf:
+        url=URL('xfile','read_xx',args=[xx[0]],vars={'xpath':os.path.join(os.getcwd(),'Applications','spks','help')})
+        rows+=[XML(k_htm.a(xx[1],_href=url,_target="box",_class='btn btn-info'))]
+    table=TABLE(rows)
+    return dict(table=table)
+    #redirect(url)

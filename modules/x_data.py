@@ -2817,13 +2817,49 @@ x_data={
         },
     },
     #--------------------------------------------------------------------
+    'hr_nahar':{ #db
+        'khod':{
+            'base':{'mode':'form','title':'فرم درخواست ناهار - شخصی','help':'','code':'920','rev':'00-040622'
+            },
+            'tasks':{
+                'frd_1_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,,'prop':['hidden']}
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام'},
+                'p_id':{'type':'auto','ref':{'db':'user','tb':'user','key':'__0__','val':'{p_id}','where':'''un = "{{=__objs__['frd_1_un']['value']}}"'''},'title':'شماره پرسنلی'},#,'prop':['hidden']
+                'date1':{'type':'text','len':'10','title':'تاریخ ','prop':['readonly']},
+                'x_case':{'type':'select','title':'وضعیت','def_value':'1','prop':['no_empty'],
+                        'select':{'1':'بله - حضور دارم',
+                            '0':'خیر - حضور ندارم',
+                            },},
+            },
+            'steps':{
+                'pre':{'tasks':'frd_1_un,frd_1,p_id,date1,x_case','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            }
+        },
+        'mhmn':{
+            'base':{'mode':'form','title':'فرم درخواست ناهار - مهمان','help':'','code':'920','rev':'00-040622'
+            },
+            'tasks':{
+                'frd_0_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,'prop':['hidden']},
+                'frd_0':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام'},#,'prop':['hidden']},
+                'frd_1':{'type':'text','len':'24','title':'نام مهمان'},
+                'date1':{'type':'text','len':'10','title':'تاریخ ','prop':['readonly']},
+                'x_case':{'type':'select','title':'وضعیت','def_value':'1','prop':['no_empty','hidden'],
+                        'select':{'1':'حضور',
+                            '0':'عدم حضور',
+                            },},
+            },
+            'steps':{
+                'pre':{'tasks':'frd_0_un,frd_0,frd_1,date1,x_case','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+            }
+        },
+    },
     #--------------------------------------------------------------------
     'tmsh':{ #db
         'hand_io':{
             'base':{'mode':'form','title':'ورود دستی ساعت ورود و خروج','help':'','code':'920','rev':'00-040611'
             },
             'tasks':{
-                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام','prop':['hidden']},
+                'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام',},#'prop':['hidden']
                 'date1':{'type':'fdate','title':'تاریخ ','prop':['readonly']},
                 'time':{'type':'time_c','title':'تردد','def_value':'07:00'},
                 'x_case':{'type':'select','title':'وضعیت پس از تردد','def_value':'WR','prop':['no_empty'],

@@ -185,13 +185,17 @@ class C_IR_DATE():
 #-----------------
 #print(C_IR_DATE().from_en_strptime("2024-03-24","%Y-%m-%d").out('yyyy-mm-dd'))
 def tatil_mode(x_date,out_case='num'):
+    '''
+    '''
     iw=ir_weekday(x_date)
     ids=ir_date_split(x_date,x_mode='str')
+    # تعطیل رسمی در تقویم
     a_tatil={
         'all':'0101,0102,0103,0104,0112,0113,0314,0315,1122,1229,1230',
         '1403':'0113,0122,0123,0215,0328,0405,0425,0426,0604,0612,0614,0622,0631,0915,1025,1109,1126',
         '1404':'0102,0111,0112,0204,0316,0324,0414,0415,0523,0531,0602,0610,0619,0903,1013,1027,1115,1220',
     }
+    # تعطیل رسمی با اعلام مدیریت
     b_tatil={
         '1403':'0302,0303,0507,0518,0925,0926,0927,1022,1120,1121,1123',
         '1404':'0114'
@@ -200,15 +204,15 @@ def tatil_mode(x_date,out_case='num'):
     xx=ids['mm']+ids['dd']
     yy=ids['yyyy']
     #print(str(ids) +" ---- " + xx )
-    rr=0
+    rr=0 # عدم تعطیل - روز کاری
     if iw==6:
-        rr= 1
+        rr= 1 # تعطیل آخر هفته
     if iw==5 and x_date> "1404/04/01":  
         rr= 1
     elif (xx in a_tatil['all']) or ((yy in a_tatil) and (xx in a_tatil[yy])):
-        rr= 2
+        rr= 2 # تعطیل رسمی در تقویم
     elif ((yy in b_tatil) and (xx in b_tatil[yy])):
-        rr= 3
+        rr= 3 # تعطیل رسمی با اعلام مدیریت
     #print(str(ids) +" ---- " + xx + " *** " + str(rr) )
     if out_case=='color':
         return ['#efe','#f00','#a22','#faa'][rr]
@@ -225,3 +229,15 @@ def ir_mon_len(yy_n,mm_n):
     return 29
 def st_date(yyyy,mm,dd):
     return str(yyyy)+"/"+("0"+str(mm))[-2:]+"/"+("0"+str(dd))[-2:]
+def mon_date_list(yy_n,mm_n=''):
+    ''' 040622
+        تولید لیست روز های 1 ماه شمسی 
+        مطابق فرمت زیر
+        
+    '''
+    if not mm_n: #yy_n=x_mon (yymm)
+        x_mon=yy_n
+        mm=x_mon[-2:]
+        yy=x_mon[:4]
+    mm_len=ir_mon_len(int(yy),int(mm))
+    return [yy+r"/"+mm+r"/"+('00'+str(x_ruz+1))[-2:] for x_ruz in range(mm_len)]
