@@ -81,8 +81,59 @@ def val_report_prety(xv):
         elif xv.lower().strip()=='false':
             return DIV(xv,_class="bg-danger")
     return xv    
-def dict_2_table(i_dict,_class='table'):
-    return TABLE(THEAD(TR(TH('key'),TH('val'))),TBODY(*[TR(x,y) for x,y in i_dict.items()]),_class=_class)
+def dict_2_table(i_dict,_class='table',tb_name=''):
+    #040624
+    #return TABLE(THEAD(TR(TH('key'),TH('val'))),TBODY(*[TR(x,y) for x,y in i_dict.items()]),_class=_class)
+    
+    # اگر ورودی مقدار ساده باشد (نه دیکشنری/لیست) همان مقدار برگردان
+    if isinstance(i_dict, (str, int, float, bool)):
+        return str(i_dict)
+
+    def dict_2_list(i_dict,x_name,step):
+        out1,out2=[],[]
+        pre_txt = "+" * step  # پیشوند برای نمایش عمق
+
+        if isinstance(i_dict, dict):
+            for k, v in i_dict.items():
+                if isinstance(v, (str, int, float, bool)) or v is None:
+                    out1.append([pre_txt + k, str(v)])
+                elif isinstance(v, (dict, list)):
+                    xx = (x_name + f" : {k}").strip(" :")
+                    out2.extend([
+                        [pre_txt + xx, "--st"],
+                        *dict_2_list(v, xx, step + 1),
+                        [pre_txt + xx, "--en"]
+                    ])
+
+        elif isinstance(i_dict, list):
+            for i, v in enumerate(i_dict):
+                k = str(i)
+                if isinstance(v, (str, int, float, bool)) or v is None:
+                    out1.append([pre_txt + k, str(v)])
+                elif isinstance(v, (dict, list)):
+                    xx = (x_name + " : " + k).strip(" :")
+                    out2.extend([
+                        [pre_txt + xx, "--st"],
+                        *dict_2_list(v, xx, step + 1),
+                        [pre_txt + xx, "--en"]
+                    ])
+  
+        return out1+out2
+        
+    # لیست کلید-مقدارها
+    o_list = dict_2_list(i_dict, "", 0)
+
+    if o_list:
+        # ساخت جدول HTML (اگر TABLE, TR, TH, ... از web2py باشد)
+        return TABLE(
+            THEAD(TR(TH('key'), TH('val'))),
+            TBODY(*[TR(td[0], td[1]) for td in o_list]),
+            _class=_class
+        )
+    else:
+        print("Empty or unsupported structure:", i_dict)
+        return ""
+        
 #---------------------- not use
 def table_4_diclist(i_diclist,base_cols=[]):#,id_col):
     if len(base_cols)==0:  base_cols=[x for x in i_diclist[0]]
@@ -655,8 +706,8 @@ def xtd(td_list,_calss):#
             {rep}
         </tr></table>
     """ 
-def x_toggle(txt):
-    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary " >+</a></div>\n
+def x_toggle(txt,head='-*-'):
+    return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary " >{head}</a></div>\n
                 <div style='border:2px outset red;margin:0 0 0 10px;'>\n
                 {txt}\n
                 </div>\n
@@ -680,7 +731,7 @@ def x_toggle_s(txt,head='+',add_objs=[],color='warning'):#s=small
                 {txt}\n
                 </div>\n
             """
-def x_toggle_h(head,txt):#s=head dar
+def x_toggle_h(txt,head='-*-'):#s=head dar
     return  f"""<div><a onclick="$(this).parent().next().toggle()" class="btn btn-primary a_toggle_hide" >{head}</a>\n
                 </div>
                 <div>\n

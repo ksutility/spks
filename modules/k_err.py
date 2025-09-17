@@ -549,7 +549,7 @@ def xreport_var(x_var_list):#,reset=False
     ttt+=k_htm.x_toggle("all:<br>"+br.join([x+nl for x in func["all"].split('\n')]))
 
     # ('w' if reset else 'a')
-    fname='c:\\temp\\report\\var_report-'+k_date.ir_date('yymmdd-hhggss')+'.htm'
+    fname='c:\\temp\\report\\var_report-'+k_date.ir_date('yymmdd-hhggss-fff')+'.htm'
     import os.path
     if not os.path.isfile(fname):
         ttt="""

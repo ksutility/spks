@@ -171,7 +171,8 @@ def list_0():
     import k_icon,k_htm,k_tools
     from x_data import x_data_cat
     #x_data_cat=x_data.x_data_cat
-    trsx={x:[] for x in x_data_cat}
+    trsx1={}
+    trsx2={x:[] for x in x_data_cat}
     n=0
     titels=['n','','نام فرم','تعداد منتظر اقدام شما','تعداد کل',""]
     afi=k_tools.access_from_internet()
@@ -194,10 +195,8 @@ def list_0():
                             multi_app+=[A(XML(k_icon.auto_app(24)),_href=URL('xtable_i',args=[db_name,tb_name,m_a_step]))]
                 if multi_app:
                     for_me_n_link=XML(k_htm.xtd_div(multi_app+[for_me_n_link]))    
-                    
-                code=tb_obj['base']['code'] if 'code' in tb_obj['base'] else '900'
-                xcat=code[0] 
-                n1=len(trsx[xcat])+1
+                
+                
                 
                 _class="btn btn-primary btn-sm"
                 tools=[]
@@ -227,20 +226,30 @@ def list_0():
                     total_n,
                     tools,
                     ]
-                tn= [DIV(n,_title=code)]  
-                tn1= [DIV(n1,_title=code)] 
-                trsx[xcat]+=[tn1+['']+tx]
-                trsx["-"]+=[tn+[db_name+","+tb_name]+tx]
+                    
+                code=tb_obj['base']['code'] if 'code' in tb_obj['base'] else '900'
+                trsx1[code]=tx
+    
+    #x_data_cat
+    for code in sorted(trsx1.keys()):         
+        tx=trsx1[code]
+        xcat=code[0] if len(code)<5 else '9'
+        n1=len(trsx2[xcat])+1
+        
+        tn= [DIV(n,_title=code)]  
+        tn1= [DIV(n1,_title=code)] 
+        trsx2[xcat]+=[tn1+['']+tx]
+        trsx2["-"]+=[tn+[db_name+","+tb_name]+tx]
  
     from k_table import K_TABLE
     # tt=['<div class="tab-content">']
     # for cat in x_data_cat:
-        # tt+=[XML(k_htm.x_toggle_h(x_data_cat[cat], K_TABLE.creat_htm ( trsx[cat],titels,table_class="1"))) ]      
+        # tt+=[XML( K_TABLE.creat_htm ( trsx2[cat],titels,table_class="1"),head=k_htm.x_toggle_h(x_data_cat[cat],)) ]      
     # tt+=['</div>']
     tt=[DIV(H3("لیست فرمها",_style="text-align:center;"))]
     tbl={}
     for cat in x_data_cat:
-        tbl[cat]=XML(K_TABLE.creat_htm ( trsx[cat],titels,table_class="1")) 
+        tbl[cat]=XML(K_TABLE.creat_htm ( trsx2[cat],titels,table_class="1")) 
     tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
     server_add=k_tools.server_python_add()
     #tt+=[XML(t0)]

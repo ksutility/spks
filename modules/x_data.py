@@ -218,10 +218,13 @@ prompt:
 # left character of tb.db.base.code =x_data_cat
 x_data_cat={
     '-':'همه فرمها',
-    '1':'اطلاعات اصلی',
+    '1':'بانک های اطلاعات مهم',
     '2':'فرمهای پرسنلی',
-    '3':'عمومی',
-    '4':'DCC',
+    '3':'اسناد',
+    '4':'سوابق اصلی پروژه ها',
+    '5':'مدریت دانش',
+    '6':'ارتباطات',
+    '7':'پشتیبانی',
     '8':'مدیریت',
     '9':'موارد متفرقه',
     'a':'آرشیو'
@@ -236,7 +239,7 @@ x_data=json.loads(data)
 x_data={
     'a_cur_subject':{ #db
         'a':{
-            'base':{'mode':'form','title':'موضوعات و پروژه های جاری','code':'100','multi_app':{'0':['ks'],'1':['ks']},'rev':'xx-040618'},
+            'base':{'mode':'form','title':'پروژه ها و فعالیتهای جاری','code':'101','multi_app':{'0':['ks'],'1':['ks']},'rev':'xx-040618'},
             'tasks':{
                 'prj_id':{'type':'reference','title':'پروژه',
                     'ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}'},'prop':['update'],
@@ -283,7 +286,7 @@ x_data={
                 },
         },
         'dsplns':{
-            'base':{'mode':'form','title':'دیسیپلینها -  پروژه های جاری','code':'93'
+            'base':{'mode':'form','title':'دیسیپلینها -  پروژه های جاری','code':'101-at1'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{cp_code} , {cp_name}'},'prop':['readonly']},
@@ -297,7 +300,7 @@ x_data={
             
         },
         'wbs_l1':{
-            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 1 ','code':'93'
+            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 1 ','code':'101-at2'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','prop':['readonly'],
@@ -315,7 +318,7 @@ x_data={
             
         },
         'wbs_l2':{
-            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 2 ','code':'93'
+            'base':{'mode':'form','title':'پروژه های جاری – wbs  لایه 2 ','code':'101-at3'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','prop':['readonly'],
@@ -337,7 +340,7 @@ x_data={
     #-------------------------------------------------------------------- prj
     'a_prj':{ #db
         'a':{
-            'base':{'mode':'form','title':'کد پروژه','code':'101'},
+            'base':{'mode':'form','title':'لیست کد پروژه ها ','code':'104'},
             'tasks':{
                 'code':{'type':'text','title':'کد پروژه','len':'4','uniq':''},
                 'name':{'type':'text','title':'نام پروژه','len':'140','lang':'fa'},
@@ -385,7 +388,7 @@ x_data={
     #-------------------------------------------------------------------- prj
     'a_sub_p':{ #db
         'a':{
-            'base':{'mode':'form','title':'کد زیر پروژه','code':'102'
+            'base':{'mode':'form','title':'لیست کد زیر پروژه ها','code':'105'
             },
             'tasks':{
                 #'prj_id':{'type':'reference','width':'5','title':'آیدی پروژه','ref':{'db':'a_prj','tb':'a','key':'{id}','val':'{code}-{name}'},'prop':['update']},
@@ -419,7 +422,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_step':{ #db
         'a':{
-            'base':{'mode':'form','title':'کد مرحله','code':'103'},
+            'base':{'mode':'form','title':'لیست کد مرحله پروژه ها','code':'106'},
             'tasks':{
                 #'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 #'prj_id':{'type':'auto','ref':{'db':'a_prj','tb':'a','key':'__0__','val':'{id}','where':'''code = "{prj}"'''},'title':'آیدی پروژه'},
@@ -444,7 +447,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_dspln':{ #db
         'a':{
-            'base':{'mode':'form','title':'کد دیسیپلین','code':'104'},
+            'base':{'mode':'form','title':'لیست کد دیسیپلین ها','code':'107'},
             'tasks':{
                 'code':{'type':'text','title':'کد دیسیپلین','len':'2','uniq':''},
                 'name_e':{'type':'text','title':'DECIPLINE NAME'},
@@ -466,7 +469,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_clint':{ #db
         'a':{
-            'base':{'mode':'form','title':'لیست کارفرمایان','code':'104'},
+            'base':{'mode':'form','title':'لیست کارفرمایان','code':'112'},
             'tasks':{
                 'name':{'type':'text','title':'نام کارفرما'},
                 'des':{'type':'text','title':'توضیح'},
@@ -480,7 +483,7 @@ x_data={
             },
         },
         'Competitors':{
-            'base':{'mode':'form','title':'لیست رقبا','code':'104','rev':'00-040515'},
+            'base':{'mode':'form','title':'لیست رقبا','code':'114','rev':'00-040515'},
             'tasks':{
                 'name':{'type':'text','title':'نام شرکت رقیب'},
                 'szmn':{'type':'reference','title':'سازمان','prop':['update'],
@@ -500,7 +503,7 @@ x_data={
             },
         },
         'persona':{ 
-            'base':{'mode':'form','title':'پرسونای شخصی کارفرمایان','code':'108','rev':'00-040513',
+            'base':{'mode':'form','title':'پرسونای شخصی کارفرمایان','code':'595','rev':'00-040513',
             },
             'tasks':{
                 #'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
@@ -607,7 +610,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_doc':{ #db
         'a':{
-            'base':{'mode':'form','title':'کد نوع مدرک','code':'105'},
+            'base':{'mode':'form','title':'لیست کد انواع مدارک','code':'108'},
             'tasks':{
                 'dspln':{'type':'reference','width':'5','title':' دیسیپلین','ref':{'db':'a_dspln','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':[]},
                 'doc_cat_id':{'type':'reference','title':'دسته','prop':['update'],
@@ -636,7 +639,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_doc_cat':{ #db
         'a':{
-            'base':{'mode':'form','title':'دسته بندی مدارک','code':'106','rev':'00-040617'},
+            'base':{'mode':'form','title':'لیست دسته بندی انواع مدارک','code':'109','rev':'00-040617'},
             'tasks':{
                 'code':{'type':'text','title':'کد دسته'},
                 'name':{'type':'text','title':'عنوان دسته'},
@@ -653,7 +656,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_contact_grup':{ #db
         'a':{
-            'base':{'mode':'form','title':'گروه مقابل مکاتبه','code':'103'},
+            'base':{'mode':'form','title':'گروه مقابل مکاتبه','code':'113'},
             'tasks':{
                 #'prj':{'type':'reference','width':'5','title':' پروژه','ref':{'db':'a_prj','tb':'a','key':'{code}','val':'{code}-{name}'},'prop':['update']},
                 #'prj_id':{'type':'auto','ref':{'db':'a_prj','tb':'a','key':'__0__','val':'{id}','where':'''code = "{prj}"'''},'title':'آیدی پروژه'},
@@ -676,7 +679,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_loc':{ #db
         'a':{
-            'base':{'mode':'form','title':'نام و آدرس دفاتر شرکت','code':'106'
+            'base':{'mode':'form','title':'نام و آدرس دفاتر شرکت','code':'111'
             },
             'tasks':{
                 'name':{'type':'text','title':'نام دفتر'},
@@ -700,10 +703,10 @@ x_data={
     #-----------------------------------------------------------------------
     'paper':{ #db
         #from paper='cdate','sbj','comment','attach','lv_archiv','lv_per_archiv','lv_onvan','io_t','paper_num','num_x','num_link','folder'
-        # 'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'901','auth_prj':'prj1','multi_app':{'0':['ks'],'1':['ks']},
+        # 'auth_prj':'prj1'
         
         'a':{
-            'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'401','auth_prj':'#cp_code NOT LIKE "AQRC%"','multi_app':{'0':['ks'],'1':['ks']},
+            'base':{'mode':'form','title':'نامه ها','auth':'dccm,ppr_vue','code':'601','auth_prj':'#cp_code NOT LIKE "AQRC%"','multi_app':{'0':['ks'],'1':['ks']},
             },
             'tasks':{
                 'prj_id':{'type':'reference','width':'30','ref':{'db':'a_sub_p','tb':'a','key':'{id}','val':'{id:03d}-{code2}-{name2}'},'title':'پروژه','prop':['update']},
@@ -807,7 +810,7 @@ x_data={
                 
         },#,
         'p':{
-            'base':{'mode':'form','title':'نامه های پیش نویس','auth':'dccm','code':'9011'
+            'base':{'mode':'form','title':'نامه های پیش نویس','auth':'dccm','code':'601-at1'
             },
             'tasks':{
                 'lno':{'type':'text','width':'10','title':'شماره نامه','link':{'url':['spks','km','set_ppr'],'args':[],'vars':{'lno':'{lno}'}},'prop':['readonly']},
@@ -831,7 +834,7 @@ x_data={
     #--------------------------------------------------------------------
     'user':{ #db
         'user':{
-            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc like "01%"','code':'201','cols_filter':'name,family,tel_wrk,loc,office,p_id,file_pic_per',
+            'base':{'mode':'form','title':'لیست همکاران','data_filter':'loc like "01%"','code':'102','cols_filter':'name,family,tel_wrk,loc,office,p_id,file_pic_per',
                 },
             'tasks':{
                 'un':{'type':'text','title':'نام کاربری','len':'3','uniq':''},
@@ -906,7 +909,7 @@ x_data={
                 'c1':{'tasks':'tel_mob,date,rlgn,mltr,shnsnme_num,father,brt_pos,mrg_case,mrg_date,n_suprt,n_child,lable_1,edu_l_cert_grade,edu_l_cert_date,edu_l_cert_pos,edu_l_cert_univ,edu_l_cert_dcpln,start_date,home_adrs,tel_home,mrf_name',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد- بخش 1','app_keys':'y','app_titls':'','oncomplete_act':'',
                         'name':'c1','auth':'dccm,#task#un,off_ens','start_step':'','start_where':"True",'end_where':"'{step_c2_ap}' == 'y'"},
-                'c2':{'tasks':'file_cv,file_mdrk_thsl,file_shnsnm,file_ins_rec,idc_p1_file,idc_p2_file,idc_serial',
+                'c2':{'tasks':'file_cv,file_mdrk_thsl,file_shnsnm,file_ins_rec,idc_p1_file,idc_p2_file,idc_serial,relate_per',
                         'xjobs':'#task#un','title':'ثبت اطلاعات توسط فرد-بخش 2','app_keys':'y,r','app_titls':'','oncomplete_act':'',
                         'name':'c2','auth':'dccm,#task#un,off_ens','start_step':'c1','start_where':"'{step_c1_ap}' == 'y'",'end_where':"'{step_c3_ap}' == 'y'"},  
                 'c3':{'tasks':'mrf_name',
@@ -934,7 +937,7 @@ x_data={
                 },
         },
         'job_rec':{
-            'base':{'mode':'form','title':'پرسنل - سابقه سمتها','code':'93'
+            'base':{'mode':'form','title':'پرسنل - سابقه سمتها','code':'102-at1'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'user','key':'{id}','val':'{un} , {name}{family}'},'prop':['readonly']},
@@ -949,7 +952,7 @@ x_data={
             
         },
         'relate_per':{
-            'base':{'mode':'form','title':'پرسنل - افراد تحت تکفل','code':'93'
+            'base':{'mode':'form','title':'پرسنل - افراد تحت تکفل','code':'102-at2'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا',
@@ -967,13 +970,15 @@ x_data={
                 'date':{'type':'fdate','title':'تاریخ تولد'},#old ,
                 'shnsnm_n':{'type':'text','title':'شماره شناسنامه','len':'10'},
                 'Idc_num':{'type':'text','title':' کد ملی','len':'10'},
-                'shaba':{'type':'text','title':'شماره شبا','len':'10'},
+                'shaba':{'type':'text','title':'شماره شبا','len':'32','pattern':"^ir\d{2}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{2}$",
+                    'placeholder':"ir00-0000-0000-0000-0000-0000-00"},
                 'yy':{'type':'auto','auto':"{{=date[:4] if date else '0000'}}",'title':'سال تولد'},
                 'mm':{'type':'auto','auto':"{{=date[5:7] if date else '00'}}",'title':'ماه تولد'},
                 'dd':{'type':'auto','auto':"{{=date[8:10] if date else '00'}}",'title':'روز تولد'},                 	
             },
             'steps':{
-                'pre':{'tasks':'**','xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':'','auth':'dccm,#task#un,off_ens'},
+                'pre':{'tasks':'f2f_id,un,name,family','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                '1':{'tasks':'m_w,r_name,r_family,rlt,tel_mob,date,shnsnm_n,shaba,yy,mm,dd','xjobs':'#task#un','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':'','auth':'dccm,#task#un,off_ens'},
             },
             
         },
@@ -981,7 +986,7 @@ x_data={
     #--------------------------------------------------------------------
     'job':{ #db
         'a':{ 
-            'base':{'mode':'form','title':'سمتها','help':'job list','code':'112'
+            'base':{'mode':'form','title':'سمتها','help':'job list','code':'110'
             },
             'tasks':{
                 'code':{'type':'text','title':'کد سمت','len':'10','uniq':''},
@@ -1002,7 +1007,7 @@ x_data={
     #--------------------------------------------------------------------
     'act':{ #db
         'a':{ 
-            'base':{'mode':'form','title':'لیست اقدام -  گزارش عملکرد','help':'act list of a person','code':'112'
+            'base':{'mode':'form','title':'لیست اقدام -  گزارش عملکرد','help':'act list of a person','code':'-'
             },
             'tasks':{
                 'code':{'type':'text','title':'کد','len':'4','uniq':''},
@@ -1095,9 +1100,9 @@ x_data={
     },
     #--------------------------------------------------------------------
     #--------------------------------------------------------------------
-    'doc_num_1':{ #db date
+    'doc_num_1':{ #db MDL 
         'a':{
-            'base':{'mode':'form','title':'شماره گذاری مدارک - MDL','help':'document_numbering','code':'402','rev':'00-040617','rev_str':'1'
+            'base':{'mode':'form','title':'شماره گذاری مدارک - MDL','help':'document_numbering','code':'401','rev':'00-040617','rev_str':'1'
             },
             'tasks':{
                 'c_prj_id':{'type':'reference','title':'c_prj_id','prop':['update'],
@@ -1126,6 +1131,7 @@ x_data={
                 'doc_srl_code':{'type':'text','len':'7','lang':'en','title':'کد سریال مدرک','uniq':'doc_p_code=`{doc_p_code}`'},
                 'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},
                 'doc_a_code':{'type':'auto','len':'50','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
+                'doc_a_name':{'type':'auto','len':'50','auto':'{c_prj_nm}-{doc_srl_name}','title':'نام کامل مدرک'},
                 'doc_rec':{'type':'f2f','len':'60','title':'سوابق','ref':{'db':'doc_rec_1','tb':'a','show_cols':['rev','date_c','file_r']},
                     'var_set':{'step':'step','dspln_id':'dspln_id','doc_t_id':'doc_t_id','doc_srl_code':'doc_srl_code'}},
             },#'prj':'prj','sub_p':'sub_p'
@@ -1134,7 +1140,7 @@ x_data={
                 '1':{'tasks':'step_x1,step_x2,step,step_name,dspln_id,dspln_nm,dspln_cd,doc_t_id,doc_t_nm,doc_t_cd,doc_p_code,doc_srl_code,doc_srl_name,doc_a_code',
                     'xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 '2':{'tasks':'doc_p_code,doc_srl_code','xjobs':'dccm','title':'ورود اطلاعات'},
-                '3':{'tasks':'doc_srl_name,doc_a_code','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
+                '3':{'tasks':'doc_srl_name,doc_a_code,doc_a_name','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 '4':{'tasks':'doc_rec','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
             },
             'cnd_flow':[{
@@ -1167,7 +1173,7 @@ x_data={
     #--------------------------------------------------------------------
     'dcc_cd':{ #db
         'a':{
-            'base':{'mode':'form','title':'آرشیو دیسک نوری - CD','code':'402','rev':'01-040326',
+            'base':{'mode':'form','title':'آرشیو دیسک نوری - CD','code':'403','rev':'01-040326',
             },
             'tasks':{
                 'c_prj_id':{'type':'reference','len':'30','ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple']},
@@ -1249,16 +1255,16 @@ x_data={
         }
     },
     #--------------------------------------------------------------------
-    'doc_rec_1':{ #db
+    'doc_rec_1':{ #db MDR
         'a':{
-            'base':{'mode':'form','title':'مرکز کنترل مدارک - DCC ','help':'document_record','code':'402','rev':'00-040617','rev_str':'1'
+            'base':{'mode':'form','title':'مرکز ثبت و بایگانی مدارک پروژه - MDR ','help':'document_record','code':'402','rev':'00-040617','rev_str':'1'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
-                    'ref':{'db':'doc_num_1','tb':'a','key':'{id}','val':'{doc_a_code}-{doc_srl_name}'},
+                    'ref':{'db':'doc_num_1','tb':'a','key':'{id}','val':'{doc_a_code}-{doc_a_name}'},
                     'team':{'c_prj_id':{},'c_prj_cd':{},'c_prj_nm':{},'doc_cat':{},'step':{},'step_name':{},
                             'dspln_cd':{},'dspln_nm':{},'doc_t_cd':{},'doc_t_nm':{},'doc_p_code':{},
-                            'doc_srl_code':{},'doc_srl_name':{},'doc_a_code':{}
+                            'doc_srl_code':{},'doc_srl_name':{},'doc_a_code':{},'doc_a_name':{}
                             },},
                 'rev':{'type':'index','len':'2','ref':{'key':'{id}','val':'{rev}','where':'''doc_a_code = "{{=__objs__['doc_a_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
                 'rev_title':{'type':'text','len':'240','title':'عنوان بازبینی'},
@@ -1290,14 +1296,17 @@ x_data={
                 'lb_f_r':'raster - فایلهای با فرمت ثابت ارسالی برای کارفرما',
                 'lb_f_b':'base - سایر اسناد پروژه که لازم نیست برای کارفرما فرستاده شود ولی برای مدیریت سوابق و یا اصلاحات احتمالی و ...  لازم می باشد',
             },
-            'cols_filter':{'':'همه',},
+            'cols_filter':{
+                'c_prj_nm,doc_srl_name,doc_srl_code,rev,date_c,frd,rev_title,f_code_r,file_v,file_r,file_b,nx_file,snd,date_s,snd_ppr,des':'لیست 1',
+                '':'همه',
+            },
             'data_filter':{'':'همه',}
         }
     },
     #--------------------------------------------------------------------
     'doc_tqm':{ #db
         'a':{
-            'base':{'mode':'form','title':'اسناد تعالی و مدیریت کیفیت','help':'document_for_TQM','code':'402','rev':'x01-040519'
+            'base':{'mode':'form','title':'اسناد تعالی و مدیریت کیفیت','help':'document_for_TQM','code':'302','rev':'x01-040519'
             },
             'tasks':{
                 'name':{'type':'text','len':'150','title':'نام مدرک'},
@@ -1335,7 +1344,7 @@ x_data={
             'data_filter':{'':'همه',}
         },
         'files':{
-            'base':{'mode':'form','title':'اسناد مدیریت کیفیت- فایلهای نهایی','code':'900'
+            'base':{'mode':'form','title':'اسناد مدیریت کیفیت- فایلهای نهایی','code':'302-at1'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
@@ -1377,7 +1386,7 @@ x_data={
             },
         },
         'inc_files':{
-            'base':{'mode':'form','title':' اسناد مدیریت کیفیت - فایلهای ورودی','code':'900'
+            'base':{'mode':'form','title':' اسناد مدیریت کیفیت - فایلهای ورودی','code':'302-at2'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
@@ -1398,7 +1407,7 @@ x_data={
             },
         },
         'suggestion':{
-            'base':{'mode':'form','title':'اسناد مدیریت کیفیت - پیشنهاد اصلاحی','code':'900','rev':'00-040417'
+            'base':{'mode':'form','title':'اسناد مدیریت کیفیت - پیشنهاد اصلاحی','code':'302-at3','rev':'00-040417'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','width':'5','title':'فرم مبنا','ref':{'db':'doc_tqm','tb':'a','key':'{id}','val':'{name}'},'prop':['readonly']},
@@ -1419,7 +1428,7 @@ x_data={
     #--------------------------------------------------------------------
     'doc_mm':{ #db
         'a':{
-            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'403','xform_cg_file':'fr-cg-doc_mm2.html',
+            'base':{'mode':'form','title':'صورت جلسه','help':'meeting minute','code':'404','xform_cg_file':'fr-cg-doc_mm2.html',
                 'multi_app':{'2':['ks'],'rev':'01-040403'},
             },
             'tasks':{
@@ -1465,7 +1474,7 @@ x_data={
             'data_filter':{'':'همه',}
         },
         'pos':{
-            'base':{'mode':'form','title':'محل جلسه','code':'93'
+            'base':{'mode':'form','title':'محل جلسه','code':'404-at1'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
@@ -1479,7 +1488,7 @@ x_data={
             
         },
         'todo':{
-            'base':{'mode':'form','title':'اقدامات جلسه','code':'93'
+            'base':{'mode':'form','title':'اقدامات جلسه','code':'404-at2'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
@@ -1495,7 +1504,7 @@ x_data={
             
         },
         'note':{
-            'base':{'mode':'form','title':'مذاکرات جلسه','code':'93'
+            'base':{'mode':'form','title':'مذاکرات جلسه','code':'404-at3'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
@@ -1507,7 +1516,7 @@ x_data={
             }, 
         },
         'attch':{
-            'base':{'mode':'form','title':'فایلهای پیوست صورتجلسات','code':'93'
+            'base':{'mode':'form','title':'فایلهای پیوست صورتجلسات','code':'404-at4'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
@@ -1526,7 +1535,7 @@ x_data={
             },    
         },
         'pic':{
-            'base':{'mode':'form','title':'تصاویر جلسه','code':'93'
+            'base':{'mode':'form','title':'تصاویر جلسه','code':'404-at5'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {c_prj_txt} , {name}'},'prop':['readonly']},
@@ -1543,7 +1552,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_act':{ #db
         'a':{
-            'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'410'
+            'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'-'
             },
             'tasks':{
                 'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_un_','title':'کد همکار'},
@@ -1583,7 +1592,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_get':{ #db
         'a':{
-            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'920'
+            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'-'
             },
             'tasks':{
                 'name_f':{'type':'text','len':'20','title':'نام'},
@@ -1614,7 +1623,7 @@ x_data={
     #--------------------------------------------------------------------
     'todo':{ #db
         'a':{
-            'base':{'mode':'form','title':'برنامه اقدامات لازم','help':'todo_act_4_person','code':'410'
+            'base':{'mode':'form','title':'برنامه اقدامات لازم','help':'todo_act_4_person','code':'810'
             },
             'tasks':{
                 'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_un_','title':'ثبت کننده  -کد'},
@@ -1648,7 +1657,7 @@ x_data={
     #--------------------------------------------------------------------
     'a_contract':{ #db
         'a':{
-            'base':{'mode':'form','title':'ثبت قراردادهای شرکت','help':'','code':'120','data_filter':'','multi_app':{'0':['ks'],'1':['ks']},
+            'base':{'mode':'form','title':'لیست قراردادها','help':'','code':'103','data_filter':'','multi_app':{'0':['ks'],'1':['ks']},
             },
             'tasks':{
                 'subject':{'type':'text','title':'موضوع قرارداد','len':'250'},
@@ -1704,7 +1713,7 @@ x_data={
     #--------------------------------------------------------------------
     'prj_shenasname':{ #db
         'a':{
-            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'','code':'121','rev':'01-040518',
+            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'','code':'405','rev':'01-040518',
                 'data_filter':'','xform_cg_file':'prj-shenasname-st.html','multi_app':{'0':['ks'],'1':['ks']},
             },
             'tasks':{
@@ -1771,7 +1780,7 @@ x_data={
     #--------------------------------------------------------------------
     'prj_mng_rpt':{ #db
         'a':{
-            'base':{'mode':'form','title':'شناسنامه فنی پروژه های شرکت','help':'prj_manage_report','code':'121','rev':'00-040618',
+            'base':{'mode':'form','title':'گزارش مدیریت پروژه ها','help':'prj_manage_report','code':'801','rev':'00-040618',
                 'data_filter':''
             },
             'tasks':{
@@ -1815,7 +1824,7 @@ x_data={
     #--------------------------------------------------------------------
     'suggestion':{ #db {_cur_user_un_}
         'a':{
-            'base':{'mode':'form','title':'فرم پیشنهاد ها','code':'311','rev':'01-040310'
+            'base':{'mode':'form','title':'فرم پیشنهاد ها','code':'520','rev':'01-040310'
             },
             'tasks':{
                 #'u_un':{'type':'user','len':'24','def_value':'{_i_}','title':'کد همکار','prop':['update','show_full','un_free']},
@@ -1853,7 +1862,7 @@ x_data={
             'data_filter':{'':'همه',}
         },
         'in_form':{
-            'base':{'mode':'form','title':'پیشنهاد اصلاحی مرتبط با فرمهای  سامانه','code':'900','rev':'00-040417',
+            'base':{'mode':'form','title':'پیشنهاد اصلاحی مرتبط با فرمهای  سامانه','code':'560','rev':'00-040417',
                 'help':'sg2=suggestion 2th case form (in_form)'
             },
             'tasks':{
@@ -1876,7 +1885,7 @@ x_data={
     #--------------------------------------------------------------------
     'errors':{ #db
         'a':{
-            'base':{'mode':'form','title':'مشکلات','code':'312'
+            'base':{'mode':'form','title':'مشکلات','code':'530'
             },
             'tasks':{
                 'err_rec':{'type':'text','title':'شرح مشکل'},
@@ -1930,7 +1939,7 @@ x_data={
     #-------------------------------------------------------------------------------------------------------------------
     'km':{ #db  "knowledge management"
         'a':{
-            'base':{'mode':'form','title':'فرم جمع آوری و ثبت دانش','code':'201','rev':'00-040425',
+            'base':{'mode':'form','title':'فرم جمع آوری و ثبت دانش','code':'510','rev':'00-040425',
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -1976,7 +1985,7 @@ x_data={
     #-------------------------------------------------------------------------------------------------------------------
     'rqst_it_srvc':{ #db  "request an IT service"
         'a':{
-            'base':{'mode':'form','title':'درخواست IT','code':'201','rev':'01-040615','rev_his':'00-040425',
+            'base':{'mode':'form','title':'درخواست IT','code':'701','rev':'01-040615','rev_his':'00-040425',
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -2026,7 +2035,7 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_saat':{ #db
         'a':{
-            'base':{'mode':'form','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'201','internet':True,'multi_app':{'1':['snr'],'2':['mlk']},
+            'base':{'mode':'form','code':'210','title':'مرخصی ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'multi_app':{'1':['snr'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -2064,7 +2073,7 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_morkhsi_ruz':{ #db
         'a':{
-            'base':{'mode':'form','title':'مرخصی روزانه','data_filter':'f_nxt_u = "{{=_i_}}"','code':'202','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+            'base':{'mode':'form','code':'220','title':'مرخصی روزانه','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -2103,7 +2112,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'off_mamurit_saat':{ #db
         'a':{
-            'base':{'mode':'form','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','code':'203','internet':True,'multi_app':{'1':['snr'],'3':['mlk']},
+            'base':{'mode':'form','code':'230','title':'ماموریت ساعتی','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'multi_app':{'1':['snr'],'3':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
@@ -2145,8 +2154,8 @@ x_data={
     #--------------------------------------------------------------------time_st,time_len '"10:55","5:25"'	'auto':'{{import k_time}}{{=k_time.add("10:55","5:25")}}'},'''
     'off_mamurit_ruz':{ #db
         'a':{
-            'base':{'mode':'form','title':'ماموریت روزانه',
-                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'204','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
+            'base':{'mode':'form','code':'240','title':'ماموریت روزانه',
+                'data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'multi_app':{'1':['rms'],'2':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
@@ -2190,8 +2199,8 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'rep_mamurit':{ #db msr=mission-report  
         'a':{
-            'base':{'mode':'form','title':'گزارش ماموریت','rev':'01-040325',
-                'data_filter':'f_nxt_u = "{{=_i_}}"','code':'207','xform_cg_file':'fr-cg-rep_mamurit.html','multi_app':{'1':['snr'],'3':['mlk']},
+            'base':{'mode':'form','title':'گزارش ماموریت','code':'250','rev':'01-040325',
+                'data_filter':'f_nxt_u = "{{=_i_}}"','xform_cg_file':'fr-cg-rep_mamurit.html','multi_app':{'1':['snr'],'3':['mlk']},
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'مامور'},
@@ -2231,7 +2240,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'hr_arzyabi_amalkard':{ #db
         'a':{
-            'base':{'mode':'form','title':'ارزشیابی عملکرد پرسنل','data_filter':'f_nxt_u = "{{=_i_}}"','code':'801','internet':True,'xform_cg_file':'hr_arzyabi_amalkard-st.html',
+            'base':{'mode':'form','code':'830','title':'ارزشیابی عملکرد پرسنل','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'xform_cg_file':'hr_arzyabi_amalkard-st.html',
             },
             'tasks':{
                 'frd_1':{'type':'user','title':'نام همکار','prop':['show_full','p_id','un_free'],},
@@ -2342,7 +2351,7 @@ x_data={
     #-------------------------------------------------------------------- 's2':{'tasks':'des_2','xjobs':'#step#0','title':'ثبت نتیجه','app_keys':'y,r,x','app_titls':['انجام شد','بازگشت جهت اصلاح','انجام نشد'],'oncomplete_act':''},
     'hr_arzyabi_amalkard_mdr':{ #db
         'a':{
-            'base':{'mode':'form','title':'ارزشیابی عملکرد مدیران','data_filter':'f_nxt_u = "{{=_i_}}"','code':'802','internet':True,'xform_cg_file':'hr_arzyabi_amalkard_mdr.html',
+            'base':{'mode':'form','code':'840','title':'ارزشیابی عملکرد مدیران','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'xform_cg_file':'hr_arzyabi_amalkard_mdr.html',
             },
             'tasks':{
                 'frd_1':{'type':'user','title':'نام همکار','xjobs':'mod_mst','prop':['show_full','p_id','un_free'],},
@@ -2445,7 +2454,7 @@ x_data={
     #-------------------------------------------------------------------- 
     'hr_arzyabi_amuzesh':{ #db
         'a':{
-            'base':{'mode':'form','title':'ارزیابی دوره های آموزشی توسط پرسنل','data_filter':'f_nxt_u = "{{=_i_}}"','code':'801','internet':True,'prop':['noname'],
+            'base':{'mode':'form','code':'850','title':'ارزیابی دوره های آموزشی توسط پرسنل','data_filter':'f_nxt_u = "{{=_i_}}"','internet':True,'prop':['noname'],
             },
             'tasks':{
                 'hmkr':{'type':'text','title':'نام و نام خانوادگی همکار','len':150,'lang':'fa',},
@@ -2534,7 +2543,7 @@ x_data={
     #--------------------------------------------------------------------
     'tel':{ #db
         'a':{
-            'base':{'mode':'form','title':'دفترچه تلفن شرکت','code':'203'
+            'base':{'mode':'form','code':'620','title':'دفترچه تلفن شرکت'
             },
             'tasks':{
                 'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
@@ -2562,8 +2571,8 @@ x_data={
     #--------------------------------------------------------------------
     'amuzesh':{ #db
         'a':{
-            'base':{'mode':'form','title':'آموزش','code':'304',
-                },
+            'base':{'mode':'form','code':'540','title':'آموزش',
+            },
             'tasks':{
                 'subj':{'type':'text','title':'موضوع','len':'255','hlp':'عنوانی که کلاس به آن مرتبط میباشد'},
                 'for_grup':{'type':'text','title':'مناسب برای گروه','len':'50','hlp':'کلاس برای چه گروه هایی مناسب است و در نظر گرفته شده است'},
@@ -2589,29 +2598,48 @@ x_data={
                     'file_name':'{file_code}_news','file_ext':"pdf",'path':'form,hrm,ed'},
                 'pics_file':{'type':'file','len':'40','title':'فایل تصویر',
                     'file_name':'{file_code}_pics','file_ext':"zip,rar,7z",'path':'form,hrm,ed'},
+                'usr_list':{'type':'user','title':'لیست شرکت کنندگان','prop':['show_full','multiple']},
+                'crt_cert':{'type':'crt_rec_form','ref':{'db':'amuzesh','tb':'cert'},'title':'تهیه گواهینامه برای شرکت کنندگان',
+                    'set_dic':{'date':'{date}','subjct':'{subj}','tchr_name':'{tchr_name}'},
+                    'set_dic_list':{'frd_un':'{usr_list}'}#'1,2,3'
                 },
+            },
             'steps':{
                 'pre':{'tasks':'subj,for_grup,tchr_name,tchr_exprt','xjobs':'edu','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'date,time_len,pos,cls_mod,cls_org,file_code','xjobs':'edu','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'user_n,usr_cmnt_file,cls_form_file,usr_cert_file,cls_lrn_file,news_link,news_file,pics_file','xjobs':'edu','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'edu,dccm'},#'xjobs':'#task#un,dccm',
+                's2':{'tasks':'user_n,usr_cmnt_file,cls_form_file,usr_cert_file,cls_lrn_file,news_link,news_file,pics_file,usr_list','xjobs':'edu','title':'تکمیل','app_keys':'y,r','app_titls':'','oncomplete_act':'','auth':'edu,dccm','do':'crt_cert'},#'xjobs':'#task#un,dccm',
             },
             'views':{
-                },
+            },
             'cols_filter':{
                 '':'همه',
                 'subj,for_grup,tchr_name,date,time_len,cls_mod':'لیست 1',
-                },
+            },
             'data_filter':{
                 '':'همه همکاران',
                 'cls_mod = "حضوری"':'حضوری',
                 'cls_mod = "مجازی"':'مجازی',
-                },
-        }
+            },
+        },
+        'cert':{
+            'base':{'mode':'form','title':'آموزش - گواهینامه','code':'540-at1','rev':'00-040628'
+            },
+            'tasks':{
+                'frd_un':{'type':'text','len':'20','title':'کد شرکت کننده','prop':['readonly']},
+                'date':{'type':'text','len':'10','title':'تاریخ کلاس','prop':['readonly']},
+                'subjct':{'type':'text','len':'50','title':'موضوع کلاس','prop':['readonly']},
+                'tchr_name':{'type':'text','len':'50','title':'نام استاد','prop':['readonly']},
+                
+            },
+            'steps':{
+                '0':{'tasks':'frd_un,date,subjct,tchr_name','xjobs':'*','title':'ورود اطلاعات','app_keys':'y','app_titls':'','oncomplete_act':''},
+            }, 
+        },
     },
     #--------------------------------------------------------------------
     'news':{ #db
         'a':{
-            'base':{'mode':'form','title':'اخبار','code':'304',
+            'base':{'mode':'form','code':'630','title':'اخبار',
                 },
             'tasks':{
                 'date':{'type':'fdate','title':'تاریخ','prop':['update']},
@@ -2644,7 +2672,7 @@ x_data={
                 },
         },
         'imgs':{
-            'base':{'mode':'form','title':'تصاویر- اخبار','code':'93'
+            'base':{'mode':'form','code':'630-at1','title':'تصاویر- اخبار'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','len':'5','title':'فرم مبنا','ref':{'tb':'a','key':'{id}','val':'{date} , {title}'},'prop':['readonly']},
@@ -2660,7 +2688,7 @@ x_data={
     #--------------------------------------------------------------------
     'rqst':{#db request
         'plot':{
-            'base':{'mode':'form','title':'درخواست - چاپ','code':'304','rev':'01-040417'
+            'base':{'mode':'form','code':'720','title':'درخواست - چاپ','rev':'01-040417'
             },
             'tasks':{
                 'u_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'کد همکار'},
@@ -2702,7 +2730,7 @@ x_data={
     #--------------------------------------------------------------------
     'survey':{ #db نظر سنجی
         'prsln':{
-            'base':{'mode':'form','title':'نتایج نظر سنجی در پرس لاین','help':'survey.porsline.ir','code':'410','rev':'00-040511'
+            'base':{'mode':'form','code':'550','title':'نتایج نظر سنجی در پرس لاین','help':'survey.porsline.ir','rev':'00-040511'
             },
             'tasks':{
                 'date1':{'type':'fdate','len':'10','title':'تاریخ نظرسنجی','prop':[]},
@@ -2734,7 +2762,7 @@ x_data={
     #--------------------------------------------------------------------
     'txt_bank':{ #db
         'prompt':{
-            'base':{'mode':'form','title':'بانک پرامپت های هوش مصنوعی','help':'','code':'920','rev':'00-040520'
+            'base':{'mode':'form','code':'570','title':'بانک پرامپت های هوش مصنوعی','help':'','rev':'00-040520'
             },
             'tasks':{
                 'prmpt':{'type':'text','len':'2500','title':'متن پرامپت','height':'100px;'},
@@ -2747,7 +2775,7 @@ x_data={
             }
         },
         'link':{
-            'base':{'mode':'form','title':'بانک لینک های مفید','help':'','code':'920','rev':'00-040520'
+            'base':{'mode':'form','code':'580','title':'بانک لینک های مفید','help':'','rev':'00-040520'
             },
             'tasks':{
                 'link':{'type':'text','len':'500','title':'لینک','link':{'target':'_blank','icon_text':'L','class':'btn btn-info'},},
@@ -2761,7 +2789,7 @@ x_data={
             }
         },
         'msg':{
-            'base':{'mode':'form','title':'بانک پیام ها و نامه های آماده','help':'','code':'920','rev':'00-040520'
+            'base':{'mode':'form','code':'590','title':'بانک پیام ها و نامه های آماده','help':'','rev':'00-040520'
             },
             'tasks':{
                 'txt':{'type':'text','len':'500','title':'متن','height':'50px;'},
@@ -2779,7 +2807,7 @@ x_data={
     #--------------------------------------------------------------------
     'Benchmarking':{ #db
         'a':{
-            'base':{'mode':'form','title':'بنچ مارک و مقایسه تطبیقی','help':'','code':'920','rev':'00-040526'
+            'base':{'mode':'form','code':'585','title':'بنچ مارک و مقایسه تطبیقی','help':'','rev':'00-040526'
             },
             'tasks':{
                 'sect':{'type':'text','len':'100','title':'حوزه / بخش','help':'section / domain'},
@@ -2819,7 +2847,7 @@ x_data={
     #--------------------------------------------------------------------
     'hr_nahar':{ #db
         'khod':{
-            'base':{'mode':'form','title':'فرم درخواست ناهار - شخصی','help':'','code':'920','rev':'00-040622'
+            'base':{'mode':'form','code':'-','title':'فرم درخواست ناهار - شخصی','help':'','rev':'00-040622'
             },
             'tasks':{
                 'frd_1_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,,'prop':['hidden']}
@@ -2836,7 +2864,7 @@ x_data={
             }
         },
         'mhmn':{
-            'base':{'mode':'form','title':'فرم درخواست ناهار - مهمان','help':'','code':'920','rev':'00-040622'
+            'base':{'mode':'form','code':'-','title':'فرم درخواست ناهار - مهمان','help':'','rev':'00-040622'
             },
             'tasks':{
                 'frd_0_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,'prop':['hidden']},
@@ -2856,7 +2884,7 @@ x_data={
     #--------------------------------------------------------------------
     'tmsh':{ #db
         'hand_io':{
-            'base':{'mode':'form','title':'ورود دستی ساعت ورود و خروج','help':'','code':'920','rev':'00-040611'
+            'base':{'mode':'form','code':'-','title':'ورود دستی ساعت ورود و خروج','help':'','rev':'00-040611'
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام',},#'prop':['hidden']
@@ -2877,10 +2905,15 @@ x_data={
     #--------------------------------------------------------------------
     'test':{ #db
         'b':{
-            'base':{'mode':'form','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار','code':'990'
+            'base':{'mode':'form','code':'-','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
                 },
             'tasks':{
+                'dt1':{'type':'fdate','len':'10','title':'تاریخ انجام کار','prop':[]},
                 'txt':{'type':'text','len':50,'lang':'fa','title':'متن','uniq':''},#'sel=`x`'
+                'ff1':{'type':'crt_rec_form','ref':{'db':'news','tb':'a'},'title':'تولید سابقه فرم خودکار',
+                    'set_dic':{'date':'{dt1}','txt':'{txt}'},
+                    'set_dic_list':{'title':'{xxlink}'}#'1,2,3'
+                },
                 'img':{'type':'file','len':'24','file_name':'abc-{id}-{{=dt[:4] if dt else "0000"}}','file_ext':"gif,jpg,jpeg,png",'path':'form,image','title':'تصویر','img':"""style='width:200px;' """},
                 'img2':{'type':'file','len':'24','file_name':'abc-{id}-{{=dt[:4] if dt else "0000"}}','file_ext':"gif,jpg,jpeg,png",'path':'test,a','title':'تصویر','img':"""style='width:200px;' """},
                 'n':{'type':'num','min':5,'max':15,'title':'عدد','prop':[]},
@@ -2898,9 +2931,10 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'indx1,xxlink,img,img2','xjobs':'*','title':'ثبت اطلاعات اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's2':{'tasks':'txt,n,sel,indx1,img2,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'at,fl,time_st2','xjobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
-                's4':{'tasks':'dt,at,fl','xjobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'dt1,txt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':'','do':'ff1'},
+                '3':{'tasks':'txt,n,sel,indx1,img2,ref,ch,tt,dt','xjobs':'des_eng_ar','title':'ثبت اطلاعات تکمیلی','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                '4':{'tasks':'at,fl,time_st2','xjobs':'#step#0','title':'ثبت فراداده ها','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
+                '5':{'tasks':'dt,at,fl','xjobs':'#task#ref','title':'بررسی اطلاعات','app_keys':'y,x,r','app_titls':'','oncomplete_act':''},
             },           
             'views':{
             

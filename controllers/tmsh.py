@@ -551,7 +551,7 @@ def _aqc_report_daily_read_2(start_date=''):
 
 def mon_report():
     # عدم حق دسترسی
-    auth_g1=session['username'] in ['ks','snr','lvi','mhm','htk','hrm','atl']
+    auth_g1=session['username'] in ['snr'] #'ks','snr','lvi','mhm','htk','hrm','atl']
     #if session['username'] in ['mlk','mss','nmn']:return ''
     args=request.args
     #if not args :return A1('Error')
@@ -560,6 +560,9 @@ def mon_report():
     spks/tmsh/mon_report?x_mon=1403/05
     """
     import k_htm,jdatetime,k_form,k_date,k_time,k_tmsh
+    from k_tmsh import C_NAHAR
+    c_nahar=C_NAHAR()
+    
     mm_v=request.vars['mm_v'] or jdatetime.date.today().strftime('%m') #'14'+jdatetime.date.today().strftime('%y/%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,_onchange="submit();",no_empty=True)
     
@@ -576,8 +579,8 @@ def mon_report():
     x_titels_1,out_rows_1,row_colors=k_tmsh.mon_list_base(x_mon)
     x_titels_2,out_rows_2,sum_min=k_tmsh.mon_list_io(x_mon,x_un,user_id,auth_g1)
     x_titels_3,out_rows_3=k_tmsh.mon_list_amlkrd(x_un=x_un,x_mon=x_mon)
-    x_titels_4,out_rows_4=k_tmsh.mon_list_nahar(x_un=x_un,x_mon=x_mon)
-    x_titels_5,out_rows_5=k_tmsh.mon_list_nahar_mehman(x_un=x_un,x_mon=x_mon)
+    x_titels_4,out_rows_4=c_nahar.mon_list_nahar(x_un=x_un,x_mon=x_mon)
+    x_titels_5,out_rows_5=c_nahar.mon_list_nahar_mehman(x_un=x_un,x_mon=x_mon)
     out_rows=[row +out_rows_2[i]+out_rows_3[i]+out_rows_4[i]+out_rows_5[i] for i,row in enumerate(out_rows_1)]
     #import k_err
     #k_err.xreport_var ([{'out_rows_1':out_rows_1,'out_rows_2':out_rows_2,'out_rows':out_rows}])
@@ -671,15 +674,22 @@ def day_list_nahar():
     x_titels_2=['n','نام','مهمان']
     head=H2('لیست ناهار  ' + x_date )
     
-    amar="تعداد کل = "+str(len(out_1)+len(out_2))
+    #head2  آمار
+    amar_1="تعداد کل = "+str(len(out_1)+len(out_2))
+    amar_2="همکاران = "+str(len(out_1)) 
+    amar_3="میهمانان = " +str(len(out_2))
     amar_t=k_date.ir_date("yyyy/mm/dd hh:gg")
-    if k_tmsh.in_nahar_change_time_(x_date):
+    
+    from k_tmsh import C_NAHAR
+    c_nahar=C_NAHAR()
+    if c_nahar.in_nahar_change_time(x_date):
         stat="فرم نهایی نشده است"
         _style="background-color:#faa;"
     else:
         stat="فرم نهایی شده است"
         _style="background-color:#afa;"
-    head2=TABLE(TR(amar,stat,DIV(amar_t)),_style=_style,_id='head2')
+    stat_tit=" زمان نهایی شدن گزارش هر روز بعد از ساعت " + " 8:15 " + "آنروز می باشد"
+    head2=TABLE(TR(DIV(amar_1,_id='amar_1'),amar_2,amar_3,DIV(stat,_title=stat_tit),DIV(amar_t,_id='amar_t')),_style=_style,_id='head2')
     table_1=k_htm.C_TABLE(x_titels_1,out_1).creat_htm(table_class='1')
     table_2=k_htm.C_TABLE(x_titels_2,out_2).creat_htm(table_class='1')
     return dict(htm=DIV(head,head2,table_1,HR(),table_2))

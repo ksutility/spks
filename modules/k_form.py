@@ -1,5 +1,6 @@
 ﻿#from gluon.cache import Cache
 #cache=Cache()
+debug=False #True #
 k_cache={}
 def session_x():
     from gluon import current
@@ -118,7 +119,7 @@ from k_err import xxxprint,xprint,xalert,xreport_var
 import time
 import k_htm,k_user
 from k_time import Cornometer
-debug=False  
+  
 db_path='applications\\spks\\databases\\'
 #cf=curent form
 ## ---------------------------------------------------------------------------------################################
@@ -730,8 +731,8 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             data_def of this task (x_data[db][tb]["tasks"][name])
         x_dic=dict
             dict(zip(names,row)) = this form save and edited data
-                save data =xdic['field_name']
-                edited data=xdic['__objs__']['field_name']
+                save data =x_dic['field_name']
+                edited data=x_dic['__objs__']['field_name']
         xid=?
         
         need=['input','output'] / ['input'] / ['output']
@@ -753,22 +754,40 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             template_parser
     '''
     sc=i_obj['type']
-    def obj_pars(i_obj,obj_type,force=False):
-        if force or 'input' in need or obj_type in ['file']:
+    def obj_pars(i_obj,obj_type,x_dic=x_dic,force=False):
+        import copy
+        o_obj=copy.deepcopy(i_obj)
+        #o_obj=i_obj.copy()
+        if force or 'input' in need or obj_type in ['file','crt_rec_form']:
             #cm.tik('obj template_parser start')
-            obj={x:template_parser(i_obj[x],x_dic,rep=f'{x}:{i_obj["name"]}') for x in i_obj}#['file_name','ext','path','pre_folder']}
-            #xreport_var([i_obj,x_dic,obj,''],True)
-            #cm.tik('obj template_parser end')
-        else:
-            obj=i_obj.copy()
+            #obj={x:template_parser(o_obj[x],x_dic,rep=f'{x}:{o_obj["name"]}') for x in o_obj}
+            
+            for fld_n,fld_v in o_obj.items():
+                if type(fld_v)==dict:
+                    if fld_n=='ref':
+                        pass
+                    else:
+                        for x_n,x_v in fld_v.items():
+                            fld_v[x_n]=template_parser(x_v,x_dic,rep=f'{x_n}:{fld_n}:{o_obj["name"]}')
+                    o_obj[fld_n]=fld_v
+                else:
+                    o_obj[fld_n]=template_parser(fld_v,x_dic,rep=f'{fld_n}:{o_obj["name"]}')
+            """ """
+            #['file_name','ext','path','pre_folder']}
+            
+            if 1==0: #report
+                #if o_obj['name']==
+                if obj_type == 'crt_rec_form':
+                    xreport_var([{'i_obj':i_obj,'out_obj': o_obj,'x_dic':x_dic}])
+            #cm.tik('obj template_parser end')         
         if debug:
-            xxxprint(msg=['obj',obj['name'],''],vals=x_dic,vals2=obj)    
-        return obj
+            xxxprint(msg=['obj',o_obj['name'],''],vals=x_dic,vals2=o_obj)    
+        return o_obj
     if x_data_s:
         db_name,tb_name=x_data_s['base']['db_name'],x_data_s['base']['tb_name']
     else:
         db_name,tb_name='',''
-    obj=obj_pars(i_obj,obj_type=sc)
+    obj=obj_pars(i_obj,obj_type=sc,x_dic=x_dic)
     
     
     
@@ -887,16 +906,21 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     'c_form':c_form
                 }])  
     #------------------------------------------------------------------------------------------------------------------
-    def select_1orX_title(_value,_multiple): #select_1_or_multi   #sc
-        if not _value:return''
-        if _multiple:
-            if type( _value)==list:
-                return ' | '.join([_select[x] for x in _value])
-            else: #type( _value)==str:
-                return ' | '.join([_select[x] for x in _value.split(',')])
+    def select_key_2_val(select_dict,key,multiple): #select_1_or_multi   #select_1orX_title
+        """
+            multiple:bool
+            key:str or list
+            
+        """
+        if not key:return''
+        if multiple:
+            if type( key)==list:
+                return ' | '.join([select_dict.get(x) for x in key])
+            else: #type( key)==str:
+                return ' | '.join([select_dict.get(x) for x in key.split(',')])
         else:
-            if _value in _select:
-                return _select[_value]
+            if key in select_dict:
+                return select_dict[key]
             else:
                 return '' 
     #------------------------------------------------------------------------------------------------------------------
@@ -1096,7 +1120,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             xprint('tt_dif='+ str(tt_dif))
         
         try:
-            obj['title']=select_1orX_title(_value,_multiple)  
+            obj['title']=select_key_2_val(select_dict=_select,key=_value,multiple=_multiple)  
             obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
             obj['data_json']=_value
         except Exception as err:
@@ -1521,7 +1545,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
                     return _select[_value]
                 else:
                     return '' 
-        obj['title']=select_1orX_title(_value,_multiple)  
+        obj['title']=select_key_2_val(select_dict=_select,key=_value,multiple=_multiple)  
         obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
         obj['data_json']=_value
         
@@ -1577,32 +1601,125 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         
         db2,tb2=obj['ref']['db'],obj['ref']['tb']
         '''
-    elif sc=="crt_1_rec_form": #sc
-        '''
-            ایجاد فیلد ثبت سابقه فرم - تهیه 1 سابقه  یکتا از 1 فرم مشخص بر اساس اطلاعات فرم جاری -
+    elif sc=="crt_rec_form": #sc
+        hlp='ثبت سابقه در فرم مقصد به تعداد مشخص بر اساس اطلاعات فرم موجود'
+        '''         
+        توضیح:
+            ایجاد فیلد ثبت سابقه فرم
+             تهیه 1 سابقه  یکتا از 1 فرم مشخص بر اساس اطلاعات فرم جاری 
+            در سوابق فرم مقصد
+        input mode:
+        در حالت امکان تغییر 
             اگر سابقه وجود نداشته باشد برنامه سابقه را ایجاد می کند
                 با نام کاربری سیستم
                 و شماره فرم  ایدی فرم مرتبط را در داخل  این فیلد از فرم جاری یاد داشت می کند
             اگر سابقه وجود داشته باشد - یعنی این فیلد مقدار داشته باشد
                 فرم مرتبط بر اساس شماره آیدی به روز می شود
+        help file:
+            http://192.168.88.179/spks/xfile/read_xx/new_task__crt_rec_form.md?xpath=D%3A%5Cks%5CI%5Cweb2py%5CApplications%5Cspks%5Chelp
         '''
+        
+        
+        #c_ = creat_rec_form
+        c_db=obj['ref']['db']
+        c_tb=obj['ref']['tb']
+        c_set_dic=obj['set_dic']
+        db2=DB1(c_db )
+        vv=''
         if 'input' in need:
-            db_name=obj['form']['db']
-            tb_name=obj['form']['tb']
-            db1=DB1(db_name )
-            if _value:
-                obj['set_dic']
-                xu = db1.update_data(tb_name,obj['set_dic'],{'id':_value})
-                xid=_value
-                vv="update"
-            else:
-                xu = db1.insert_data(tb_name,obj['set_dic'])
-                xid=xu['id']
-                vv="insert"
-        url=URL('form','xform_sd',args=[db_name,tb_name,xid])  
-        obj['input']=DIV(k_htm.a(_value,_href=url,_target="box",_title='لینک',_class='btn btn-info'),DIV(str(xu)))
-        obj['help']=vv
-        obj['output']=bj['input']
+            if obj['set_dic_list']: #لیست برای انجام کار
+                sdl=obj['set_dic_list']
+                links=[]
+                helps=[]
+                if _value: #update
+                    cur_val_list=_value.split(',')+[""]*50
+                    for key in sdl:
+                        for i,val in enumerate(sdl[key].split(',')):
+                            csd={key:val} #c_set_dic
+                            csd.update(c_set_dic)
+                            cur_val=cur_val_list[i]
+                            
+                            #c_id,url,vv,xu,xu2=xupdate_1_rec_form(db2,c_tb,csd,cur_val)
+                            xu = db2.update_data(c_tb,csd,{'id':cur_val})#,sql_do=False
+                            c_id=cur_val
+                            vv="update"
+                            xu2=''
+                            url=URL('form','xform_sd',args=[c_db,c_tb,c_id])  
+                            
+                            links+=[k_htm.a(c_id,_href=url,_target="box",_title='لینک',_class='btn btn-info')]
+                            helps+=[XML(k_htm.x_toggle_h(XML(DIV(
+                                    f'c_id : {c_id}',BR(),
+                                    f'sql : {vv}',BR(),
+                                    f'value = {_value}',HR(),
+                                    'xu',k_htm.dict_2_table(xu)
+                                ))))]
+                               
+                    #'xdic',k_htm.dict_2_table(x_dic)
+                    obj['input']=DIV(*links,*helps)
+                else: #insert
+                    c_id_list=[]
+                    for key in sdl:
+                        for i,val in enumerate(sdl[key].split(',')):
+                            csd={key:val} #c_set_dic
+                            csd.update(c_set_dic)
+                            
+                            #c_id,url,vv,xu,xu2=xupdate_1_rec_form(db2,c_tb,csd,cur_val)
+                            xu = db2.insert_data(c_tb,csd)#,sql_do=False
+                            c_id=xu['id']
+                            c_id_list+=[str(c_id)]
+                            
+                            vv="insert"
+                            url=URL('form','xform_sd',args=[c_db,c_tb,c_id])  
+                    
+                            links+=[k_htm.a(c_id,_href=url,_target="box",_title='لینک',_class='btn btn-info')]
+                            helps+=[XML(k_htm.x_toggle_h(XML(DIV(
+                                    f'c_id : {c_id}',BR(),
+                                    f'sql : {vv}',BR(),
+                                    'xu',k_htm.dict_2_table(xu)
+                                ))))]
+                    xu2=DB1(db_name).update_data(tb_name,{obj['name']:','.join(c_id_list)},{'id':xid})#,sql_do=False 
+                    #'xdic',k_htm.dict_2_table(x_dic)
+                    obj['input']=DIV(*links,*helps)
+            else:# انجام کار فقط برای 1 بار
+                def xupdate_1_rec_form(db2,c_tb,c_set_dic,cur_value):#xupdate =insert or update
+                    if cur_value:
+                        xu = db2.update_data(c_tb,c_set_dic,{'id':cur_value})#,sql_do=False
+                        c_id=cur_value
+                        vv="update"
+                        xu2=''
+                    else:
+                        xu = db2.insert_data(c_tb,c_set_dic)#,sql_do=False
+                        c_id=xu['id']
+                        xu2=DB1(db_name).update_data(tb_name,{obj['name']:c_id},{'id':xid})#,sql_do=False
+                        vv="insert"
+                    url=URL('form','xform_sd',args=[c_db,c_tb,c_id])  
+                    return c_id,url,vv,xu,xu2
+                #------------------------------------------------------------------
+                c_id,url,vv,xu,xu2=xupdate_1_rec_form(db2,c_tb,c_set_dic,_value)
+
+                obj['input']=DIV(k_htm.a(c_id,_href=url,_target="box",_title='لینک',_class='btn btn-info'),
+                    XML(k_htm.x_toggle_h(XML(DIV(
+                        'sql : ' + vv,
+                        'value = ' + _value,HR(),
+                        'xu',k_htm.dict_2_table(xu),HR(),
+                        'xu2',k_htm.dict_2_table(xu2),HR(),
+                        'xdic',k_htm.dict_2_table(x_dic)
+                    )))))
+        obj['help']=hlp + obj.get('help','')
+        
+        if 'output' in need:
+            def xx_link(c_id):
+                c_id=row[titles.index('id')]
+                url=URL('form','xform',args=[c_db,c_tb,c_id])
+                return k_htm.a(c_id,_href=url,_target="box")
+            #-------------------------------------------------
+            
+            rows,titles,n=db2.select(c_tb,where=c_set_dic)
+            out=[]
+            for row in rows:
+                c_id=row[titles.index('id')]
+                out+=[xx_link(c_id)]
+            obj['output']=DIV(DIV(_value),DIV(out))
         
     elif sc=="do": #sc
         do_name,do_param=base_data.split(share.st_splite_chr2)
@@ -1673,8 +1790,15 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         obj_help_pre+=[k_htm.a('list',_target="box",_href=URL('km','uniq_inf_show',args=(db_name,tb_name,obj['name']),vars={'uniq_where':obj['uniq']}))]       
     obj['help']=TABLE(obj.get('help',''),*obj_help_pre)
     ##obj['js']=
-    return obj #,cm.records()
     
+    return obj #,cm.records()
+class C_TASK():#smart_field
+    def __init__(self,x_data_s,field_name):
+        self.x_data=x_data_s['tasks'][field_name]#fd=field_data
+        self.name=field_name
+    def title_html(self):
+        #html for 1th_part(=field name) of smart_field
+        return DIV(self.x_data['title'],_title=self.name)
 class C_FORM_B():#
     def __init__(self,x_data_s,xid,new_data={},form_sabt_data={}):
         if type(x_data_s)==tuple:
@@ -2011,7 +2135,22 @@ class C_FORM():
                 cur_step_name=new_data['cur_step_name'] or self.cur_step_name
             self.cur_step_name=cur_step_name
             x_r=self.__update(cur_step_name,text_app,new_data)
-            #print('__update')
+        
+        # run do tasks of cur_step
+        from gluon import current
+        request=current.request
+        x_data_s=self.x_data_s
+        cur_step=x_data_s['steps'][self.cur_step_name]
+        if 'do' in cur_step:
+            for task_name in cur_step.get('do','').split(','):
+                task=x_data_s['tasks'][task_name]
+                x_obj=obj_set (i_obj=task,x_dic=self.all_data,x_data_s=x_data_s,xid=self.xid, need=['input'],request=request,c_form=self)
+                title_html=C_TASK(x_data_s,task_name).title_html()
+                print ("self.x_data_s['steps'][self.cur_step_name].get('do','').split(',')=" +task_name)
+                x_r['html_report']+=DIV(title_html,x_obj['input'],x_obj['help'])
+                #print('__update')
+            
+            
         return x_r #DIV(XML(r1)),xid,r_dic
         #--------------------------------     
     def save_app_review(self,request_data):
@@ -2052,17 +2191,22 @@ class C_FORM():
         form_sabt_data=self.all_data
 
         fd=x_data_s['tasks'][field_name]#fd=field_data
-        htm_1=DIV(fd['title'],_title=field_name)#htm_1=html for 1th_part(=field name) of row
+        #title_html=DIV(fd['title'],_title=field_name)#html for 1th_part(=field name) of row
+        title_html=C_TASK(x_data_s,field_name).title_html()
+        
         if 'hide' in fd['prop']:
-            return [htm_1,'*','','','','']
+            return [title_html,'*','','','','']
         if 'auth' in fd :
             if (not k_user.user_in_xjobs(fd['auth'],x_data_s,c_form=self)):
-                return [htm_1,'*','','','','',''] 
+                return [title_html,'*','','','','',''] 
         if mode=='output-mini':
             if not fd['type'] in ['file','f2f'] : mode='output'
-            
+        
+        if 1==0: #report
+            if fd['type']=='crt_rec_form':
+                xreport_var([{'fd':fd,'x_dic':form_sabt_data}])    
         x_obj=obj_set(i_obj=fd,x_dic=form_sabt_data,x_data_s=x_data_s,xid=xid, need=[mode],request=request,c_form=self)
-        return [htm_1,x_obj[mode],x_obj['help'],fd['title'],field_name,x_obj['data_json']]
+        return [title_html,x_obj[mode],x_obj['help'],fd['title'],field_name,x_obj['data_json']]
         #------------------------------------------------- 
     def un_what_can_do_4_step(self,step_name,x_un=''):
         ''' 030907
@@ -2169,13 +2313,96 @@ def input_validate(in_data,data_inf):
         else:
             return False
 def chidman(hx,x_data_s,step,form_case=2,request=''):
+    """
+    ساختاردهی و نمایش فرم‌های چندبخشی (عمودی/افقی) بر اساس داده‌های ورودی و تنظیمات مرحله‌ای.
+
+    این تابع داده‌های ورودی (`hx['data']`) را با توجه به تنظیمات مرحله‌ای (`step`)
+    به جدول‌بندی واکنش‌گرا (Bootstrap-like) تبدیل می‌کند و خروجی HTML (وب‌۲پی DIV/H5/XML) بازمی‌گرداند.
+    حالت نمایش می‌تواند عمودی (vertical) یا افقی (horizon) باشد.
+
+    پارامترها
+    ----------
+    hx : dict
+        دیکشنری شامل داده‌ها و المان‌های نمایشی. کلیدهای پرکاربرد:
+        - "data" : لیست المان‌ها (DIV یا محتوای HTML) برای نمایش
+        - "stp" : عنوان یا شماره مرحله
+        - "app" : لیست ابزار/دکمه‌ها/المان‌های اپلیکیشن
+        - "app-color" : رنگ پیش‌فرض ستون اپلیکیشن (کلاس CSS)
+    x_data_s : any
+        داده‌های اضافی (context) که به `k_user.xjobs_inf` پاس داده می‌شود.
+    step : dict
+        تنظیمات مرحله. کلیدهای پرکاربرد:
+        - "step_cols_width" : عرض ستون‌ها به صورت رشته جداشده با کاما (مثل `"6,6"` یا `"3,3,6"`)
+        - "xjobs" : نوع یا کد job برای تولید اطلاعات تکمیلی
+        - "header", "footer" : متن هدر و فوتر (HTML string)
+    form_case : int, پیش‌فرض=2
+        نوع نمایش:
+        - 1 = vertical (عمودی)
+        - 2 = horizon (افقی)
+    request : web2py request, اختیاری
+        اگر داده‌ی `form_case` از طریق `request.post_vars` یا `request.get_vars` آمده باشد، خوانده می‌شود.
+
+    خروجی
+    -------
+    HTMLHelper (DIV یا لیست از DIV ها)
+        ساختار HTML نهایی برای رندر شدن در قالب.
+
+    مثال
+    ------
+    >>> hx = {
+    ...   "data": [DIV("field1"), DIV("field2")],
+    ...   "stp": "مرحله 1",
+    ...   "app": ["ذخیره", "لغو"],
+    ...   "app-color": "bg-info"
+    ... }
+    >>> step = {"step_cols_width": "6,6", "header": "فرم تست", "footer": "پایان"}
+    >>> chidman(hx, {}, step, form_case=1)
+    [<DIV ...>, <DIV ...>, ...]
+
+    """
     def rows_2_table(in_rows,step_cols_width):
         '''
+        inputs:
             in_rows:list of div
                 input rows
-            step_cols_width:list
+            step_cols_width:list of ints
+            
                 output table cols number
         '''
+        """
+        تقسیم‌بندی لیستی از المان‌های نمایشی به سطرها و ستون‌های واکنش‌گرا (Bootstrap-like).
+
+        این تابع لیست المان‌های ورودی (`in_rows`) را بر اساس الگوی عرض ستون‌ها (`step_cols_width`)
+        در قالب مجموعه‌ای از سطرها (`DIV(class='row')`) و ستون‌ها (`DIV(class='col-X')`) سازمان‌دهی می‌کند.
+
+        پارامترها
+        ----------
+        in_rows : list
+            لیستی از المان‌های نمایشی (مانند DIV یا هر شیء HTML web2py) که قرار است در جدول‌بندی قرار گیرند.
+        step_cols_width : list of int
+            لیست عرض ستون‌ها (به مقیاس Bootstrap). مثال:
+            - [12] → هر سطر شامل یک ستون تمام‌عرض
+            - [6,6] → هر سطر شامل دو ستون نصف‌عرض
+            - [3,3,6] → هر سطر شامل سه ستون با عرض‌های ۳، ۳ و ۶
+
+        خروجی
+        -------
+        list
+            لیستی از `DIV`‌ها، هر کدام یک `row` شامل ستون‌بندی بر اساس `step_cols_width`.
+
+        نکات
+        ------
+        - اگر `step_cols_width == [1]` باشد، تابع خروجی را بدون تغییر برمی‌گرداند.
+        - در صورتی که تعداد عناصر `in_rows` مضربی از طول `step_cols_width` نباشد،
+          سطر آخر ناقص ساخته می‌شود ولی همچنان بازگردانده خواهد شد.
+        - برای هر ستون از کلاس CSS به شکل `col-{n}` استفاده می‌شود.
+
+        مثال
+        ------
+        >>> rows_2_table([DIV("a"), DIV("b"), DIV("c")], [6,6])
+        [DIV(_class="row", ...), DIV(_class="row", ...)]
+
+        """
         if step_cols_width==[1]:
             return in_rows
         n=0
@@ -2185,22 +2412,35 @@ def chidman(hx,x_data_s,step,form_case=2,request=''):
             #نشان دادن بخش اصلی 1 فیلد
             #if len(xx)==3:
             #    xx=xx[1]
+            col_w = step_cols_width[n] if n < len(step_cols_width) else 1
+            r.append(DIV(xx, _class=f"col-{col_w}"))
             n+=1
-            r+=[DIV(xx,_class=f"col-{step_cols_width[n-1]}")]
             if n==len(step_cols_width):
-                o_rs+=[DIV(_class="row",*r)]
+                o_rs.append(DIV(*r, _class="row"))
                 n=0
                 r=[]
+        if r:  # اگر ستون‌های نیمه‌کاره باقی بماند
+            o_rs.append(DIV(*r, _class="row"))
         return o_rs
     #-------------------------------
     step_cols_width=step['step_cols_width'].split(',') if 'step_cols_width' in step else [1]
     hx['data_r']=rows_2_table(hx['data'],step_cols_width)
     import k_user,k_tools
-    form_case=k_tools.int_force((request.post_vars['form_case'] or request.get_vars['form_case']) if request else form_case,form_case)
-    xjobs=k_user.xjobs_inf(step['xjobs'],x_data_s)
+    
+    # تعیین form_case
+    if request:
+        fc_val = (request.post_vars.get('form_case')
+                  or request.get_vars.get('form_case')
+                  or form_case)
+    else:
+        fc_val = form_case
+    form_case = k_tools.int_force(fc_val, form_case)
+
+    xjobs=k_user.xjobs_inf(step.get('xjobs', ''),x_data_s)
     header=H5(XML(step.get('header','')),_class='text-center bg-white')
     footer=H5(XML(step.get('footer','')),_class='text-center bg-white')
     
+    # -------------------------------
     if form_case==1:#vertical
         return [header
                 ]+[DIV(
@@ -2212,15 +2452,24 @@ def chidman(hx,x_data_s,step,form_case=2,request=''):
                 ]+[footer]
         #return DIV(DIV(hx['stp'],_class='col-2 text-right border-left'),DIV(htm_1,_class='col-10'),_class='row border-bottom')
     elif form_case==2:#horizon
-        htm_1=[DIV(x,_class='row') for x in hx['app']]
-        return DIV( header,
-                    DIV(DIV(hx['stp'],_class='row'),
-                        DIV(xjobs['describe'],_title=xjobs['inf'],_class='row text-warning'),
-                        _class='col-2 text-right border-left text-light bg-dark'),
-                    DIV(hx['data_r'],_class='col-8'),
-                    DIV(htm_1,_class=f"col-2 {hx['app-color']}"),
-                    footer,
-                    _class="row border-bottom ")   
+       
+        htm_1=[DIV(x,_class='row') for x in hx.get('app', [])]
+        return DIV( 
+            header,
+            DIV(
+                DIV(hx.get('stp', ''), _class='row'),
+                DIV(xjobs.get('describe', ''),
+                    _title=xjobs.get('inf', ''),
+                    _class='row text-warning'),
+                _class='col-2 text-right border-left text-light bg-dark'
+            ),
+            DIV(*hx['data_r'], _class='col-8'),
+            DIV(*htm_1, _class=f"col-2 {hx.get('app-color','')}"),
+            footer,
+            _class="row border-bottom "
+        )      
+    else:
+        return DIV(header, "Invalid form_case", footer)               
 
 
 class C_FORM_HTM():
@@ -2269,7 +2518,10 @@ class C_FORM_HTM():
                 A('لیست فرم',_href=URL('xtable',args=args),_class='btn btn-primary')]
         return htm_form
 
-    def show_form_body(self,x_data_s,c_form,xid):   
+    def show_form_body(self,x_data_s,c_form,xid):
+        '''
+            بخش اصلی نمایش فرم
+        '''
         #out_mode='json'
         htm_form={'body':[],'body_json':{},'inf':''}
         text_app_added=False
@@ -2370,7 +2622,7 @@ class C_FORM_HTM():
         '''
         #print (step)
         fsc_class=f"form_step_c{fsc_mode}" #fsc_mode=form_step_class
-        hx={'data':[],'stp':'','app':[],'data_json':{}}#fsc_mode
+        hx={'data':[],'stp':'','app':[],'data_json':{},'app_do':[]}#fsc_mode
         #print ("step['tasks']="+step['tasks'])
         for field_name in step['tasks'].split(','):
             if not field_name :continue
@@ -2382,6 +2634,14 @@ class C_FORM_HTM():
                 #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
         #breakpoint() f_nxt_s
+        for field_name in step.get('do','').split(','):
+            if not field_name :continue
+            if field_name in x_data_s['labels']:
+                hx['app_do']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
+            else:
+                hh=self.c_form.show_step_1_row(field_name,current.request,mode='output')
+                hx['app_do']+=[self._show_row(hh[:3],step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
+                hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}
         def val_in_dic(x_dict,v_name):
             '''
                 goal:extract item_val(=return) from dict(=x_dict) by its item_name(=v_name)
@@ -2418,7 +2678,13 @@ class C_FORM_HTM():
         #   return hx['data_json']
         #else:
 
-        return hx['data_json'],DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid "+fsc_class) #DIV(,_style="background-color:#555;")
+        #return hx['data_json'],DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid "+fsc_class) #DIV(,_style="background-color:#555;")
+
+        return hx['data_json'],DIV(
+            chidman(hx,x_data_s,step,request=current.request)+[DIV(x) for x in hx['app_do']],
+            _class="container-fluid "+fsc_class
+        )
+            #DIV(,_style="background-color:#555;")
     def show_step_cur(self,step={},step_n=0,info=False,out_mode=''): #like=row_edit
         '''
             0209012 
@@ -2428,17 +2694,28 @@ class C_FORM_HTM():
         x_data_s=self.x_data_s
         if not step:
             step=k_tools.nth_item_of_dict(x_data_s['steps'],int(step_n))
-        hx={'data':[],'stp':'','app':[],'data_json':{}}
+        hx={'data':[],'stp':'','app':[],'data_json':{},'app_do':[]}
         for field_name in step['tasks'].split(','):
             if not field_name :continue
             if field_name in x_data_s['labels']:
                 hx['data']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
             else:
                 hh=self.c_form.show_step_1_row(field_name,current.request,mode='input')
-                hx['data']+=[self._show_row(hh,step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
+                hx['data']+=[self._show_row(hh[:3],step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
                 #[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
                 hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
-        hx['app1']=[DIV(BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{self.x_color[xx]}',_onclick=f"app_key('{xx}')") if xx in step['app_kt'] else '' ,_class='col-'+{'y':'8','r':'2','x':'2'}[xx]) for xx in ['x','y','r']]
+        hx['app1']=[
+            DIV(BUTTON(step['app_kt'][xx],_type='BUTTON',_class=f'w-100 btn btn-{self.x_color[xx]}',_onclick=f"app_key('{xx}')") if xx in step['app_kt'] else '' ,_class='col-'+{'y':'8','r':'2','x':'2'}[xx]) for xx in ['x','y','r']]
+        
+        for field_name in step.get('do','').split(','):
+            if not field_name :continue
+            if field_name in x_data_s['labels']:
+                hx['app_do']+=[DIV(DIV(XML(x_data_s['labels'][field_name]),_class="col text-center bg-info text-light"),_class='row border-top')]
+            else:
+                hh=self.c_form.show_step_1_row(field_name,current.request,mode='output')
+                hx['app_do']+=[self._show_row(hh[:3],step,hidden=('hidden' in x_data_s['tasks'][field_name]['prop']))]
+                hx['data_json'][field_name]={'name':str(hh[4]),'value':hh[5],'help':str(hh[2]),'title':str(hh[3])}#(hh[1] if type(hh[1])==str else '')
+        
         hx['app']=['نتیجه','-'*10,'اقدام:','توسط:','مورخ :'] if info else []
         hx['app']+=[INPUT(_type='hidden',_id='cur_step_name',_name='cur_step_name',_value=step['name'])]
         hx['app']+=[INPUT(_type='hidden',_id='text_app',_name='text_app',_value='')]
@@ -2448,15 +2725,78 @@ class C_FORM_HTM():
         #   return hx['data_json']
         #else:
         return hx['data_json'],DIV(
-                DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid form_step_cur")
-                ,DIV(*hx['app1'],_class="row p-2"))
+                DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid form_step_cur"),
+                DIV(*hx['app1'],_class="row p-2"),
+                *hx['app_do']
+            )
+            #    +[DIV(x) for x in hx['app_do']
                      #,_action=URL('save',args=request.args)
-    def _show_row(self,hh,step,hidden=False):
-        task_cols_width=step.get('task_cols_width','3,6,3')
-        tcw=task_cols_width.split(',')
-        style="display:none;" if hidden else ''
-        return DIV(*[DIV(hh[i],_class=f'col-{tcw[i]} text-right') for i in range(0,3) if tcw[i]!='0'],_class='row border',_style=style)
-        #hx['data']+=[DIV(DIV(hh[0],_class='col-3 text-right'),DIV(hh[1],_class='col-6 text-right'),DIV(hh[2],_class='col-3 text-right'),_class='row border-top')]
+        """
+                DIV(chidman(hx,x_data_s,step,request=current.request),_class="container-fluid form_step_cur"),
+                DIV(*hx['app1'],_class="row p-2"),
+                DIV(*hx['app_do'],_class="row p-2")
+            )
+            #,_action=URL('save',args=request.args)"""
+        
+    def _show_row(self, htm_objs, step, hidden=False):
+        """
+        ایجاد یک ردیف (row) واکنش‌گرا با ستون‌بندی مشخص‌شده در step.
+
+        این تابع لیست داده‌های ورودی (htm_objs) را گرفته و با توجه به
+        عرض ستون‌های تعریف‌شده در step['task_cols_width'] (به سبک Bootstrap)
+        یک DIV با کلاس "row" بازمی‌گرداند. در صورت نیاز می‌تواند ردیف را
+        مخفی (hidden) کند.
+
+        پارامترها
+        ----------
+        self : object
+            شیء فراخواننده (برای متدهای کلاس).
+        htm_objs : list
+            لیست المان‌های HTML یا متن برای قرار گرفتن در ستون‌ها.
+            تعداد عناصر باید حداقل برابر با طول `task_cols_width` باشد.
+        step : dict
+            تنظیمات مرحله. کلید مورد استفاده:
+            - "task_cols_width" : رشته‌ای از عرض ستون‌ها جداشده با کاما،
+              مثلاً "3,6,3" (پیش‌فرض: "3,6,3").
+              اگر برای یک ستون مقدار "0" داده شود، آن ستون نمایش داده نمی‌شود.
+        hidden : bool, پیش‌فرض=False
+            اگر True باشد، ردیف با `display:none;` مخفی خواهد شد.
+
+        خروجی
+        -------
+        DIV
+            یک المان HTML (web2py DIV) با کلاس "row border" که شامل
+            ستون‌بندی داده‌ها است.
+
+        مثال
+        ------
+        >>> step = {"task_cols_width": "4,4,4"}
+        >>> self._show_row(["عنوان", "مقدار", "توضیح"], step)
+        <DIV class="row border"> ... </DIV>
+
+        نکات
+        ------
+        - اگر طول `task_cols_width` و `htm_objs` یکسان نباشد،
+          فقط به اندازه حداقل طول مشترک ستون ساخته می‌شود.
+        - برای هر ستون کلاس `col-{n} text-right` اعمال می‌شود.
+        - اگر مقدار ستون "0" باشد، آن ستون رندر نمی‌شود.
+        """
+
+        task_cols_width = step.get('task_cols_width', '3,6,3')
+        tcw = [x.strip() for x in task_cols_width.split(',') if x.strip()]  # لیست رشته‌ها
+        style = "display:none;" if hidden else ''
+
+        return DIV(
+            *[
+                DIV(htm_objs[i], _class=f'col-{tcw[i]} text-right')
+                for i in range(min(len(htm_objs), len(tcw)))
+                if tcw[i] != '0'
+            ],
+            _class='row border',
+            _style=style
+        )    
+        #hx['data']+=[DIV(DIV(htm_objs[0],_class='col-3 text-right'),DIV(htm_objs[1],_class='col-6 text-right'),DIV(htm_objs[2],_class='col-3 text-right'),_class='row border-top')]
+        
     def app_review (self,step_name): 
         '''
             0209018

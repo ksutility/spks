@@ -493,7 +493,7 @@ class DB1():
         r1['base_row_id']=base_row_id
         return r1
     #----------------------------------------------------------------
-    def insert_data(self,table_name,name_list_or_nv_dict,val_list=[]):
+    def insert_data(self,table_name,name_list_or_nv_dict,val_list=[],sql_do=True):
         if type(name_list_or_nv_dict)==dict:
             val_list=list(name_list_or_nv_dict.values())
             name_list=list(name_list_or_nv_dict.keys())
@@ -521,13 +521,18 @@ class DB1():
         x_v="?,"*(len(val_list))
         sql_t='INSERT INTO {} ({}) VALUES ({})'.format(table_name,",".join(name_list),x_v[:-1])#NSERT OR IGNORE INTO
         #ui.msg(sql_t+"/n"+str(val_list))
-        rep=self._exec(sql_t, val_list)
-        xid=self.cur.lastrowid
+        
+        if sql_do:
+            rep=self._exec(sql_t, val_list)
+            xid=self.cur.lastrowid
+        else:
+            rep={}
+            xid=-1
         rep.update({'id':xid,'ids':xid,'sql':sql_t+"|"+str(val_list),'done':True,'result':'رکورد جدید اضافه شد'})
         if debug:xxxprint (msg=["result",'',''] ,vals=rep)
         return rep
 
-    def update_data(self,table_name,set_dic,x_where):
+    def update_data(self,table_name,set_dic,x_where,sql_do=True):
         ''' set_dic={'name11':'val11','name12':'val12'..}
             x_where: dict /str
                 dict= {'name21':'val21','name22':'val22'..}
@@ -546,7 +551,7 @@ class DB1():
         if not find1['done']:#" any record not found"
             xr['done']='0'
             xr['msg']=' هیچ ردیفی پیدا نشد'
-            xr['msg']+=' لذا آپدیت انجام نشد '
+            xr['msg']+=' لذا آپدیت قابل انجام نیست'
             report_db_change(self.path,r1, [])
             return xr
         if debug:xxxprint(msg=["find1",'',''],vals=find1 )
@@ -555,54 +560,56 @@ class DB1():
         s_set=self._dic_2_set(set_dic)
         
         xr['sql']='UPDATE {} SET {}' .format(table_name,s_set)+ sql_where
-        xr['exe']=self._exec(xr['sql'])
-        xr['rowcount']=self.cur.rowcount
-        r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
-        if debug:xxxprint(msg=["data",'rowcount = updated',''] ,vals=xr)
-        if xr['rowcount']==0:# any record not found
-            xr['done']='1'
-            xr['msg']=' رکورد پیدا شد ولی تغییر توسط برنامه نتوانست اعمال شود'
-            report_db_change(self.path,r1, [])
-            return xr
-        # بررسی تغییرات  
-        find2=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
+        if sql_do:
+            xr['exe']=self._exec(xr['sql'])
+            xr['rowcount']=self.cur.rowcount
         
-        if debug:xxxprint(msg=["find2",'',''],vals=find2 )
-        xr['dif_x']={} #different s
-        xr['dif']={}
-        if (not find2) or (not find2['rows']):   
-            rows2,titles2,row_num2=self.select(table_name,limit=0)
-            id_list=[x[0] for x in rows2]
-            for i,row in enumerate(find1['rows']):
-                id_1=row[0]
-                row=row[1:]
-                if not id_1 in id_list:
-                    xxprint('err_x',f'{id_1} not in {str(id_list)}')
-                row_x= id_list.index(id_1)   
-                row2=rows2[row_x][1:]
-                dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
-                dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
-                report_db_change(self.path,r1, dif,idx=i+1)
-                xr['dif'][row[0]]=dif
-            xr['id']=str(find1['ids'])
-        else: 
-            xr['id']=str(find2['ids'])
-            tt=find2['titles']
-            # مقایسه اطلاعات قبل و بعد از تغییر به صورت ردیف به ردیف
-            for i,f1 in enumerate(find1['rows']):
-                f2=find2['rows'][i]
-                dif_list=[j for j,x in enumerate(f1) if x!=f2[j]]
-                dif=['row({}),col({}):{}=>{}'.format(f1[0],tt[j],f1[j],f2[j]) for j in dif_list]
-                report_db_change(self.path,r1, dif)
-                rrp={f'dif- {i}':x for i,x in enumerate(dif)}
-                rrp.update({'update_n':len(dif)})
-                if debug:xxxprint(msg=["result",'',''] ,vals=rrp)
-                #xxprint ('db-update','row {}:dif={}----\n####   {}'.format(f1[0],len(dif),'\n####   '.join(dif)))
-                xr['dif']=dif
-                xr['dif_x'][f1[0]]=[tt[j] for j in dif_list] 
-                xr['updtae_n']=len(dif)
-        xr['msg']=','.join(xr['dif'])       
-        if debug:xxxprint(msg=["end",'',''] )
+            r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
+            if debug:xxxprint(msg=["data",'rowcount = updated',''] ,vals=xr)
+            if xr['rowcount']==0:# any record not found
+                xr['done']='1'
+                xr['msg']=' رکورد پیدا شد ولی تغییر توسط برنامه نتوانست اعمال شود'
+                report_db_change(self.path,r1, [])
+                return xr
+            # بررسی تغییرات  
+            find2=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
+            
+            if debug:xxxprint(msg=["find2",'',''],vals=find2 )
+            xr['dif_x']={} #different s
+            xr['dif']={}
+            if (not find2) or (not find2['rows']):   
+                rows2,titles2,row_num2=self.select(table_name,limit=0)
+                id_list=[x[0] for x in rows2]
+                for i,row in enumerate(find1['rows']):
+                    id_1=row[0]
+                    row=row[1:]
+                    if not id_1 in id_list:
+                        xxprint('err_x',f'{id_1} not in {str(id_list)}')
+                    row_x= id_list.index(id_1)   
+                    row2=rows2[row_x][1:]
+                    dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
+                    dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
+                    report_db_change(self.path,r1, dif,idx=i+1)
+                    xr['dif'][row[0]]=dif
+                xr['id']=str(find1['ids'])
+            else: 
+                xr['id']=str(find2['ids'])
+                tt=find2['titles']
+                # مقایسه اطلاعات قبل و بعد از تغییر به صورت ردیف به ردیف
+                for i,f1 in enumerate(find1['rows']):
+                    f2=find2['rows'][i]
+                    dif_list=[j for j,x in enumerate(f1) if x!=f2[j]]
+                    dif=['row({}),col({}):{}=>{}'.format(f1[0],tt[j],f1[j],f2[j]) for j in dif_list]
+                    report_db_change(self.path,r1, dif)
+                    rrp={f'dif- {i}':x for i,x in enumerate(dif)}
+                    rrp.update({'update_n':len(dif)})
+                    if debug:xxxprint(msg=["result",'',''] ,vals=rrp)
+                    #xxprint ('db-update','row {}:dif={}----\n####   {}'.format(f1[0],len(dif),'\n####   '.join(dif)))
+                    xr['dif']=dif
+                    xr['dif_x'][f1[0]]=[tt[j] for j in dif_list] 
+                    xr['updtae_n']=len(dif)
+            xr['msg']=','.join(xr['dif'])       
+            if debug:xxxprint(msg=["end",'',''] )
         return xr
         #except: #Error as e:   print(e)
         #   return False

@@ -14,15 +14,21 @@ def i_date():
         return {'d':d,'m':m,'iso':mt + dt}
 def ir_date(xformat='',add=0):
     date_obj=jdatetime.date.today()+jdatetime.timedelta(days=add)
-    date_txt=(date_obj).strftime('%Y-%m-%d')
-    yyyy,mm,dd=date_txt.split('-')
+    date_txt=(date_obj).strftime('%Y-%m-%d-%H:%M:%S.%f')
+    yyyy,mm,dd,nn=date_txt.split('-')
     yy=yyyy[-2:]
+    
+    from datetime import datetime
+    xnow=datetime.utcnow().strftime('%S.%f')#%H:%M:
+    xnow,f=xnow.split('.')
+    
     now=time.strftime("%H:%M:%S", time.localtime())
     hh,gg,ss=now.split(':')
     w,ww,www=ir_weekday(in_time=date_obj,w_case=4)
     ll={'yyyy':yyyy,'yy':yy,'mm':mm,'dd':dd,
         'hh':hh,'gg':gg,'ss':ss,
-        'w':str(w),'ww':ww,'www':www}
+        'www':www,'ww':ww,'w':str(w),
+        'fff':f[:3],'ff':f[:2],'f':f}# milisec
     if xformat:  
         for x in ll:
             xformat=xformat.replace(x,ll[x])
