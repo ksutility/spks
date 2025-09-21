@@ -228,18 +228,26 @@ def list_0():
                     ]
                     
                 code=tb_obj['base']['code'] if 'code' in tb_obj['base'] else '900'
-                trsx1[code]=tx
+                if (code =="-") or (code in trsx1):
+                    #print (f"error in x_data => code {code} is duplicate in {db_name},{tb_name}")
+                    code+=db_name+"-"+tb_name
+                trsx1[code]=[tx ,db_name+","+tb_name+","+code] 
     
     #x_data_cat
-    for code in sorted(trsx1.keys()):         
+    n=0
+    for code in sorted(trsx1.keys()):
+        n+=1
         tx=trsx1[code]
         xcat=code[0] if len(code)<5 else '9'
-        n1=len(trsx2[xcat])+1
-        
+        if xcat == "-":
+            print (f"error in x_data => xcat = -  :{tx[1]}")
+            code+=db_name+"-"+tb_name
+        if xcat in trsx2: 
+            n1=len(trsx2[xcat])+1
+            tn1= [DIV(n1,_title=code)] 
+            trsx2[xcat]+=[tn1+['']+tx[0]]
         tn= [DIV(n,_title=code)]  
-        tn1= [DIV(n1,_title=code)] 
-        trsx2[xcat]+=[tn1+['']+tx]
-        trsx2["-"]+=[tn+[db_name+","+tb_name]+tx]
+        trsx2["-"]+=[tn+[tx[1]]+tx[0]]
  
     from k_table import K_TABLE
     # tt=['<div class="tab-content">']

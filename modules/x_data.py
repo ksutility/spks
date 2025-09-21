@@ -1007,7 +1007,7 @@ x_data={
     #--------------------------------------------------------------------
     'act':{ #db
         'a':{ 
-            'base':{'mode':'form','title':'لیست اقدام -  گزارش عملکرد','help':'act list of a person','code':'-'
+            'base':{'mode':'form','title':'لیست اقدام -  گزارش عملکرد','help':'act list of a person','code':'01'
             },
             'tasks':{
                 'code':{'type':'text','title':'کد','len':'4','uniq':''},
@@ -1552,7 +1552,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_act':{ #db
         'a':{
-            'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'-'
+            'base':{'mode':'form','title':'اقدامات هر فرد','help':'person_act_manage','code':'01'
             },
             'tasks':{
                 'frd_id':{'type':'auto-x','len':'4','auto':'_cur_user_un_','title':'کد همکار'},
@@ -1592,7 +1592,7 @@ x_data={
     #--------------------------------------------------------------------
     'person_get':{ #db
         'a':{
-            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'-'
+            'base':{'mode':'form','title':'مشخصات افراد شناسایی شده برای جذب نیرو','help':'','code':'01'
             },
             'tasks':{
                 'name_f':{'type':'text','len':'20','title':'نام'},
@@ -2847,7 +2847,7 @@ x_data={
     #--------------------------------------------------------------------
     'hr_nahar':{ #db
         'khod':{
-            'base':{'mode':'form','code':'-','title':'فرم درخواست ناهار - شخصی','help':'','rev':'00-040622'
+            'base':{'mode':'form','code':'01','title':'فرم درخواست ناهار - شخصی','help':'','rev':'00-040622'
             },
             'tasks':{
                 'frd_1_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,,'prop':['hidden']}
@@ -2864,7 +2864,7 @@ x_data={
             }
         },
         'mhmn':{
-            'base':{'mode':'form','code':'-','title':'فرم درخواست ناهار - مهمان','help':'','rev':'00-040622'
+            'base':{'mode':'form','code':'01','title':'فرم درخواست ناهار - مهمان','help':'','rev':'00-040622'
             },
             'tasks':{
                 'frd_0_un':{'type':'auto-x','len':'24','auto':'_cur_user_un_','title':'ثبت کننده  - کد'},#,'prop':['hidden']},
@@ -2884,7 +2884,7 @@ x_data={
     #--------------------------------------------------------------------
     'tmsh':{ #db
         'hand_io':{
-            'base':{'mode':'form','code':'-','title':'ورود دستی ساعت ورود و خروج','help':'','rev':'00-040611'
+            'base':{'mode':'form','code':'01','title':'ورود دستی ساعت ورود و خروج','help':'','rev':'00-040611'
             },
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'ثبت کننده  - نام',},#'prop':['hidden']
@@ -2905,7 +2905,7 @@ x_data={
     #--------------------------------------------------------------------
     'test':{ #db
         'b':{
-            'base':{'mode':'form','code':'-','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
+            'base':{'mode':'form','code':'0','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
                 },
             'tasks':{
                 'dt1':{'type':'fdate','len':'10','title':'تاریخ انجام کار','prop':[]},

@@ -464,7 +464,7 @@ class C_TABLE:
         for i_r,row in enumerate(rows):
             tds=[]
             for i,cell in enumerate(row):
-                if not self.heads[i] in heads:continue
+                if i>=len(self.heads) or (not self.heads[i] in heads):continue
                 if type(cell)==dict:
                     _class_l=[heads[i]['class']] if 'class' in heads[i] else []
                     _class_l+=[cell['class']] if 'class' in cell else []

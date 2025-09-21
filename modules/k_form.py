@@ -491,7 +491,7 @@ def formname_to_formcode(form_name):
 #=================================================================================================================
 #====================================================== used =====================================================    
 #---------------------------------------------------------------------------------################################
-def template_parser(x_template,x_dic={},rep=''):
+def template_parser(x_template,x_dic={},rep='',show_err=True):
     '''
     use in kswt:ok 020905
     rename:021126 - old name=format_parser
@@ -528,6 +528,8 @@ def template_parser(x_template,x_dic={},rep=''):
         x_dic1.update({'session':current.session,'_i_':current.session['username'],'_d_':k_date.ir_date('yy/mm/dd')})
         #xxxprint(msg=['inf','template_parser',xx],vals=x_dic)
         
+        #x1= template.render(content=xx,context=x_dic1) 
+        #return x1.format(**x_dic1)  #remove 020926
         try:
             """
                 این فرایند خطا گیری برای کمک به رفع خطا در بخش های زیر می باشد
@@ -538,10 +540,11 @@ def template_parser(x_template,x_dic={},rep=''):
             #xxxprint(msg=['inf',x1+"|"+str(rep),xx],vals=x_dic)
             return x1.format(**x_dic1)  #remove 020926
         except Exception as err:
-            
-            xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)
+            if show_err:
+                xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)
+                #ui.msg('error in template_parser')
             return 'error in template_parser :'+str(err)
-            ui.msg('error in template_parser')
+                
     else:
         return x_template
 #---------------------------------------------------------------------------------################################
@@ -686,7 +689,10 @@ def reference_select (ref_0,form_nexu=False,form_data={},debug=False,x_where='')
             do_report('err',x + " is not in Ref /n ref shoud have ['db','tb','key','val']" +  ref)
     
     for x in ['db','tb','where']:
-        ref[x]=template_parser(ref.get(x,''),x_dic=form_data) #.format(task=task_inf,step=form['steps'],session=session)
+        t_out=template_parser(ref.get(x,''),x_dic=form_data,show_err=False) #.format(task=task_inf,step=form['steps'],session=session)
+        if 'error in template_parser :' in t_out:
+            return '',ref
+        ref[x]=t_out
         #ref_0['pars']=ref
     #if debug :xxxprint(msg=['ref2','idx',''],vals={'form_data':form_data,'ref':ref,'idx':idx})    
     #dbn=share.base_path_data_read + share.dbc_form_prefix + ref['db']+".db"#db_path+ref['db']
@@ -1225,7 +1231,7 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if not xid and c_form:
             xid=str(c_form.xid)
             
-        x_data,ref_pars=reference_select(obj['ref'],form_data=x_dic,debug=True,x_where="id !="+str(xid))
+        x_data,ref_pars=reference_select(obj['ref'],form_data=x_dic,x_where="id !="+str(xid))#,debug=True
         index_hlp=''
         from k_num import SMART_NUM_LIST
         x_list=[x_data[x] for x in x_data if x_data[x]]
@@ -2099,7 +2105,7 @@ class C_FORM():
 
         new_data.update(x_data)
         xu = db1.update_data(self.tb_name,new_data,{'id':xid})
-        xxxprint(vals={'new_data1':self.new_data,'new_data2':new_data,'update_result':xu})
+        #xxxprint(vals={'new_data':new_data,'update_result':xu})
         p1=A(f"#{xid}-update",_onclick="$(this).next().toggle()",_class='toggle')
         p2=DIV(XML(f"{db1.path}<br> UPDATE: <hr>{rr}<hr>"))
         return  {'html_report':DIV(p1,p2,k_htm.val_report(xu)),'id':xid,'db_report':xu}
