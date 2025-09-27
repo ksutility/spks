@@ -1389,9 +1389,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             bt_view=f'''<a class="btn btn-info" title='مشاهده فایل' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{_value}</a>''' if _value else ''
             file_icon=obj['s_ext'] #"F"
             bt_view_mini=f'''<a class="file-{obj['s_ext']}" title='مشاهده فایل {_value}' href = 'javascript:void(0)' onclick='j_box_show("{show_link}",false);'>{file_icon}</a>''' if _value else ''
-        bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",true);'>x</a>''' if _value else ''
+        bt_del=f'''<a class="btn btn-danger" title='حذف فایل-{del_link}' href = 'javascript:void(0)' onclick='j_box_show("{del_link}",reload=false);'>x</a>''' if _value else ''
         bt_del=''
-        bt_upload=f'''<a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",true);'>بارگزاری فایل</a>'''
+        bt_upload=f'''<a class="btn btn-primary" title='{obj['file_name']}' href = 'javascript:void(0)' onclick='j_box_show("{upload_link}",reload=false);'>بارگزاری فایل</a>'''
         msg2=DIV(*[XML(x) for x in msg1]) if msg1 else ''
         #msg2=msg1 #if msg1 else ''
         obj['input']=XML(f'''

@@ -267,7 +267,7 @@ def file_delete_rcl(file_path,path='',delete_empty_folder=False,recycle_sub_fold
     rep=f'{file_path} '    
     if not os.path.exists(file_path):
         rep+=': not exist'
-        xxxprint(msg=['err',rep,''])
+        #xxxprint(msg=['err',rep,''])
         return rep
     #try:
     

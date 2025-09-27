@@ -2914,6 +2914,88 @@ x_data={
         },
     },
     #--------------------------------------------------------------------
+    'vendor':{ #db {_cur_user_un_}
+        'vnl':{
+            'base':{'mode':'form','title':'لیست تامین کنندگان','code':'420','rev':'00-040702','help':'vendor list'
+            },
+            'tasks':{
+                'cat':{'type':'select','title':'دسته','select':{'SND':'صوت','LGT':'نور','DEF':'پدافند'}},
+                'shakhs':{'type':'select','title':'نوع شخص','select':['حقیقی','حقوقی']},
+                'name':{'type':'text','title':'عنوان','help':'نام شرکت یا فرد حقیقی'},
+                'website':{'type':'text','title':'وبسایت','len':'50'},
+                'email':{'type':'text','title':'ایمیل','len':'50'},
+                'tel':{'type':'text','title':'تلفن','len':'15'},
+                'city':{'type':'text','title':'شهر','len':'15'},
+                'adrs':{'type':'text','title':'آدرس','len':'250','height':'50px'},
+                'cert':{'type':'text','title':'گواهی‌نامه‌ها','height':'50px'},
+                'd_expert':{'type':'text','title':'زمینه تخصص','len':'50'},
+                'onbdg':{'type':'text','title':'معرفی - شیوه آشنایی','help_e':'Onboarding Method','len':'50'},
+                'date_u':{'type':'fdate','title':'تاریخ آخرین بروزرسانی','help_e':'Last Update'},
+                'colab':{'type':'text','title':'سابقه همکاری باشرکت','help_e':'Collaboration History with the Company','height':'50px'},
+                'com_task':{'type':'f2f','len':'60','title':'اقدامات هماهنگی','ref':{'tb':'com_task','show_cols':['todo','date']},},
+                'vn_code':{'type':'auto','len':'8','auto':'AQC0-DCT-REC-VNL-{cat}-{id:04d}','title':'کد وندور'},
+                'file_resume':{'type':'file','title':'فایل رزومه','file_name':'{vn_code}-RESUME','file_ext':"pdf,jpg,zip",'path':'form,dct,vnl'},
+                'estlm':{'type':'f2f','len':'60','title':'استعلام','ref':{'tb':'estlm','show_cols':['c_prj_cd','date','price','reslt']},},
+                'short_lst':{'type':'check','title':'لیست کوتاه','help_e':'Short List'}
+                #{'type':'text','title':'نام شرکت- موسسه','def_value':'مهندسان مشاور آستان قدس رضوی'},
+            },
+            'steps':{
+                's0':{'tasks':'cat,shakhs,name','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'vn_code,website,email,tel,city,adrs,d_expert,onbdg','xjobs':'#step#0','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'date_u,cert,colab,file_resume','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''},
+                's3':{'tasks':'com_task,estlm,short_lst','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
+            },
+            'views':{
+                'all':{'input':'vrfy_rslt,vrfy_meta','view1':'idea,idea_bnft,idea_dscr','view2':'clnt_stf,clnt_stf_dscr'}
+            },
+            'labels':{
+                'lable_1':'از اینکه با ارائه پیشنهادات مفید خود ما را در بهبود و توسعه شرکت یاری می فرمایید بسیار سپاسگذاریم',
+            },
+            'cols_filter':{'':'همه',},
+            'data_filter':{'':'همه',}
+        },
+        'com_task':{
+            'base':{'mode':'form','title':'وندور لیست - اقدامات هماهنگی','code':'420-at1','rev':'00-040702'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
+                    'ref':{'db':'vendor','tb':'vnl','key':'{id}','val':'{cat}-{shakhs}-{name}'},
+                    'team':{'cat':{},'shakhs':{},'name':{}
+                            },},
+                'todo':{'type':'text','title':' اقدام لازم'},
+                'date':{'type':'fdate','title':' تاریخ انجام'},
+            },
+            'steps':{
+                's0':{'tasks':'f2f_id,cat,shakhs,name,todo','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'date','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+        },
+        'estlm':{
+            'base':{'mode':'form','title':'وندور لیست - استعلام برای پروژه','code':'420-at2','rev':'00-040702'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
+                    'ref':{'db':'vendor','tb':'vnl','key':'{id}','val':'{cat}-{shakhs}-{name}'},
+                    'team':{'cat':{},'shakhs':{},'name':{},'vn_code':{}
+                            },},
+                'c_prj_id':{'type':'reference','title':'پروژه','prop':['update'],
+                            'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},
+                            'team':{'c_prj_cd':{'val':'{cp_code}'},'c_prj_nm':{'val':'{cp_name}'}},},
+                'date':{'type':'fdate','title':'تاریخ استعلام'},
+                'svcds':{'type':'text','title':'شرح خدمات','help_e':'Service Description'},
+                'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ قرارداد','help':'مبلغ قرارداد بر حسب میلیون تومان'},
+                'reslt':{'type':'text','title':'نتیجه ارزیابی'},
+                'file_svcds':{'type':'file','title':'فایل شرح خدمات','file_name':'{vn_code}-{c_prj_cd}-SVCDS','file_ext':"pdf,jpg,zip",'path':'form,dct,vnl'},
+                'r_des':{'type':'text','title':'توضیح نتیجه ارزیابی'}               
+            },
+            'steps':{
+                's0':{'tasks':'f2f_id,cat,shakhs,name,vn_code,c_prj_id,c_prj_cd,c_prj_nm','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'date,svcds,file_svcds,price','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+                's2':{'tasks':'reslt,r_des','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+        }
+    },
+    #--------------------------------------------------------------------
     'test':{ #db
         'b':{
             'base':{'mode':'form','code':'0','title':'بررسی عملکرد فیلدهای هوشمند در مرحله پیش انتشار'
