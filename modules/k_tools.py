@@ -174,3 +174,13 @@ def dict2obj(in_dict):
         o_d[x]=y
         
     return Storage(o_d)#{x:y json_data1)
+def x_format(text,x_format_dic):
+    '''
+        error manangment in format prosecc
+    '''
+    try:
+        return text.format(**x_format_dic)
+    except Exception as err:
+        k_err.xxxprint(msg=['x_format',text,''],vals={'data':x_format_dic})
+        return ''
+        

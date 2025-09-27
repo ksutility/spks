@@ -258,7 +258,8 @@ def list_0():
     tbl={}
     for cat in x_data_cat:
         tbl[cat]=XML(K_TABLE.creat_htm ( trsx2[cat],titels,table_class="1")) 
-    tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active='2'))]
+    x_active=request.args[0] if request.args else '2'
+    tt+=[XML(k_htm.tabs(cat_dict=x_data_cat,content_dict=tbl,x_active=x_active))]
     server_add=k_tools.server_python_add()
     #tt+=[XML(t0)]
     return dict(htm=DIV(tt,_dir='rtl'),server_python_add=k_tools.server_python_add(),access_from_internet=k_tools.access_from_internet())
@@ -451,7 +452,7 @@ def xtable_i():
         style=style1,
         script=scripts['table cell display'],
         table_filter=c_filter.htm if show_filter else '***',
-        table_head=_xtable_head(x_data_s,x_select,nr,''),
+        table_head=_xtable_head(x_data_s,x_select,nr,'','-'),
         table=table2,btm_mnu="")
 def xtable_i_save():
 
@@ -736,10 +737,10 @@ def date_picker():
     #print(f'today={today} - def_date= {def_date} - {def_date[:4]} - {def_date[5:7]}')
     yy_v=request.vars['yy_v'] or def_date[:4] or '1404' #'1403' #jdatetime.date.today().strftime('%y')
     yy_obj=k_htm.select(_options=[str(x) for x in range(1340,1405)],_name='yy_v',_value=yy_v,no_empty=True,_onchange="submit();")
-    yy_n=int(yy_v)
+    yy_n=int(yy_v) if yy_v else 0
     mm_v=request.vars['mm_v'] or def_date[5:7] #jdatetime.date.today().strftime('%m')
     mm_obj=k_htm.select(_options=[str(x).zfill(2) for x in range(1,13)],_name='mm_v',_value=mm_v,no_empty=True,_onchange="submit();")
-    mm_n=int(mm_v)
+    mm_n=int(mm_v) if mm_v else 0
     #print(mm_n)
     style="""<style>
     div.hd {
@@ -754,8 +755,8 @@ def date_picker():
     """
     mm_len=k_date.ir_mon_len(yy_n,mm_n)
     date=k_date.st_date(yy_n,mm_n,1)
-    w0=k_date.ir_weekday(date,w_case=0)
-    td1=[['','']]*w0
+    w0=k_date.ir_weekday(date,w_case=0) or 0
+    td1=[['','']]*w0 if w0 else [['','']]
     tr=[[DIV(x,_class="hd") for x in ['ش','ی','د','س','چ','پ','ج']]]
     #return f"{date}-{mm_len}-{w0}"
     for x_ruz in range(1,mm_len+1):
@@ -784,8 +785,8 @@ def date_picker():
             b=befor
             find after & befor month od 1 date (yy_v,mm_v)
         '''
-        yy=int(yy_v)
-        mm=int(mm_v)
+        yy=int(yy_v) if yy_v else 0
+        mm=int(mm_v) if mm_v else 0
         mmx=yy*12+mm
         mm_b=list(divmod(mmx-2,12))
         mm_b[1]+=1

@@ -889,13 +889,13 @@ x_data={
                 'file_cv': {'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}5-cv','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':'رزومه','auth':'dccm,#task#un'},
                 'file_ins_rec':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}6-ins-rec','file_ext':"pdf",'path':'form,hrm,cv,{un}','title':' سنوات بیمه بیرون از آستان قدس','auth':'dccm,#task#un'},
                 'home_adrs':{'type':'text','title':'آدرس محل سکونت','len':'50'}, 	
-                'tel_home': {'type':'text','title':'موبایل','len':'13'},
+                'tel_home': {'type':'text','title':'تلفن منزل','len':'13'},
                 'mrf_name': {'type':'text','title':'معرف','len':'10'},	
                 'idc_p1_file':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}7-idc-p1','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس روی کار ملی','auth':'dccm,#task#un'}, 
                 'idc_p2_file':{'type':'file','len':'40','file_name':'AQC0-HRM-CV-{un}8-idc-p2','file_ext':"jpg",'path':'form,hrm,cv,{un}','title':'عکس پشت کارت ملی','auth':'dccm,#task#un'}, 
                 'idc_serial': {'type':'text','title':'شماره سریال پشت کارت ملی','len':'10'},	
                 'job_rec':{'type':'f2f','len':'60','title':'سابقه سمتها','ref':{'tb':'job_rec','show_cols':['loc','office','job','date_st']},},
-                'relate_per':{'type':'f2f','len':'60','title':'افراد تحت تکفل','ref':{'tb':'relate_per','show_cols':['r_name','r_family','Idc_num','date','shnsnm_n']},},
+                'relate_per':{'type':'f2f','len':'60','title':'افراد تحت تکفل','ref':{'tb':'relate_per','show_cols':['r_name','r_family','shnsnm_n','date','Idc_num','rlt']},},
                 },
             'steps':{
                 '0':{'tasks':'m_w,pre_n,name,family,a_name,eng,office,job,un,loc,auth_prj,auth_prj_id','xjobs':'dccm,edu','title':'تعریف اولیه','app_keys':'','app_titls':'','oncomplete_act':''},
@@ -978,7 +978,7 @@ x_data={
             },
             'steps':{
                 'pre':{'tasks':'f2f_id,un,name,family','xjobs':'*','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                '1':{'tasks':'m_w,r_name,r_family,rlt,tel_mob,date,shnsnm_n,shaba,yy,mm,dd','xjobs':'#task#un','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':'','auth':'dccm,#task#un,off_ens'},
+                '1':{'tasks':'m_w,r_name,r_family,rlt,tel_mob,date,shnsnm_n,Idc_num,shaba,yy,mm,dd','xjobs':'#task#un','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':'','auth':'dccm,#task#un,off_ens'},
             },
             
         },
@@ -1108,7 +1108,8 @@ x_data={
                 'c_prj_id':{'type':'reference','title':'c_prj_id','prop':['update'],
                             'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},
                             'team':{'c_prj_cd':{'val':'{cp_code}'},'c_prj_nm':{'val':'{cp_name}'}},},
-                'doc_cat':{'type':'select','title':'دسته مدرک','select':{'OUT':'OUT - اسناد خروجی پروژه','PMO':'PMO - اسناد مدیریت پروژه'},'prop':['update','no_empty']},
+                'doc_cat':{'type':'select','title':'دسته مدرک','prop':['update','no_empty'],
+                    'select':{'OUT':'OUT - اسناد خروجی پروژه','PMO':'PMO - اسناد مدیریت پروژه','DOC':'DOC - مستندات خروجی فرایند'}},
                 
                 
                 'step_x1':{'type':'select','title':'فاز','select':{'A':'Assessment - مطالعات ارزیابی و امکان سنجی','B':'Basic of Design - فاز  0 - مطالعات و شکل گیری مبانی و انگاره',
@@ -1129,9 +1130,9 @@ x_data={
                                
                 'doc_p_code':{'type':'auto','len':'24','auto':'{c_prj_cd}-{step}-{dspln_cd}-{doc_t_cd}','title':'پیش کد مدرک'},
                 'doc_srl_code':{'type':'text','len':'7','lang':'en','title':'کد سریال مدرک','uniq':'doc_p_code=`{doc_p_code}`'},
-                'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک'},
+                'doc_srl_name':{'type':'text','len':'250','title':'نام مدرک','prop':['update']},
                 'doc_a_code':{'type':'auto','len':'50','auto':'{doc_p_code}-{doc_srl_code}','title':'کد کامل مدرک'},
-                'doc_a_name':{'type':'auto','len':'50','auto':'{c_prj_nm}-{doc_srl_name}','title':'نام کامل مدرک'},
+                'doc_a_name':{'type':'auto','len':'50','auto':'{c_prj_nm} - {doc_srl_name}','title':'نام کامل مدرک'},
                 'doc_rec':{'type':'f2f','len':'60','title':'سوابق','ref':{'db':'doc_rec_1','tb':'a','show_cols':['rev','date_c','file_r']},
                     'var_set':{'step':'step','dspln_id':'dspln_id','doc_t_id':'doc_t_id','doc_srl_code':'doc_srl_code'}},
             },#'prj':'prj','sub_p':'sub_p'
@@ -1155,6 +1156,15 @@ x_data={
                     'tasks':{
                         'step':{'auto':"_P"},
                         'step_name':{'auto':"PMO"},
+                        },
+                    'steps':{
+                        '1':{'tasks':'step,step_name,dspln_id,dspln_nm,dspln_cd,doc_t_id,doc_t_nm,doc_t_cd'}
+                        }
+                },
+                'DOC':{
+                    'tasks':{
+                        'step':{'auto':"DC"},
+                        'step_name':{'auto':"Document"},
                         },
                     'steps':{
                         '1':{'tasks':'step,step_name,dspln_id,dspln_nm,dspln_cd,doc_t_id,doc_t_nm,doc_t_cd'}
@@ -1269,13 +1279,14 @@ x_data={
                 'rev':{'type':'index','len':'2','ref':{'key':'{id}','val':'{rev}','where':'''doc_a_code = "{{=__objs__['doc_a_code']['value']}}"'''},'title':'بازبینی','prop':['update']},
                 'rev_title':{'type':'text','len':'240','title':'عنوان بازبینی'},
                 'date_c':{'type':'fdate','width':'10','title':'تاریخ تهیه','prop':['update']},
-                'f_code_r':{'type':'auto','auto':'{doc_a_code}-{rev}-{{=date_c[2:4]+date_c[5:7]+date_c[8:10] if date_c else ""}}','title':'کد فایل'},
+                'date':{'type':'auto','width':'6','title':'تاریخ تهیه-کد','auto':'{{=date_c[2:4]+date_c[5:7]+date_c[8:10] if date_c else ""}}'},
+                'f_code_r':{'type':'auto','auto':'{doc_a_code}-{rev}-{date}','title':'کد فایل'},
                 'frd':{'type':'user','title':'تهیه کننده','prop':['show_full']},
                 'snd':{'type':'text','len':'240','title':'مستندات ارائه'},
                 'date_s':{'type':'fdate','width':'10','title':'تاریخ ارائه','prop':['update']},
-                'file_b':{'type':'file_v','file_name':'{{=f_code_r}}-bas','title':'f_bas','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd}'},
-                'file_v':{'type':'file_v','file_name':'{{=f_code_r}}-vec','title':'f_vec','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd}'},
-                'file_r':{'type':'file_r','file_name':'{{=f_code_r}}-ras','title':'f_ras','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd}'},
+                'file_b':{'type':'file_v','file_name':'{{=f_code_r}}-bas','title':'f_bas','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd},{doc_srl_code},{rev}-{date}-k8'},
+                'file_v':{'type':'file_v','file_name':'{{=f_code_r}}-vec','title':'f_vec','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd},{doc_srl_code},{rev}-{date}-k8'},
+                'file_r':{'type':'file_r','file_name':'{{=f_code_r}}-ras','title':'f_ras','path':'prj_1,{c_prj_cd},{step},{dspln_cd},{doc_t_cd},{doc_srl_code},{rev}-{date}-k8'},
                 'nx_file':{'type':'text','len':'240','title':'نام های متفرقه فایل'},
                 'snd_ppr':{'type':'text','len':'240','title':'شماره نامه های ارسال فایل'},
                 'des':{'type':'text','len':'240','title':'توضیح'},
@@ -1284,7 +1295,7 @@ x_data={
                 '0':{'tasks':'f2f_id,c_prj_id,c_prj_cd,c_prj_nm,doc_cat,step,step_name,dspln_cd,dspln_nm,doc_t_cd,doc_t_nm,doc_p_code,doc_srl_code,doc_srl_name,doc_a_code'
                         ,'xjobs':'dccm','title':'ورود اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
                 '1':{'tasks':'rev,date_c,frd,rev_title','xjobs':'dccm','title':'تکمیل اطلاعات','app_keys':'','app_titls':'','oncomplete_act':''},
-                '2':{'tasks':'f_code_r,lb_f_v,file_v,lb_f_r,file_r,lb_f_b,file_b,nx_file','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
+                '2':{'tasks':'date,f_code_r,lb_f_v,file_v,lb_f_r,file_r,lb_f_b,file_b,nx_file','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''},
                 '3':{'tasks':'snd_label,snd,date_s,snd_ppr,des','xjobs':'dccm','title':'مرحله 2','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
@@ -1944,7 +1955,7 @@ x_data={
             'tasks':{
                 'frd_1':{'type':'auto-x','len':'24','auto':'_cur_user_','title':'درخواست کننده'},
                 'date':{'type':'fdate','len':'10','title':'تاریخ','prop':[]},
-                'kdes':{'type':'text','len':1500,'lang':'fa','title':'دانش','help':' محتوا، مسئله، تجربه یا راهکار به‌دست‌آمده','height':'100px'},
+                'kdes':{'type':'text','len':3000,'lang':'fa','title':'دانش','help':' محتوا، مسئله، تجربه یا راهکار به‌دست‌آمده','height':'100px'},
                 'cat1':{'type':'select','title':'دسته بندی','help_e':'category 1',
                     'select':{
                             'TECH':'	دانش فنی	-   شامل نکات اجرایی، جزئیات طراحی، مصالح، ضوابط فنی و روش‌های بهینه فنی در پروژه‌ها',
@@ -1962,14 +1973,14 @@ x_data={
                             'INNO':'	دانش نوآورانه	-   روش‌ها یا ابزارهای جدید پیشنهادشده توسط همکاران برای بهبود عملکرد',
                             'GENL':'	دانش عمومی	-   سایر موارد دانشی که در دسته‌بندی بالا نگنجند ولی دارای ارزش ثبت هستند'
                     }},
-                'file_att':{'type':'file','len':'40','file_name':'AQC0-KNM-EXP-{id:04d}-RP','file_ext':"jpg,pdf,txt",'path':'form,knm,exp','title':'پیوست','help':'مستندات در صورت نیاز'},
+                'file_att':{'type':'file','len':'40','file_name':'AQC0-KNM-EXP-{id:04d}-RP','file_ext':"jpg,pdf,txt,zip",'path':'form,knm,exp','title':'پیوست','help':'مستندات در صورت نیاز'},
                 'km_des':{'type':'text','len':1500,'lang':'fa','title':' توضیح km'},
                 'km_res':{'type':'select','title':'سطح اثربخشی','help_e':'result','select':{'1':'محدود','2':'متوسط','3':'زیاد'},'prop':['no_empty']},
 
             },
             'steps':{
-                's0':{'tasks':'frd_1,date,kdes,cat1,file_att','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'km_des,km_res','xjobs':'kma','title':'ارزیابی','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
+                's0':{'tasks':'frd_1,date,kdes,cat1','xjobs':'*','title':'مشخصات درخواست','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'file_att,km_des,km_res','xjobs':'*','title':'ارزیابی','app_keys':'y,r','app_titls':['مورد تایید است','فرم اصلاح شود'],'oncomplete_act':''},
             },
             'views':{
                 'all':{'input':'rd_1,date,cat1','view1':'km_des','view2':'km_res'}
@@ -2699,15 +2710,15 @@ x_data={
                     'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d};{cp_code};{cp_name}'},'title':'پروژه','prop':['update','multiple'],
                     'team':{'cp_code':{'val':'{cp_code}','title':'کد موضوع'},'cp_name':{'val':'{cp_name}','title':'نام پروژه'}},},
                 'title':{'type':'text','title':'عنوان یا موضوع سفارش','len':'250','height':'50px'},
-                'xtype':{'type':'select','title':'نوع سفارش','prop':['can_add','no_empty'],'def_value':'3', 'value_show_case':True,
+                'xtype':{'type':'select','title':'نوع سفارش','prop':['can_add','no_empty'], 'value_show_case':True,
                     'select':['کارت ویزیت','پوستر','بروشور','سربرگ','نقشه','بنر']},            
-                'size':{'type':'select','title':'ابعاد نهایی','prop':['can_add','no_empty'],'def_value':'3','value_show_case':True,
+                'size':{'type':'select','title':'ابعاد نهایی','prop':['can_add','no_empty'],'value_show_case':True,
                     'select':['A0','A1','A2','A3','A4','A5','B4']}, 
-                'color':{'type':'select','title':'رنگ‌بندی','def_value':'3','prop':['no_empty'],'value_show_case':True,
+                'color':{'type':'select','title':'رنگ‌بندی','prop':['no_empty'],'value_show_case':True,
                     'select':['رنگی','سیاه‌وسفید']},
-                'paper':{'type':'select','title':'نوع کاغذ','prop':['can_add','no_empty'],'def_value':'3','value_show_case':True,
+                'paper':{'type':'select','title':'نوع کاغذ','prop':['can_add','no_empty'],'value_show_case':True,
                     'select':['تحریر','گلاسه','مات','براق']}, 
-                'add':{'type':'select','title':'خدمات اضافه','prop':['can_add','multiple','no_empty'],'def_value':'3','value_show_case':True,
+                'add':{'type':'select','title':'خدمات اضافه','prop':['can_add','multiple'],'value_show_case':True,
                     'select':['لمینت','طلاکوب','خط تا','سلفون','پانچ','صحافی']}, 
                 'des_1':{'type':'text','title':'توضیح - درخواست ','len':'2500'},
                 'des_2':{'type':'text','title':'توضیح - برآورد','len':'250'},

@@ -2,9 +2,12 @@
 #cache=Cache()
 debug=False #True #
 k_cache={}
-def session_x():
+def session_x(item_name=''):
     from gluon import current
-    return current.session
+    if item_name:
+        return current.session.get(item_name,'')
+    else:
+        return current.session
 from gluon import current
 session=current.session
 
@@ -536,9 +539,15 @@ def template_parser(x_template,x_dic={},rep='',show_err=True):
                 1-auto filed:                    before source field is filled
                     فیلد های اتومات در مرحله قبل از پر شدن فیلد های مبنای اطلاعات آنها
             """
-            x1= template.render(content=xx,context=x_dic1) 
+            x1= template.render(content=xx,context=x_dic1) if "{{" in xx else xx
+        except Exception as err:
+            if show_err:
+                xxxprint(msg=['err-',err,x_template],err=err,vals=x_dic,launch=True)
+            x1=xx
+            
+        try:    
             #xxxprint(msg=['inf',x1+"|"+str(rep),xx],vals=x_dic)
-            return x1.format(**x_dic1)  #remove 020926
+            return x1.format(**x_dic1) if "{" in x1 else x1  #remove 020926
         except Exception as err:
             if show_err:
                 xxxprint(msg=['err',err,x_template],err=err,vals=x_dic,launch=True)
@@ -921,9 +930,9 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
         if not key:return''
         if multiple:
             if type( key)==list:
-                return ' | '.join([select_dict.get(x) for x in key])
+                return ' | '.join([select_dict.get(x,'') for x in key])
             else: #type( key)==str:
-                return ' | '.join([select_dict.get(x) for x in key.split(',')])
+                return ' | '.join([select_dict.get(x,'') for x in key.split(',')])
         else:
             if key in select_dict:
                 return select_dict[key]
@@ -1125,13 +1134,19 @@ def obj_set(i_obj,x_dic,x_data_s='',xid=0, need=['input','output'],request='',c_
             xprint('value='+ str(_value))
             xprint('tt_dif='+ str(tt_dif))
         
-        try:
+        if session_x("username")!="admin":
             obj['title']=select_key_2_val(select_dict=_select,key=_value,multiple=_multiple)  
             obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
             obj['data_json']=_value
-        except Exception as err:
-            obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
-            xxxprint(msg=["err",'',''],err=err,vals={'select':_select}) 
+        else:
+            try:
+                obj['title']=select_key_2_val(select_dict=_select,key=_value,multiple=_multiple)  
+                obj['output']=XML(f'''<a  title="{_value}">{obj['title']}</a>''') if 'value_show_case' in obj and obj['value_show_case'] else XML(f'''<a  title="{obj['title']}">{_value}</a>''')
+                obj['data_json']=_value
+            except Exception as err:
+                obj['output']+=" -e" #XML( A("- e",_title=f"an error ocured<br>{str(err)}"))#> -e</a>'''
+                xxxprint(msg=["err",sc,'obj_name='+obj['name']],err=err,vals={'select':_select,'obj':obj}) 
+
         obj["value"]=_value
         if 'update' in obj['prop'] :x_dic[obj['name']]=_value
         #print('obj["value"]'+obj["value"])
@@ -2238,14 +2253,18 @@ class C_FORM():
             مشخص کردن اینکه 1 مرحله در وضعیت آماده برای ویرایش می باشد - با توجه به نتایج مراحل دیگر
         return [fsc_mode,,] @ 
         '''
+        from k_tools import x_format
         step=self.x_data_s['steps'][f'{step_name}']
         start_where=step['start_where'] #"'{step_0_ap}' =='y' and not '{step_2_ap}' in ['y','x']"
         end_where=step['end_where']
-        #print(start_where)
-        start_where_prs=start_where.format(**self.all_data)
-        end_where_prs=end_where.format(**self.all_data)
-        start=eval(start_where_prs)
-        end=eval(end_where_prs)
+        #xxxprint(msg=[start_where,end_where,''],vals={'self':self.all_data})
+        start_where_prs=x_format(start_where,self.all_data)
+        end_where_prs=x_format(end_where,self.all_data)
+        start=eval(start_where_prs) if start_where_prs else True
+        end=eval(end_where_prs) if end_where_prs else True
+        if (not start_where_prs) or (not end_where_prs):
+            xxxprint(msg=[step_name,self.db_name,self.tb_name],vals={'all_data':self.all_data,'step':step,'x_data_s':self.x_data_s})
+
         ss=f"start_where={start_where},end_where={end_where}"
 
         if not start:
