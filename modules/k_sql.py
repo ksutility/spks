@@ -493,127 +493,269 @@ class DB1():
         r1['base_row_id']=base_row_id
         return r1
     #----------------------------------------------------------------
-    def insert_data(self,table_name,name_list_or_nv_dict,val_list=[],sql_do=True):
-        if type(name_list_or_nv_dict)==dict:
-            val_list=list(name_list_or_nv_dict.values())
-            name_list=list(name_list_or_nv_dict.keys())
+    def insert_data(self, table_name, name_list_or_nv_dict, val_list=None, sql_do=True, debug=False):
+        """
+        درج داده در جدول:
+          - اگر داده مشابه وجود داشته باشد: درج نمی‌شود و همان رکورد موجود بازگردانده می‌شود.
+          - اگر ردیف خالی (مقادیر '-') وجود داشته باشد: با داده جدید بروزرسانی می‌شود.
+          - در غیر این صورت: رکورد جدید درج می‌شود.
+
+        Args:
+            table_name (str): نام جدول
+            name_list_or_nv_dict (list[str] | dict): لیست ستون‌ها یا دیکشنری {ستون: مقدار}
+            val_list (list, optional): لیست مقادیر (اگر ورودی دیکشنری باشد نیاز نیست)
+            sql_do (bool, optional): اجرای واقعی SQL یا فقط ساخت دستور
+            debug (bool, optional): فعال‌سازی چاپ Debug
+
+        Returns:
+            dict: نتیجه عملیات شامل id، وضعیت و پیام
+        """
+
+        # --- آماده‌سازی ورودی ---
+        if isinstance(name_list_or_nv_dict, dict):
+            name_list = list(name_list_or_nv_dict.keys())
+            val_list = list(name_list_or_nv_dict.values())
         else:
-            name_list=name_list_or_nv_dict
-            #val_list=val_list
-        ''' if data isnot exist => add data         , return add_row_number, insert_result = true
-            if data is  exist   => don't add data   , return find_row_number,insert_result = false'''
-        find=self.select(table=table_name,where=[name_list,val_list],result='dict_x')
-        
-        if find['done']:
-            find.update({'done':False,'result':'عدم وارد کردن اطلاعات به دلیل پیدا کردن اطلاعات مشابه'})
+            name_list = name_list_or_nv_dict
+            val_list = val_list if val_list is not None else []
+
+        # --- بررسی وجود داده مشابه ---
+        find = self.select(table=table_name, where=[name_list, val_list], result='dict_x')
+        if find.get('done'):
+            find.update({
+                'done': False,
+                'result': 'عدم وارد کردن اطلاعات به دلیل پیدا کردن اطلاعات مشابه'
+            })
             return find
-        #find empty
-        where_dic={x:'-' for x in name_list}
-        set_dic={n:val_list[i] for i,n in enumerate(name_list)}
-        find2=self.select(table=table_name,where=where_dic,result='dict_x')
 
-        if find2['done']:
-            rep=self.update_data(table_name,set_dic,{'id':find2['id']})
-            rep['done']=True
-            xxxprint (msg=['inset','find empty row = ok',''],vals=rep)
+        # --- بررسی وجود ردیف خالی (مقدار '-') ---
+        where_dic = {col: '-' for col in name_list}
+        set_dic = {col: val_list[i] for i, col in enumerate(name_list)}
+        find2 = self.select(table=table_name, where=where_dic, result='dict_x')
+
+        if find2.get('done'):
+            rep = self.update_data(table_name, set_dic, {'id': find2['id']})
+            rep.update({
+                'done': True,
+                'result': '''ردیف خالی با اطلاعات جدید بروزرسانی شد
+                    insert_data: empty row updated ->'''
+            })
+            if debug:
+                xxxprint (msg=['inset',rep['result'],''],vals=rep)
             return rep
-        #----------
-        x_v="?,"*(len(val_list))
-        sql_t='INSERT INTO {} ({}) VALUES ({})'.format(table_name,",".join(name_list),x_v[:-1])#NSERT OR IGNORE INTO
-        #ui.msg(sql_t+"/n"+str(val_list))
-        
-        if sql_do:
-            rep=self._exec(sql_t, val_list)
-            xid=self.cur.lastrowid
-        else:
-            rep={}
-            xid=-1
-        rep.update({'id':xid,'ids':xid,'sql':sql_t+"|"+str(val_list),'done':True,'result':'رکورد جدید اضافه شد'})
-        if debug:xxxprint (msg=["result",'',''] ,vals=rep)
-        return rep
 
-    def update_data(self,table_name,set_dic,x_where,sql_do=True):
-        ''' set_dic={'name11':'val11','name12':'val12'..}
-            x_where: dict /str
+        # --- درج رکورد جدید ---
+        placeholders = ",".join(["?"] * len(val_list))
+        sql_t = f'INSERT INTO {table_name} ({",".join(name_list)}) VALUES ({placeholders})'
+
+        if sql_do:
+            rep = self._exec(sql_t, val_list)
+            xid = self.cur.lastrowid
+        else:
+            rep = {}
+            xid = -1
+
+        rep.update({
+            'id': xid,
+            'ids': xid,
+            'sql': sql_t + "|" + str(val_list),
+            'done': True,
+            'result': '''رکورد جدید اضافه شد
+                insert_data: insert new row ->'''
+        })
+
+        if debug:
+            xxxprint (msg=["result",rep['result'],''] ,vals=rep)
+        return rep
+    #-----------------------------------------------------
+    def update_data(self, table_name, set_dic, x_where, sql_do=True, debug=False):
+        """
+        بروزرسانی داده‌ها در جدول.
+
+        Args:
+            table_name (str): نام جدول
+            set_dic (dict): مقادیر جدید برای آپدیت، مانند {"col1": "val1"}
+            x_where (dict | str): شرط WHERE (به صورت دیکشنری یا رشته SQL)
                 dict= {'name21':'val21','name22':'val22'..}
                 str='name21 Like val21'
-                
-        '''
-        #try:
-        
-        if debug:xxxprint(msg=["start",'',''])
-        sql_where=C_SQL().where(x_where)
-        xr={'where':sql_where}
-        
-        # بررسی وجود حداقل 1 رکورد با شرایط تعیین شده 
-        find1=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
-        r1="select {} from {}".format(x_where,table_name)
-        if not find1['done']:#" any record not found"
-            xr['done']='0'
-            xr['msg']=' هیچ ردیفی پیدا نشد'
-            xr['msg']+=' لذا آپدیت قابل انجام نیست'
-            report_db_change(self.path,r1, [])
+            sql_do (bool, optional): اگر False باشد فقط SQL ساخته می‌شود و اجرا نمی‌شود.
+            debug (bool, optional): فعال کردن پیام‌های دیباگ
+
+        Returns:
+            dict: نتیجه شامل SQL ساخته‌شده، رکوردهای تغییر یافته، تفاوت‌ها و پیام.
+        """
+        if debug:
+            xxxprint(msg=["update_data","start",''] )
+
+        # ساخت شرط WHERE
+        sql_where = C_SQL().where(x_where)
+        xr = {'where': sql_where}
+
+        # بررسی وجود رکورد مطابق شرط
+        find1 = self.select(table=table_name, where=x_where, result='dict_x', limit=0)
+        sql_preview = f"SELECT * FROM {table_name} {sql_where}"
+
+        if not find1.get('done'):
+            xr.update({
+                'done': 0,#False
+                'msg': 'هیچ ردیفی پیدا نشد، آپدیت قابل انجام نیست'
+            })
+            report_db_change(self.path, sql_preview, [])
             return xr
-        if debug:xxxprint(msg=["find1",'',''],vals=find1 )
+
+        if debug:
+          xxxprint(msg=["update_data",'found records',''],vals=find1 )
         
         # انجام تغییرات و به روز رسانی
-        s_set=self._dic_2_set(set_dic)
         
-        xr['sql']='UPDATE {} SET {}' .format(table_name,s_set)+ sql_where
+        # ساخت بخش SET
+        s_set = self._dic_2_set(set_dic)
+        xr['sql'] = f'UPDATE {table_name} SET {s_set} {sql_where}'
+
         if sql_do:
-            xr['exe']=self._exec(xr['sql'])
-            xr['rowcount']=self.cur.rowcount
-        
-            r1=('updated <{}> rows --- sql={}'.format(xr['rowcount'],xr['sql']))
-            if debug:xxxprint(msg=["data",'rowcount = updated',''] ,vals=xr)
-            if xr['rowcount']==0:# any record not found
-                xr['done']='1'
-                xr['msg']=' رکورد پیدا شد ولی تغییر توسط برنامه نتوانست اعمال شود'
-                report_db_change(self.path,r1, [])
+            xr['exe'] = self._exec(xr['sql'])
+            xr['rowcount'] = self.cur.rowcount
+
+            log_msg = f"updated <{xr['rowcount']}> rows --- sql={xr['sql']}"
+            if debug:
+                xxxprint(msg=["update_data","executed",'rowcount(updated)='+xr['rowcount']] ,vals=xr)
+
+            if xr['rowcount'] == 0:# any record not found
+                xr.update({
+                    'done':'1', #  False,
+                    'msg': 'رکورد پیدا شد ولی تغییر اعمال نشد (rowcount=0)'
+                })
+                report_db_change(self.path, log_msg, [])
                 return xr
-            # بررسی تغییرات  
-            find2=self.select(table=table_name,where=x_where,result='dict_x',limit=0)
-            
-            if debug:xxxprint(msg=["find2",'',''],vals=find2 )
-            xr['dif_x']={} #different s
-            xr['dif']={}
-            if (not find2) or (not find2['rows']):   
-                rows2,titles2,row_num2=self.select(table_name,limit=0)
-                id_list=[x[0] for x in rows2]
-                for i,row in enumerate(find1['rows']):
-                    id_1=row[0]
-                    row=row[1:]
-                    if not id_1 in id_list:
-                        xxprint('err_x',f'{id_1} not in {str(id_list)}')
-                    row_x= id_list.index(id_1)   
-                    row2=rows2[row_x][1:]
-                    dif_list=[j for j,x in enumerate(row) if x!=row2[j]]
-                    dif=['row({}),col({}):{}=>{}'.format(row_x,titles2[j],row[j],row2[j]) for j in dif_list]
-                    report_db_change(self.path,r1, dif,idx=i+1)
-                    xr['dif'][row[0]]=dif
-                xr['id']=str(find1['ids'])
-            else: 
-                xr['id']=str(find2['ids'])
-                tt=find2['titles']
+
+            # بررسی تغییرات بعد از آپدیت
+            find2 = self.select(table=table_name, where=x_where, result='dict_x', limit=0)
+            xr['dif'] = [] #different s
+            xr['dif_x'] = {}
+
+            if find2 and find2.get('rows'):
+                tt = find2['titles']
                 # مقایسه اطلاعات قبل و بعد از تغییر به صورت ردیف به ردیف
-                for i,f1 in enumerate(find1['rows']):
-                    f2=find2['rows'][i]
-                    dif_list=[j for j,x in enumerate(f1) if x!=f2[j]]
-                    dif=['row({}),col({}):{}=>{}'.format(f1[0],tt[j],f1[j],f2[j]) for j in dif_list]
-                    report_db_change(self.path,r1, dif)
-                    rrp={f'dif- {i}':x for i,x in enumerate(dif)}
-                    rrp.update({'update_n':len(dif)})
-                    if debug:xxxprint(msg=["result",'',''] ,vals=rrp)
-                    #xxprint ('db-update','row {}:dif={}----\n####   {}'.format(f1[0],len(dif),'\n####   '.join(dif)))
-                    xr['dif']=dif
-                    xr['dif_x'][f1[0]]=[tt[j] for j in dif_list] 
-                    xr['updtae_n']=len(dif)
-            xr['msg']=','.join(xr['dif'])       
-            if debug:xxxprint(msg=["end",'',''] )
+                for i, f1 in enumerate(find1['rows']):
+                    f2 = find2['rows'][i]
+                    dif_list = [j for j, x in enumerate(f1) if x != f2[j]]
+                    dif = [f"row({f1[0]}),col({tt[j]}):{f1[j]}=>{f2[j]}" for j in dif_list]
+
+                    report_db_change(self.path, log_msg, dif)
+                    if debug:
+                        rrp={f'dif- {i}':x for i,x in enumerate(dif)}
+                        rrp.update({'update_n':len(dif)})
+                        xxxprint(msg=["result",f"update_data: row {f1[0]} changes",''] ,vals=rrp)
+
+                    xr['dif'].extend(dif)
+                    xr['dif_x'][f1[0]] = [tt[j] for j in dif_list]
+
+                xr['id'] = str(find2['ids'])
+                xr['update_n'] = len(xr['dif'])
+            else:
+                xr.update({
+                    'done': False,
+                    'msg': 'بعد از آپدیت رکورد یافت نشد یا قابل بازیابی نبود'
+                })
+                if debug:
+                    xr1=self.show_change(table_name, find1, r1)
+                    xxxprint(msg=["update_data","end",""] ,vals={'xr':xr,'xr1':xr1})
+                return xr
+
+            xr.update({
+                'done': True,
+                'msg': ','.join(xr['dif']) if xr['dif'] else 'تغییر خاصی ثبت نشد'
+            })
+        else:
+            xr.update({
+                'done': True,
+                'msg': 'SQL فقط ساخته شد (بدون اجرا)'
+            })
+
+        if debug:
+            xxxprint(msg=["update_data","end",""] ,vals=xr)
+
         return xr
-        #except: #Error as e:   print(e)
-        #   return False
+    ##-------------------------------------------------------------------------------
+    def show_change(self,table_name, find1, r1):
+        """
+            🔎 مقایسه رکوردهای قبل و بعد از آپدیت در دیتابیس
+            
+            پارامترها:
+                table_name (str): نام جدول
+                find1 (dict): داده‌های قدیمی شامل:
+                    - rows: لیست رکوردهای قبل از آپدیت
+                    - ids: لیست شناسه رکوردها
+                r1 (Any): شناسه/اطلاعات اضافی برای ثبت گزارش
+             
+            خروجی:
+                xr (dict): شامل کلیدهای:
+                    - 'dif': تغییرات هر رکورد
+                    - 'id' : لیست شناسه‌ها
+            مراحل:
+              1. `find1['rows']` شامل داده‌های قبل از آپدیت است.
+                 - ستون اول رکورد = شناسه (`id`)
+                 - بقیه ستون‌ها = مقادیر قدیمی
+
+              2. بررسی می‌شود آیا همین شناسه (`id`) در داده‌های جدید (rows2) وجود دارد یا خیر.
+                 - اگر وجود نداشت، پیام خطا ثبت می‌شود (`xxprint`) و رکورد رد می‌شود.
+
+              3. در صورت وجود، مقادیر قدیمی (`old_values`) با مقادیر جدید (`new_values`) مقایسه می‌شوند.
+                 - ستون‌هایی که تغییر کرده‌اند در `dif_list` ذخیره می‌شوند.
+                 - برای هر تغییر گزارشی به صورت
+                   "row(id),col(column_name): old_value => new_value"
+                   ساخته می‌شود.
+
+              4. تغییرات هر رکورد به تابع `report_db_change` ارسال می‌شود
+                 تا در فایل یا لاگ ثبت گردد.
+
+              5. خروجی نهایی در دیکشنری `xr['dif']` ذخیره می‌شود:
+                 - کلید = شناسه رکورد (id)
+                 - مقدار = لیست تغییرات آن رکورد
+        """
+         # مقداردهی اولیه خروجی
+        xr = {'dif': {}, 'id': ''}
+        
+        # داده‌های جدید از دیتابیس
+        rows2, titles2, row_num2 = self.select(table_name, limit=0)
+        
+        # نگاشت id → row برای دسترسی سریع
+        new_data = {r[0]: r[1:] for r in rows2}
+
+        for i, row in enumerate(find1['rows']):
+            
+
+            id_1 = row[0]          # شناسه رکورد
+            old_values = row[1:]   # مقادیر قدیمی بدون id
+
+            if id_1 not in new_data:
+                xxprint('err_x', f'id {id_1} not found in new data')
+                continue
+
+            new_values = new_data[id_1]  # مقادیر جدید بدون id
+
+            # مقایسه ستون‌ها
+            dif_list = [j for j, val in enumerate(old_values) if val != new_values[j]]
+            dif = [
+                f"row({id_1}),col({titles2[j]}): {old_values[j]} => {new_values[j]}"
+                for j in dif_list
+            ]
+
+            # ثبت تغییرات در گزارش
+            if dif:
+                report_db_change(self.path, r1, dif, idx=i+1)
+
+            # ذخیره تغییرات در خروجی
+            xr.setdefault('dif', {})
+            xr['dif'][id_1] = dif
+
+        # ثبت شناسه رکوردهای تغییر یافته
+        xr['id'] = str(find1['ids'])
+        return xr
     
+    
+    
+   
     
     ##-----------------------------------------------------------------------------------------
     def grupList_of_colomn(self,table_name,colomn_name,where_field='',where_value='',have_sum=True,traslate_dict={}):

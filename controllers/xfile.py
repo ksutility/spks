@@ -407,10 +407,18 @@ def read_xx(): #read all markup
     f_name,f_msg,file_inf=_x_file()
     ext=file_inf['ext'][1:]
     if ext in ['md','mm','ksm','ksml','mermaid']:
-        return _read_markup(ext)
+        return dict(htm=XML(_read_markup(ext)))
     #elif ext in[""]
     #xd={'json':'json_read','csv':'read_csv','md':'read_m','mm':'read_m','ksm':'read_m','ipt2win':'read_ipt2win'}    
     return str(file_inf) 
+def read_do(): 
+    import k_file_x
+    f_name,f_msg,file_inf=_x_file()
+    # try:
+    htm=k_file_x.do_2_html(f_name)
+    # except Exception as err:
+    # htm=XML('error : <hr>'+str(err))
+    return dict(htm=htm)
 def read_ipt2win():
     #return 'abc'
     import autocad_persian_ipt as acp
@@ -434,7 +442,7 @@ def read_ipt2win():
 def _read_markup(mm_case):
     f_name,f_msg,file_inf=_x_file()
     if not f_name:return f_msg
-    import k_s_dom,k_file
+    import k_s_dom,k_file,k_file_x
     from k_file_x import markup_2_htm
     #from gluon.ks import markdown
     #return x.xx()
@@ -534,7 +542,9 @@ def _read_markup(mm_case):
         html_1=_r_ksm(f_name) 
         data=""
     elif mm_case=='mermaid':
-        html_1=markup_2_htm(data,'mermaid') #_r_mermaid(data)  
+        html_1=markup_2_htm(data,'mermaid') #_r_mermaid(data) 
+    #elif mm_case=='do':
+    #    html_1=k_file_x.do_2_html(f_name) #_r_mermaid(data)
     html_2=_dir_x(html_1)    
     def report(data,html_1,html_2):
         if not request.vars.debug: return ''

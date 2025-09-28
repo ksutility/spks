@@ -546,7 +546,7 @@ def f_list():#file_browser=file.index
         pass
 
     def link_view(x_file,link_txt,link_title='View'):
-        xd={'json':'json_read','csv':'read_csv','md':'read_xx','mm':'read_xx','ksm':'read_xx','ksml':'read_xx','ipt2win':'read_ipt2win',
+        xd={'json':'json_read','csv':'read_csv','md':'read_xx','mm':'read_xx','ksm':'read_xx','ksml':'read_xx','do':'read_do','ipt2win':'read_ipt2win',
             'mermaid':'read_xx','mermaid2':'read_mermaid'}
             #'xls':'read_xl','xlsx':'read_xl','xlsm':'read_xl'}
         ext=x_file['ext'][1:]

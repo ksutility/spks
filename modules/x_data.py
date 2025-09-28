@@ -2914,14 +2914,15 @@ x_data={
         },
     },
     #--------------------------------------------------------------------
-    'vendor':{ #db {_cur_user_un_}
-        'vnl':{
-            'base':{'mode':'form','title':'لیست تامین کنندگان','code':'420','rev':'00-040702','help':'vendor list'
+    'out_source':{ #db 
+        'lst':{
+            'base':{'mode':'form','title':'لیست برون سپار ها','code':'420','rev':'00-040702','help':'vendor list'
             },
             'tasks':{
                 'cat':{'type':'select','title':'دسته','select':{'SND':'صوت','LGT':'نور','DEF':'پدافند'}},
-                'shakhs':{'type':'select','title':'نوع شخص','select':['حقیقی','حقوقی']},
+                'shakhs':{'type':'select','title':'نوع شخص','select':{'PR':'pr - شخص حقیقی','CO':'co - شرکت - حقوقی'}},
                 'name':{'type':'text','title':'عنوان','help':'نام شرکت یا فرد حقیقی'},
+                'agnt':{'type':'f2f','title':'نماینده','help_e':'AGENT','ref':{'tb':'agnt','show_cols':['family','tel_mob']},},
                 'website':{'type':'text','title':'وبسایت','len':'50'},
                 'email':{'type':'text','title':'ایمیل','len':'50'},
                 'tel':{'type':'text','title':'تلفن','len':'15'},
@@ -2933,17 +2934,17 @@ x_data={
                 'date_u':{'type':'fdate','title':'تاریخ آخرین بروزرسانی','help_e':'Last Update'},
                 'colab':{'type':'text','title':'سابقه همکاری باشرکت','help_e':'Collaboration History with the Company','height':'50px'},
                 'com_task':{'type':'f2f','len':'60','title':'اقدامات هماهنگی','ref':{'tb':'com_task','show_cols':['todo','date']},},
-                'vn_code':{'type':'auto','len':'8','auto':'AQC0-DCT-REC-VNL-{cat}-{id:04d}','title':'کد وندور'},
-                'file_resume':{'type':'file','title':'فایل رزومه','file_name':'{vn_code}-RESUME','file_ext':"pdf,jpg,zip",'path':'form,dct,vnl'},
+                'os_code':{'type':'auto','len':'8','auto':'AQC0-DCT-REC-OSL-{cat}-{id:04d}','title':'کد برون سپار'},
+                'file_resume':{'type':'file','title':'فایل رزومه','file_name':'{os_code}-RESUME','file_ext':"pdf,jpg,zip",'path':'form,dct,osl'},
                 'estlm':{'type':'f2f','len':'60','title':'استعلام','ref':{'tb':'estlm','show_cols':['c_prj_cd','date','price','reslt']},},
                 'short_lst':{'type':'check','title':'لیست کوتاه','help_e':'Short List'}
                 #{'type':'text','title':'نام شرکت- موسسه','def_value':'مهندسان مشاور آستان قدس رضوی'},
             },
             'steps':{
                 's0':{'tasks':'cat,shakhs,name','xjobs':'*','title':'ثبت پیشنهاد','app_keys':'','app_titls':'','oncomplete_act':''},
-                's1':{'tasks':'vn_code,website,email,tel,city,adrs,d_expert,onbdg','xjobs':'#step#0','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
+                's1':{'tasks':'os_code,website,email,tel,city,adrs,d_expert,onbdg','xjobs':'#step#0','title':'بررسی','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'date_u,cert,colab,file_resume','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''},
-                's3':{'tasks':'com_task,estlm,short_lst','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
+                's3':{'tasks':'com_task,estlm,short_lst,agnt','xjobs':'#step#0','title':'نتیجه','app_keys':'','app_titls':'','oncomplete_act':''}
             },
             'views':{
                 'all':{'input':'vrfy_rslt,vrfy_meta','view1':'idea,idea_bnft,idea_dscr','view2':'clnt_stf,clnt_stf_dscr'}
@@ -2955,11 +2956,11 @@ x_data={
             'data_filter':{'':'همه',}
         },
         'com_task':{
-            'base':{'mode':'form','title':'وندور لیست - اقدامات هماهنگی','code':'420-at1','rev':'00-040702'
+            'base':{'mode':'form','title':'برون سپار ها- اقدامات هماهنگی','code':'420-at1','rev':'00-040702'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
-                    'ref':{'db':'vendor','tb':'vnl','key':'{id}','val':'{cat}-{shakhs}-{name}'},
+                    'ref':{'db':'out_source','tb':'lst','key':'{id}','val':'{cat}-{shakhs}-{name}'},
                     'team':{'cat':{},'shakhs':{},'name':{}
                             },},
                 'todo':{'type':'text','title':' اقدام لازم'},
@@ -2971,12 +2972,12 @@ x_data={
             },
         },
         'estlm':{
-            'base':{'mode':'form','title':'وندور لیست - استعلام برای پروژه','code':'420-at2','rev':'00-040702'
+            'base':{'mode':'form','title':'برون سپار ها - استعلام برای پروژه','code':'420-at2','rev':'00-040702'
             },
             'tasks':{
                 'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
-                    'ref':{'db':'vendor','tb':'vnl','key':'{id}','val':'{cat}-{shakhs}-{name}'},
-                    'team':{'cat':{},'shakhs':{},'name':{},'vn_code':{}
+                    'ref':{'db':'out_source','tb':'lst','key':'{id}','val':'{cat}-{shakhs}-{name}'},
+                    'team':{'cat':{},'shakhs':{},'name':{},'os_code':{}
                             },},
                 'c_prj_id':{'type':'reference','title':'پروژه','prop':['update'],
                             'ref':{'db':'a_cur_subject','tb':'a','key':'{id}','val':'{id:03d},{cp_code},{cp_name}'},
@@ -2985,13 +2986,34 @@ x_data={
                 'svcds':{'type':'text','title':'شرح خدمات','help_e':'Service Description'},
                 'price':{'type':'num','min':1,'max':900000,'len':'6','title':'مبلغ قرارداد','help':'مبلغ قرارداد بر حسب میلیون تومان'},
                 'reslt':{'type':'text','title':'نتیجه ارزیابی'},
-                'file_svcds':{'type':'file','title':'فایل شرح خدمات','file_name':'{vn_code}-{c_prj_cd}-SVCDS','file_ext':"pdf,jpg,zip",'path':'form,dct,vnl'},
+                'file_svcds':{'type':'file','title':'فایل شرح خدمات','file_name':'{os_code}-{c_prj_cd}-SVCDS','file_ext':"pdf,jpg,zip",'path':'form,dct,osl'},
                 'r_des':{'type':'text','title':'توضیح نتیجه ارزیابی'}               
             },
             'steps':{
-                's0':{'tasks':'f2f_id,cat,shakhs,name,vn_code,c_prj_id,c_prj_cd,c_prj_nm','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+                's0':{'tasks':'f2f_id,cat,shakhs,name,os_code,c_prj_id,c_prj_cd,c_prj_nm','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
                 's1':{'tasks':'date,svcds,file_svcds,price','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
                 's2':{'tasks':'reslt,r_des','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
+            },
+        },
+		'agnt':{
+            'base':{'mode':'form','title':'برون سپار - نماینده','code':'420-at3','rev':'00-040705'
+            },
+            'tasks':{
+                'f2f_id':{'type':'reference','title':'فرم مبنا','prop':['update'],
+                    'ref':{'db':'out_source','tb':'lst','key':'{id}','val':'{cat}-{shakhs}-{name}'},
+                    'team':{'cat':{},'shakhs':{},'name':{},'os_code':{}
+                            },},
+                'm_w':{'type':'select','select':['آقای','خانم'],'title':'جنسیت'},
+                'pre_n':{'type':'select','select':['','مهندس','دکتر'],'title':'پیش نام'},
+                'name':{'type':'text','title':'نام','len':'15'},
+                'family':{'type':'text','title':'فامیل','len':'35'},
+                'tel_mob':{'type':'text','title':'موبایل','len':'13'},
+                'tel_wrk':{'type':'text','title':'تلفن','len':'10'},
+                'job':{'type':'text','title':'سمت','len':'40'},
+                'des':{'type':'text','title':'توضیحات','len':'250'},                        
+            },
+            'steps':{
+                's0':{'tasks':'f2f_id**,cat,shaks,name,os_code','xjobs':'*','title':'ثبت ','app_keys':'','app_titls':'','oncomplete_act':''},
             },
         }
     },
@@ -3037,6 +3059,7 @@ x_data={
         }
     },
 }
+#x_data={x:x_data[x] for x in ['out_source']}
 def set_if_ns(obj,pre_dict): # set if not set
     for prop,valu in pre_dict.items():
         if not prop in obj:obj[prop]=valu
@@ -3117,9 +3140,9 @@ def x_data_verify(x_data):
                 # make fildes(f2f_db,f2f_tb,f2f_nm) from field(f2f_id) : speed change => make need fiels
                 if obj['name']=='f2f_id':
                     new_fld={
-                        'f2f_db':{'type':'text','title':'database','len':'40','prop':['readonly']},
-                        'f2f_tb':{'type':'text','title':'table','len':'40','prop':['readonly']},
-                        'f2f_nm':{'type':'text','title':'name','len':'40','prop':['readonly']}
+                        'f2f_db':{'type':'text','title':'database','len':'40','prop':['readonly','hidden']},
+                        'f2f_tb':{'type':'text','title':'table','len':'40','prop':['readonly','hidden']},
+                        'f2f_nm':{'type':'text','title':'name','len':'40','prop':['readonly','hidden']}
                         }
                     tasks_add.update(new_fld)    
             #print(str(tasks_add))
@@ -3155,7 +3178,11 @@ def x_data_verify(x_data):
                 len_steps=len(steps)
                 for step_name,step in steps.items():
                     i+=1
+                    #pre_compile step task
                     if step['tasks']=='**':step['tasks']=','.join(list(tb_obj['tasks'].keys()))
+                    if 'f2f_id**' in step['tasks']:step['tasks']=step['tasks'].replace('f2f_id**','f2f_id,f2f_nm,f2f_db,f2f_tb')
+                    
+                    
                     if not 'app_keys' in step or not step['app_keys']:
                         step['app_keys']='y,x,r' if i>0 else 'y,x'
                     if not 'app_titls' in step or not step['app_titls']:

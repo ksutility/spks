@@ -332,7 +332,7 @@ def read(wb_path,sheet_name):
             row_new=read_row(row)
             rows.append(row_new)
             dic_list.append({t:row_new[i] for i,t in enumerate(titles)})
-    return titles,rows,dic_list
+    return [titles,rows,dic_list]
 def append(wb_path,sheet_name,new_rows):
     import os,k_file
     if os.path.exists(wb_path):

@@ -585,5 +585,72 @@ def val_report(xv):
     else: 
         tt+="type="+type(xv).__name__+"<br>"+str(xv)
     return tt
-#-------------------------------------    
+#-------------------------------------  
+def error_reporter(mode=1):
+    """
+    Decorator برای گزارش خطا
+    در خروجی اصلی
+    
+    mode=0 -> گزارش ساده
+    mode=1 -> گزارش کامل (شامل متغیرها)
+    """
 
+    def decorator(func):  
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if mode == 0:
+                    from gluon import XML
+                    # گزارش ساده
+                    return XML(f"⚠️ error :<hr> {e}")
+
+                else:
+                     # گزارش کامل
+                    exc_type, exc_value, exc_tb = sys.exc_info()
+                    #out1=[["\n" + "="*50]]
+                    out1=[["⚠️  خطا در اجرای تابع:", func.__name__]]
+                    out1+=[["⚠️  نوع خطا:", exc_type.__name__]]
+                    out1+=[["⚠️  پیام خطا:", exc_value]]
+                    
+                    out=[]
+                    # پیمایش traceback
+                    while exc_tb:
+                        frame = exc_tb.tb_frame
+                        lineno = exc_tb.tb_lineno
+                        code_name = frame.f_code.co_name
+                        filename = frame.f_code.co_filename
+
+                        out+=["📍 محل خطا:"]
+                        out+=[f"   فایل: {filename}"]
+                        out+=[f"   تابع: {code_name}"]
+                        out+=[f"   خط: {lineno}"]
+
+                        # گرفتن کد خط
+                        linecache = traceback.extract_tb(exc_tb)[-1].line
+                        if linecache:
+                            out+=[f"   کد: {linecache.strip()}"]
+
+                        # متغیرهای محلی
+                        out+=["   متغیرهای محلی:"]
+                        for k, v in frame.f_locals.items():
+                            try:
+                                out+=[f"     {k} = {repr(v)}"]
+                            except:
+                                out+=[f"     {k} = <نمایش‌پذیر نیست>"]
+                        exc_tb = exc_tb.tb_next
+
+                    out+=["="*50]
+                    #raise   # برای اینکه خطا همچنان بالا برود (می‌توانید حذف کنید)
+                    from gluon import TABLE,DIV,XML
+                    style="""<style>
+                    table {
+                        width:100%;
+                        border:2px outset red;
+                    }
+                    </style>"""
+                    return DIV(XML(style),str(e),TABLE(out1),TABLE(out))
+
+        return wrapper
+    return decorator

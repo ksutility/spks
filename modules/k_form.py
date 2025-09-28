@@ -2532,6 +2532,7 @@ class C_FORM_HTM():
         xlink=URL('sabege',args=(bx['db_name'],bx['tb_name']+"_backup",xid))
         x_arg=current.request.args[:2]
         xid=int(xid)
+        args_session()
         args=current.request.args
         htm_form['tools']=[XML(k_htm.x_toggle_s(DIV(
                 A('T',_title='نمایش جدول مربوطه',_href=URL('data','xtable',args=args[:2]+['edit']+[args[2]]),_class='btn btn-primary'),'-',
@@ -2851,6 +2852,7 @@ def _xform(out_items=['head','body','tools'],section=-1):
     #print('?save')
     #k_form.C_FORM_HTM
     import k_user
+    args_session()
     request=current.request
    
     if request.vars['text_app']:
@@ -2882,7 +2884,9 @@ def _xform(out_items=['head','body','tools'],section=-1):
         return {'htm':H1(auth.msg),'json':'','link':'','c_form_htm':''}
         print("auth - not ok")
    
+    
     xid=request.args[2] or 1
+    
     c_form_htm=C_FORM_HTM(x_data_s,xid)
     htm_form=''
     if section>-1:
@@ -3249,3 +3253,12 @@ def _auto_redirect(link,delay=.2,err_show=False,title="بازگشت به فرم"
     """)]
     return htm_form
 # ------------------------------------------------------------------------------------------
+def args_session():
+    #save xid in session
+    args=current.request.args
+    sn_name=args[0]+"__"+args[1]
+    if len(args)>2:
+        current.session[sn_name]=args[2]
+    else:
+        args+=['','','']
+        args[2]=current.session[sn_name]

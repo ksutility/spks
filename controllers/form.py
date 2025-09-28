@@ -99,7 +99,7 @@ def xform_sd():
             return 'j_box_iframe_win_close'
     session.view_page='xform_sd'
     session['update_step']=True
-    res=k_form._xform(out_items=['body'])
+    res=k_form._xform(out_items=['head','body'])
     #xreport_var([{'htm':htm}])
     return dict(htm=res['htm'],link=res['link'])#k_form._xform())
 def xform_json():

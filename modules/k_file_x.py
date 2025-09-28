@@ -655,6 +655,96 @@ def markup_2_htm(data,ext): # oldname =file_2_htm
         from k_file_x import mermaid_2_html
         lines= data.split("/n")
         return mermaid_2_html(lines)
+        
+from k_err import error_reporter
+
+@error_reporter(mode=0)
+def do_2_html(file):
+    """
+    Convert a 'do_file' to HTML representation or insert data into database.
+
+    Parameters:
+        file (str): Path to the do_file in JSON format.
+
+    Returns:
+        str or HTML object: HTML table or links, or error messages.
+    """
+    import k_file,k_str,k_htm,k_err
+    folder=k_file.file_name_split(file)['path']
+    
+    #read do_file - in json format
+    try:
+        with open(file,'r',encoding='utf8') as f: 
+            lines = [line for line in f]
+            lines_rs = [line.rstrip() for line in lines] 
+            #try:
+            json_str=''.join(lines_rs)
+            x_do=eval(json_str)   
+    except Exception as err:
+        k_err.xxxprint(msg=['Error reading do_file',err,''],err=err,vals={'lines_rs':lines_rs},launch=True)
+        return f"Error parsing file: {err}"
+    #return str(x_do)    
+        
+    if x_do['cat']=='copy_excel_2_form':
+        
+        
+        # Read Excel data
+        import k_xl_light
+        wb_path=folder+"\\"+x_do['excel_file']
+        data=k_xl_light.read(wb_path,x_do['sheet_name']) 
+        
+        trs=[]
+        
+        # Case: Insert data into database
+        if x_do.get('idx_case','')=='do':
+        
+            #جمع آوری کلیه اطلاعات مربوط به لینکها
+            # Collect all link-related information
+            link_data={}
+            for step_link in x_do.get('steps_link_data',[]):
+                link_data.update(step_link)
+            
+            insert_results = []
+            for row in data[1:]:
+                update_data=[row[int(v)-1] for v in link_data]
+                ref=x_do['ref']
+                insert_results.append(
+                    DB1(ref['db']).insert_data(ref['tb'], list(link_data.keys()), update_data, sql_do=False)
+                )
+            return DIV(k_htm.val_report_prety(insert_results),k_htm.val_report(insert_results))
+        
+        # Case: Generate HTML links
+        else:
+            
+            def crt_link_obj(step_link_data, link_txt, idx, step_index, row_data):
+                """
+                Create HTML anchor tag for a step with link data.
+                """
+                tt = '&'.join([f"{y}={row_data[int(x)-1] or '-'}" for x, y in step_link_data.items()])
+                link_href = link_txt.format(idx=idx) + "?" + tt
+                return k_htm.a(f"Step {step_index}", _href=link_href, _target="box", _title=link_href)
+
+            pre_link = x_do.get('pre_link', '')
+            #pre_link='''http://192.168.88.179:50/spks/form/xform_sd/out_source/lst/'''
+            steps_link_data = x_do.get('steps_link_data', [])
+            
+            for row_index, row in enumerate(data[1:]):
+                row_cells = [str(row_index + 1)]
+
+                if x_do.get('idx_case', '') == 'link_new_id':
+                    row_cells.append(crt_link_obj(x_do['link'][0], pre_link, -1, 1, row))
+                    for step_index, step_link in enumerate(steps_link_data[1:]):
+                        row_cells.append(crt_link_obj(step_link, pre_link, '', step_index + 2, row))
+                else:
+                    for step_index, step_link in enumerate(steps_link_data):
+                        row_cells.append(crt_link_obj(step_link, pre_link, row_index + 1, step_index + 1, row))
+                        
+                trs.append(row_cells)
+                
+            return TABLE(trs) # + '<br> excel :<br>' + str(data)
+
+    else:
+        return f"No action for category: {x_do.get('cat', 'unknown')}" 
 #--------------------------------------------------------------------------------------
 def ksml_to_html(file,list_url,file_url,pre_case=''): # ksml_to_html(f_name):   
     xdic={}
